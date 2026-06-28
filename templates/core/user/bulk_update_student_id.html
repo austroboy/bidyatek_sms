@@ -1,0 +1,98 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% load static widget_tweaks %}
+
+
+{% block extra_css %}
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css'>
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-5-theme/1.3.0/select2-bootstrap-5-theme.min.css'>
+<link rel="stylesheet" href="{% static 'assets/css/loading.css' %}" />
+{% endblock extra_css %}
+
+{% block content %}
+
+<div id="loading-screen" style="display: none;">
+    <figure>
+        <div class="dot white"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    </figure>
+</div>
+
+<div class="container-fluid flex-grow-1 container-p-y">
+    {% include 'pageinfo.html' %}
+
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="card-title mb-0">{{ heading }} - {{ subheading }}</h4>
+            </div>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.class_config.id_for_label }}" class="form-label">
+                            {{ form.class_config.label }}
+                        </label>
+                        {{ form.class_config|add_class:"form-select" }}
+                        {% if form.class_config.errors %}
+                            <div class="text-danger">
+                                {{ form.class_config.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.excel_file.id_for_label }}" class="form-label">
+                            {{ form.excel_file.label }}
+                        </label>
+                        {{ form.excel_file|add_class:"form-control" }}
+                        {% if form.excel_file.errors %}
+                            <div class="text-danger">
+                                {{ form.excel_file.errors }}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">
+                            Excel format: Must contain 'old_id' and 'new_id' columns
+                        </small>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    <button type="submit" class="btn btn-primary" id="submit-btn">
+                        <i class="fas fa-upload"></i> Upload and Update
+                    </button>
+                    {% comment %} <a href="{% static 'samples/student_id_update_sample.xlsx' %}" class="btn btn-info">
+                        <i class="fas fa-download"></i> Download Sample
+                    </a> {% endcomment %}
+                </div>
+            </form>
+
+            {% if messages %}
+            <div class="mt-4">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_javascript %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<script>
+    document.querySelector("form").addEventListener("submit", function () {
+        document.getElementById("loading-screen").style.display = "block";
+        document.getElementById("submit-btn").disabled = true;
+    });
+</script>
+{% endblock extra_javascript %}

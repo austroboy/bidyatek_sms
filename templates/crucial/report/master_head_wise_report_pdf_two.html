@@ -1,0 +1,244 @@
+{% load salary_tags %}
+{% load tz %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { 
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .header { 
+            text-align: center; 
+            margin-bottom: 10px;
+            padding: 5px;
+        }
+        .header h1 { 
+            font-size: 16px; 
+            margin: 2px 0; 
+        }
+        .header h2 {
+            font-size: 12px;
+            margin: 2px 0;
+        }
+        .header p {
+            font-size: 9px;
+            margin: 2px 0;
+        }
+
+        .header-section {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            z-index: 999;
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 8px 0;
+        }
+
+        .report-title {
+            text-align: center;
+            margin: 4px 0;
+        }
+
+        .report-summary {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+            font-size: 10px;
+            flex-wrap: wrap;
+        }
+
+        .report-summary p {
+            margin: 0 15px;
+            white-space: nowrap;
+        }
+    
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+    
+        table { 
+            width: 100%;
+            border-collapse: collapse; 
+            font-size: 9px; 
+            table-layout: fixed;  /* Use fixed layout */
+            page-break-inside: auto;
+        }
+    
+        th, td { 
+            border: 1px dotted #5b5a5a;
+            padding: 5px; 
+            text-align: center;
+            word-wrap: break-word;
+            overflow: hidden;
+        }
+    
+        th {
+            height: 150px;
+            width: 25px;  /* Reduced width */
+            padding: 0;
+            position: relative;
+            vertical-align: middle;
+            text-align: center;
+            overflow: hidden;
+        }
+        .vertical-header {
+            position: absolute;
+            bottom: 10px;  /* Adjusted position */
+            left: 50%;
+            transform: translateX(-50%) rotate(-90deg);
+            transform-origin: bottom center;
+            white-space: nowrap;
+            font-weight: bold;
+            font-size: 6px;  /* Smaller font */
+            width: 100px;  /* Reduced width */
+        }
+    
+        td { 
+            min-width: 70px;
+            max-width: 140px;
+            vertical-align: middle;
+            white-space: normal;
+        }
+    
+        @page { 
+            size: legal landscape; 
+            margin: 180px 0.5cm 0.5cm;
+        }
+    
+        .total-row {
+            font-weight: bold;
+            background-color: #e0e0e0;
+        }
+
+        @media print {
+            .header-section {
+                position: fixed;
+                top: -170px; /* Adjust header vertical position */
+            }
+            
+            .styled-table {
+                margin-top: 200px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+    {% for chunk in chunks_with_info %}
+    <div class="page-break">
+        <div class="header-section">
+            <div class="report-header" style="display: flex; justify-content: space-between;">
+                <div style="width: 20%;">
+                    <img src="{{institute_logo}}" alt="Logo" style="height: 60px;">
+                </div>
+                <div style="width: 60%; text-align: center;">
+                    <p style="margin: 2px; font-size: 20px; font-weight: bold;">Rajuk Uttara Model College</p>
+                    <p style="margin: 2px; font-size: 12px;">Sector#6, Uttara Model Town, Dhaka-1230</p>
+                    <p style="margin: 2px; font-size: 10px;">EST:1994</p>
+                    <p style="margin: 2px; font-size: 10px;">Education For Humanization</p>
+                    <p style="margin: 2px; font-size: 12px;">WWW.RAJUKCOLLEGE.EDU.BD</p>
+                </div>
+                <div style="width: 20%;"></div>
+            </div>
+            
+    
+            <h4 class="report-title">Master Head Wise Collection Sum Report</h4>
+    
+            <div class="report-summary">
+                <p>Date Range: {{ from_date }} to {{ to_date }}</p>
+                <p><strong>Payment Mode: SSL</strong></p>
+                
+            </div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th><div class="vertical-header">SL No.</div></th>
+                    <th><div class="vertical-header">Version</div></th>
+                    <th><div class="vertical-header">Shift</div></th>
+                    {% for fh_id, fh_name in chunk.fee_heads.items %}
+                        <th><div class="vertical-header">{{ fh_name }}</div></th>
+                    {% endfor %}
+                    {% if forloop.last %}  <!-- Add only in last chunk -->
+                        <th><div class="vertical-header">Other Fee</div></th>
+                        <th><div class="vertical-header">Total</div></th>
+                    {% endif %}
+                </tr>
+            </thead>
+            
+            <tbody>
+                {% for row in data %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ row.version|default:'Undefined Version' }}</td>
+                    <td>{{ row.shift|default:'Undefined Shift' }}</td>
+                    {% for fh in chunk.fee_head_objects %}
+                        <td>{{ row.fee_head_totals|get_item:fh.id|floatformat:-2 }}</td>
+                    {% endfor %}
+                    {% if forloop.parentloop.last %}  <!-- Add only in last chunk -->
+                        <td>-</td>
+                        <td>{{ row.grand_total|floatformat:-2 }}</td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+            
+            <tfoot>
+                <tr class="total-row">
+                    <td colspan="3">Grand Total</td>
+                    {% for fh in chunk.fee_head_objects %}
+                        <td>{{ overall_totals|get_item:fh.id|floatformat:"-1" }}</td>
+                    {% endfor %}
+                    {% if forloop.last %}  <!-- Add only in last chunk -->
+                        <td>{{ other_fee_total|default:"0.00"|floatformat:"-1"}}</td>
+                        <td>{{ overall_grand_total|floatformat:"-1" }}</td>
+                    {% endif %}
+                </tr>
+            </tfoot>
+        </table>
+
+        {% if not forloop.last %}
+        <div style="page-break-after: always;"></div>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    <div style="padding-top: 150px;">
+        <table style="width: 100%; border-collapse: collapse; text-align: center; margin-top: 150px; border: 1px solid white !important;">
+            <tr>
+                <td style="text-align: center; vertical-align: middle; border: 1px solid white !important;">
+                    _____________________
+                    <br><span style="display: block; margin-top: 5px; font-size: 14px;" class="text-dark">Examined By<br>
+                        Sr. Accounts Officer</span>
+                </td>
+                <td style="text-align: center; vertical-align: middle; border: 1px solid white !important;">
+                    _____________________
+                    <br><span style="display: block; margin-top: 5px; font-size: 14px;" class="text-dark">Checked By<br>
+                        Asst. Accounts Officer</span> 
+                </td>
+                <td style="text-align: center; vertical-align: middle; border: 1px solid white !important;">
+                    _____________________
+                    <br><span style="display: block; margin-top: 5px; font-size: 14px;" class="text-dark">Checked By<br>
+                        Accountant</span> 
+                </td>
+                <td style="text-align: center; vertical-align: middle; border: 1px solid white !important;">
+                    _____________________
+                    <br><span style="display: block; margin-top: 5px; font-size: 14px;" class="text-dark">Prepared By<br>
+                        Accounts Assistant</span> 
+                </td>
+            </tr>
+        </table>
+    </div>
+
+</body>
+</html>

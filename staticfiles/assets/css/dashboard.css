@@ -1,0 +1,518 @@
+/* dashboard */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap");
+.content-wrapper {
+  font-family: "Poppins", sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin: 0 !important;
+  line-height: normal;
+}
+
+
+/* navbar */
+.navbar_cont__wrapper .navbar__left .img_wrapper {
+  width: 40px;
+  height: 40px;
+}
+.navbar_cont__wrapper .navbar__left img {
+  width: 20px;
+  object-fit: contain;
+}
+.navbar_cont__wrapper {
+  background-color: #0f5650;
+}
+.navbar_cont .profile box-icon {
+  fill: white;
+  width: 8px;
+}
+
+.navbar_cont .profile img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+.navbar_cont .active__icon {
+  width: 5px;
+  height: 5px;
+  top: 3px;
+  right: 1px;
+}
+/* shortcut items */
+.shortcut_item {
+  padding-top: 9px;
+}
+
+.shortcut_item * {
+  fill: white;
+}
+
+.shortcut__features * {
+  fill: #425971;
+}
+
+.shortcut__features {
+  width: 280px !important;
+  color: #425971;
+  z-index: 1;
+}
+/* .shortcut__features.dropdown-menu.show {
+  display: grid ;
+} */
+.shortcut__features .items {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 16px;
+  gap: 26px;
+  width: 100%;
+}
+.shortcut__features .items .item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+.edit_details_overlay.shortcut__features {
+  right: 0;
+}
+.dropdown-toggle::after {
+  display: none !important;
+}
+.dropdown-menu{
+  padding-top: 0 !important;
+}
+/* notificaion overlay */
+.edit_details_overlay.notification__overlay ul li {
+  color: #0d1654;
+  padding: 12px;
+  padding-top: 7px;
+  cursor: pointer;
+  line-height: 19px;
+  padding-bottom: 0;
+}
+
+.notification__overlay ul li:hover {
+  color: white;
+}
+
+.notification__overlay.edit_details_overlay {
+  
+  right: 0;
+  padding: 2px 0;
+  width: 270px !important;
+}
+.notification__overlay.edit_details_overlay ul{
+  height: 350px !important;
+  display: block;
+  overflow: auto;
+}
+.edit_details_overlay.notification__overlay ul li hr {
+  margin: 0;
+  margin-top: 10px;
+  opacity: 0.6;
+}
+
+/* profile */
+.profile__overlay.edit_details_overlay{
+  width: 170px !important;
+  
+}
+.profile__overlay.edit_details_overlay ul{
+  padding: 4px 0;
+}
+.profile__overlay.edit_details_overlay ul li{
+  padding: 4px 15px;
+}
+/* total student, teacher and stuffs */
+.leave_sms {
+  font-family: "Poppins", sans-serif;
+}
+.shadow {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+}
+.leave_sms .img_wrapper {
+  width: 50px;
+  padding: 10px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.leave_sms .img_wrapper img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+}
+.leave_sms .text_wrapper p {
+  color: #a3a3a3;
+  font-size: 13px;
+}
+.leave_sms .text_wrapper span {
+  font-weight: 600;
+  font-size: 20px;
+}
+.leave_sms .leave_student .img_wrapper {
+  background-color: #fff2d8;
+}
+.leave_sms .leave_teacher .img_wrapper {
+  background-color: #ffeaea;
+}
+.leave_sms .general_sms .img_wrapper {
+  background-color: #e1f1ff;
+}
+.leave_sms .masking_sms .img_wrapper {
+  background-color: #d1f3e0;
+}
+
+.leave_sms .dots {
+  right: 5px;
+  top: 2px;
+  border-radius: 50%;
+  background-color: #fff;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dots {
+  z-index: 200;
+}
+
+.edit_details_overlay {
+  display: none;    
+
+}
+.edit_details_overlay.active {
+  display: block;
+}
+/* student details attendance and notice and events */
+.student_details {
+  font-family: "Public Sans", sans-serif;
+}
+.student_details .img_wrapper {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 1px solid #0f5650;
+  overflow: hidden;
+}
+.student_details .img_wrapper img {
+  width: 100%;
+}
+.student_details h3.name {
+  background-color: #0f5650;
+}
+.student_details .table_wrapper {
+  background-color: rgba(29, 30, 78, 0.1);
+  padding: 0 10px;
+  display: flex;
+  justify-content: center;
+}
+.details_attendance_notice .col-12 .shadow {
+  height: 310px;
+}
+.student_details table th {
+  text-align: right;
+  color: #131f73;
+  font-weight: 600;
+}
+
+.student_details table th,
+.student_details table td {
+  border-bottom: 1px solid #fff;
+  font-size: 14px;
+  padding: 5px 5px;
+}
+.student_details table tr:last-child th,
+.student_details table tr:last-child td {
+  border-bottom: none;
+}
+.student_details table td {
+  border-left: 1px solid #fff;
+}
+.student_details .edit__icon {
+  top: 5px;
+  right: 15px;
+  width: 20px;
+}
+
+.student_details .edit__icon img {
+  width: 100%;
+  object-fit: contain;
+}
+
+/* student teacher stuff */
+.student_teacher_stuff .student .img_wrapper {
+  background-color: #77df40;
+}
+.student_teacher_stuff .teacher .img_wrapper {
+  background-color: #6b6eff;
+}
+.student_teacher_stuff .stuffs .img_wrapper {
+  background-color: #e5bd1d;
+}
+.student_teacher_stuff .parents .img_wrapper {
+  background-color: #ff3e1d;
+}
+
+/* attendance information */
+.heading {
+  background-color: #0f5650;
+  padding-top: 12px;
+}
+.attendance_info .heading h3 {
+  line-height: 0px !important;
+  font-size: 15px;
+}
+.attendance_info .student_attendance {
+  background-color: rgba(107, 110, 255, 0.1);
+  z-index: 100;
+}
+.attendance_info .teacher_attendance {
+  background-color: rgba(229, 189, 29, 0.1);
+}
+.attendance_info .staff_attendance {
+  background-color: rgba(78, 255, 102, 0.1);
+}
+.attendance_info .attendance .chart_info h6 {
+  color: #0f5650;
+}
+.attendance_info .attendance .dots {
+  right: 10px;
+  top: 10px;
+  border-radius: 50%;
+  background-color: #fff;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.attendance_info .student_attendance .pieChart_wrapper {
+  position: relative;
+  z-index: 15;
+}
+.attendance_info .student_attendance .pieChart_wrapper::after {
+  content: "";
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background-color: #fff;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+}
+.attendance_info .pieChart_wrapper {
+  width: 100px;
+  height: 100px;
+}
+.attendance_info .teacher_attendance .pieChart_wrapper {
+  position: relative;
+  z-index: 15;
+}
+.attendance_info .attendance .pieChart_wrapper::after {
+  content: "";
+  width: 98px;
+  height: 98px;
+  border-radius: 50%;
+  background-color: #fff;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+}
+
+.pieChart_wrapper__holder .total {
+  transform: translate(-50%, -50%);
+  z-index: 50;
+}
+
+.pieChart_wrapper__holder .total p {
+  line-height: 18px;
+}
+.attendance .present_absent .item {
+  text-align: center;
+}
+/* edit overlay */
+.edit_details_overlay {
+  top: 40px;
+  right: 10px;
+  height: auto !important;
+  width: auto;
+  z-index: 210;
+  padding-bottom: 0;
+}
+.edit_details_overlay ul {
+  margin-bottom: 0;
+}
+.edit_details_overlay ul li {
+  padding: 8px 15px;
+}
+
+.edit_details_overlay ul li:hover {
+  background-color: #131f73;
+}
+.edit_details_overlay ul li:hover a {
+  color: #fff;
+  text-decoration: none;
+}
+.edit_details_overlay ul li a {
+  color: #131f73;
+}
+
+@media only screen and (max-width: 575px) {
+  .details_attendance_notice .col-lg-6 .shadow {
+    height: auto;
+  }
+  .details_attendance_notice .attendance_info .shadow {
+    height: auto;
+  }
+}
+@media only screen and (max-width: 480px) {
+  .attendance .present_absent p {
+    font-size: 11px !important;
+  }
+
+  .pieChart_wrapper__holder .total p {
+    font-size: 14px;
+  }
+
+  .attendance_info .attendance .dots {
+    top: 4px;
+    right: 4px;
+  }
+}
+
+/* notice and events */
+.notices ul {
+  padding: 8px 0;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+.notices ul li {
+  margin: 4px 12px;
+  border-bottom: 1px solid rgb(239, 239, 239);
+}
+.notices ul li:last-child {
+  border-bottom: none;
+}
+.notices ul li span {
+  padding: 5px 8px;
+  text-transform: capitalize;
+  font-weight: normal;
+}
+.notices ul li p {
+  line-height: 15px;
+  font-size: 10px;
+  padding: 4px 0;
+  max-height: 35px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media only screen and (max-width: 991px) {
+  .notices ul li p {
+    font-size: 15px;
+    line-height: normal;
+    max-height: 70px;
+  }
+  .details_attendance_notice .col-12:last-of-type .shadow {
+    height: auto;
+  }
+  .details_attendance_notice .text-right {
+    padding-bottom: 20px;
+  }
+}
+/* events */
+.events ul li p {
+  font-size: 15px;
+  line-height: normal;
+  max-height: 70px;
+}
+
+
+
+/* student teacher male female */
+.male_female .male .img_wrapper {
+  background-color: rgba(107, 110, 255, 0.19);
+}
+.male_female .female .img_wrapper {
+  background-color: rgba(255, 62, 29, 0.1);
+}
+
+/* support fashion video */
+.support input,
+.support textarea {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+.support input::placeholder,
+.support textarea::placeholder {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.3);
+}
+.support label {
+  color: #0f5650;
+}
+.support span {
+  color: rgba(0, 0, 0, 0.3);
+  font-size: 12px;
+}
+.support input[type="file"] {
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+}
+.support .custom-file label::after {
+  display: none;
+}
+.support .custom-file label::after {
+  display: none;
+}
+.support .custom-file {
+  width: 40px;
+  max-width: 40px;
+}
+.support .custom-file input {
+  width: 40px;
+}
+.support .custom-file label {
+  width: 40px;
+  border-radius: 10px !important;
+  margin-bottom: 0;
+  border: none;
+  background-color: #3f7afc;
+}
+.custom_file_wrapper {
+  width: 150px;
+}
+.custom_file_wrapper {
+  width: 196px;
+}
+
+.custom_file_wrapper span {
+  padding: 8px;
+  background-color: transparent;
+  border: none;
+}
+
+
+
+
+#myChart3 {
+  height: 165px;
+}

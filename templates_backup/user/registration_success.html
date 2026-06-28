@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registration Successful</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      text-align: center;
+      padding: 50px;
+    }
+    .success-container {
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: #2e7d32;
+    }
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #0d47a1;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="success-container">
+    <h1>Registration Successful!</h1>
+    <p>Thank you for registering. Your registration ID is: <strong>{{ registration.registration_id }}</strong></p>
+    <p>Please keep this ID for future reference.</p>
+    {% comment %} <a href="/" class="btn">Return to Home</a> {% endcomment %}
+  </div>
+</body>
+</html>

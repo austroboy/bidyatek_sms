@@ -1,0 +1,277 @@
+{% extends 'partials/base.html' %} {% load static %} {% block extra_css %}
+
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css"
+/>
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-5-theme/1.3.0/select2-bootstrap-5-theme.min.css"
+/>
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css"
+/>
+<style>
+  #tables {
+    display: flex;
+    gap: 100px;
+  }
+  .first-table {
+    width: 100%;
+    text-align: center;
+  }
+  table,
+  th,
+  td {
+    border: 0.5px solid #ccc;
+    border-collapse: collapse;
+  }
+
+  table {
+    width: 100%;
+  }
+
+  .serial {
+    width: 10%;
+  }
+  .number {
+    width: 8%;
+  }
+
+  .name {
+    width: 30%;
+  }
+  th {
+    height: 35px;
+    color: black;
+  }
+  tr {
+    height: 30px;
+  }
+  td {
+    padding: 0 !important;
+    color: black;
+  }
+
+  .marktable {
+    display: none;
+  }
+
+  @media print {
+    @page {
+      size: A4 landscape;
+      margin: 40px 20px 20px;
+    }
+
+    body {
+      -webkit-print-color-adjust: exact;
+      background-color: white;
+    }
+
+    #tables {
+      display: flex;
+      gap: 20px;
+      color: black;
+    }
+    #tables h2,
+    #tables h4 {
+      color: black;
+    }
+
+    .marktable {
+      display: block;
+    }
+  }
+
+  #fixed-button {
+    position: fixed;
+    right: 0px;
+    z-index: 1000 !important;
+    top: 50%; /* Set top to 50% */
+    transform: translateY(-50%);
+  }
+
+  #fixed-button button {
+    color: #fccf14;
+    display: block;
+    height: 50px;
+    position: relative;
+    text-align: center;
+    line-height: 40px;
+    width: 50px;
+    margin-bottom: 1px;
+    z-index: 1000;
+    border: none;
+  }
+
+  #fixed-button button:hover {
+    right: 5px;
+    opacity: 1;
+  }
+
+  .fixed-icon {
+    background-color: #1d1e4e;
+  }
+</style>
+
+{% endblock extra_css %} {% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+
+  <div id="fixed-button">
+    <div>
+      <button class="fixed-icon" id="print_tables">
+        <i class="bx bxs-printer fs-1"></i>
+      </button>
+    </div>
+
+    <div>
+      <button class="fixed-icon" id="previous">
+        <i class="bx bx-skip-previous fs-1"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="card p-4">
+    <form action="{% url 'exam_signature_sheet' %}" method="post">
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-3">
+          <div class="mb-3">
+            <div class="">
+              <select
+                class="form-select"
+                name="exam_name_id"
+                id="exam_name"
+                required
+              >
+                <option disabled selected value="">Select Exam</option>
+                {% for examname in exam_list %}
+                <option value="{{examname.id}}">{{examname.name}}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="mb-3">
+            <div class="">
+              <select
+                class="form-select"
+                name="class_name_id"
+                id="class_name"
+                required
+              >
+                <option disabled selected value="">Select Class</option>
+
+                {% for class in class_list %}
+                <option value="{{class.id}}">
+                  {{class}}
+                </option>
+                {%endfor%}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-2 mb-2 mb-md-0">
+          <button class="btn btn-primary" type="submit">Load</button>
+        </div>
+
+        <div
+          class="col-md-4 d-flex justify-content-between gap-2 align-content-center"
+        >
+          <div class="d-flex flex-row gap-2 align-self-center pb-3">
+            <input
+              class="form-control form-control"
+              type="text"
+              id="examname"
+              value="{{exam_instance}}"
+              disabled
+            />
+            <input
+              class="form-control form-control"
+              type="text"
+              id="classname"
+              value="{{class_instance}}"
+              disabled
+            />
+          </div>
+        </div>
+      </div>
+    </form>
+    <hr />
+    <div class="overflow-hidden">
+      <div id="horizontalformset">
+        <div id="tables">
+          <div class="first-table">
+            <div class="marktable">
+              <h4>{{institute.institute_name}}</h4>
+              <h5 style="color: black;" >{{exam_instance}} Signature</h5> 
+
+              <p class="fw-bold d-flex gap-3 justify-content-center">
+                <span>Class: {{class_instance}}</span>
+                <span>Exam Start Date: ______________</span>
+                <span>Exam End Date: ______________</span>
+              </p>
+            </div>
+
+            <table class="mt-3" >
+              <tr>
+                <th class="serial p-1">RNo</th>
+                <th class="name text-nowrap p-1">Student Name</th>
+                <td style="min-width: 132px"></td>
+                <td style="min-width: 132px"></td>
+                <td style="min-width: 132px"></td>
+                <td style="min-width: 132px"></td>
+                <td style="min-width: 132px"></td>
+                <td style="min-width: 132px"></td>
+              </tr>
+              <tbody>
+                {% for student_data in studentList%}
+                <tr>
+                  <td>{{ student_data.roll_no }}</td>
+                  <td class="text-start ps-1 title">
+                    {{ student_data.student_field.name }}
+                  </td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- end: Content -->
+
+{% endblock content %} {% block extra_javascript %}
+
+<script src="{% static 'assets/js/extended-ui-perfect-scrollbar.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/jQuery.print/1.6.2/jQuery.print.min.js"
+  integrity="sha512-t3XNbzH2GEXeT9juLjifw/5ejswnjWWMMDxsdCg4+MmvrM+MwqGhxlWeFJ53xN/SBHPDnW0gXYvBx/afZZfGMQ=="
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer"
+></script>
+<script>
+  $("#print_tables").on("click", function () {
+    $("#tables").print({
+      title: "Tables",
+      doctype: "<!doctype html>",
+    });
+  });
+</script>
+{% endblock extra_javascript%}

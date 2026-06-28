@@ -1,0 +1,100 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load widget_tweaks %}
+{% block extra_css %} 
+<link
+      rel="stylesheet"
+      href="{% static 'assets/vendor/css/datedropper.css' %}"
+      
+    />
+{% endblock extra_css %} 
+
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y"> 
+    {% include 'pageinfo.html' %}
+    
+    <div class="card ">
+        <div class="card-body">
+
+           <form action="{% url 'search_expenseitem' %}" method="post">
+            {% csrf_token %}
+                <div class="row">
+                    
+                    <div class="col-md-5 d-flex gap-2 align-items-center"> <label>From</label> <input id="" type="text" name="start_date" class="form-control daterange"> </div>
+                    <div class="col-md-5 d-flex gap-2 align-items-center"> <label>To</label> <input type="text" name="end_date" class="form-control daterange"> </div>
+                   
+                    <div class="col-md-2 d-flex align-items-center">  <button class="btn btn-primary pro-button w-100">Search</button> </div>
+                </div>
+            </form>
+
+            <div class="table-responsive pt-4">
+              <table class="table table-nowrap mb-0">
+                <thead style="background-color: rgba(252, 207, 20, 0.2) !important;">
+                  <tr class="shadow-sm">
+                    <th scope="col">ID</th>
+                    <th scope="col">Expense Name</th>
+                    <th scope="col">Amount</th>
+                    <th scope="col">Boucher</th>
+                    <th scope="col">Employee Name</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Created At</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    {% for expense in expenseitem %}
+              
+                  <tr>
+                    <td>
+                        {{forloop.counter}}
+                    </td>
+                    <td>
+                        {{expense.expensetype_id}}
+                    </td>
+                    <td>
+                      {{expense.amount}}
+                        
+                    </td>
+                    <td>
+                      {% if expense.boucher  %}
+                      <a class="text-danger" style="text-decoration: none;" href="/media/{{expense.boucher}}" download>Download</a>
+                      {% else %}
+                      -
+                      {% endif %}
+                        
+                    </td>
+                    <td>
+                      {{expense.employee_id}}
+                      
+                    </td>
+                    <td>
+                      {{expense.description}}
+                    </td>
+                    <td>
+                        {{expense.created_at}}
+                    </td>
+          
+                    
+          
+                  
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+    </div>
+</div>
+<!-- end: Content -->
+
+{% endblock content %} 
+
+{% block extra_javascript %} 
+<script src="https://cdn.jsdelivr.net/gh/bbbootstrap/libraries@main/datedropper.js"></script>
+<script>
+    $(document).ready(function(){
+        $('.daterange').dateDropper(); 
+    });
+</script>
+{% endblock extra_javascript %}

@@ -1,0 +1,225 @@
+{% extends 'partials/base.html' %} {% load static %} {% block extra_css %}
+<style>
+    .fbox{
+        width: 2.15in;
+        height: 3.4in;
+        background: url('{% static "idcard/idfont.svg" %}' ) no-repeat;
+        background-size: cover;
+        }
+  
+    .bbox{
+        width: 2.15in;
+        height: 3.4in;
+        background: url('{% static "idcard/idback.svg" %}' ) no-repeat;
+        background-size: cover;
+        }
+  
+        
+  
+    @media print {
+    
+    @page {
+        size: A5;
+        margin: 0;
+    }
+
+    .student-card {
+        page-break-before: always; /* Add page break before each card */
+        width: 2.15in;
+        height: 3.4in;
+        margin: 0;
+      }
+  
+      .student-card:last-child {
+        page-break-after: auto; /* Remove page break after the last card */
+      } 
+      
+    .fbox{
+        width: 2.15in;
+        height: 3.4in;
+        background: url('{% static "idcard/idfont.svg" %}' ) no-repeat;
+        background-size: cover;
+        
+        }
+
+    .bbox{
+    width: 2.15in;
+    height: 3.4in;
+    background: url('{% static "idcard/idback.svg" %}' ) no-repeat;
+    background-size: cover;
+
+    }
+
+    
+    body {
+        -webkit-print-color-adjust: exact;
+    }
+    }
+  
+  
+    #fixed-button {
+    position: fixed;
+    right: 0px;
+    }
+  
+    #fixed-button button {
+      color: #fff;
+      display: block;
+      height: 50px;
+      position: relative;
+      text-align: center;
+      line-height: 40px;
+      width: 50px;
+      margin-bottom: 1px;
+      z-index: 1000;
+      border: none;
+    }
+  
+    #fixed-button button:hover {
+      right: 5px;
+      opacity: 1;
+    }
+  
+    .fixed-icon {
+      background-color: #696cff;
+    }
+</style>
+{% endblock extra_css %} {% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+
+  <div id="fixed-button">
+    <div>
+      <button class="fixed-icon" id="print-invoice">
+        <i class="bx bxs-printer fs-1"></i>
+      </button>
+    </div>
+
+    <div>
+      <button class="fixed-icon" id="previous">
+        <i class="bx bx-skip-previous fs-1"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="container p-4">
+      <form action="{% url 'student_id_data' %}" method="post">
+        {% csrf_token %}
+        <div class="d-flex gap-2 justify-content-between">
+          <select class="form-select w-75" name="class_name_id" required>
+            <option disabled hidden selected>Select Class</option>
+            {% for class in classList %}
+
+            <option value="{{class.id}}">{{class.name}}</option>
+
+            {% endfor %}
+          </select>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            name="action"
+            value="view_id_card"
+            id="searchButton"
+          >
+            View ID Card
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            name="action"
+            value="generate_barcode"
+            id="downloadButton"
+          >
+            Generate Barcode
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div
+      class="container d-flex align-items-center justify-content-center flex-row flex-wrap pb-4"
+    >
+      <div>
+        <div class="" id="invoice">
+          {% for student in studentlist %}
+          <div class="student-card mx-auto mt-5 fbox position-relative" style="text-align: center;">
+            <p class="text-center fw-bold pt-4"> {{institute.institute_name}} </p>
+            <img style="border-radius: 8px; position: absolute; top: 60px; left: 5px;" height="40px" width="50px" src="{{institute.institute_logo.url}}" alt="">
+            
+            {% if student.student_field.avatar %}
+                <img style="border-radius: 8px; position: absolute; top: 77px; left: 68.5px;" height="72px" width="70px" src="{{student.student_field.avatar.url}}" alt="">
+            {% endif %}
+             
+            <p style="position: absolute; top: 155px; width: 100%; margin: 0 auto;font-weight: 600;">{{ student.student_field.name }}</p>
+            <p  style="position: absolute; top: 175px; width: 100%; margin: 0 auto; font-size: 12px;font-weight: 600;">Class: {{ student.class_id.class_group_id.class_id }} {{ student.class_id.section_id }}</p>
+            <div style="position: absolute; bottom: 58px; left: 100px;" class="m-0 p-0 text-start">
+                <p class="" style="font-size: 10px; font-weight: 600; padding:0px; margin:-1.5px -1px; ">{{ student.roll_no }}</p>
+                <p class="" style="font-size: 10px; font-weight: 600; padding:0px; margin:-1.5px -1px; ">{{ student.student_field.dob }}</p>
+                <p class="" style="font-size: 10px; font-weight: 600; padding:0px; margin:-1.5px -1px; ">{{ student.student_field.blood_group }}</p>
+                <p class="" style="font-size: 10px; font-weight: 600; padding:0px; margin:-1.5px -1px; ">{{ student.parent_id.name }}</p>
+                <p class="" style="font-size: 10px; font-weight: 600; padding:0px; margin:-1.5px -1px; "> {{ student.parent_id.phone_number }} </p>
+            </div>
+            {% if student.student_field.barcode %}
+                <img style="position: absolute; bottom: 3px; left: 3.5px;" height="50px" width="200px" src="{{ student.student_field.barcode.url }}" alt="">
+            {% else %}
+                  <p class="text-danger">Need Generate ID Card</p>
+            {% endif %}
+            
+          </div>
+
+          {% endfor %}
+
+          <div class="mx-auto mt-5 bbox position-relative" style="text-align: center; left: 0; right: 0;">
+            <img style="border-radius: 8px; position: absolute; top: 20px; left: 59px;" height="70px" width="90px" src="{{institute.institute_logo.url}}" alt=""> 
+            <p class="border-bottom" style="position: absolute; top: 90px; width: 100%; margin: 0 auto; font-size: 11px;">If found please return to</p>
+            <p  style="position: absolute; top: 112px; width: 100%; margin: 0 auto; font-size: 11px;">{{institute.headmaster_mobile}}</p>
+            <p  style="position: absolute; top: 135px; width: 100%; margin: 0 auto; font-size: 11px;">{{institute.education_thana_id}}, {{institute.education_district_id}}</p>
+            <p  style="position: absolute; bottom: 125px; width: 100%; margin: 0 auto; font-size: 9px;">07/02/2024</p>
+            <p  style="position: absolute; bottom: 115px; width: 100%; margin: 0 auto; font-size: 9px;">07/02/2024</p>
+            <img style="border-radius: 8px; position: absolute; bottom: 18.5px; left: 25.5px;" height="60px" width="60px" src="{% static 'idcard/QR-code.svg'%}" alt="">
+            {% comment %} <img style="border-radius: 8px; position: absolute; bottom: 30px; left: 125px;" height="40px" width="70px" src="signature.png" alt=""> {% endcomment %}
+          </div>
+
+        </div>
+
+        
+      </div>
+    </div>
+  </div>
+</div>
+<!-- end: Content -->
+
+{% endblock content %} {% block extra_javascript %}
+
+<script src="{% static 'assets/vendor/libs/print/html2pdf.bundle.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/print/jQuery.print.js' %}"></script>
+
+<script type="text/javascript">
+  $(document).ready(function () {
+    $("#print-invoice").on("click", function () {
+      $("#invoice").print({
+        globalStyles: true,
+        mediaPrint: false,
+        stylesheet: null,
+        noPrintSelector: ".no-print",
+        iframe: true,
+        append: null,
+        prepend: null,
+        manuallyCopyFormValues: true,
+        deferred: $.Deferred(),
+        timeout: 750,
+        title: "Invoice",
+        doctype: "<!doctype html>",
+      });
+    });
+
+    $("#previous").on("click", function () {
+      window.history.back();
+    });
+  });
+</script>
+
+{% endblock extra_javascript%}

@@ -1,0 +1,147 @@
+<style>
+    .container {
+        max-width: 900px;
+        margin: 20px auto;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+    h2, h4 {
+        text-align: center;
+        color: #333;
+    }
+    label {
+        font-weight: bold;
+    }
+    .form-control {
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        padding: 8px;
+    }
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+    .btn-danger {
+        background-color: #dc3545;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .btn-danger:hover {
+        background-color: #c82333;
+    }
+    table {
+        width: 100%;
+        margin-top: 20px;
+        border-collapse: collapse;
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: center;
+    }
+    th {
+        background-color: #007bff;
+        color: white;
+    }
+    .text-center {
+        text-align: center;
+        font-style: italic;
+        color: #555;
+    }
+</style>
+{% block content %}
+<div class="container">
+    <h2>Find Duplicate Fees</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-5">
+                <label>First Fee Type:</label>
+                <select name="feetype1" class="form-control" required>
+                    <option value="">Select Fee Type</option>
+                    {% for ft in fee_types %}
+                        <option value="{{ ft.id }}">{{ ft.fees_title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-5">
+                <label>Second Fee Type:</label>
+                <select name="feetype2" class="form-control" required>
+                    <option value="">Select Fee Type</option>
+                    {% for ft in fee_types %}
+                        <option value="{{ ft.id }}">{{ ft.fees_title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <br>
+                <button type="submit" class="btn btn-primary">Find Duplicates</button>
+            </div>
+        </div>
+    </form>
+
+    {% if students %}
+    <hr>
+    <h4>Duplicate Entries</h4>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Student Name</th>
+                <th>Roll</th>
+                <th>Class</th>
+                <th>Group</th>
+                <th>Section</th>
+                <th>Version</th>
+                <th>Shift</th>
+                <th>Fee Type 1</th>
+                <th>Fee Type 2</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td>{{ student.student.student_field.name }}</td>
+                <td>{{ student.student_info.roll }}</td>
+                <td>{{ student.student_info.class }}</td>
+                <td>{{ student.student_info.group }}</td>
+                <td>{{ student.student_info.section }}</td>
+                <td>{{ student.student_info.version }}</td>
+                <td>{{ student.student_info.shift }}</td>
+                {% for fee in student.fees %}
+                <td>
+                    {{ fee.feetype_id.fees_title }}<br>
+                    Amount: {{ fee.amount }}<br>
+                    Status: {{ fee.status }}<br>
+                    Month: {{ fee.month_id.name }}
+                </td>
+                {% endfor %}
+                <td>
+                    {% for fee in student.fees %}
+                    <form method="post" action="{% url 'delete_fee_entry' fee.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm mb-2">Delete {{ forloop.counter }}</button>
+                    </form>
+                    {% endfor %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="10" class="text-center">No duplicate entries found</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+{% endblock %}

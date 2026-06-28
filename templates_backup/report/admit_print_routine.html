@@ -1,0 +1,313 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+
+{% block extra_css %} 
+<style>
+    
+    .padding {
+      padding: 15px;
+    }
+    .mar-bot {
+      margin-bottom: 0px;
+    }
+    .admit-card {
+      border: .5px dotted #ccc;
+      padding: 0px;
+      margin: 20px 0;
+    }
+    .Box h5,
+    .Box p {
+      margin: 0;
+    }
+    h5 {
+      text-transform: uppercase;
+    }
+    table img {
+      width: 100%;
+      margin: 0 auto;
+    }
+    .table-bordered td,
+    .table-bordered th,
+    .table thead th {
+      border: 1px dotted #ccc !important;
+      padding: -10px 0px;
+    }
+
+    #schedule{
+      display: none;
+    }
+
+    @media print {
+      
+      @page {
+        size: A5;
+        margin: 0;
+      }
+      .admit-card {
+        page-break-before: always;
+        border: 0px ;
+        padding: 0px;
+        margin: 0px;
+        
+      }
+  
+      .admit-card:last-child {
+        page-break-after: auto; 
+      }
+
+      .print-padding{
+        margin-top: 8px;
+        padding-top: 4px;
+      }
+
+      #schedule{
+        display: block;
+      }
+      
+      body {
+        -webkit-print-color-adjust: exact;
+      }
+    }
+
+    
+    #fixed-button {
+      position: fixed;
+      right: 0px;
+      z-index: 1000;
+    }
+
+    #fixed-button button {
+      color: #fff;
+      display: block;
+      height: 50px;
+      position: relative;
+      text-align: center;
+      line-height: 40px;
+      width: 50px;
+      margin-bottom: 1px;
+      z-index: 1000;
+      border: none;
+    }
+
+    #fixed-button button:hover {
+      right: 5px;
+      opacity: 1;
+    }
+
+    .fixed-icon {
+      background-color: #696cff;
+    }
+</style>
+{% endblock extra_css %} 
+
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+    {% include 'pageinfo.html' %}
+
+    <div id="fixed-button">
+        <div>
+          <button class="fixed-icon" id="print-admitcard">
+            <i class="bx bxs-printer fs-1"></i>
+          </button>
+        </div>
+  
+        <div>
+          <button class="fixed-icon" id="previous">
+            <i class="bx bx-skip-previous fs-1"></i>
+          </button>
+        </div>
+    </div>
+    
+    <div class="card p-4">
+        
+        <form action="{% url 'admit_card' %}" method="post">
+          {% csrf_token %}
+          <div class="row d-flex gap-2 justify-content-between">
+            <div class="col-md-4">
+              <select  class="form-select " name="class_name_id" required>
+                <option disabled hidden selected>Select Class</option>
+                {% for class in classList %}
+  
+                <option value="{{class.id}}">{{class}}</option>
+  
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-4">
+              <select  class="form-select " name="exam_name_id" required>
+                <option disabled hidden selected>Select Exam</option>
+                {% for exam in examList %}
+  
+                <option value="{{exam.id}}">{{exam.name}}</option>
+  
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-3 text-md-end ">
+              <button type="submit" class="btn btn-primary" id="searchButton">
+                View Admit
+              </button>
+            </div>
+            
+          </div>
+        </form>
+        
+      <hr>
+
+        <div class="container" id="printAdmitcard">
+          {% for student in studentlist %}
+  
+          <div class="admit-card" id="admitCard">
+            <div  class="Box border-  mar-bot">
+              <div class="print-padding" class="teal-thead">
+                <div  class="d-flex justify-content-between pt-3 px-2 m-0">
+                  <h6 class="fw-bold">{{ latest_institute.institute_name }} {{ latest_institute.institute_name }} </h6>
+                  <h6 style="line-height: -10px;">Admit Card</h6>
+                </div>
+
+              </div>
+              
+              <div class="row pt-2">
+                
+                <div class="col-6 text-start"> 
+                  <img
+                    width="100px"
+                    src="{{ latest_institute.institute_logo.url }}" 
+                    alt=""
+                  />
+                  
+                </div>
+                <div class="col-6 text-end">
+                  {% if student.student_field.avatar %}
+                  <img class="profile pb-2"
+                    width="100px"
+                    height="100px"
+                    src="{{student.student_field.avatar.url}}"  
+                    alt=""
+                  />
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+  
+            <div class=" ">
+              <div class="row">
+                <div class="col-md-10">
+                  <table class="table table-bordered">
+                    <tbody>
+                      <tr>
+                        <td><b>ENROLLMENT NO : {{student.student_field.rfid}}</b></td>
+                        <td><b>Class: </b> {{student.class_id}}</td>
+                      </tr>
+                      <tr>
+                        <td><b>Student Name: </b>{{student.student_field.name}}</td>
+                        <td><b>Gender: </b>{{student.student_field.gender}}</td>
+                      </tr>
+                      <tr>
+                        <td><b>Roll No: </b>{{student.roll_no}}</td>
+                        <td><b>Exam: {{exam}}</b></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="col-md-2 txt-center">
+                  <table class="table table-bordered">
+                    <tbody>
+                      <tr>
+                        <td style="height: 40px;">
+                          
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="text-center p-0 m-0">Signature</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="schedule">
+            <table class="table table-nowrap mb-0">
+              <thead class="teal-thead">
+                <tr class="shadow-sm">
+                  
+                  <th class="py-0">Subject</th>
+                  <th class="py-0">Exam date</th>
+                  <th class="py-0">Start time</th>
+                  <th class="py-0">Etart time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for schedule in scheduleList %}
+            
+                <tr style="padding:   0px;">
+                  
+                <td style="padding: 0px;">
+                    {{schedule.subject_id}}
+                </td>
+                <td style="padding: 0px;">
+                    {{schedule.exam_date}}
+                </td>
+                
+                <td style="padding: 0px;">
+                    <div class="text-center" >{{schedule.start_time}}</div>
+                </td>
+                <td style="padding: 0px;">
+                    <div class="text-center" >{{schedule.end_time}}</div>
+                    
+                </td>
+            
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+  
+          {% endfor %}
+
+          
+        </div>
+    </div>
+ 
+  
+</div>
+<!-- end: Content -->
+
+{% endblock content %} 
+{% block extra_javascript %} 
+
+<script src="{% static 'assets/vendor/libs/print/html2pdf.bundle.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/print/jQuery.print.js' %}"></script>
+
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $("#print-admitcard").on("click", function () {
+          $("#printAdmitcard").print({
+            globalStyles: true,
+            mediaPrint: false,
+            stylesheet: null,
+            noPrintSelector: ".no-print",
+            iframe: true,
+            append: null,
+            prepend: null,
+            manuallyCopyFormValues: true,
+            deferred: $.Deferred(),
+            timeout: 750,
+            title: "Invoice",
+            doctype: "<!doctype html>",
+          });
+        });
+
+        $("#previous").on("click", function () {
+          window.history.back(); 
+        });
+      });
+    </script>
+
+
+
+{% endblock extra_javascript%}

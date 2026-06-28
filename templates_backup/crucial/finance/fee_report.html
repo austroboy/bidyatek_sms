@@ -1,0 +1,46 @@
+{% extends 'partials/base.html' %}  
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Comprehensive Fee Report</h2>
+    <div class="alert alert-info">
+        <strong>Note:</strong> This report will show all fee heads with paid fees in the selected date range.
+        Each fee head will appear as a separate column in the report.
+    </div>
+    
+    <form method="post" class="bg-light p-4 rounded shadow">
+        {% csrf_token %}
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label class="form-label">Start Date</label>
+                {{ form.start_date }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">End Date</label>
+                {{ form.end_date }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Format</label>
+                {{ form.format }}
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Generate Report</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-control {
+        height: 45px;
+        border-radius: 5px;
+    }
+    .btn-primary {
+        padding: 10px 25px;
+        font-weight: bold;
+    }
+    .alert {
+        border-left: 4px solid #0d6efd;
+    }
+</style>
+{% endblock %}

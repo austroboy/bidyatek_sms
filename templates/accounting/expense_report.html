@@ -1,0 +1,106 @@
+{% extends 'partials/base.html' %}
+{% load humanize %}
+
+{% block extra_css %}
+<style>
+    .table-container {
+        page-break-inside: avoid;
+        margin-bottom: 20px;
+    }
+    .total-row {
+        background-color: #f8f9fa;
+        font-weight: bold;
+    }
+    .grand-total {
+        background-color: #e9ecef;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+    <h4 class="font-weight-bold py-3 mb-4">Expense Ledger Report</h4>
+
+    <form method="GET" class="mb-4">
+        <div class="row">
+            <div class="col-md-3">
+                <label>From Date:</label>
+                <input type="date" name="from_date" class="form-control" 
+                       value="{{ request.GET.from_date }}" required>
+            </div>
+            <div class="col-md-3">
+                <label>To Date:</label>
+                <input type="date" name="to_date" class="form-control" 
+                       value="{{ request.GET.to_date }}" required>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary mt-4">Generate Report</button>
+            </div>
+        </div>
+    </form>
+
+    <a href="{% url 'expense_report_pdf' %}?{{ request.GET.urlencode }}" class="btn btn-danger mb-3">
+        <i class="fas fa-file-pdf"></i> Download PDF
+    </a>
+
+    {% if ledger_data %}
+        {% for data in ledger_data %}
+            <div class="table-container">
+                {% if data.page_number == 1 %}
+                    <h5>{{ data.ledger.name }} ({{ data.ledger.code }})</h5>
+                {% else %}
+                    <h5>{{ data.ledger.name }} - Continued</h5>
+                {% endif %}
+                <table class="table table-bordered">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Voucher No</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Staff</th> 
+                            <th>Payment For</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in data.entries %}
+                        <tr>
+                            <td>{{ entry.voucher_no }}</td>
+                            <td>{{ entry.date|date:"d M Y" }}</td>
+                            <td class="text-right">{{ entry.amount|intcomma }}</td>
+                            <td>{% if entry.staff %}{{ entry.staff.staff_field.name }}{% else %}-{% endif %}</td>
+                            <td>{{ entry.description|default:"-" }}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="total-row">
+                            <td colspan="4" class="text-right">Total</td>
+                            <td class="text-right">{{ data.total|intcomma }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                {% if data.total_pages > 1 %}
+                    <div class="text-center text-muted">
+                        Page {{ data.page_number }} of {{ data.total_pages }}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+        
+        <div class="table-container grand-total">
+            <table class="table table-bordered">
+                <tr>
+                    <td colspan="4" class="text-right"><strong>Grand Total</strong></td>
+                    <td class="text-right"><strong>{{ grand_total|intcomma }}</strong></td>
+                </tr>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            {% if from_date %}
+                No expenses found for selected date range
+            {% else %}
+                Please select a date range to generate report
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

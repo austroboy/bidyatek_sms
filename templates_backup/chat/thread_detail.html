@@ -1,0 +1,172 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+    <!-- Thread List (Hidden on small screens) -->
+    <div class="col-md-4 d-none d-md-block border-end">
+        <!-- Same as chat_home.html thread list -->
+    </div>
+    
+    <!-- Chat Area -->
+    <div class="col-md-8">
+        <div class="d-flex align-items-center border-bottom p-3">
+            <a href="{% url 'chat_home' %}" class="btn btn-sm btn-outline-primary d-md-none me-2">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <img src="{% if thread.display_avatar %}{{ thread.display_avatar.url }}{% else %}{% static 'default_avatar.png' %}{% endif %}" 
+                 class="rounded-circle me-3" width="50" height="50" alt="Avatar">
+            <div>
+                <h5 class="mb-0">{{ thread.display_name }}</h5>
+                <small class="text-muted">
+                    <span id="user-status" class="badge bg-success">Online</span>
+                </small>
+            </div>
+        </div>
+        
+        <!-- Messages -->
+        <div id="chat-messages" class="p-3" style="height: 65vh; overflow-y: auto;">
+            {% for message in messages %}
+            <div class="mb-3 d-flex {% if message.sender == request.user %}justify-content-end{% endif %}">
+                <div class="card {% if message.sender == request.user %}bg-primary text-white{% endif %}" 
+                     style="max-width: 75%;">
+                    <div class="card-body p-2">
+                        {% if message.message_type == 'image' %}
+                        <img src="{{ message.file.url }}" class="img-fluid rounded" alt="Image">
+                        {% elif message.message_type == 'video' %}
+                        <video controls class="w-100">
+                            <source src="{{ message.file.url }}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        {% elif message.message_type == 'audio' %}
+                        <audio controls>
+                            <source src="{{ message.file.url }}" type="audio/mpeg">
+                            Your browser does not support the audio element.
+                        </audio>
+                        {% elif message.message_type == 'document' %}
+                        <a href="{{ message.file.url }}" target="_blank" class="text-white">
+                            <i class="fas fa-file-download me-1"></i> Document
+                        </a>
+                        {% elif message.message_type == 'call' %}
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-phone me-2"></i>
+                            <div>
+                                <div>Call {{ message.call_status|title }}</div>
+                                {% if message.call_duration %}
+                                <small>{{ message.call_duration }} seconds</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% else %}
+                        <p class="card-text mb-0">{{ message.content }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer p-1 px-2 bg-transparent border-0">
+                        <small class="text-muted {% if message.sender == request.user %}text-white{% endif %}">
+                            {{ message.sent_at|timesince }} ago
+                        </small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Message Form -->
+        <div class="border-top p-3">
+            <form method="post" enctype="multipart/form-data" id="message-form">
+                {% csrf_token %}
+                <div class="input-group">
+                    {{ form.content }}
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-secondary" id="file-upload-btn">
+                            <i class="fas fa-paperclip"></i>
+                        </button>
+                        {{ form.file }}
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <div class="d-flex justify-content-center mt-2">
+                <button class="btn btn-sm btn-outline-success me-2" id="voice-call-btn">
+                    <i class="fas fa-phone"></i> Voice
+                </button>
+                <button class="btn btn-sm btn-outline-danger" id="video-call-btn">
+                    <i class="fas fa-video"></i> Video
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // Scroll to bottom of chat
+    const messagesDiv = $('#chat-messages');
+    messagesDiv.scrollTop(messagesDiv[0].scrollHeight);
+    
+    // File upload button trigger
+    $('#file-upload-btn').click(function() {
+        $('#id_file').click();
+    });
+    
+    // Handle file selection
+    $('#id_file').change(function() {
+        if (this.files.length > 0) {
+            $('#message-form').submit();
+        }
+    });
+    
+    // Auto resize textarea
+    $('#id_content').on('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+    
+    // Voice and video call buttons
+    $('#voice-call-btn, #video-call-btn').click(function() {
+        const isVideo = $(this).attr('id') === 'video-call-btn';
+        
+        // This is a placeholder - actual implementation requires WebRTC
+        alert(`Starting ${isVideo ? 'video' : 'voice'} call...`);
+        
+        // In a real implementation, you would initiate a call here
+        // This would involve:
+        // 1. Creating a call offer
+        // 2. Sending it to the other participant via WebSocket
+        // 3. Handling the response and setting up the media stream
+    });
+    
+    // WebSocket implementation for real-time chat
+    // Note: This is a simplified version - production requires proper implementation
+    const wsScheme = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsPath = wsScheme + '//' + window.location.host + '/ws/chat/' + '{{ thread.id }}/';
+    const chatSocket = new WebSocket(wsPath);
+    
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        // Handle incoming messages
+    };
+    
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+    
+    // Form submission via WebSocket
+    $('#message-form').submit(function(e) {
+        e.preventDefault();
+        const message = $('#id_content').val();
+        if (message.trim()) {
+            chatSocket.send(JSON.stringify({
+                'message': message,
+                'sender': '{{ request.user.username }}'
+            }));
+            $('#id_content').val('');
+        }
+    });
+});
+</script>
+{% endblock %}

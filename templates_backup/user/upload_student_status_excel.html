@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Student Status Excel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .container {
+            max-width: 1000px;
+            margin-top: 30px;
+        }
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+            border-radius: 10px;
+        }
+        .btn-upload {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 30px;
+        }
+        .btn-upload:hover {
+            background-color: #218838;
+            color: white;
+        }
+        .upload-section {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 30px;
+            margin-bottom: 20px;
+            border: 2px dashed #dee2e6;
+        }
+        .info-box {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .warning-box {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .result-table {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.85em;
+        }
+        .badge-active {
+            background-color: #28a745;
+            color: white;
+        }
+        .badge-deactive {
+            background-color: #dc3545;
+            color: white;
+        }
+        .nav-link.active {
+            background-color: #366092 !important;
+            color: white !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-file-excel me-2"></i>Upload Student Status via Excel</h4>
+            </div>
+            <div class="card-body">
+                
+                {% comment %} <!-- Navigation Tabs -->
+                <ul class="nav nav-tabs mb-4">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'manage_student_status' %}">
+                            <i class="fas fa-user-cog me-1"></i> Manage Student Status
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'bulk_activate_by_date_range' %}">
+                            <i class="fas fa-calendar-plus me-1"></i> Activate by Date
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'upload_student_status_excel' %}">
+                            <i class="fas fa-file-excel me-1"></i> Excel Upload
+                        </a>
+                    </li>
+                </ul> {% endcomment %}
+
+                <!-- Messages -->
+                {% if messages %}
+                    <div class="messages mb-3">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-triangle{% endif %} me-2"></i>
+                                {% autoescape off %}
+                                    {{ message }}
+                                {% endautoescape %}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Upload Section -->
+                <div class="upload-section text-center">
+                    <form method="post" enctype="multipart/form-data" id="uploadForm">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <i class="fas fa-file-excel fa-4x text-success mb-3"></i>
+                            <h4>Upload Excel File to Update Student Status</h4>
+                            <p class="text-muted">Upload an Excel file with User ID and Status columns</p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <input type="file" class="form-control" id="excelFile" name="excel_file" accept=".xlsx,.xls,.csv" required>
+                            <div class="form-text">
+                                Supported formats: .xlsx, .xls, .csv
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-center gap-3">
+                            <button type="submit" class="btn btn-upload" id="uploadBtn">
+                                <i class="fas fa-upload me-1"></i> Upload & Process
+                            </button>
+                            <a href="{% url 'download_status_template' %}" class="btn btn-outline-success">
+                                <i class="fas fa-download me-1"></i> Download Template
+                            </a>
+                            <a href="{% url 'download_status_report' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-file-download me-1"></i> Download Current Report
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Instructions -->
+                <div class="info-box">
+                    <h6><i class="fas fa-info-circle me-2"></i>Instructions:</h6>
+                    <ol class="mb-0">
+                        <li><strong>Download the template</strong> to see the correct format</li>
+                        <li><strong>Required columns:</strong> "User ID" and "Status"</li>
+                        <li><strong>Valid Status values:</strong> "Active" or "Deactive" (case-sensitive)</li>
+                        <li>Only students with matching User ID will be updated</li>
+                        <li>If status in Excel matches database, no change will be made</li>
+                        <li>When changing from Active to Deactive, students will be automatically logged out</li>
+                    </ol>
+                </div>
+
+                <!-- Sample Data -->
+                <div class="mt-4">
+                    <h5><i class="fas fa-table me-2"></i>Sample Excel Format:</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>User ID</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>2220621006</td>
+                                    <td><span class="badge badge-active">Active</span></td>
+                                </tr>
+                                <tr>
+                                    <td>2320721022</td>
+                                    <td><span class="badge badge-deactive">Deactive</span></td>
+                                </tr>
+                                <tr>
+                                    <td>2220621005</td>
+                                    <td><span class="badge badge-deactive">Deactive</span></td>
+                                </tr>
+                                <tr>
+                                    <td>2220621034</td>
+                                    <td><span class="badge badge-active">Active</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Upload Results -->
+                {% if summary or results %}
+                <div class="mt-5">
+                    <h5><i class="fas fa-chart-bar me-2"></i>Upload Results</h5>
+                    
+                    {% if summary %}
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card text-center bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">Total Processed</h6>
+                                    <h3 class="text-primary">{{ summary.total }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center bg-success text-white">
+                                <div class="card-body">
+                                    <h6 class="card-title">Updated</h6>
+                                    <h3>{{ summary.updated }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center bg-warning">
+                                <div class="card-body">
+                                    <h6 class="card-title">No Change</h6>
+                                    <h3>{{ summary.no_change }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center bg-danger text-white">
+                                <div class="card-body">
+                                    <h6 class="card-title">Not Found</h6>
+                                    <h3>{{ summary.not_found }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if results %}
+                    <div class="result-table">
+                        <h6>Detailed Results (First 100 records):</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>User ID</th>
+                                        <th>Name</th>
+                                        <th>Action</th>
+                                        <th>Old Status</th>
+                                        <th>New Status</th>
+                                        <th>Message</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for result in results %}
+                                    <tr>
+                                        <td>{{ result.user_id }}</td>
+                                        <td>{{ result.name|default:"-" }}</td>
+                                        <td>
+                                            {% if result.action == 'updated' %}
+                                                <span class="badge bg-success">Updated</span>
+                                            {% elif result.action == 'no_change' %}
+                                                <span class="badge bg-warning">No Change</span>
+                                            {% elif result.action == 'not_found' %}
+                                                <span class="badge bg-danger">Not Found</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Error</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if result.old_status %}
+                                                {% if result.old_status == 'Active' %}
+                                                    <span class="badge badge-active">{{ result.old_status }}</span>
+                                                {% else %}
+                                                    <span class="badge badge-deactive">{{ result.old_status }}</span>
+                                                {% endif %}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if result.new_status %}
+                                                {% if result.new_status == 'Active' %}
+                                                    <span class="badge badge-active">{{ result.new_status }}</span>
+                                                {% else %}
+                                                    <span class="badge badge-deactive">{{ result.new_status }}</span>
+                                                {% endif %}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ result.message|default:"" }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Download Report Section -->
+                <div class="mt-4">
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-download me-2"></i>Download Current Status Report:</h6>
+                        <p class="mb-2">Want to see current status of all students before updating?</p>
+                        <a href="{% url 'manage_student_status' %}" class="btn btn-sm btn-outline-primary me-2">
+                            <i class="fas fa-filter me-1"></i> Filter Students First
+                        </a>
+                        <a href="{% url 'download_status_report' %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-download me-1"></i> Download Full Report
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadForm = document.getElementById('uploadForm');
+            const uploadBtn = document.getElementById('uploadBtn');
+            const excelFile = document.getElementById('excelFile');
+            
+            // Validate file size and type before upload
+            excelFile.addEventListener('change', function() {
+                const file = this.files[0];
+                if (!file) return;
+                
+                // Check file type
+                const validTypes = [
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'application/vnd.ms-excel',
+                    'text/csv'
+                ];
+                
+                if (!validTypes.includes(file.type) && 
+                    !file.name.match(/\.(xlsx|xls|csv)$/)) {
+                    alert('Please upload a valid Excel or CSV file.');
+                    this.value = '';
+                    return;
+                }
+                
+                // Check file size (max 10MB)
+                const maxSize = 10 * 1024 * 1024; // 10MB
+                if (file.size > maxSize) {
+                    alert('File size must be less than 10MB.');
+                    this.value = '';
+                    return;
+                }
+            });
+            
+            // Show confirmation before upload
+            uploadForm.addEventListener('submit', function(e) {
+                const file = excelFile.files[0];
+                if (!file) {
+                    e.preventDefault();
+                    alert('Please select a file to upload.');
+                    return;
+                }
+                
+                const confirmation = confirm(`Are you sure you want to upload "${file.name}"?\n\nThis will update student status based on the Excel data.`);
+                if (!confirmation) {
+                    e.preventDefault();
+                } else {
+                    // Disable button and show loading
+                    uploadBtn.disabled = true;
+                    uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Processing...';
+                }
+            });
+            
+            // Add badge styles
+            const style = document.createElement('style');
+            style.textContent = `
+                .badge-active { background-color: #28a745; color: white; }
+                .badge-deactive { background-color: #dc3545; color: white; }
+                .badge { padding: 5px 10px; border-radius: 5px; font-size: 0.85em; }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<div class="d-flex justify-content-between">
+  <div class="p-2 align-items-center">
+    <button class="btn btn-primary" hx-get="{% url 'add_notification' %}" hx-target="#notificationdialog"> 
+      <i class='bx bx-plus-circle me-2'></i>
+      Add
+    </button>
+  </div>
+  <div class="d-none d-md-block">
+    <div class="form-group">
+      <input class="form-control" type="text" id="searchName" ng-model="searchName" placeholder="Type name to search" />
+    </div>
+  </div>
+</div>
+
+<div class="card-body">
+  <div class="table-responsive text-nowrap" >
+    <table class="table">
+      <thead class="teal-thead">
+        <tr class="shadow-sm">
+          <th>#</th>
+          <th>Date</th>
+          <th>Notification For</th>
+          <th>Notification</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for notification in notificationlist %}
+  
+        <tr>
+          <td>
+            {{forloop.counter}} 
+          </td>
+          <td>
+            {{notification.notification_date}}
+          </td>
+          <td>
+            {{notification.notification_for}}
+          </td>
+          <td>
+            {{notification.notification}}
+          </td>
+  
+          <td>
+            <div class="dropdown">
+              <button
+                type="button"
+                class="btn p-0 dropdown-toggle hide-arrow"
+                data-bs-toggle="dropdown"
+              >
+                <i class="bx bx-dots-vertical-rounded"></i>
+              </button>
+              <div class="dropdown-menu">
+                <a
+                  class="dropdown-item"
+                  href="javascript:void(0);"
+                  hx-get="{% url 'edit_notification' pk=notification.pk %}"
+                  hx-target="#notificationdialog"
+                  ><i class="bx bx-edit-alt me-1"></i> Edit</a
+                >
+                <a
+                  class="dropdown-item"
+                  hx-delete="{% url 'del_notification' pk=notification.pk %}"
+                  href="javascript:void(0);"
+                  hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+                  hx-target="#notificationadd"
+                  hx-confirm="are you want to delete?"
+                  ><i class="bx bx-trash me-1"></i> Delete</a
+                >
+              </div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+  </div>
+  
+</div>

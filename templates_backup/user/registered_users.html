@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registered Users</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f8f9fa;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+    }
+    
+    h1 {
+      text-align: center;
+      color: #0d47a1;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eaeaea;
+    }
+    
+    .filters {
+      background-color: #f1f8ff;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+    
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .filter-group label {
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #0d47a1;
+    }
+    
+    .filter-group input, .filter-group select {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    
+    .filter-buttons {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    
+    .apply-btn {
+      background-color: #0d47a1;
+      color: white;
+    }
+    
+    .apply-btn:hover {
+      background-color: #083c8d;
+    }
+    
+    .reset-btn {
+      background-color: #6c757d;
+      color: white;
+    }
+    
+    .reset-btn:hover {
+      background-color: #5a6268;
+    }
+    
+    .table-container {
+      overflow-x: auto;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    th, td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid #eaeaea;
+    }
+    
+    th {
+      background-color: #0d47a1;
+      color: white;
+      position: sticky;
+      top: 0;
+      font-weight: 600;
+    }
+    
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    
+    tr:hover {
+      background-color: #f1f7ff;
+    }
+    
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+      gap: 5px;
+    }
+    
+    .pagination a, .pagination span {
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      text-decoration: none;
+      color: #0d47a1;
+      font-weight: 600;
+    }
+    
+    .pagination a:hover {
+      background-color: #0d47a1;
+      color: white;
+    }
+    
+    .pagination .current {
+      background-color: #0d47a1;
+      color: white;
+      border-color: #0d47a1;
+    }
+    
+    .results-count {
+      text-align: center;
+      margin-top: 15px;
+      color: #666;
+      font-style: italic;
+    }
+    
+    @media (max-width: 768px) {
+      .filters {
+        grid-template-columns: 1fr;
+      }
+      
+      th, td {
+        padding: 10px;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1><i class="fas fa-users"></i> Registered Users</h1>
+    
+    <!-- Filter Form -->
+    <div class="filters">
+      <div class="filter-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" value="{{ name_filter }}">
+      </div>
+      
+      <div class="filter-group">
+        <label for="mobile">Mobile</label>
+        <input type="text" id="mobile" name="mobile" value="{{ mobile_filter }}">
+      </div>
+      
+      <div class="filter-group">
+        <label for="email">Email</label>
+        <input type="text" id="email" name="email" value="{{ email_filter }}">
+      </div>
+      
+      <div class="filter-group">
+        <label for="admitted_class">Admitted Class</label>
+        <select id="admitted_class" name="admitted_class">
+          <option value="">All Classes</option>
+          {% for class in class_choices %}
+            <option value="{{ class }}" {% if admitted_class_filter == class %}selected{% endif %}>{{ class }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label for="passing_class">Passing Class</label>
+        <select id="passing_class" name="passing_class">
+          <option value="">All Classes</option>
+          {% for class in class_choices %}
+            <option value="{{ class }}" {% if passing_class_filter == class %}selected{% endif %}>{{ class }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      
+      <div class="filter-buttons">
+        <button type="button" class="apply-btn" onclick="applyFilters()">Apply Filters</button>
+        <button type="button" class="reset-btn" onclick="resetFilters()">Reset Filters</button>
+      </div>
+    </div>
+    
+    <!-- Users Table -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Mobile</th>
+            <th>Email</th>
+            <th>Admitted Class</th>
+            <th>Passing Class</th>
+            <th>Registration Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td>{{ user.registration_id }}</td>
+            <td>{{ user.full_name }}</td>
+            <td>{{ user.mobile }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.admitted_class }}</td>
+            <td>{{ user.passing_class }}</td>
+            <td>{{ user.registration_date|date:"M d, Y" }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7" style="text-align: center;">No registered users found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="pagination">
+      {% if users.has_previous %}
+        <a href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&laquo; First</a>
+        <a href="?page={{ users.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Previous</a>
+      {% endif %}
+      
+      {% for num in users.paginator.page_range %}
+        {% if users.number == num %}
+          <span class="current">{{ num }}</span>
+        {% elif num > users.number|add:'-3' and num < users.number|add:'3' %}
+          <a href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+        {% endif %}
+      {% endfor %}
+      
+      {% if users.has_next %}
+        <a href="?page={{ users.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Next</a>
+        <a href="?page={{ users.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Last &raquo;</a>
+      {% endif %}
+    </div>
+    
+    <div class="results-count">
+      Page {{ users.number }} of {{ users.paginator.num_pages }} | Total Users: {{ users.paginator.count }}
+    </div>
+  </div>
+
+  <script>
+    function applyFilters() {
+      const name = document.getElementById('name').value;
+      const mobile = document.getElementById('mobile').value;
+      const email = document.getElementById('email').value;
+      const admitted_class = document.getElementById('admitted_class').value;
+      const passing_class = document.getElementById('passing_class').value;
+      
+      let url = '?';
+      if (name) url += `name=${encodeURIComponent(name)}&`;
+      if (mobile) url += `mobile=${encodeURIComponent(mobile)}&`;
+      if (email) url += `email=${encodeURIComponent(email)}&`;
+      if (admitted_class) url += `admitted_class=${encodeURIComponent(admitted_class)}&`;
+      if (passing_class) url += `passing_class=${encodeURIComponent(passing_class)}&`;
+      
+      // Remove trailing & if exists
+      if (url.endsWith('&')) url = url.slice(0, -1);
+      
+      window.location.href = url;
+    }
+    
+    function resetFilters() {
+      window.location.href = '?';
+    }
+    
+    // Allow pressing Enter in input fields to apply filters
+    document.querySelectorAll('.filter-group input').forEach(input => {
+      input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          applyFilters();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

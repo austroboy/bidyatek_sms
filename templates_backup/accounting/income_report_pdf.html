@@ -1,0 +1,108 @@
+{% load humanize %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        @page {
+            size: A4;
+            margin: 1cm; 
+        }
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10px; 
+            margin: 0;
+            padding: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 5px;
+            page-break-inside: auto; 
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 5px; 
+            text-align: left;
+            font-size: 10px;
+        }
+        th {
+            background-color: #f8f9fa;
+        }
+        .total-row {
+            background-color: #e9ecef;
+            font-weight: bold;
+        }
+        .grand-total {
+            background-color: #dee2e6;
+            font-weight: bold;
+            page-break-before: avoid;
+            padding: 5px;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .ledger-section {
+            page-break-before: avoid; 
+            page-break-after: avoid;
+            margin-bottom: 10px;
+        }
+        h2, h4 {
+            margin: 2px 0; 
+        }
+        p {
+            margin: 2px 0 5px 0; 
+        }
+    </style>
+</head>
+<body>
+    <h2>Income Ledger Report</h2>
+    <p>Date Range: {{ from_date }} to {{ to_date }}</p>
+
+    {% regroup ledger_data by ledger as ledger_groups %}
+    {% for ledger_group in ledger_groups %}
+        <div class="ledger-section">
+            <h4>{{ ledger_group.grouper.name }} ({{ ledger_group.grouper.code }})</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Voucher No</th>
+                        <th>Date</th>
+                        <th>Student</th>
+                        <th>Amount</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in ledger_group.list %}
+                        {% for entry in data.entries %}
+                            <tr>
+                                <td>{{ entry.voucher_no }}</td>
+                                <td>{{ entry.date|date:"d M Y" }}</td>
+                                <td>{{ entry.student.student_field.name|default:"-" }}</td>
+                                <td class="text-right">{{ entry.amount|intcomma }}</td>
+                                <td>{{ entry.description|default:"-" }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% endfor %}
+                    <tr class="total-row">
+                        <td colspan="3" class="text-right">Total</td>
+                        <td class="text-right">{{ ledger_group.list.0.total|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    {% endfor %}
+
+    <div class="grand-total">
+        <table>
+            <tr>
+                <td colspan="3" class="text-right">Grand Total</td>
+                <td class="text-right">{{ grand_total|intcomma }}</td>
+                <td></td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>

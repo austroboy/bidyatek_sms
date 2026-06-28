@@ -1,0 +1,133 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% block extra_css %}
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css'>
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-5-theme/1.3.0/select2-bootstrap-5-theme.min.css'>
+<link rel="stylesheet" href="{% static 'assets/css/loading.css' %}" />
+{% endblock extra_css %}
+
+{% block content %}
+<div id="loading-screen" style="display: none;">
+    <figure>
+        <div class="dot white"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    </figure>
+</div>
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+    {% include 'pageinfo.html' %}
+
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between mb-3">
+                <h4 class="card-title mb-0">Fee Deposit Form</h4>
+            </div>
+
+            <!-- Search Student -->
+            <form method="GET" class="mb-4 border p-3 rounded bg-light">
+                <div class="row align-items-end">
+                    <div class="col-md-6">
+                        <label for="search_term" class="form-label">Student Name or ID</label>
+                        <input type="text" id="search_term" name="search_term" class="form-control" required>
+                        <small class="form-text text-muted">Enter student name or student ID</small>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary mt-3">Search</button>
+                    </div>
+                </div>
+            </form>
+
+            {% if error_message %}
+            <div class="alert alert-danger mt-3">
+                {{ error_message }}
+            </div>
+            {% endif %}
+
+            {% if student %}
+            <div class="border p-4 rounded">
+                <!-- Institute Info -->
+                <div class="text-center mb-4">
+                    {% if institute.institute_logo %}
+                        <img src="{{ institute.institute_logo.url }}" alt="Institute Logo" class="img-fluid mb-2" style="max-width:100px;">
+                    {% endif %}
+                    <h5 class="fw-bold">{{ institute.institute_name }}</h5>
+                </div>
+
+                <!-- Student Info -->
+                <div class="row mb-3">
+                    <div class="col-md-8">
+                        <p><strong>Student Name:</strong> {{ student.student_field.name }}</p>
+                        <p><strong>Student ID:</strong> {{ student.student_field.user_id }}</p>
+                        <p><strong>Roll Number:</strong> {{ student.roll_no }}</p>
+                        <p><strong>Class:</strong> {{ student.class_id.class_group_id.class_id.name }}</p>
+                        <p><strong>Section:</strong> {{ student.class_id.section_id.name }}</p>
+                        {% if student.class_id.class_group_id.group_id %}
+                            <p><strong>Group:</strong> {{ student.class_id.class_group_id.group_id.name }}</p>
+                        {% endif %}
+                        <p><strong>Version:</strong> {{ student.version }}</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <p><strong>Date:</strong> {{ current_date }}</p>
+                    </div>
+                </div>
+
+                <!-- Fees Table -->
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Fee Head</th>
+                                <th>Amount</th>
+                                <th>Discount</th>
+                                <th>Late Fee</th>
+                                <th>Total Due</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for fee in due_fees %}
+                            <tr>
+                                <td>{{ fee.feetype_id.fees_title }}</td>
+                                <td>{{ fee.amount }}</td>
+                                <td>{{ fee.discount_amount }}</td>
+                                <td>{{ fee.late_amount }}</td>
+                                <td>{{ fee.total_fee_after_partial_payments }}</td>
+                            </tr>
+                            {% endfor %}
+                            <tr class="fw-bold">
+                                <td colspan="4" class="text-end">Total Due:</td>
+                                <td>{{ total_due }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Signature -->
+                <div class="text-end mt-5">
+                    <p>_________________________</p>
+                    <p class="fw-semibold">Authorized Signature</p>
+                </div>
+            </div>
+
+            <!-- Download Options -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h6 class="mb-3">Download Options</h6>
+                    <a href="{% url 'generate_deposit_pdf' student.id %}?copies=1" target="_blank" class="btn btn-outline-primary btn-sm me-2">1 Copy</a>
+                    <a href="{% url 'generate_deposit_pdf' student.id %}?copies=2" target="_blank" class="btn btn-outline-primary btn-sm me-2">2 Copies</a>
+                    <a href="{% url 'generate_deposit_pdf' student.id %}?copies=3" target="_blank" class="btn btn-outline-primary btn-sm">3 Copies</a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<!-- end: Content -->
+{% endblock content %}
+
+{% block extra_javascript %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+{% endblock extra_javascript %}

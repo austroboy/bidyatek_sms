@@ -1,0 +1,28 @@
+<div id="pageinfo" class="d-flex justify-content-between align-items-center">
+  <h5 class="py-2 mb-4">
+      <span class="text-muted fw-light">{{heading}} /</span> {{subheading}}
+  </h5>
+
+  <script>
+      document.addEventListener("DOMContentLoaded", function () {
+          // Handle the "refresh" event
+          document.getElementById("pageinfo").addEventListener("refresh", function (event) {
+              // Perform the refresh logic here
+              location.reload()
+          });
+      });
+  </script>
+
+  {% for message in messages %} 
+      {% if message.tags == 'success' %} 
+          <div class="alert alert-success bg-success alert-dismissible fade show alert-notify mb-0" role="alert">
+              <div class="text-white">{{message}}</div>
+          </div>
+      {% endif %} 
+      {% if message.tags == 'error' %} 
+          <div class="alert alert-danger bg-danger alert-dismissible fade show alert-notify mb-0" role="alert">
+              <div class="text-white">{{message}}</div>
+          </div>
+      {% endif %} 
+  {% endfor %}
+</div>

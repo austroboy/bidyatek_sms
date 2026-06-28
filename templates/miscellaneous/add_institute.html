@@ -1,0 +1,201 @@
+{% block content %}
+
+<div class="offcanvas w-100 offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasBoth"
+    aria-labelledby="offcanvasBothLabel">
+    <div class="offcanvas-header">
+        <h5 id="offcanvasBothLabel" class="offcanvas-title">
+            Institute Information
+        </h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+
+    <div class="offcanvas-body my-auto mx-0 flex-grow-0">
+
+        <div class="card">
+            <div class="card-body">
+
+
+                <form
+                    action="{% if institute %}{% url 'institute_edit' id=institute.id %}{% else %}{% url 'institute' %}{% endif %}"
+                    method="post" autocomplete="off" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="col-md-12">
+
+                        <div class="badge bg-label-primary mb-3">
+                            Basic Information
+                        </div>
+                        <div class="row ">
+                            <div class="col-md-6">
+                                <label class="labels">Institute Logo</label>
+                                <input type="file" name="institute_logo" class="form-control" value="">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="labels">Institute Id</label>
+                                <input type="text" class="form-control" name="institute_id"
+                                    value="{{ institute.institute_id }}">
+                            </div>
+
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label class="labels">Institute Name</label>
+                                <input type="text" class="form-control" name="institute_name"
+                                    value="{{ institute.institute_name }}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="labels">Institute Gender Type</label>
+                                <select class="form-select" name="institute_gender_type">
+                                    <option value="Combined" {% if institute.institute_gender_type == "Combined" %}selected{% endif %}>Combined</option>
+                                    <option value="Boys" {% if institute.institute_gender_type == "Boys" %}selected{% endif %}>Boys</option>
+                                    <option value="Girls" {% if institute.institute_gender_type == "Girls" %}selected{% endif %}>Girls</option>
+                                </select>
+                            </div>
+
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label class="labels">Institute Email</label>
+                                <input type="text" class="form-control" name="institute_email_address"
+                                    value="{{ institute.institute_email_address }}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="labels">Status</label>
+                                <select class="form-select" name="status">
+                                    <option value="Active" {% if institute and institute.status == "Active" %}selected{% endif %}>Active</option>
+                                    <option value="Deactive" {% if institute and institute.status == "Deactive" %}selected{% endif %}>Deactive</option>                                    
+                                </select>
+                            </div>
+
+                        </div>
+                        <div class="row mt-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="labels">Head Master Name</label>
+                                <input type="text" class="form-control" name="headmaster_name"
+                                    value="{{ institute.headmaster_name }}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="labels">Head Master Mobile</label>
+                                <input type="text" class="form-control" name="headmaster_mobile"
+                                    value="{{ institute.headmaster_mobile }}">
+                            </div>
+
+                        </div>
+
+                        <div class="row mt-3">
+
+                            <div class="col-md-6">
+                                <label class="labels">Education Board</label>
+                                <input type="text" class="form-control" name="education_board_id"
+                                    value="{{ institute.education_board_id }}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="labels">Education District</label>
+                                <input type="text" class="form-control" name="education_division_id"
+                                    value="{{ institute.education_division_id }}">
+                            </div>
+
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label class="labels">Education District</label>
+                                <input type="text" class="form-control" name="education_district_id"
+                                    value="{{ institute.education_district_id }}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="labels">Education Upazilla/Thana</label>
+                                <input type="text" class="form-control" name="education_thana_id"
+                                    value="{{ institute.education_thana_id }}">
+                            </div>
+
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label class="labels">Facebook Link</label>
+                                <input type="text" class="form-control" name="institute_fb"
+                                    value="{{ institute.institute_fb }}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="labels">Youtube Link</label>
+                                <input type="text" class="form-control" name="institute_you"
+                                    value="{{ institute.institute_you }}">
+                            </div>
+
+                        </div>
+
+                        <div class="badge bg-label-primary my-3">
+                            Contact Information
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="labels">Institute EIIN No</label>
+                                <input type="text" class="form-control" name="institute_eiin_no"
+                                    value="{{ institute.institute_eiin_no }}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="labels">ICT Teacher / Incharge</label>
+                                <input type="text" class="form-control" name="ict_teacher"
+                                    value="{{ institute.ict_teacher }}">
+                            </div>
+
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label class="labels">Incharge Mobile Number</label>
+                                <input type="text" class="form-control" name="ict_teacher_mobile"
+                                    value="{{ institute.ict_teacher_mobile }}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="labels">Incharge Email Address *</label>
+                                <input type="text" class="form-control" name="ict_teacher_email"
+                                    value="{{ institute.ict_teacher_email }}">
+                            </div>
+
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label class="labels">Institute Web Address</label>
+                                <input type="text" class="form-control" name="institute_web"
+                                    value="{{ institute.institute_web }}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="labels">Institute Management</label>
+                                <input type="text" class="form-control" name="institute_management_web"
+                                    value="{{ institute.institute_management_web }}">
+                            </div>
+
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <label class="labels">Institute Address</label>
+                                <input type="text" class="form-control" name="institute_address"
+                                    value="{{ institute.institute_address }}">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <input class="btn btn-primary mb-2 d-grid w-50 mx-auto my-3" type="submit"
+                        value="{% if institute %}Update{% else %}Add{% endif %}">
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+
+    {% endblock content %}

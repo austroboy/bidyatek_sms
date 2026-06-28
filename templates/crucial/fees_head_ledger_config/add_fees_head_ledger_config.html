@@ -1,0 +1,25 @@
+{% load widget_tweaks %}
+{% block content %}
+<form hx-post="{{ request.path }}" hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}' class="modal-content">
+  <div>
+    <h4 class="modal-header">Add/Edit Fees Head Ledger Config</h4>
+  </div>
+  <div class="modal-body"> 
+    <div class="mb-3">
+      <label for="{{ form.head.id_for_label }}" class="form-label">Fee Head Name</label>
+      {% render_field form.head class+="form-control" placeholder="Fee Head Name" %}
+    </div>
+    
+    <!-- Ledger field is removed since it is now automatically assigned to "Regular Income" -->
+    
+    <div class="mb-3">
+      <label for="{{ form.is_active.id_for_label }}" class="form-label">Is Active?</label>
+      {% render_field form.is_active class+="form-check-input"%}
+    </div>
+  </div> 
+  <div class="modal-footer">
+    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+    <button type="submit" class="btn btn-primary">Save</button>
+  </div>
+</form>
+{% endblock content %}

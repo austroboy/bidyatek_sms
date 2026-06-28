@@ -1,0 +1,325 @@
+/* =========================================================
+   THEME OVERRIDE (LOAD THIS CSS LAST)
+   Theme Color: #568490
+   ========================================================= */
+
+   :root{
+    --theme: #568490;
+    --theme-rgb: 86,132,144;
+    --theme-dark: #3f6f79;
+    --theme-darker: #2c525a;
+  
+    --theme-soft: rgba(var(--theme-rgb), .10);
+    --theme-soft-2: rgba(var(--theme-rgb), .16);
+    --theme-soft-3: rgba(var(--theme-rgb), .22);
+    --theme-border: rgba(var(--theme-rgb), .28);
+  
+    /* Remap your existing dashboard tokens */
+    --primary: var(--theme);
+    --primary-2: var(--theme-dark);
+    --brand: var(--theme);
+    --brand-dark: var(--theme-darker);
+  }
+  
+  /* Bootstrap/Sneat primary override (fixes #696cff buttons etc.) */
+  :root{
+    --bs-primary: var(--theme) !important;
+    --bs-primary-rgb: var(--theme-rgb) !important;
+    --bs-link-color: var(--theme) !important;
+    --bs-link-hover-color: var(--theme-dark) !important;
+  }
+  
+  /* ---------------------------------------------------------
+     GLOBAL (links, primary helpers)
+  --------------------------------------------------------- */
+  .text-primary{ color: var(--theme) !important; }
+  a{ color: var(--theme) !important; }
+  a:hover{ color: var(--theme-dark) !important; }
+  
+  .bg-primary,
+  .badge.bg-primary,
+  .bg-label-primary{
+    background-color: var(--theme) !important;
+  }
+  .border-primary{ border-color: var(--theme) !important; }
+  
+  /* ---------------------------------------------------------
+     BUTTONS (fix navy/purple buttons everywhere)
+  --------------------------------------------------------- */
+  .btn-primary,
+  .btn-primary:hover,
+  .btn-primary:focus,
+  .btn-primary:active,
+  .btn-primary.active{
+    background-color: var(--theme) !important;
+    border-color: var(--theme) !important;
+    box-shadow: 0 10px 18px rgba(var(--theme-rgb), .22) !important;
+    background-image: none !important;
+  }
+  .btn-primary:hover{ filter: brightness(.96); }
+  
+  .btn-outline-primary{
+    color: var(--theme) !important;
+    border-color: var(--theme) !important;
+  }
+  .btn-outline-primary:hover{
+    background: var(--theme) !important;
+    color: #fff !important;
+  }
+  
+  .btn-label-primary{
+    background: var(--theme-soft-2) !important;
+    color: var(--theme-darker) !important;
+    border-color: transparent !important;
+  }
+  
+  /* "Add Routine" / table action buttons (extra safety) */
+  .table .btn,
+  .table a.btn{
+    border-radius: 10px;
+  }
+  .table .btn.btn-primary,
+  .table a.btn.btn-primary{
+    background-color: var(--theme) !important;
+    border-color: var(--theme) !important;
+  }
+  
+  /* ---------------------------------------------------------
+     FORMS (focus ring)
+  --------------------------------------------------------- */
+  .form-control:focus,
+  .form-select:focus,
+  .form-check-input:focus{
+    border-color: var(--theme) !important;
+    box-shadow: 0 0 0 4px rgba(var(--theme-rgb), .18) !important;
+  }
+  .form-check-input:checked{
+    background-color: var(--theme) !important;
+    border-color: var(--theme) !important;
+  }
+  
+  /* ---------------------------------------------------------
+     NAVBAR / TOPBAR (Sneat + your custom)
+  --------------------------------------------------------- */
+  .navbar_cont__wrapper,
+  .navbar.bg-navbar-theme,
+  .layout-navbar,
+  .navbar{
+    background: linear-gradient(90deg, var(--theme-darker) 0%, var(--theme) 100%) !important;
+  }
+  
+  /* ---------------------------------------------------------
+     SIDEBAR (Sneat + your custom)
+  --------------------------------------------------------- */
+  aside.logicunite_side_menu,
+  nav.logicunite_side_menu,
+  #layout-menu.logicunite_side_menu,
+  .bg-menu-theme,
+  .layout-menu{
+    background: linear-gradient(180deg, var(--theme-darker) 0%, var(--theme) 100%) !important;
+  }
+  
+  /* Menu links + active */
+  .menu-vertical .menu-item .menu-link,
+  #layout-menu .menu-link{
+    color: rgba(255,255,255,.92) !important;
+    border-radius: 12px;
+    margin: 4px 10px;
+    transition: background .2s ease, transform .15s ease;
+  }
+  .menu-vertical .menu-item .menu-link:hover,
+  #layout-menu .menu-link:hover{
+    background: rgba(255,255,255,.10) !important;
+    transform: translateX(2px);
+  }
+  .menu-vertical .menu-item.active > .menu-link,
+  #layout-menu .menu-item.active > .menu-link{
+    background: rgba(255,255,255,.16) !important;
+    box-shadow: 0 10px 18px rgba(0,0,0,.16);
+  }
+  .menu-vertical .menu-header-text,
+  #layout-menu .menu-header-text{
+    color: rgba(255,255,255,.70) !important;
+  }
+  
+  /* ---------------------------------------------------------
+     DASHBOARD CARDS (make it premium + hover)
+  --------------------------------------------------------- */
+  .card,
+  .shadow,
+  .shadow-effect{
+    border-radius: 16px !important;
+    border: 1px solid rgba(15,23,42,0.10) !important;
+    box-shadow: 0 10px 28px rgba(15,23,42,0.10) !important;
+    transition: transform .20s ease, box-shadow .20s ease, border-color .20s ease;
+  }
+  .card:hover,
+  .shadow:hover,
+  .shadow-effect:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 16px 34px rgba(15,23,42,0.14) !important;
+    border-color: rgba(var(--theme-rgb), .30) !important;
+  }
+  
+  /* Section headers (where navy ছিল) */
+  .heading,
+  .student_details h3.name,
+  .payment-table .table-head{
+    background-color: var(--theme) !important;
+  }
+  
+  /* ---------------------------------------------------------
+     TABLE HEADERS (আপনার main issue)
+     - dashboard_table.css এর green + navy সব theme হবে
+  --------------------------------------------------------- */
+  .table thead th,
+  .table thead td{
+    background-color: var(--theme) !important;
+    color: #fff !important;
+    border-color: rgba(255,255,255,.18) !important;
+  }
+  
+  .fees-info .table-head,
+  .expense-info .table-head,
+  .fund-info .table-head,
+  .online-payslip .table-head,
+  .invoice__main table thead tr td{
+    background-color: var(--theme) !important;
+    color: #fff !important;
+  }
+  .fees-info .table-head th,
+  .expense-info .table-head th,
+  .fund-info .table-head th,
+  .online-payslip .table-head th{
+    color: #fff !important;
+  }
+  
+  /* table body soft theme */
+  .fees-info .table-content,
+  .payment-table .table-content,
+  .expense-info .table-content,
+  .fund-info .table-content,
+  .online-payslip .table-content{
+    background-color: rgba(var(--theme-rgb), .06) !important;
+  }
+  
+  /* ---------------------------------------------------------
+     DATATABLES (hover + pagination)
+  --------------------------------------------------------- */
+  table.dataTable tbody tr:hover{
+    background-color: rgba(var(--theme-rgb), .10) !important;
+  }
+  .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+  .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover{
+    background: var(--theme) !important;
+    border-color: var(--theme) !important;
+    color: #fff !important;
+  }
+  
+  /* ---------------------------------------------------------
+     EVENTS (fullcalendar)
+  --------------------------------------------------------- */
+  .fc-state-down,
+  .fc-state-active,
+  .fc-state-disabled{
+    background-color: var(--theme) !important;
+    border-color: var(--theme) !important;
+    color: #fff !important;
+  }
+  .fc-event,
+  .fc-event-dot{
+    background-color: var(--theme) !important;
+  }
+  
+  /* ---------------------------------------------------------
+     GTABLE (purple/blue -> theme)
+  --------------------------------------------------------- */
+  thead th:hover{ color: var(--theme) !important; }
+  thead th:hover span.icon-arrow{ border-color: var(--theme) !important; }
+  thead th.active span.icon-arrow{ background-color: var(--theme) !important; }
+  thead th.active,
+  tbody td.active{ color: var(--theme) !important; }
+  
+  .table-responsive::-webkit-scrollbar-thumb{
+    background-color: var(--theme) !important;
+  }
+  #softdatatable thead th{
+    background-color: rgba(var(--theme-rgb), .14) !important;
+  }
+  
+  /* ---------------------------------------------------------
+     CLASS ROUTINE (class-routine.css colors unify)
+  --------------------------------------------------------- */
+  #period-form button,
+  #save-button,
+  #print-button,
+  #table-collapse-button{
+    background-color: var(--theme) !important;
+    color: #fff !important;
+  }
+  
+  .subject{
+    background-color: var(--theme-dark) !important;
+    border-color: var(--theme) !important;
+  }
+  
+  .header,
+  .day-label{
+    background-color: var(--theme) !important;
+    border-color: var(--theme-dark) !important;
+  }
+  
+  .period:hover{ border-color: var(--theme) !important; }
+  .period.drag-over{
+    border-color: var(--theme) !important;
+    background-color: rgba(var(--theme-rgb), .08) !important;
+  }
+  #schedule::-webkit-scrollbar-thumb{
+    background-color: var(--theme) !important;
+  }
+  
+  /* ---------------------------------------------------------
+     SMALL UI (view all button, pills, etc.)
+  --------------------------------------------------------- */
+  .view-all,
+  .viewAll,
+  .btn-view-all,
+  .btn-viewall{
+    background: rgba(var(--theme-rgb), .16) !important;
+    color: var(--theme-darker) !important;
+    border: 1px solid rgba(var(--theme-rgb), .28) !important;
+    border-radius: 999px !important;
+    font-weight: 700 !important;
+  }
+  .view-all:hover,
+  .viewAll:hover,
+  .btn-view-all:hover,
+  .btn-viewall:hover{
+    background: rgba(var(--theme-rgb), .26) !important;
+  }
+  
+  /* Floating help button or icon buttons */
+  .btn.btn-icon,
+  .btn-icon{
+    border-radius: 14px !important;
+  }
+  
+  /* ---------------------------------------------------------
+     OPTIONAL: nicer empty state for Events/Notice (if empty)
+  --------------------------------------------------------- */
+  .events, .notice{
+    overflow: hidden;
+  }
+  .events .body:empty::before,
+  .notice .body:empty::before{
+    content: "No data available";
+    display: block;
+    padding: 22px;
+    text-align: center;
+    color: rgba(15,23,42,.55);
+    background: rgba(var(--theme-rgb), .06);
+    border-radius: 12px;
+    margin: 14px;
+  }
+
+  

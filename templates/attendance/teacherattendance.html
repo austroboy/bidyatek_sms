@@ -1,0 +1,190 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load attendance_tags %}
+{% block extra_css %}
+
+{% endblock extra_css %} 
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+
+  <div class="card">
+    <div class="card-body">
+        <div class="d-flex border-bottom pb-2 justify-content-between">
+            <div class="h4  pt-2">Teacher Attendance</div>
+            
+
+            <div
+            style="padding: 0px 4px 4px 4px"
+            class=" mb-3 col-md-3 border rounded-3 d-md-flex flex-row justify-content-between "
+            >
+            <span class="fw-bold pt-2">Date:</span
+            ><span class="pt-1 ps-1"
+                ><input
+                class="form-control form-control-sm text-center"
+                type="text"
+                id="atdate"
+                value="{{attendance_date}}"
+                disabled
+            /></span>
+            </div>
+
+        </div>
+        
+        
+
+        <div class="table-responsive">
+            <table class="table table-centered table-nowrap mb-0">
+                <thead style="background-color: rgba(252, 207, 20, 0.2) !important;">
+                    <tr>
+                        
+                        <th scope="col">ID</th>
+                        <th scope="col">Image</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">PREVIOUS 7 DAYS STATUS</th>
+                        
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for teacher in teacherlist %}
+                    <tr>
+                        
+                        <td>
+                            {{forloop.counter}}
+                        </td>
+                        <td>
+                            {% if teacher.teacher_field.avatar %}
+                            <img class="avatar-xs rounded-circle"
+                            width="32px"
+                            height="32px"
+                            
+                            src="{{teacher.teacher_field.avatar.url}}" 
+                            alt=""
+                            />
+                            {% endif %}
+                        </td>
+                        <td>
+                           {{teacher.teacher_field.name}}
+                        </td>
+                        
+                        <td>
+                            <div class="form-check form-check-inline">
+
+                                <label class="form-check-label">
+                                    <input class="form-check-input attend" type="radio"
+                                        id="{{teacher.id}}True" data-id=" {{teacher.id}}"
+                                        name="{{teacher.id}}" value="True">
+                                    Present
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline">
+
+                                <label class="form-check-label">
+                                    <input class="form-check-input unattend"
+                                        data-id=" {{teacher.id}}" type="radio"
+                                        id="{{teacher.id}}False" name="{{teacher.id}}"
+                                        value="False">
+                                    Absent
+                                </label>
+                            </div>
+                        </td>
+                        <td>
+                            {% with teacher.id as teacher_id %}
+                            {% for status in attendance_data|get_value:teacher_id %}
+                                {% if status == 'holiday' %}
+                                    <i class="bx bx-radio-circle-marked text-warning me-1"></i>
+                                {% elif status == 'weekend' %}
+                                    <i class="bx bx-radio-circle-marked text-info me-1"></i>
+                                {% elif status == True %}
+                                    <i class="bx bx-radio-circle-marked text-success me-1"></i> 
+                                
+                                {% else %}
+                                    <i class="bx bx-radio-circle-marked text-secondary me-1"></i> <!-- No data -->
+                                {% endif %}
+                            {% endfor %}
+                            {% endwith %}
+                        </td>
+                    </tr>
+                   {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- end card-body -->
+</div>
+
+</div>
+
+{% endblock content %} 
+ 
+{% block extra_javascript %}
+
+<script>
+
+    $(document).ready(function () {
+
+        var attenddate = $('#atdate').val();
+        console.log(attenddate)
+
+        function loadData() {
+            $.ajax({
+                url: "/get_teacher_attendance/",
+                type: "POST",
+                data: { date: attenddate },
+                success: function (response) {
+                    const data = response.attendance
+
+                   
+                    data.forEach((element, index) => {
+                        var status = element.status;
+                        var teacherId = element.name;
+
+                        if (status === true) {
+                            $(`#${teacherId}True`).prop('checked', true);
+                        } else {
+                            $(`#${teacherId}False`).prop('checked', true);
+                        }
+                    })
+                    
+
+                },
+                error: function (error) {
+                    console.log(error)
+                }
+            });
+        }
+
+        loadData();
+
+
+
+        $(document).on("click", 'input[type="radio"]', function () {
+            var value = $(this).val();
+            var dataId = $(this).attr("data-id");
+            sendToServer(dataId, value);
+
+        });
+
+
+        function sendToServer(id, value) {
+            $.ajax({
+                url: "/teacher_attendance_save/",
+                type: "POST",
+                data: { id: id, value: value },
+            })
+                .done(function (response) {
+                    console.log(response);
+                })
+                .fail(function () {
+                    console.log("Error Occured");
+                });
+
+        }
+    });
+
+</script>
+
+{% endblock extra_javascript%}

@@ -1,0 +1,255 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+
+<style>
+@page {
+    size: A4;
+    margin: 10mm;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* ================= CARD BASE ================= */
+.id-card {
+    width: 85.6mm;
+    height: 53.98mm;
+    border-radius: 14px;
+    overflow: hidden;
+    display: inline-block;
+    margin: 6mm;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+}
+
+/* ================= FRONT (TECH GRADIENT EDITION) ================= */
+.front {
+    background:
+        linear-gradient(135deg,
+            #0f0c29 0%,
+            #302b63 40%,
+            #00c6ff 100%
+        );
+    color: #ffffff;
+    height: 100%;
+    padding: 6mm;
+    box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+}
+
+/* tech grid light streak */
+.front::before {
+    content: "";
+    position: absolute;
+    top: -15mm;
+    right: -40mm;
+    width: 140mm;
+    height: 26mm;
+    background: linear-gradient(
+        90deg,
+        rgba(0,198,255,0.35),
+        rgba(0,198,255,0.08),
+        transparent
+    );
+    transform: rotate(-15deg);
+}
+
+/* neon tech glow */
+.front::after {
+    content: "";
+    position: absolute;
+    bottom: -30mm;
+    left: -30mm;
+    width: 65mm;
+    height: 65mm;
+    background: radial-gradient(
+        circle,
+        rgba(0,198,255,0.45),
+        rgba(0,198,255,0.15),
+        transparent
+    );
+    border-radius: 50%;
+}
+
+/* institute header */
+.front-header {
+    text-align: center;
+    font-size: 9pt;
+    font-weight: 600;
+    letter-spacing: 1.1px;
+    padding: 2.3mm 0;
+    margin-bottom: 4mm;
+    border-bottom: 1px solid rgba(0,198,255,0.45);
+}
+
+/* frosted tech panel */
+.front-body {
+    display: grid;
+    grid-template-columns: 22mm auto;
+    column-gap: 5mm;
+    align-items: center;
+    background: rgba(15, 20, 45, 0.55);
+    padding: 4mm;
+    border-radius: 6mm;
+    backdrop-filter: blur(6px);
+    position: relative;
+    z-index: 1;
+}
+
+/* photo frame */
+.photo {
+    width: 22mm;
+    height: 26mm;
+    background:
+        linear-gradient(
+            135deg,
+            #e6f9ff,
+            #7de2ff
+        );
+    border-radius: 5mm;
+    padding: 1.4mm;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.45);
+}
+
+.photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4mm;
+}
+
+/* info */
+.info {
+    font-size: 7.4pt;
+    line-height: 1.65;
+}
+
+.name {
+    font-size: 9.9pt;
+    font-weight: 700;
+    margin-bottom: 2.6mm;
+    letter-spacing: 0.4px;
+}
+
+.info-row {
+    margin-bottom: 1.4mm;
+    opacity: 0.97;
+}
+
+/* footer */
+.front-footer {
+    position: absolute;
+    bottom: 3mm;
+    left: 0;
+    right: 0;
+    font-size: 6.5pt;
+    text-align: center;
+    letter-spacing: 1.2px;
+    opacity: 0.85;
+}
+
+
+/* ================= BACK ================= */
+.back {
+    background: #f2f5ff;
+    color: #2b3575;
+    height: 100%;
+    padding: 5mm;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.school {
+    font-size: 9pt;
+    font-weight: bold;
+    margin-bottom: 2mm;
+}
+
+.qr {
+    margin: 4mm 0;
+}
+
+.qr img {
+    width: 22mm;
+    height: 22mm;
+}
+
+.dates {
+    font-size: 6.5pt;
+    margin-bottom: 2mm;
+}
+
+.note {
+    font-size: 6pt;
+    opacity: 0.8;
+}
+</style>
+</head>
+
+<body>
+
+{% for student in students %}
+
+<!-- FRONT -->
+<div class="id-card">
+    <div class="front">
+
+        <div class="front-header">
+            {{ institute.institute_name|default:"INSTITUTE NAME" }}
+        </div>
+
+        <div class="front-body">
+            <div class="photo">
+                <img src="{{ student.avatar_url }}">
+            </div>
+
+            <div class="info">
+                <div class="name">{{ student.name }}</div>
+                <div class="info-row">ID : {{ student.user_id }}</div>
+                <div class="info-row">Class : {{ student.class_name }}</div>
+                <div class="info-row">Section : {{ student.section_name }}</div>
+                <div class="info-row">Shift : {{ student.shift_name }}</div>
+            </div>
+        </div>
+
+        {% comment %} <div class="front-footer">
+            STUDENT ID CARD
+        </div> {% endcomment %}
+    </div>
+</div>
+
+<!-- BACK -->
+<div class="id-card">
+    <div class="back">
+
+        <div class="school">
+            {{ institute.institute_name|default:"INTERNATIONAL SCHOOL" }}
+        </div>
+
+        <div class="dates">
+            Issue : {{ current_date }}<br>
+            Expire : {{ current_date }}
+        </div>
+
+        <div class="qr">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ student.user_id }}">
+        </div>
+
+        <div class="note">
+            This card is property of the institute.<br>
+            If found, please return.
+        </div>
+
+    </div>
+</div>
+
+{% endfor %}
+
+</body>
+</html>

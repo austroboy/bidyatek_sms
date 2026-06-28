@@ -1,0 +1,158 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% load attendance_tags %}
+{% block extra_css %}
+
+{% endblock extra_css %}
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+
+  <div class="card">
+    <div class="card-body">
+        
+        <div class="d-flex border-bottom pb-2 justify-content-between">
+            <div class="h4  pt-2">Hostel Attendance</div>
+            
+
+            <div
+            style="padding: 0px 4px 4px 4px"
+            class=" mb-3 col-md-3 border rounded-3 d-md-flex flex-row justify-content-between "
+            >
+            <span class="fw-bold pt-2">Date:</span
+            ><span class="pt-1 ps-1"
+                ><input
+                class="form-control form-control-sm text-center"
+                type="text"
+                id="atdate"
+                value="{{attendance_date}}"
+                disabled
+            /></span>
+            </div>
+
+        </div>
+        <div class="table-responsive">
+            <form action="">
+                <table style="width: 100%;" class="table table-centered table-nowrap mb-0">
+                    <thead class="teal-thead">
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Image</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Roll</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">PREVIOUS 7 DAYS STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in studentList %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                {% if student.student_field.avatar %}
+                                <img class="avatar-xs rounded-circle" width="32px" height="32px" src="{{ student.student_field.avatar.url }}" alt="" />
+                                {% endif %}
+                            </td>
+                            <td>{{ student.student_field.name }}</td>
+                            <td>{{ student.roll_no }}</td>
+                            <td>
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label">
+                                        <input class="form-check-input attend" type="radio" id="{{ student.id }}True" data-id="{{ student.id }}" name="{{ student.id }}" value="True">
+                                        Present
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label">
+                                        <input class="form-check-input unattend" data-id="{{ student.id }}" type="radio" id="{{ student.id }}False" name="{{ student.id }}" value="False">
+                                        Absent
+                                    </label>
+                                </div>
+                            </td>
+                            <td>
+                                {% with student.id as student_id %}
+                                    {% for status in attendance_data|get_value:student_id %}
+                                        {% if status == True %}
+                                            <i class="bx bx-radio-circle-marked text-success me-1"></i>
+                                        {% else %}
+                                            <i class="bx bx-radio-circle-marked text-danger me-1"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endwith %}
+                            </td>                            
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </form>
+        </div>
+        
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+ 
+{% block extra_javascript %}
+
+<script>
+    $(document).ready(function () {
+        var attenddate = $('#atdate').val();
+        console.log(attenddate);
+
+        function loadData() {
+        $.ajax({
+            url: "/get_hostel_student_attendance/",
+            type: "POST",
+            data: { date: $('#atdate').val() },
+            success: function (response) {
+                const data = response.attendance;
+                data.forEach((element) => {
+                    var status = element.status;
+                    var studentId = element.student_id;
+
+                    if (status === true) {
+                        console.log(`Setting checked for: #${studentId}True`);
+
+                        $(`#${studentId}True`).prop('checked', true);
+                    } else {
+                        console.log(`Setting checked for: #${studentId}False`);
+
+                        $(`#${studentId}False`).prop('checked', true);
+                    }
+                });
+            },
+            error: function (error) {
+                console.error("Error fetching attendance data:", error);
+            }
+        });
+    }
+
+    // Call the function after the DOM is fully loaded
+    loadData();
+
+        $(document).on("click", 'input[type="radio"]', function () {
+            var value = $(this).val();
+            var dataId = $(this).attr("data-id");
+            sendToServer(dataId, value);
+        });
+
+        function sendToServer(id, value) {
+            $.ajax({
+                url: "/student_hostel_attendance_save/",
+                type: "POST",
+                data: { id: id, value: value },
+            })
+                .done(function (response) {
+                    console.log(response);
+                })
+                .fail(function () {
+                    console.log("Error Occured");
+                });
+        }
+    });
+</script>
+
+{% endblock extra_javascript %}

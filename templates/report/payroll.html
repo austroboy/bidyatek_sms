@@ -1,0 +1,317 @@
+{% load static %} 
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Salary Slip</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css"
+    />
+    <style type="text/css">
+      body {
+        margin-top: 20px;
+        background: #eee;
+      }
+
+      /*Invoice*/
+      .invoice .top-left {
+        font-size: 65px;
+        color: #3ba0ff;
+      }
+
+      .invoice .top-right {
+        text-align: right;
+        padding-right: 100px;
+        padding-top: 15px;
+      }
+
+      .invoice .table-row {
+        margin-left: -15px;
+        margin-right: -15px;
+        margin-top: 25px;
+      }
+
+      .invoice .payment-info {
+        font-weight: 500;
+      }
+
+      .invoice .table-row .table > thead {
+        border-top: 1px solid #ddd;
+      }
+
+      .invoice .table-row .table > thead > tr > th {
+        border-bottom: none;
+      }
+
+      .invoice .table > tbody > tr > td {
+        padding: 8px 20px;
+      }
+
+      .invoice .invoice-total {
+        margin-right: -10px;
+        font-size: 16px;
+      }
+
+      .invoice .last-row {
+        border-bottom: 1px solid #ddd;
+      }
+
+      .invoice-ribbon {
+        width: 85px;
+        height: 88px;
+        overflow: hidden;
+        position: absolute;
+        top: -1px;
+        right: 0px;
+      }
+
+      .ribbon-inner {
+        text-align: center;
+        transform: rotate(45deg);
+        position: relative;
+        padding: 7px 0;
+        left: -5px;
+        top: 11px;
+        width: 120px;
+        background-color: #66c591;
+        font-size: 15px;
+        color: #fff;
+      }
+
+      .ribbon-inner:before,
+      .ribbon-inner:after {
+        content: "";
+        position: absolute;
+      }
+
+      .ribbon-inner:before {
+        left: 0;
+      }
+
+      .ribbon-inner:after {
+        right: 0;
+      }
+
+      @media (max-width: 575px) {
+        .invoice .top-left,
+        .invoice .top-right,
+        .invoice {
+          text-align: center;
+        }
+
+        .adjust {
+          padding-left: 100px;
+        }
+
+        .invoice .from,
+        .invoice .to,
+        .invoice {
+          float: none;
+          width: 100%;
+          text-align: center;
+          margin-bottom: 25px;
+        }
+
+        .invoice p.lead,
+        .invoice .from p.lead,
+        .invoice .to p.lead,
+        .invoice p.lead {
+          font-size: 22px;
+        }
+
+        .invoice .btn {
+          margin-top: 10px;
+        }
+      }
+
+      @media print {
+        .invoice {
+          width: 148mm; /* A5 width */
+          height: 210mm; /* A5 height */
+          margin: 0;
+          padding: 0;
+        }
+      }
+
+      #fixed-button {
+        position: fixed;
+        right: 0px;
+        z-index: 1000!important;
+        top: 50%; /* Set top to 50% */
+        transform: translateY(-50%);
+      }
+    
+      #fixed-button button {
+        color: #FCCF14;
+        display: block;
+        height: 50px;
+        position: relative;
+        text-align: center; 
+        line-height: 40px;
+        width: 50px;
+        margin-bottom: 1px;
+        z-index: 1000;
+        border: none;
+      }
+    
+      #fixed-button button:hover {
+        right: 5px;
+        opacity: 1;
+      }
+    
+      .fixed-icon {
+        background-color: #1D1E4E;
+      }
+    </style>
+  </head>
+
+  <body>
+    
+
+    <div class="container card">
+      <div id="fixed-button">
+        <div>
+          <button class="fixed-icon" id="print-invoice">
+            <i class="bx bxs-printer fs-1"></i>
+          </button>
+        </div>
+        <div>
+          <button class="fixed-icon" id="download-invoice">
+            <i class="bx bxs-file-pdf fs-1"></i>
+          </button>
+        </div>
+        <div>
+          <button class="fixed-icon" id="previous">
+            <i class='bx bx-skip-previous fs-1'></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="bootdeys">
+        <div class="row">
+          <div class="col-12">
+            <div class="panel panel-default invoice" id="invoice">
+              <div class="panel-body">
+                <div class="invoice-ribbon">
+                  <div class="ribbon-inner">PAID</div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6 top-left">
+                    <img alt="logo" src="{{institute.institute_logo.url}}" height="80px" />
+                  </div>
+                  <div class="col-md-6 top-right adjust">
+                    <h3 class="marginright">{{institute.institute_name}}</h3>
+                    <span class="marginright">Salary Slip</span>
+                  </div>
+                </div>
+                <hr />
+                <div class="row">
+                  <div class="col-6 text-start">
+                    <p class="lead marginbottom payment-info">Employee Details</p>
+                    <p>Employee Name : {{salary.employee_salary.employee}}</p>
+                    <p>Designation : {{salary.employee_salary.employee.teacher_profile.designation}} {{salary.employee_salary.employee.staff_profile.designation}}</p>
+                  </div>
+
+                  <div class="col-6 text-end">
+                    <p class="lead marginbottom payment-info">
+                      Payment Details
+                    </p>
+                    <p>INVOICE: {{salary.transaction_no}}</p>
+                    <p>Payment Date: 14 April 2023</p>
+                  </div>
+                </div>
+                <div class="row table-row table-responsive">
+                  <table class="table">
+                    <thead class="teal-thead">
+                      <tr>
+                        <th class="text-start ps-3">Salary Month</th>
+                        <th class="text-end pe-3">Payable</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="text-start ps-3">{{salary.salary_month}}</td>
+                        <td class="text-end pe-3">{{salary.total_salary}}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="row">
+                  <div class="col-6 margintop text-start">
+                  
+                    <p
+                      style="margin-top: 50px"
+                      class=""
+                    >_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ </p>
+                    <p class="lead marginbottom payment-info">Accountant Signature</p>
+                  </div>
+
+                  <div class="col-6 invoice-total text-end">
+                    <p>Subtotal : {{salary.total_salary}}</p>
+                    
+                    <p>Total : {{salary.total_salary}}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div> 
+    </div>
+
+    <script src="{% static 'assets/vendor/libs/jquery/jquery.js' %}"></script>
+    <script src="{% static 'assets/vendor/libs/print/html2pdf.bundle.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'assets/vendor/libs/print/jQuery.print.js' %}"></script>
+
+    <script type="text/javascript">
+      $(document).ready(function () {
+        function pdfGenerator() {
+          let pdfsave = $("#invoice").html();
+          var opt = {
+            margin: 0.2,
+            filename: "{{salary.employee}}.pdf",
+            image: { type: "jpeg", quality: 0.99 },
+            html2canvas: { dpi: 192, letterRendering: true, useCORS: true },
+            jsPDF: { unit: "in", format: "a5", orientation: "landscape" },
+          };
+
+          html2pdf().set(opt).from(pdfsave).save();
+        }
+
+        // Download Invoice button click event
+        $("#download-invoice").on("click", function () {
+          pdfGenerator();
+        });
+
+        $("#print-invoice").on("click", function () {
+          $("#invoice").print({
+            globalStyles: true,
+            mediaPrint: false,
+            stylesheet: null,
+            noPrintSelector: ".no-print",
+            iframe: true,
+            append: null,
+            prepend: null,
+            manuallyCopyFormValues: true,
+            deferred: $.Deferred(),
+            timeout: 750,
+            title: "Invoice",
+            doctype: "<!doctype html>",
+          });
+        });
+
+        $("#previous").on("click", function () {
+            // Navigate to the desired URL
+            window.location.href = "/payroll/salary_process/";
+        });
+      });
+    </script>
+  </body>
+</html>

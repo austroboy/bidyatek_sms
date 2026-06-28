@@ -1,0 +1,93 @@
+{% extends 'partials/base.html' %}
+{% load humanize custom_tags %}
+{% load tz %}
+
+{% block content %}
+<div class="container-fluid">
+    <h4 class="py-3 mb-4">Master Head Wise Collection Report</h4>
+
+    <form method="GET" class="mb-4" id="filter-form">
+        <div class="row">
+            <div class="col-md-3">
+                <label for="from_date">From Date:</label>
+                <input type="date" name="from_date" id="from_date" class="form-control" 
+                       value="{{ request.GET.from_date }}" required>
+            </div>
+            <div class="col-md-3">
+                <label for="to_date">To Date:</label>
+                <input type="date" name="to_date" id="to_date" class="form-control" 
+                       value="{{ request.GET.to_date }}" required>
+            </div>
+            <div class="d-flex justify-content-start gap-2">
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <a href="#" class="btn btn-danger" id="download-pdf">Download PDF</a>
+                <a href="{% url 'download_excel_two' %}?{{ request.GET.urlencode }}" class="btn btn-success">
+                    <i class="fa fa-file-excel-o"></i> Download Excel
+                </a>
+            </div>
+            
+            
+        </div>
+    </form>
+
+    {% if data %}
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead class="thead-light">
+                <tr>
+                    <th>SL No.</th>
+                    <th>Version</th>
+                    <th>Shift</th>
+                    {% for fh_id, fh_name in all_fee_heads.items %}
+                        <th><div class="vertical-header">{{ fh_name }}</div></th>
+                    {% endfor %}
+                    <th>Other Fee</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in data %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ row.version|default:'Undefined Version' }}</td>
+                    <td>{{ row.shift|default:'Undefined Shift' }}</td>
+                    {% for fh_id in all_fee_heads.keys %}
+                        <td>{{ row.fee_head_totals|get_item:fh_id|default:"0.00"|floatformat:2 }}</td>
+                    {% endfor %}
+                    <td></td>
+                    <td>{{ row.grand_total|default:"0.00"|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="font-weight-bold">
+                    <td colspan="3" class="text-end">Overall Total</td>
+                    {% for fh_id in all_fee_heads.keys %}
+                        <td>{{ overall_totals|get_item:fh_id|default:"0.00"|floatformat:2 }}</td>
+                    {% endfor %}
+                    <td>{{ other_fee_total|default:"0.00"|floatformat:2 }}</td>
+                    <td>{{ overall_grand_total|default:"0.00"|floatformat:2 }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+{% else %}
+    <div class="alert alert-info">No data found for the selected filters</div>
+{% endif %}
+
+</div>
+
+<script>
+    document.getElementById("download-pdf").addEventListener("click", function(event) {
+        event.preventDefault();
+        let fromDate = document.getElementById("from_date").value;
+        let toDate = document.getElementById("to_date").value;
+        if (fromDate && toDate) {
+            window.location.href = "{% url 'download_master_head_pdf' %}" + "?from_date=" + fromDate + "&to_date=" + toDate;
+        } else {
+            alert("Please select a date range before downloading the PDF.");
+        }
+    });
+</script>
+
+{% endblock %}

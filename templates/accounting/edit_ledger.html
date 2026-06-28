@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Ledger</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .form-control, .btn {
+            margin-bottom: 10px;
+        }
+        .container {
+            max-width: 600px;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2 class="text-center">Edit Ledger</h2>
+    <form method="POST" action="">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="category">Select Category</label>
+            <select class="form-control" id="category" name="category" required>
+                <option value="">Select Category</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {% if ledger.category.id == category.id %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="ledger_name">Ledger Name</label>
+            <input type="text" class="form-control" id="ledger_name" name="ledger_name" placeholder="Ledger Name" value="{{ ledger.name }}" required>
+        </div>
+        <div class="form-group">
+            <label for="note">Write Note</label>
+            <input type="text" class="form-control" id="note" name="note" placeholder="Write Note" value="{{ ledger.note }}">
+        </div>
+        <button type="submit" class="btn btn-primary">Update</button>
+        <a href="{% url 'ledger-list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

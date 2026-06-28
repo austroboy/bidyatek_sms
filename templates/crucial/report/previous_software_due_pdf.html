@@ -1,0 +1,175 @@
+
+{% load static %}
+{% load custom_tags humanize %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { 
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .header { 
+            text-align: center; 
+            margin-bottom: 10px;
+            padding: 5px;
+        }
+        .header h1 { 
+            font-size: 16px; 
+            margin: 2px 0; 
+        }
+        .header h2 {
+            font-size: 12px;
+            margin: 2px 0;
+        }
+        .header p {
+            font-size: 10px;
+            margin: 2px 0;
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto; /* Allows scrolling if the table is too wide */
+        }
+
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            font-size: 7px; /* Reduced size for better fit */
+            table-layout: fixed; /* Ensures the table stays within page */
+            page-break-inside: auto;
+        }
+
+        th, td { 
+            border: 1px solid #000; 
+            padding: 3px; 
+            word-wrap: break-word;
+            text-align: center;
+            min-width: auto; /* Adjust width dynamically */
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        th { 
+            background-color: #f2f2f2; 
+            font-weight: bold;
+            white-space: normal; /* Allows headers to break into multiple lines */
+            word-wrap: break-word; /* Ensures long text does not get cut off */
+        }
+
+        .vertical-header {
+            writing-mode: vertical-lr;
+            text-orientation: upright;
+            white-space: normal; /* Allows multi-line headers */
+            padding: 5px 3px;
+            min-width: 35px; /* Slightly wider for readability */
+            max-width: 55px;
+        }
+
+        .text-right { 
+            text-align: right;
+            padding-right: 4px !important;
+        }
+
+        @page { 
+            size: legal landscape; 
+            margin: 10mm;
+        }
+
+        .total-in-words {
+            font-size: 9px;
+            margin-top: 10px;
+        }
+
+        .signature-table {
+            width: 100%;
+            margin-top: 20px;
+            font-size: 9px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>RAJUK UTTARA MODEL COLLEGE</h1>
+        <h2>Previous Software's Paid Detailed Report Head Wise</h2>
+        <p>Date Range: {{ from_date }} to {{ to_date }}</p>
+    </div>
+
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th class="fixed-header">Version</th>
+                <th class="fixed-header">Shift</th>
+                {% for head_id, head_name in previous_heads.items %}
+                <th class="vertical-header">{{ head_name }}</th>
+                {% endfor %}
+                <th class="fixed-header">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in data %}
+            <tr>
+                <td>{{ item.version }}</td>
+                <td>{{ item.shift }}</td>
+                {% for head_id in previous_heads.keys %}
+                <td class="text-right">
+                    {{ item.head_totals|get_item:head_id|floatformat:"g"|intcomma }}
+                </td>
+                {% endfor %}
+                <td class="text-right">
+                    {{ item.row_total|floatformat:"g"|intcomma }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="2"><strong>Grand Total</strong></td>
+                {% for head_id in previous_heads.keys %}
+                <td class="text-right">
+                    {{ overall_totals|get_item:head_id|floatformat:"g"|intcomma }}
+                </td>
+                {% endfor %}
+                <td class="text-right">
+                    {{ overall_grand_total|floatformat:"g"|intcomma }}
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="total-in-words">
+        <p>Total Amount in Words: {{ overall_grand_total|floatformat:"g"|intcomma }} Taka Only</p>
+    </div>
+
+    <!-- Signature Section -->
+    <table style="width: 100%; margin-top: 50px; font-size: 12px;">
+        <tr>
+            <td style="width: 25%; text-align: center">
+                <p style="border-top: 1px solid #000; width: 80%; margin: auto; padding-top: 5px;">
+                    Examined By<br>
+                    Sr. Accounts Officer
+                </p>
+            </td>
+            <td style="width: 25%; text-align: center">
+                <p style="border-top: 1px solid #000; width: 80%; margin: auto; padding-top: 5px;">
+                    Checked By<br>
+                    Asst. Accounts Officer
+                </p>
+            </td>
+            <td style="width: 25%; text-align: center">
+                <p style="border-top: 1px solid #000; width: 80%; margin: auto; padding-top: 5px;">
+                    Checked By<br>
+                    Accountant
+                </p>
+            </td>
+            <td style="width: 25%; text-align: center">
+                <p style="border-top: 1px solid #000; width: 80%; margin: auto; padding-top: 5px;">
+                    Prepared By<br>
+                    Accounts Assistant
+                </p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

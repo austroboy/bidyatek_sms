@@ -1,0 +1,50 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% block title %}Payment Successful - Trust Bank{% endblock title %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link href="{% static 'css/table.css' %}" rel="stylesheet" type="text/css" />
+<style>
+    .success-card {
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background: #f8f9fa;
+    }
+    .trust-logo {
+        max-width: 200px;
+        margin: 20px auto;
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="page-content mt-4">
+    <div class="container-fluid d-flex justify-content-center align-items-center" style="height: 80vh;">
+        <div class="card shadow-lg p-4 text-center success-card">
+            <img src="{% static 'path/to/trust-bank-logo.png' %}" alt="Trust Bank" class="trust-logo">
+            <h1 class="text-success display-4 mb-4">Payment Successful</h1>
+            <div class="alert alert-success">
+                <i class="fa fa-check-circle fa-3x"></i>
+                <p class="lead mt-3">Your payment through Trust Bank has been processed successfully.</p>
+            </div>
+            
+            <div class="transaction-details mt-4">
+                <p><strong>Transaction ID:</strong> {{ transaction.tran_id }}</p>
+                <p><strong>Amount:</strong> ৳{{ transaction.amount }}</p>
+                <p><strong>Date:</strong> {{ transaction.tran_date|date:"d M Y H:i" }}</p>
+            </div>
+
+            <div class="mt-4">
+                <a href="{% url 'dashboard' %}" class="btn btn-primary">
+                    <i class="fa fa-home"></i> Return to Dashboard
+                </a>
+                <a href="{% url 'ssl_commerz:payment_receipt' tran_id=transaction.tran_id %}" 
+                   class="btn btn-success">
+                    <i class="fa fa-download"></i> Download Receipt
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

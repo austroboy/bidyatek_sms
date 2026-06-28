@@ -1,0 +1,38 @@
+{% load widget_tweaks %}
+{% block content %}
+<form hx-post="{{ request.path }}" hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}' class="modal-content">
+  <div>
+    <h4 class="modal-header">Add-Edit Fee Amount</h4>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <label for="{{ form.student_class.id_for_label }}" class="form-label">Class</label>
+      {% render_field form.student_class class+="form-control" placeholder="Class" %}
+    </div>
+ 
+    <div class="mb-3">
+      <label for="{{ form.fees_type.id_for_label }}" class="form-label">Fee Type</label>
+      {% render_field form.fees_type class+="form-control" placeholder="Fee Type" %}
+    </div>
+    
+    
+
+    <div class="mb-3">
+      <label for="{{ form.amount.id_for_label }}" class="form-label">Amount</label>
+      {% render_field form.amount|attr:"type:number" class+="form-control" placeholder="Amount" %}
+    </div>
+
+    
+    <div class="mb-3">
+      <label for="{{ form.academic_year.id_for_label }}" class="form-label">Admission Year</label>
+      {% render_field form.academic_year class+="form-control" placeholder="Admission Year" %}
+    </div> 
+    
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+    <button type="submit" class="btn btn-primary ">Save</button>
+  </div>
+</form>
+
+{% endblock content %}

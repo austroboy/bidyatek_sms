@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: A4;
+            margin: 1cm;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .page {
+            page-break-after: always;
+            margin-bottom: 2cm;
+        }
+        .admit-card-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .admit-card {
+            width: 32%;
+            border: 2px solid #1d1e4e;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            position: relative;
+            background: #fff;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #1d1e4e;
+            padding-bottom: 5px;
+        }
+        .institute-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #1d1e4e;
+            text-align: center;
+            flex-grow: 1;
+        }
+        .logo {
+            width: 50px;
+            height: 50px;
+        }
+        .exam-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+            margin: 10px 0;
+            color: #1d1e4e;
+        }
+        .student-info {
+            margin: 10px 0;
+        }
+        .info-row {
+            display: flex;
+            margin-bottom: 5px;
+        }
+        .info-label {
+            font-weight: bold;
+            min-width: 80px;
+        }
+        .photo-container {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 60px;
+            height: 60px;
+            border: 1px solid #ddd;
+        }
+        .student-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .footer {
+            margin-top: 15px;
+            border-top: 1px solid #1d1e4e;
+            padding-top: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .signature-line {
+            width: 150px;
+            border-top: 1px solid #000;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 12px;
+        }
+        .watermark {
+            position: absolute;
+            opacity: 0.1;
+            font-size: 60px;
+            transform: rotate(-45deg);
+            top: 40%;
+            left: 20%;
+            z-index: -1;
+            color: #1d1e4e;
+        }
+    </style>
+</head>
+<body>
+    {% for group in student_groups %}
+    <div class="page">
+        <div class="admit-card-container">
+            {% for student in group %}
+            <div class="admit-card">
+                <div class="watermark">{{ institute.institute_name }}</div>
+                
+                <div class="header">
+                    {% if ins_logo %}
+                    <img class="logo" src="{{ ins_logo }}" alt="Institute Logo">
+                    {% endif %}
+                    <div class="institute-name">
+                        {{ institute.institute_name }}<br>
+                        <span style="font-size: 12px;">{{ institute.institute_address }}</span>
+                    </div>
+                </div>
+                
+                <div class="exam-title">Admit Card - {{ exam_instance.name }}</div>
+                
+                {% if student.avatar_url %}
+                <div class="photo-container">
+                    <img class="student-photo" src="{{ student.avatar_url }}" alt="Student Photo">
+                </div>
+                {% endif %}
+                
+                <div class="student-info">
+                    <div class="info-row">
+                        <span class="info-label">Name:</span>
+                        <span>{{ student.student_field.name }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Roll No:</span>
+                        <span>{{ student.roll_no }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Class:</span>
+                        <span>{{ student.class_id.class_group_id.class_id.name }}</span>
+                    </div>
+                    {% if student.class_id.section_id %}
+                    <div class="info-row">
+                        <span class="info-label">Section:</span>
+                        <span>{{ student.class_id.section_id.name }}</span>
+                    </div>
+                    {% endif %}
+                    {% if student.class_id.class_group_id.group_id %}
+                    <div class="info-row">
+                        <span class="info-label">Group:</span>
+                        <span>{{ student.class_id.class_group_id.group_id.name }}</span>
+                    </div>
+                    {% endif %}
+                    {% if student.class_id.shift_id %}
+                    <div class="info-row">
+                        <span class="info-label">Shift:</span>
+                        <span>{{ student.class_id.shift_id.name }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="info-row">
+                        <span class="info-label">Version:</span>
+                        <span>{{ student.get_version_display }}</span>
+                    </div>
+                </div>
+                
+                <div class="footer">
+                    <div class="signature-line">Student Signature</div>
+                    <div class="signature-line">Authority Signature</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</body>
+</html>

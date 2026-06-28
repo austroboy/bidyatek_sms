@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulk Activate by Date Range</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        .container {
+            max-width: 800px;
+            margin-top: 30px;
+        }
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+            border-radius: 10px;
+        }
+        .btn-activate {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 30px;
+        }
+        .btn-activate:hover {
+            background-color: #218838;
+            color: white;
+        }
+        .student-count {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #28a745;
+        }
+        .filter-section {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .action-section {
+            background-color: #e9ecef;
+            border-radius: 5px;
+            padding: 20px;
+        }
+        .warning-box {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .info-box {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .date-input {
+            background-color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Bulk Activate Students by Date Range</h4>
+            </div>
+            <div class="card-body">
+                <!-- Instructions -->
+                <div class="info-box mb-4">
+                    <h6><i class="fas fa-info-circle me-2"></i>How this works:</h6>
+                    <p class="mb-0">
+                        This feature helps you restore students who were deactivated within a specific date range. 
+                        For example, if you accidentally deactivated 500 students yesterday, you can select yesterday's date 
+                        range to activate only those students, leaving previously deactivated students unchanged.
+                    </p>
+                </div>
+
+                <!-- Filter Section -->
+                <div class="filter-section">
+                    <form method="get" id="filterForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="class" class="form-label">Class (Optional)</label>
+                                <select name="class" id="class" class="form-select">
+                                    <option value="">All Classes</option>
+                                    {% for class in classes %}
+                                        <option value="{{ class.id }}" {% if selected_class == class.id|stringformat:"i" %}selected{% endif %}>
+                                            {{ class.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="version" class="form-label">Version (Optional)</label>
+                                <select name="version" id="version" class="form-select">
+                                    <option value="">All Versions</option>
+                                    {% for version in versions %}
+                                        <option value="{{ version.0 }}" {% if selected_version == version.0 %}selected{% endif %}>
+                                            {{ version.1 }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <label for="from_date" class="form-label">From Date</label>
+                                <input type="text" name="from_date" id="from_date" 
+                                       class="form-control date-input" 
+                                       value="{{ from_date }}"
+                                       placeholder="Select start date">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="to_date" class="form-label">To Date</label>
+                                <input type="text" name="to_date" id="to_date" 
+                                       class="form-control date-input" 
+                                       value="{{ to_date }}"
+                                       placeholder="Select end date">
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-filter me-1"></i> Apply Filters
+                                </button>
+                                <button type="button" id="resetBtn" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-1"></i> Reset Filters
+                                </button>
+                                <a href="{% url 'manage_student_status' %}" class="btn btn-outline-primary float-end">
+                                    <i class="fas fa-arrow-left me-1"></i> Back to Status Management
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Results Summary -->
+                <div class="text-center mb-4">
+                    <div class="student-count">
+                        <i class="fas fa-users me-2"></i>
+                        Found {{ student_count }} deactivated students
+                    </div>
+                    <small class="text-muted">
+                        {% if selected_class %}
+                            Class: 
+                            {% for class in classes %}
+                                {% if selected_class == class.id|stringformat:"i" %}{{ class.name }}{% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        {% if selected_version %} | Version: {{ selected_version }}{% endif %}
+                        {% if from_date %} | Date Range: {{ from_date }} to {{ to_date }}{% endif %}
+                    </small>
+                </div>
+
+                <!-- Messages -->
+                {% if messages %}
+                    <div class="messages mb-3">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-triangle{% endif %} me-2"></i>
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Action Section -->
+                <div class="action-section">
+                    <h5 class="mb-3"><i class="fas fa-play-circle me-2"></i>Bulk Activation</h5>
+                    
+                    <form method="post" action="{% url 'bulk_activate_by_date' %}" id="bulkActivateForm">
+                        {% csrf_token %}
+                        
+                        <!-- Pass filter parameters -->
+                        <input type="hidden" name="class" value="{{ selected_class }}">
+                        <input type="hidden" name="version" value="{{ selected_version }}">
+                        <input type="hidden" name="from_date" value="{{ from_date }}">
+                        <input type="hidden" name="to_date" value="{{ to_date }}">
+                        <input type="hidden" name="action" value="activate">
+                        
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="confirmActivation">
+                                    <label class="form-check-label fw-bold" for="confirmActivation">
+                                        Activate All {{ student_count }} Deactivated Students
+                                    </label>
+                                    <div class="form-text">
+                                        This will activate all students who were deactivated between {{ from_date }} and {{ to_date }}
+                                        {% if selected_class or selected_version %}
+                                            with the selected filters.
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-activate w-100" id="bulkActivateBtn" disabled>
+                                    <i class="fas fa-play me-1"></i> Activate Students
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Warning Box -->
+                        <div class="warning-box mt-3" id="warningBox" style="display: none;">
+                            <div class="d-flex">
+                                <i class="fas fa-exclamation-triangle text-warning me-2 mt-1"></i>
+                                <div>
+                                    <strong class="text-warning">Important:</strong>
+                                    <ul class="mb-0 mt-1">
+                                        <li>This will change the status of all selected students to "Active"</li>
+                                        <li>Students will be able to log in immediately after activation</li>
+                                        <li>Only students deactivated within the selected date range will be affected</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Additional Options -->
+                <div class="mt-4">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0"><i class="fas fa-exchange-alt me-2"></i>Other Bulk Actions</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="d-grid">
+                                        <a href="{% url 'bulk_deactivate_by_date' %}" class="btn btn-outline-danger">
+                                            <i class="fas fa-pause-circle me-1"></i> Bulk Deactivate by Date Range
+                                        </a>
+                                        <small class="form-text text-muted mt-1">
+                                            Deactivate students who were activated within a specific date range
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-grid">
+                                        <a href="{% url 'manage_student_status' %}" class="btn btn-outline-primary">
+                                            <i class="fas fa-cog me-1"></i> Standard Status Management
+                                        </a>
+                                        <small class="form-text text-muted mt-1">
+                                            Manage student status with class and version filters (no date range)
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize date pickers
+            flatpickr("#from_date", {
+                dateFormat: "Y-m-d",
+                maxDate: "today"
+            });
+            
+            flatpickr("#to_date", {
+                dateFormat: "Y-m-d",
+                maxDate: "today"
+            });
+            
+            // Get elements
+            const confirmCheckbox = document.getElementById('confirmActivation');
+            const activateBtn = document.getElementById('bulkActivateBtn');
+            const warningBox = document.getElementById('warningBox');
+            const resetBtn = document.getElementById('resetBtn');
+            
+            // Enable/disable activate button
+            function updateActivateButtonState() {
+                const isConfirmed = confirmCheckbox.checked;
+                const studentCount = {{ student_count }};
+                
+                activateBtn.disabled = !isConfirmed;
+                
+                if (isConfirmed && studentCount > 0) {
+                    warningBox.style.display = 'block';
+                } else {
+                    warningBox.style.display = 'none';
+                }
+            }
+            
+            confirmCheckbox.addEventListener('change', updateActivateButtonState);
+            
+            // Activate button click handler
+            activateBtn.addEventListener('click', function() {
+                const studentCount = {{ student_count }};
+                
+                if (studentCount === 0) {
+                    alert('No students found to activate with the current filters.');
+                    return;
+                }
+                
+                if (!confirmCheckbox.checked) {
+                    alert('Please confirm that you want to activate all students.');
+                    return;
+                }
+                
+                const fromDate = "{{ from_date }}";
+                const toDate = "{{ to_date }}";
+                
+                let confirmationMessage = `Are you sure you want to ACTIVATE ${studentCount} students?\n\n`;
+                confirmationMessage += `Date Range: ${fromDate} to ${toDate}\n`;
+                
+                {% if selected_class %}
+                    confirmationMessage += `Class: {{ selected_class }}\n`;
+                {% endif %}
+                
+                {% if selected_version %}
+                    confirmationMessage += `Version: {{ selected_version }}\n`;
+                {% endif %}
+                
+                confirmationMessage += '\nThis action will change their status from "Deactive" to "Active".';
+                
+                if (confirm(confirmationMessage)) {
+                    // Submit the form
+                    document.getElementById('bulkActivateForm').submit();
+                }
+            });
+            
+            // Reset filters
+            resetBtn.addEventListener('click', function() {
+                document.getElementById('class').value = '';
+                document.getElementById('version').value = '';
+                document.getElementById('from_date').value = '{{ default_from_date }}';
+                document.getElementById('to_date').value = '{{ default_to_date }}';
+                document.getElementById('filterForm').submit();
+            });
+            
+            // Update button state on page load
+            updateActivateButtonState();
+        });
+    </script>
+</body>
+</html>

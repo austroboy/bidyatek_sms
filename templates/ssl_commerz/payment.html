@@ -1,0 +1,195 @@
+
+
+{% extends 'partials/base.html' %}
+{% load static %}
+{% block title %}Payment Form{% endblock title %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link href="{% static 'css/table.css' %}" rel="stylesheet" type="text/css" />
+<style>
+    .payment-card {
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .card-header {
+        background: linear-gradient(to right, #4e73df, #224abe);
+        color: white;
+        border-radius: 12px 12px 0 0;
+    }
+    .amount-info {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 20px;
+    }
+    .btn-success {
+        background: linear-gradient(to right, #28a745, #218838);
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    .btn-success:hover {
+        background: #1e7e34;
+    }
+    .payment-option {
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .payment-option:hover {
+        border-color: #4e73df;
+        background-color: #f8f9fa;
+    }
+    
+    .payment-option.selected {
+        border-color: #4e73df;
+        background-color: #f0f4ff;
+    }
+    
+    .checkmark {
+        color: #4e73df;
+        display: none;
+    }
+    
+    .payment-option.selected .checkmark {
+        display: block;
+    }
+    
+    #payment_method {
+        display: none;
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+
+<div class="page-content mt-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card payment-card">
+                    <div class="card-header text-center">
+                        <h3 class="mb-0">Proceed to Payment</h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- List Unpaid Fees -->
+                        <h5 class="text-center">Unpaid Fees Breakdown</h5>
+                        <ul class="list-group">
+                            {% for fee in unpaid_fees %}
+                                {% if fee.total_fee_after_partial_payments > 0 %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <strong>{{ fee.feetype_id.fees_title }} (Unpaid):</strong>
+                                        <span class="text-danger">{{ fee.total_fee_after_partial_payments }} BDT</span>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+
+                        <h5 class="mt-4">Paid Fees</h5>
+                        <ul class="list-group">
+                            {% for fee in unpaid_fees %}
+                                {% if fee.total_fee_after_partial_payments == 0 %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <strong>{{ fee.feetype_id.fees_title }} (Paid):</strong>
+                                        <span class="text-success">0.00 BDT</span>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    
+                        <!-- Total Amount -->
+                        <p class="amount-info text-center">
+                            Total Unpaid Amount: <span class="text-primary font-weight-bold">{{ total_amount }} BDT</span>
+                        </p>
+                        
+                        <!-- Payment Form -->
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            <!-- Added Payment Method Dropdown -->
+                            <div class="form-group">
+                                <label>Select Payment Method:</label>
+                                
+                                <!-- SSLCommerz Option -->
+                                <div class="payment-option" onclick="selectPaymentMethod('sslcommerz')">
+                                    <span>SSLCommerz</span>
+                                    <div class="checkmark">
+                                        <i class="fa fa-check-circle"></i>
+                                    </div>
+                                </div>
+                            
+                                <!-- Trust Bank Option -->
+                                <div class="payment-option" onclick="selectPaymentMethod('trustbank')">
+                                    <span>Trust Bank</span>
+                                    <div class="checkmark">
+                                        <i class="fa fa-check-circle"></i>
+                                    </div>
+                                </div>
+                            
+                                <input type="hidden" name="payment_method" id="payment_method" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-success btn-block mt-3" id="submitBtn" disabled>
+                                <i class="fa fa-credit-card"></i> Proceed to Full Payment
+                            </button>
+                        </form>
+
+                    </div>
+                    <div class="card-footer text-center">
+                        <small class="text-muted">Only full payment is allowed. Please review the details before proceeding.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_javascript %}
+<script src="https://unpkg.com/htmx.org@1.8.4"></script>
+<script>
+    function selectPaymentMethod(method) {
+        // Remove all selections
+        document.querySelectorAll('.payment-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+
+        // Add selection to clicked option
+        const selectedOption = event.currentTarget;
+        selectedOption.classList.add('selected');
+
+        // Update hidden input value
+        document.getElementById('payment_method').value = method;
+
+        // Enable submit button
+        document.getElementById('submitBtn').disabled = false;
+    }
+
+    // Optional: Add hover effect
+    document.querySelectorAll('.payment-option').forEach(option => {
+        option.addEventListener('mouseover', function() {
+            if (!this.classList.contains('selected')) {
+                this.style.backgroundColor = '#f8f9fa';
+            }
+        });
+        
+        option.addEventListener('mouseout', function() {
+            if (!this.classList.contains('selected')) {
+                this.style.backgroundColor = 'white';
+            }
+        });
+    });
+</script>
+
+{% endblock extra_javascript %}

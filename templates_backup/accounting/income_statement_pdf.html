@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Income Statement Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .date-range {
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .status {
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: {% if status == 'Profit' %}#28a745{% else %}#dc3545{% endif %};
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f5f5f5;
+            padding: 8px;
+            text-align: left;
+            font-weight: bold;
+        }
+        td {
+            padding: 8px;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .text-success {
+            color: #28a745;
+        }
+        .text-danger {
+            color: #dc3545;
+        }
+        .section-header {
+            background-color: #e9ecef;
+            padding: 8px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .total-row {
+            font-weight: bold;
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Income Statement Report</h1>
+    </div>
+    
+    <div class="date-range">
+        Period: {{ from_date }} to {{ to_date }}
+    </div>
+    
+    <div class="status">
+        Net {{ status }}: {{ net_profit|floatformat:2 }}
+    </div>
+
+    <div class="section-header">INCOME</div>
+    <table>
+        <tr>
+            <th>Description</th>
+            <th class="text-right">Amount</th>
+        </tr>
+        {% for income in income_details %}
+        <tr>
+            <td>{{ income.name }}</td>
+            <td class="text-right text-success">{{ income.amount|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
+        <tr class="total-row">
+            <td><strong>Total Income</strong></td>
+            <td class="text-right text-success"><strong>{{ total_income|floatformat:2 }}</strong></td>
+        </tr>
+    </table>
+
+    <div class="section-header">EXPENSES</div>
+    <table>
+        <tr>
+            <th>Description</th>
+            <th class="text-right">Amount</th>
+        </tr>
+        {% for expense in expense_details %}
+        <tr>
+            <td>{{ expense.name }}</td>
+            <td class="text-right text-danger">{{ expense.amount|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
+        <tr class="total-row">
+            <td><strong>Total Expenses</strong></td>
+            <td class="text-right text-danger"><strong>{{ total_expenses|floatformat:2 }}</strong></td>
+        </tr>
+    </table>
+
+    <table>
+        <tr class="total-row">
+            <td><strong>Net {{ status }}</strong></td>
+            <td class="text-right">
+                <strong style="color: {% if status == 'Profit' %}#28a745{% else %}#dc3545{% endif %};">
+                    {{ net_profit|floatformat:2 }}
+                </strong>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

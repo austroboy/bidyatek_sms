@@ -1,0 +1,257 @@
+/* =========================================================
+   FINAL THEME OVERRIDE (LOAD THIS CSS LAST)
+   Theme Color: #568490
+   ========================================================= */
+
+   :root{
+    --theme: #568490;
+    --theme-rgb: 86,132,144;
+    --theme-dark: #3f6f79;
+    --theme-darker: #2c525a;
+  
+    --theme-soft: rgba(var(--theme-rgb), .12);
+    --theme-soft-2: rgba(var(--theme-rgb), .18);
+    --theme-border: rgba(var(--theme-rgb), .28);
+  
+    /* Your existing tokens remap (dashboard.css uses these a lot) */
+    --primary: var(--theme);
+    --primary-2: var(--theme-dark);
+    --brand: var(--theme);
+    --brand-dark: var(--theme-darker);
+  }
+  
+  /* Bootstrap primary override */
+  :root{
+    --bs-primary: var(--theme);
+    --bs-primary-rgb: var(--theme-rgb);
+    --bs-link-color: var(--theme);
+    --bs-link-hover-color: var(--theme-dark);
+  }
+  
+  /* ---------------------------------------------------------
+     GLOBAL PRIMARY (background/text/border)
+  --------------------------------------------------------- */
+  .bg-primary,
+  .bg-label-primary,
+  .badge.bg-primary{
+    background-color: var(--theme) !important;
+  }
+  .text-primary{ color: var(--theme) !important; }
+  .border-primary{ border-color: var(--theme) !important; }
+  
+  /* ---------------------------------------------------------
+     BUTTONS (Fix: Add Routine button + floating button etc.)
+  --------------------------------------------------------- */
+  .btn-primary,
+  .btn-primary:hover,
+  .btn-primary:focus,
+  .btn-primary:active,
+  .btn-primary.active{
+    background-color: var(--theme) !important;
+    border-color: var(--theme) !important;
+    box-shadow: 0 10px 18px rgba(var(--theme-rgb), .22) !important;
+  }
+  .btn-primary:hover{ filter: brightness(.96); }
+  
+  .btn-outline-primary{
+    color: var(--theme) !important;
+    border-color: var(--theme) !important;
+  }
+  .btn-outline-primary:hover{
+    background: var(--theme) !important;
+    color: #fff !important;
+  }
+  
+  /* Sneat/Template label button */
+  .btn-label-primary{
+    background: var(--theme-soft-2) !important;
+    color: var(--theme-darker) !important;
+    border-color: transparent !important;
+  }
+  
+  /* Table buttons (your screenshot page) */
+  .table .btn.btn-primary,
+  .table a.btn.btn-primary{
+    background-color: var(--theme) !important;
+    border-color: var(--theme) !important;
+  }
+  
+  /* Floating help/chat type primary icon button */
+  .btn.btn-primary.btn-icon,
+  .btn-icon.btn-primary{
+    background-color: var(--theme) !important;
+    border-color: var(--theme) !important;
+  }
+  
+  /* ---------------------------------------------------------
+     FOCUS / FORM
+  --------------------------------------------------------- */
+  .form-control:focus,
+  .form-select:focus,
+  .form-check-input:focus{
+    border-color: var(--theme) !important;
+    box-shadow: 0 0 0 4px rgba(var(--theme-rgb), .18) !important;
+  }
+  .form-check-input:checked{
+    background-color: var(--theme) !important;
+    border-color: var(--theme) !important;
+  }
+  
+  /* ---------------------------------------------------------
+     SECTION HEADERS (যেখানে navy ছিল)
+  --------------------------------------------------------- */
+  .heading,
+  .student_details h3.name,
+  .payment-table .table-head{
+    background-color: var(--theme) !important;
+  }
+  
+  /* ---------------------------------------------------------
+     DASHBOARD TABLES (fees / expense / fund / payslip)
+     Fix: table head must be theme color (not green / not navy)
+  --------------------------------------------------------- */
+  .fees-info .table-head,
+  .expense-info .table-head,
+  .fund-info .table-head,
+  .online-payslip .table-head,
+  .invoice__main table thead tr td{
+    background-color: var(--theme) !important;
+    color: #fff !important;
+  }
+  
+  .fees-info .table-head th,
+  .expense-info .table-head th,
+  .fund-info .table-head th,
+  .online-payslip .table-head th{
+    color: #fff !important;
+  }
+  
+  .fees-info .table-content,
+  .payment-table .table-content,
+  .expense-info .table-content,
+  .fund-info .table-content,
+  .online-payslip .table-content{
+    background-color: rgba(var(--theme-rgb), .06) !important;
+  }
+  
+  /* Replace your selects arrow color */
+  .input-fields select{
+    background:
+      rgba(var(--theme-rgb), .08)
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 384 512'%3E%3Cpath fill='%23568490' d='M192 384c-8.188 0-16.38-3.125-22.62-9.375l-160-160c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L192 306.8l137.4-137.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-160 160C208.4 380.9 200.2 384 192 384z'/%3E%3C/svg%3E")
+      right 1rem center/10px 10px no-repeat !important;
+  }
+  
+  /* Date icon color */
+  input[type="date"]::-webkit-calendar-picker-indicator{
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='15' viewBox='0 0 24 24'%3E%3Cpath fill='%23568490' d='M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z'/%3E%3C/svg%3E") !important;
+  }
+  
+  /* Submit buttons (আপনার css এ orange ছিল) */
+  .submit-button-orange{
+    background-color: var(--theme) !important;
+    color: #fff !important;
+  }
+  
+  /* ---------------------------------------------------------
+     DATATABLES (hover + current page)
+  --------------------------------------------------------- */
+  table.dataTable tbody tr:hover{
+    background-color: rgba(var(--theme-rgb), 0.10) !important;
+  }
+  
+  .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+  .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover{
+    background: var(--theme) !important;
+    border-color: var(--theme) !important;
+    color: #fff !important;
+  }
+  
+  /* ---------------------------------------------------------
+     FULLCALENDAR (events.css)
+  --------------------------------------------------------- */
+  .fc-state-down,
+  .fc-state-active,
+  .fc-state-disabled{
+    background-color: var(--theme) !important;
+    border-color: var(--theme) !important;
+    color: #fff !important;
+  }
+  .fc-event,
+  .fc-event-dot{
+    background-color: var(--theme) !important;
+  }
+  
+  /* ---------------------------------------------------------
+     GTABLE (purple/blue -> theme)
+  --------------------------------------------------------- */
+  thead th:hover{ color: var(--theme) !important; }
+  thead th:hover span.icon-arrow{ border-color: var(--theme) !important; }
+  thead th.active span.icon-arrow{ background-color: var(--theme) !important; }
+  thead th.active,
+  tbody td.active{ color: var(--theme) !important; }
+  
+  .table-responsive::-webkit-scrollbar-thumb{
+    background-color: var(--theme) !important;
+  }
+  
+  #softdatatable thead th{
+    background-color: rgba(var(--theme-rgb), .14) !important;
+  }
+  
+  /* ---------------------------------------------------------
+     CLASS ROUTINE (class-routine.css)
+  --------------------------------------------------------- */
+  #period-form button,
+  #save-button,
+  #print-button,
+  #table-collapse-button{
+    background-color: var(--theme) !important;
+    color: #fff !important;
+  }
+  
+  .subject{
+    background-color: var(--theme-dark) !important;
+    border-color: var(--theme) !important;
+  }
+  
+  .header,
+  .day-label{
+    background-color: var(--theme) !important;
+    border-color: var(--theme-dark) !important;
+  }
+  
+  .period:hover{
+    border-color: var(--theme) !important;
+  }
+  
+  .period.drag-over{
+    border-color: var(--theme) !important;
+    background-color: rgba(var(--theme-rgb), .08) !important;
+  }
+  
+  #schedule::-webkit-scrollbar-thumb{
+    background-color: var(--theme) !important;
+  }
+  
+  /* Optional: inside schedule subject cell (yellow -> soft theme) */
+  #schedule-container .subject{
+    background-color: rgba(var(--theme-rgb), .14) !important;
+    color: #0f172a !important;
+  }
+  #schedule-container .subject p:first-of-type{
+    border-bottom: 1px solid rgba(var(--theme-rgb), .35) !important;
+  }
+  
+  /* ---------------------------------------------------------
+     SIDEBAR/TOPBAR (ensure base match)
+  --------------------------------------------------------- */
+  aside.logicunite_side_menu,
+  #layout-menu.logicunite_side_menu{
+    background: linear-gradient(180deg, var(--theme-darker) 0%, var(--theme) 100%) !important;
+  }
+  nav.logicunite_side_menu,
+  .navbar_cont__wrapper{
+    background: linear-gradient(90deg, var(--theme-darker) 0%, var(--theme) 100%) !important;
+  }
+  

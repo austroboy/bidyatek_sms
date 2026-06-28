@@ -1,0 +1,238 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% load template_tags %}
+{% block extra_css %}
+
+<link rel="stylesheet" href="{% static 'assets/vendor/libs/datatables/datatables.min.css' %}" />
+<link rel="stylesheet" href="{% static 'assets/css/datatable.css' %}" />
+<link rel="stylesheet" href="{% static 'assets/vendor/libs/select2/select2.min.css' %}" />
+<link rel="stylesheet" href="{% static 'assets/vendor/libs/select2/select2-bootstrap-5-theme.min.css' %}" />
+<style>
+  .select2-container--open {
+    z-index: 999999;
+  }
+
+  table {
+    font-size: 0.875rem;
+  }
+
+  .form-control {
+    height: 2rem;
+    font-size: 0.875rem;
+  }
+
+  .form-select {
+    height: 2rem;
+    font-size: 0.875rem;
+  }
+</style>
+
+{% endblock extra_css %}
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+  <div class="card p-4">
+    <form id="bulk-payment-form" action="{% url 'salary_process' %}" method="post">
+      {% csrf_token %}
+      <div class="d-flex justify-content-between mb-3">
+        <h5>Salary Process</h5>
+        <button type="submit" class="btn btn-primary" name="invoice_type" value="bulk">Bulk Pay</button>
+      </div>
+      <div class="table-responsive">
+        <table id="datatable" class="table table-md table-striped table-hover compact hover stripe" width="100%">
+          <thead style="background-color: rgba(252, 207, 20, 0.2) !important;">
+            <tr class="shadow-sm">
+              <th><input type="checkbox" id="select_all"></th>
+              <th>#</th>
+              <th>Employee Name</th>
+              <th>Designation</th>
+              <th>Employee Type</th>
+              <th>Salary Month</th>
+              <th>Salary</th>
+              <th>Paid Amount</th>
+              <th>Pending Amount</th>
+              <th>Unpaid</th>
+              <th>Payment Amount</th>
+              <th>Payment Method</th>
+              <th>Payment Type</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for salary_process in salary_process_list %}
+            <tr>
+              <td>
+                <input type="checkbox" name="selected_salaries" value="{{ salary_process.id }}" class="select-checkbox">
+              </td>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ salary_process.employee_salary.employee }}</td>
+              <td>{{ salary_process.employee_salary.employee.teacher_profile.designation }}</td>
+              <td>{{ salary_process.employee_salary.employee.teacher_profile.employee_type }}</td>
+              <td>{{ salary_process.salary_month }}</td>
+              <td>{{ salary_process.total_salary }}</td>
+              <td>{{ salary_process.paid_amount }}</td>
+              <td id="pending_amount_{{ salary_process.id }}">{{ salary_process.pending_amount }}</td>
+              <td id="unpaid_amount_{{ salary_process.id }}">{{ salary_process.unpaid_amount|floatformat:2 }}</td>
+              <td>
+                <input
+                    type="number"
+                    name="payment_amount_{{ salary_process.id }}"
+                    id="payment_amount_{{ salary_process.id }}"
+                    placeholder="Enter Amount"
+                    class="form-control"
+                    min="0"
+                    max="{{ salary_process.pending_amount }}"
+                    value="0"
+                />
+                <input
+                    type="hidden"
+                    name="pending_amount_{{ salary_process.id }}"
+                    value="{{ salary_process.pending_amount }}"
+                />
+
+              </td>              
+              <td>
+                <select name="payment_method_{{ salary_process.id }}" class="form-select" required>
+                  <option value="cash">Cash</option>
+                  <option value="bank">Bank</option>
+                  <option value="mfs">MFS</option>
+                </select>
+              </td>
+              <td>
+                <select name="payment_status_{{ salary_process.id }}" class="form-select payment-status" data-salary-id="{{ salary_process.id }}" required>
+                  <option value="partial">Partial</option>
+                  <option value="full">Full</option>
+                </select>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="btn btn-primary btn-sm pay-individual"
+                  data-salary-id="{{ salary_process.id }}"
+                >
+                  Pay
+                </button>
+                <a
+                  href="{% url 'generate_pay_report' salary_process.id %}"
+                  class="btn btn-outline-danger btn-sm"
+                >
+                  PaySlip
+                </a>
+              </td>              
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock content %}
+
+{% block extra_javascript %}
+<script src="{% static 'assets/vendor/libs/datatables/pdfmake.min.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/datatables/vfs_fonts.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/datatables/datatables.min.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/select2/select2.min.js' %}"></script>
+<script>
+  $(document).ready(function () {
+      // Initialize DataTable
+      $('#datatable').DataTable({
+          pagingType: "simple_numbers",
+          pageLength: 25,
+          scrollX: true
+      });
+
+      // Select All functionality
+      $("#select_all").on("change", function () {
+          $(".select-checkbox").prop("checked", this.checked);
+      });
+
+      // Handle payment type changes
+      $(".payment-status").on("change", function () {
+          const salaryId = $(this).data("salary-id");
+          const status = $(this).val();
+          const paymentField = $(`#payment_amount_${salaryId}`);
+          const unpaidField = $(`#unpaid_amount_${salaryId}`);
+
+          if (status === "full") {
+              const unpaidAmount = parseFloat(unpaidField.text());
+              paymentField.val(unpaidAmount).prop("readonly", true);
+          } else {
+              paymentField.val("").prop("readonly", false);
+          }
+      });
+
+      // Bulk Payment Submission
+      $("#bulk-payment-form").on("submit", function (e) {
+          const selectedSalaries = $(".select-checkbox:checked");
+          if (selectedSalaries.length === 0) {
+              alert("Please select at least one salary for bulk payment.");
+              e.preventDefault();
+              return;
+          }
+          selectedSalaries.each(function () {
+              const salaryId = $(this).val();
+              const paymentStatus = $(`select[name="payment_status_${salaryId}"]`).val();
+              const paymentAmountField = $(`#payment_amount_${salaryId}`);
+              const unpaidAmountField = $(`#unpaid_amount_${salaryId}`);
+
+              if (paymentStatus === "full") {
+                  const unpaidAmount = parseFloat(unpaidAmountField.text());
+                  paymentAmountField.val(unpaidAmount);
+              }
+          });
+      });
+
+      $(".pay-individual").on("click", function () {
+        const salaryId = $(this).data("salary-id");
+        const paymentAmount = parseFloat($(`#payment_amount_${salaryId}`).val());
+        const paymentMethod = $(`select[name="payment_method_${salaryId}"]`).val();
+        const paymentStatus = $(`select[name="payment_status_${salaryId}"]`).val();
+    
+        // Validate the form fields
+        if (!paymentAmount || paymentAmount <= 0) {
+            alert("Please enter a valid payment amount.");
+            return;
+        }
+    
+        if (!paymentMethod) {
+            alert("Please select a payment method.");
+            return;
+        }
+    
+        if (!paymentStatus) {
+            alert("Please select a payment type.");
+            return;
+        }
+    
+        // Check if payment amount exceeds the pending amount
+        if (paymentAmount > parseFloat($(`#pending_amount_${salaryId}`).val())) {
+            alert("Payment amount cannot exceed pending amount.");
+            return;
+        }
+    
+        // AJAX call to process the payment
+        $.ajax({
+            url: "{% url 'salary_process' %}",
+            method: "POST",
+            data: {
+                csrfmiddlewaretoken: "{{ csrf_token }}",
+                invoice_type: `individual_${salaryId}`,
+                [`payment_amount_${salaryId}`]: paymentAmount,
+                [`payment_method_${salaryId}`]: paymentMethod,
+                [`payment_status_${salaryId}`]: paymentStatus,
+            },
+            success: function () {
+                alert("Payment processed successfully.");
+                location.reload();
+            },
+            error: function () {
+                alert("Error processing payment. Please try again.");
+            },
+        });
+    });
+        
+  });
+</script>
+{% endblock extra_javascript %}

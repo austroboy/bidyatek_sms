@@ -1,0 +1,44 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% block title %}Payment Cancelled - Trust Bank{% endblock title %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link href="{% static 'css/table.css' %}" rel="stylesheet" type="text/css" />
+<style>
+    .cancel-card {
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .trust-logo {
+        max-width: 200px;
+        margin: 20px auto;
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="page-content mt-4">
+    <div class="container-fluid d-flex justify-content-center align-items-center" style="height: 80vh;">
+        <div class="card shadow-lg p-4 text-center cancel-card">
+            <img src="{% static 'path/to/trust-bank-logo.png' %}" alt="Trust Bank" class="trust-logo">
+            <h1 class="text-warning display-4 mb-4">Payment Cancelled</h1>
+            <div class="alert alert-warning">
+                <i class="fa fa-exclamation-triangle fa-3x"></i>
+                <p class="lead mt-3">You cancelled the payment through Trust Bank.</p>
+            </div>
+
+            <div class="transaction-details mt-4">
+                <p><strong>Transaction ID:</strong> {{ transaction.tran_id }}</p>
+                <p><strong>Amount:</strong> ৳{{ transaction.amount }}</p>
+            </div>
+
+            <div class="mt-4">
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                    <i class="fa fa-home"></i> Return to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

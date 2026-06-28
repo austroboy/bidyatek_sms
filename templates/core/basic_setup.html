@@ -1,0 +1,152 @@
+{% extends 'partials/base.html' %}
+
+{% load static %}
+{% load template_tags %}
+{% block extra_css %}
+<style>
+    /* CSS for Equal Width Columns */
+    .equal-width {
+        flex: 1; /* All columns take up equal space */
+        max-width: 33.33%; /* Divide into three equal parts */
+    }
+
+    .form-label {
+        width: 100px; /* Optional: Adjust label width */
+    }
+
+    .form-control {
+        flex-grow: 1; /* Input elements grow to fill available space */
+    }
+
+    /* CSS for Equal Width Table Columns */
+    table {
+        table-layout: fixed; /* Fix table layout */
+        width: 100%; /* Full width */
+    }
+
+    th, td {
+        text-align: center; /* Center align text */
+        word-wrap: break-word; /* Break long text */
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+  <!-- Hoverable Table rows -->
+  <div class="card">
+    <div class="mx-2 border-bottom py-4 px-2">
+        <form class="type_info form-inline" id="type_info" action="{% url 'basic_setup' %}" method="POST">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-5 d-flex mb-2 align-items-center">
+                    <label for="model_id" class="form-label text-nowrap">Select Type</label>
+                    <select class="form-control" name="model_name" id="model_id">
+                        <option selected disabled hidden value="">Select Type</option>
+                        <option value="student_class">Class</option>
+                        <option value="student_section">Section</option> 
+                        <option value="student_group">Group</option> 
+                        <option value="student_shift">Shift</option>
+                        <option value="subject">Subject</option>
+                        <option value="class_period">Period</option>
+                        <option value="marktype">Mark Type</option>
+                        <option value="role">Role Type</option>
+                        <option value="session">Admission Year</option>
+                    </select>
+                </div>
+
+                <div class="col-md-5 d-flex mb-2 align-items-center">
+                    <label for="item_name" class="form-label text-nowrap">Type Name</label>
+                    <input type="text" name="name" class="form-control" id="item_name" placeholder="Enter Item Name" required>
+                </div>
+
+                <div class="col-md-2 text-center  mb-2 text-md-end align-self-center">
+                    <button class="btn btn-primary w-100 text-nowrap" type="submit" name="Add">Create</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="text-center">
+        <!-- Dynamic Content Sections -->
+        <div class="row mt-4" id="classadd" hx-get="{% url 'listclassname' %}" hx-trigger="load, classListChanged from:body"></div>
+        <div class="row mt-4" id="sectionadd" hx-get="{% url 'listsection' %}" hx-trigger="load, sectionListChanged from:body"></div>
+        <div class="row mt-4" id="groupadd" hx-get="{% url 'listgroup' %}" hx-trigger="load, groupListChanged from:body"></div>
+        <div class="row mt-4" id="subjectadd" hx-get="{% url 'listsubjectname' %}" hx-trigger="load, subjectListChanged from:body"></div>
+        <div class="row mt-4" id="shiftadd" hx-get="{% url 'list_shiftname' %}" hx-trigger="load, shiftListChanged from:body"></div>
+        <div class="row mt-4" id="periodadd" hx-get="{% url 'list_periodname' %}" hx-trigger="load, periodListChanged from:body"></div>
+        <div class="row mt-4" id="marktypeadd" hx-get="{% url 'list_marktype' %}" hx-trigger="load, markTypeChanged from:body"></div>
+        <div class="row mt-4" id="roletypeadd" hx-get="{% url 'list_roletype' %}" hx-trigger="load, roleListChanged from:body"></div>
+        <div class="row mt-4" id="sessionadd" hx-get="{% url 'list_addmission_session' %}" hx-trigger="load, sessionListChanged from:body"></div>
+
+        <!-- Modal -->
+        <div style="" id="modal" class="modal">
+            <div id="dialog" class="modal-dialog modal-dialog-centered" hx-target="this"></div>
+        </div>
+    </div>
+  </div>
+</div>
+<!-- end: Content -->
+{% endblock content %}
+
+{% block extra_javascript %}
+<script src="https://unpkg.com/htmx.org@1.8.4"></script>
+
+<script>
+    ; (function () {
+        const modal = new bootstrap.Modal(document.getElementById("modal"))
+
+        htmx.on("htmx:afterSwap", (e) => {
+            // Response targeting #dialog => show the modal
+            if (e.detail.target.id == "dialog") {
+                modal.show()
+            }
+        })
+
+        htmx.on("htmx:beforeSwap", (e) => {
+            // Empty response targeting #dialog => hide the modal
+            if (e.detail.target.id == "dialog" && !e.detail.xhr.response) {
+                modal.hide()
+                e.detail.shouldSwap = false
+
+                if (e.detail.xhr.getResponseHeader("HX-Trigger")) {
+                    const hxTriggerHeader = e.detail.xhr.getResponseHeader("HX-Trigger");
+                    if (hxTriggerHeader) {
+                      const hxTriggerData = JSON.parse(hxTriggerHeader);
+                      console.log(hxTriggerData.messages)
+
+                      if (hxTriggerData.messages === "Success") {
+                          htmx.trigger("#pageinfo", "refresh");
+                      }
+                    }
+                }
+            }
+        })
+
+        // Remove dialog content after hiding
+        htmx.on("hidden.bs.modal", () => {
+            document.getElementById("dialog").innerHTML = ""
+        })
+    })()
+
+    // Save selected option to localStorage
+    function saveSelectedOption() {
+        var selectedOption = document.getElementById("model_id").value;
+        localStorage.setItem("selectedOption", selectedOption);
+    }
+
+    // Load selected option from localStorage
+    function loadSelectedOption() {
+        var selectedOption = localStorage.getItem("selectedOption");
+        if (selectedOption) {
+            document.getElementById("model_id").value = selectedOption;
+        }
+    }
+
+    var selectElement = document.getElementById("model_id");
+    selectElement.addEventListener("change", saveSelectedOption);
+    window.addEventListener("load", loadSelectedOption);
+</script>
+{% endblock extra_javascript %}

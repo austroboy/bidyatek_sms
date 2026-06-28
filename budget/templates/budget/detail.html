@@ -1,0 +1,176 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+
+{% block extra_javascript %}
+<script src="https://unpkg.com/htmx.org@1.8.4"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
+    <div>
+      <nav aria-label="breadcrumb" class="mb-1">
+        <ol class="breadcrumb mb-0">
+          <li class="breadcrumb-item"><a href="{% url 'budget_dashboard' %}" style="color:#2D6A73;">Budget</a></li>
+          <li class="breadcrumb-item active">{{ budget.title }}</li>
+        </ol>
+      </nav>
+      <h4 class="fw-bold mb-0" style="color:#2D6A73;">{{ budget.title }}</h4>
+      <small class="text-muted">{{ budget.year_start }} → {{ budget.year_end }}</small>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      {% if budget.status == 'DRAFT' %}
+        <form method="post" action="{% url 'budget_activate' budget.pk %}" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-success" onclick="return confirm('Activate this budget? This will close any currently active budget.')">
+            <i class='bx bx-check-circle me-1'></i>Activate Budget
+          </button>
+        </form>
+      {% elif budget.status == 'ACTIVE' %}
+        <form method="post" action="{% url 'budget_close' budget.pk %}" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-outline-secondary" onclick="return confirm('Close this budget? All monthly rows will be locked.')">
+            <i class='bx bx-lock me-1'></i>Close Budget
+          </button>
+        </form>
+      {% endif %}
+      <a href="{% url 'budget_report' budget.pk %}" class="btn btn-outline-primary">
+        <i class='bx bx-file-blank me-1'></i>View Report
+      </a>
+      <a href="{% url 'budget_alerts' %}" class="btn btn-outline-danger position-relative">
+        <i class='bx bx-bell me-1'></i>Alerts
+        {% if budget.unacknowledged_alerts_count > 0 %}
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            {{ budget.unacknowledged_alerts_count }}
+          </span>
+        {% endif %}
+      </a>
+    </div>
+  </div>
+
+  <!-- Status Badge -->
+  <div class="mb-3">
+    {% if budget.status == 'DRAFT' %}
+      <span class="badge bg-warning text-dark fs-6 px-3 py-2"><i class='bx bx-edit me-1'></i>DRAFT — Categories can be freely added and edited</span>
+    {% elif budget.status == 'ACTIVE' %}
+      <span class="badge bg-success fs-6 px-3 py-2"><i class='bx bx-check me-1'></i>ACTIVE — Use Revise to change amounts</span>
+    {% elif budget.status == 'CLOSED' %}
+      <span class="badge bg-secondary fs-6 px-3 py-2"><i class='bx bx-lock me-1'></i>CLOSED — Read only</span>
+    {% endif %}
+  </div>
+
+  <!-- Alerts strip -->
+  {% if alerts %}
+  <div class="alert alert-warning border-warning border-start border-4 py-2 mb-3">
+    <strong><i class='bx bx-error me-1'></i>{{ alerts.count }} Alert{{ alerts.count|pluralize }}:</strong>
+    {% for a in alerts %}
+      <span class="ms-2 badge {% if a.alert_type == 'WARNING' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+        {{ a.budget_category.name }} — {{ a.alert_type }}
+      </span>
+    {% endfor %}
+    <a href="{% url 'budget_alerts' %}" class="ms-2 small">View all</a>
+  </div>
+  {% endif %}
+
+  <!-- Summary Cards -->
+  <div class="row mb-4 g-3">
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body text-center">
+          <div class="text-muted small mb-1">Income Budget</div>
+          <h4 class="fw-bold" style="color:#2D6A73;">৳ {{ budget.total_income_budget|floatformat:0 }}</h4>
+          <div class="text-muted small">Actual: <span class="text-success fw-semibold">৳ {{ budget.total_actual_income|floatformat:0 }}</span></div>
+          <div class="progress mt-2" style="height:6px;">
+            <div class="progress-bar bg-success" style="width:{{ budget.income_usage_percent }}%;"></div>
+          </div>
+          <div class="text-muted small mt-1">{{ budget.income_usage_percent }}% received</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body text-center">
+          <div class="text-muted small mb-1">Expense Budget</div>
+          <h4 class="fw-bold text-danger">৳ {{ budget.total_expense_budget|floatformat:0 }}</h4>
+          <div class="text-muted small">Actual: <span class="text-danger fw-semibold">৳ {{ budget.total_actual_expense|floatformat:0 }}</span></div>
+          <div class="progress mt-2" style="height:6px;">
+            <div class="progress-bar bg-danger" style="width:{% if budget.expense_usage_percent > 100 %}100{% else %}{{ budget.expense_usage_percent }}{% endif %}%;"></div>
+          </div>
+          <div class="text-muted small mt-1">{{ budget.expense_usage_percent }}% spent</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body text-center">
+          <div class="text-muted small mb-1">Planned Net Balance</div>
+          <h4 class="fw-bold {% if budget.net_budget >= 0 %}text-success{% else %}text-danger{% endif %}">
+            ৳ {{ budget.net_budget|floatformat:0 }}
+          </h4>
+          <div class="text-muted small">Actual Net:
+            <span class="fw-semibold {% if budget.net_actual >= 0 %}text-success{% else %}text-danger{% endif %}">
+              ৳ {{ budget.net_actual|floatformat:0 }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body text-center">
+          <div class="text-muted small mb-1">Total Categories</div>
+          <h4 class="fw-bold">{{ budget.categories.count }}</h4>
+          <div class="text-muted small">
+            <span class="text-success">{{ income_cats.count }} income</span> /
+            <span class="text-danger">{{ expense_cats.count }} expense</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal container (HTMX target) -->
+  <div id="budgetmodal" class="modal">
+    <div id="budgetdialog" class="modal-dialog modal-dialog-centered" hx-target="this"></div>
+  </div>
+
+  <!-- Category Tables (HTMX refreshable) -->
+  <div id="budget-category-area"
+       hx-get="{% url 'budget_category_list' budget.pk %}"
+       hx-trigger="load, budgetCategoryChanged from:body"
+       hx-swap="innerHTML">
+    <!-- Loaded via HTMX -->
+    <div class="text-center py-5 text-muted">
+      <div class="spinner-border spinner-border-sm" role="status"></div>
+      Loading categories...
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  const modal = new bootstrap.Modal(document.getElementById("budgetmodal"));
+
+  htmx.on("htmx:afterSwap", (e) => {
+    if (e.detail.target.id === "budgetdialog") {
+      modal.show();
+    }
+  });
+
+  htmx.on("htmx:beforeSwap", (e) => {
+    if (e.detail.target.id === "budgetdialog" && !e.detail.xhr.response) {
+      modal.hide();
+      e.detail.shouldSwap = false;
+    }
+  });
+
+  htmx.on("hidden.bs.modal", () => {
+    document.getElementById("budgetdialog").innerHTML = "";
+  });
+})();
+</script>
+
+{% endblock %}

@@ -1,0 +1,40 @@
+{% block content %}
+<div class="container mt-4">
+    <h2>Transfer Unpaid Fees Between Fee Types</h2>
+    <div class="card">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>From Fee Type:</label>
+                    <select name="old_feetype" class="form-control" required>
+                        <option value="">Select Source Fee Type</option>
+                        {% for ft in fee_types %}
+                            <option value="{{ ft.id }}">{{ ft.fees_title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>To Fee Type:</label>
+                    <select name="new_feetype" class="form-control" required>
+                        <option value="">Select Destination Fee Type</option>
+                        {% for ft in fee_types %}
+                            <option value="{{ ft.id }}">{{ ft.fees_title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    Only fees with 'unpaid' status will be transferred. Paid or partial payments will remain unchanged.
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-exchange-alt"></i> Transfer Unpaid Fees
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

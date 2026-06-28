@@ -1,0 +1,42 @@
+{% load widget_tweaks %}
+{% block content %}
+<form hx-post="{{ request.path }}" hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}' class="modal-content" enctype="multipart/form-data">
+  <div>
+    <h4 class="modal-header">Add-Edit Notification</h4>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <label for="{{ form.notification_date.id_for_label }}">Notification Date:</label>
+      {% render_field form.notification_date|attr:"type:date" class="form-control" %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.notification_for.id_for_label }}">Notification For:</label>
+      {% render_field form.notification_for class="form-control" %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.notification.id_for_label }}">Notification:</label>
+      {% render_field form.notification class="form-control" %}
+    </div>
+    
+  </div>
+
+{% if form.errors %}
+                                <div class="alert alert-danger">
+                                    <strong>Error:</strong> Please correct the following errors.
+                                    <ul>
+                                        {% for field in form %}
+                                            {% if field.errors %}
+                                                <li>{{ field.label }}: {{ field.errors|join:", " }}</li>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-danger " data-bs-dismiss="modal">Close</button>
+    <button type="submit" class="btn  btn-primary ">Save</button>
+  </div>
+</form>
+
+{% endblock content %}

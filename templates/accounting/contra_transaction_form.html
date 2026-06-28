@@ -1,0 +1,163 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load template_tags %} 
+{% block extra_css %} 
+<style>
+  h3 {
+          font-size: 24px;
+          font-weight: 500;
+          text-align: center;
+          margin-top: 16px;
+      }
+      .form-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 16px;
+          margin-top: 16px;
+          align-items: end;
+      }
+      .form-grid.sm-grid-cols-4 {
+          grid-template-columns: repeat(4, 1fr);
+      }
+      .form-grid.sm-grid-cols-3 {
+          grid-template-columns: repeat(3, 1fr);
+          margin-top: 20px;
+      }
+
+      @media screen and (max-width: 720px) {
+        .form-grid.sm-grid-cols-4 {
+          grid-template-columns: repeat(2, 1fr);
+      }
+      .form-grid.sm-grid-cols-3 {
+          grid-template-columns: repeat(2, 1fr);
+          margin-top: 20px;
+      }
+      }
+      .form-group {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+      }
+      label {
+          font-weight: 500;
+      }
+      select, input[type="text"],input[type="number"], input[type="date"] {
+          width: 100%;
+          padding: 8px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+          transition: border-color 0.3s, box-shadow 0.3s;
+      }
+      select:focus, input[type="text"]:focus, input[type="date"]:focus {
+          border-color: #007bff;
+          box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+          outline: none;
+      }
+      button {
+          /* width: 100%; */
+          padding: 8px;
+          background-color: #007bff;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          cursor: pointer;
+          transition: background-color 0.3s, transform 0.3s;
+      }
+      button:hover {
+          background-color: #0056b3;
+          transform: translateY(-2px);
+      }
+</style>
+{% endblock extra_css %} 
+
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+    {% include 'pageinfo.html' %}
+    
+    <div class="card">
+        <div class="card-body">
+            <h3 class="header">Contra Transaction Form</h3>
+            <hr/>
+            {% if messages %}
+            <div>
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <form method="post" action="{% url 'contra_transaction' %}">
+                {% csrf_token %}
+                <div class="form-grid sm-grid-cols-4">
+                    <div class="form-group">
+                        <label>Select Credit Ledger</label>
+                        <select name="credit_ledger" id="credit_ledger" required>
+                            <option value="" disabled selected>Select Ledger</option>
+                            {% for ledger in credit_ledgers %}
+                            <option value="{{ ledger.id }}">{{ ledger.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Select Debit Ledger</label>
+                        <select name="debit_ledger" id="debit_ledger" required>
+                            <option value="" disabled selected>Select Ledger</option>
+                            {% for ledger in debit_ledgers %}
+                            <option value="{{ ledger.id }}">{{ ledger.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Amount</label>
+                        <input type="number" name="amount" id="amount" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Select Date</label>
+                        <input type="date" name="date" id="date" required>
+                    </div>
+                </div>
+                <div class="form-grid sm-grid-cols-3">
+                    <div class="form-group">
+                        <label>Voucher No.</label>
+                        <input type="text" name="voucher_no" id="voucher_no" placeholder="Voucher No" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Write Note</label>
+                        <input type="text" name="note" id="note" placeholder="Note">
+                    </div>
+                    <div class="form-group">
+                        <button type="submit">Save</button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Show the Download button if voucher_no is available -->
+            {% if voucher_no %}
+            <div class="form-group">
+                <a href="{% url 'download_voucher' voucher_no %}" class="btn btn-primary" target="_blank">Download Voucher</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+
+    {% if messages %}
+    <ul>
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}  
+
+        
+<!-- end: Content -->
+
+{% endblock content %} 
+{% block extra_javascript %} 
+
+
+{% endblock extra_javascript%}

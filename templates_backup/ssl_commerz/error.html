@@ -1,0 +1,29 @@
+
+{% extends 'partials/base.html' %}
+{% load static %}
+{% block title %}Error{% endblock title %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link href="{% static 'css/table.css' %}" rel="stylesheet" type="text/css" />
+{% endblock extra_css %}
+
+{% block content %}
+<div class="page-content mt-4">
+    <div class="container-fluid d-flex justify-content-center align-items-center" style="height: 80vh;">
+        <div class="card shadow-lg p-4 text-center">
+            <h1 class="text-danger display-5">No Dues</h1>
+            <p class="lead">{{ error }}</p>
+            <hr>
+            <a href="{% url 'dashboard' %}" class="btn btn-primary mt-3">Go back to Home</a>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_javascript %}
+<script src="https://unpkg.com/htmx.org@1.8.4"></script>
+<script>
+    // Add any specific JavaScript logic here if needed.
+</script>
+{% endblock extra_javascript %}

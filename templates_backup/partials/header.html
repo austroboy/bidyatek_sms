@@ -1,0 +1,174 @@
+{% load static %}
+{% block header %}
+
+<!-- start: Navbar -->
+<div class="container-fluid mt-2">
+  <div class="navbar_cont row">
+    <div class="col-12">
+      <div
+        class="d-flex shadow rounded p-3 align-items-center justify-content-between navbar_cont__wrapper text-white">
+        <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+          <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+            <i class="bx bx-menu bx-sm"></i>
+          </a>
+        </div>
+        <div class="navbar__left d-flex align-items-center gap-1">
+          <div class="img_wrapper bg-white rounded-circle p-2 d-flex align-items-center justify-content-center">
+            <a href="{% if 'http' not in institute.institute_web %}https://{{ institute.institute_web }}{% else %}{{ institute.institute_web }}{% endif %}" class="d-flex justify-content-center align-items-center  mx-auto">
+              <img height="80px" src="{{institute.institute_logo.url}}" alt="">
+            </a> 
+            {% comment %} <img src="{% static 'assets/img/essential/icon.png'%}" alt="logo" /> {% endcomment %}
+          </div>
+          <h1 class="d-none d-sm-block fs-6">
+            <a href="{% if 'http' not in institute.institute_web %}https://{{ institute.institute_web }}{% else %}{{ institute.institute_web }}{% endif %}" class="text-white">
+              {{ institute.institute_name }}
+          </a>
+          </h1>
+        </div>
+        <div class="navbar__right d-flex align-items-center gap-2">
+          
+          <div class="item shortcut_item dropdown position-relative" >
+            <div class="dots dropdown-toggle" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <i class='bx bxs-grid-alt fs-3' ></i>
+            </div>
+
+            <div class="edit_details_overlay dropdown-menu shortcut__features bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton2">
+              <div class="items">
+
+                <div class="item">
+                  <box-icon name='money-withdraw'></box-icon>
+                  Fees
+                </div>
+                <div class="item">
+                  <box-icon name='calendar-check'></box-icon>
+                  Attendance
+                </div>
+                <div class="item">
+                  <box-icon name='file'></box-icon>
+                  Marks
+                </div>
+                <div class="item">
+                  <box-icon type='solid' name='volume-low'></box-icon>
+                  Notice
+                </div>
+                <div class="item">
+                  <box-icon name='money-withdraw'></box-icon>
+                  Fees
+                </div>
+                <div class="item">
+                  <box-icon name='file'></box-icon>
+                  Marks
+                </div>
+              </div>
+            </div>
+          </div>
+          <span>|</span>
+          <div class="item dropdown position-relative">
+            <div class="dots dropdown-toggle" id="dropdownMenuButton3" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <img src="{% static 'assets/img/essential/notification.png' %}" alt="" />
+            </div>
+
+            <div class="active__icon position-absolute rounded-circle bg-danger"></div>
+            <div class="edit_details_overlay dropdown-menu notification__overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton3">
+              <ul class="list-unstyled scrollbar">
+                {% comment %} <li>Lorem ipsum dolor sit amet lit a bit consectetur adipisicing elit tit.
+                  <hr>
+                </li>
+                <li>Lorem ipsum dolor sit amet lit a bit consectetur adipisicing elit tit.
+                  <hr>
+                </li>
+                <li>Lorem ipsum dolor sit amet lit a bit consectetur adipisicing elit tit.
+                  <hr>
+                </li>
+                <li>Lorem ipsum dolor sit amet lit a bit consectetur adipisicing elit tit.
+                  <hr>
+                </li>
+                <li>Lorem ipsum dolor sit amet lit a bit consectetur adipisicing elit tit.
+                  <hr>
+                </li>
+                <li>Lorem ipsum dolor sit amet lit a bit consectetur adipisicing elit tit.
+                  <hr>
+                </li>
+                <li>Lorem ipsum dolor sit amet lit a bit consectetur adipisicing elit tit.
+                  <hr>
+                </li>
+                <li>Lorem ipsum dolor sit amet lit a bit consectetur adipisicing elit tit.
+                  <hr>
+                </li>
+                <li>Lorem ipsum dolor sit amet lit a bit consectetur adipisicing elit tit.
+                  <hr>
+                </li>
+                <li>Lorem ipsum dolor sit amet lit a bit consectetur adipisicing elit tit.
+                  <hr>
+                </li>
+                <li>Lorem ipsum dolor sit amet lit a bit consectetur adipisicing elit tit.
+                  <hr>
+                </li> {% endcomment %}
+              </ul>
+            </div>
+          </div>
+          <span>|</span>
+          <div class="profile item position-relative dropdown">
+            <div class="dots d-flex align-items-center gap-1 dropdown-toggle" id="dropdownMenuButton4" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              {% if user.is_authenticated %}
+                  {% if user.avatar %}
+                  <img src="{{user.avatar.url}}" alt style="height: 35px!important; width: 35px!important;" class="w-px-40 rounded-circle" />
+                  {% else %}
+                  <img src="{% static 'assets/img/avatars/user.png' %}" alt class="w-px-40 h-auto rounded-circle" />
+                  {% endif %}
+              {% endif %} 
+            </div>
+            
+            <div class="edit_details_overlay dropdown-menu profile__overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton4">
+              <ul class="list-unstyled">
+                <li>
+                  <a class="" href="#">
+                    <div class="d-flex align-items-center">
+                      <div class="flex-shrink-0 me-3">
+                        <div class="avatar avatar-online">
+                          {% if user.is_authenticated %}
+                              {% if user.avatar %}
+                              <img src="{{user.avatar.url}}" alt style="height: 35px!important; width: 35px!important;" class="w-px-40 rounded-circle" />
+                              {% else %}
+                              <img src="{% static 'assets/img/avatars/user.png' %}" alt class="w-px-40 h-auto rounded-circle" />
+                              {% endif %}
+                          {% endif %} 
+                          
+                        </div>
+                      </div>
+                      <div class="flex-grow-1">
+                        {% if user.is_authenticated %}
+                            <span class="fw-medium d-block">{{user.name}}</span>
+                          
+                            {% for group_for in request.user.groups.all %}
+                              {% if group_for.name == 'parent' %}
+                                  <p class="text-primary">Parent</p>
+                              {% elif group_for.name == 'staff' %}
+                                  <p class="text-primary">Staff</p>
+                              {% elif group_for.name == 'student' %}
+                                  <p class="text-primary">Student</p>
+                              {% elif group_for.name == 'teacher' %}
+                                  <p class="text-primary">Teacher</p>
+                              {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                      </div>
+                    </div>
+                  </a>
+                </li>
+                  <div class="dropdown-divider"></div>
+                <li onclick="location.href='{% url 'edit_profile' %}'"><a href="{% url 'edit_profile' %}">Profile</a></li>
+                <li onclick="location.href='#'"><a href="#">Settings</a></li>
+                <li onclick="location.href='{% url 'change_password' %}'"><a href="{% url 'change_password' %}">Password Change</a></li>
+                <li onclick="location.href='{% url 'logout' %}'"><a href="{% url 'logout' %}">Logout</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock header %}

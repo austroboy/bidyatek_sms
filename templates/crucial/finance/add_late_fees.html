@@ -1,0 +1,96 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">Generate Late Fees</h4>
+    
+    <div class="card">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <!-- Filter Form -->
+                <div class="row mb-4">
+                    <div class="col-md-2">
+                        <label for="class">Class:</label>
+                        <select name="class" id="class" class="form-select" required>
+                            <option value="">Select Class</option>
+                            {% for class in classes %}
+                            <option value="{{ class.id }}">{{ class.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="section">Section:</label>
+                        <select name="section" id="section" class="form-select">
+                            <option value="">All Sections</option>
+                            {% for section in sections %}
+                            <option value="{{ section.id }}">{{ section.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="version">Version:</label>
+                        <select name="version" id="version" class="form-select">
+                            <option value="">All Versions</option>
+                            {% for version in versions %}
+                            <option value="{{ version }}">{{ version }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="group">Group:</label>
+                        <select name="group" id="group" class="form-select">
+                            <option value="">All Groups</option>
+                            {% for group in groups %}
+                            <option value="{{ group.id }}">{{ group.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="shift">Shift:</label>
+                        <select name="shift" id="shift" class="form-select">
+                            <option value="">All Shifts</option>
+                            {% for shift in shifts %}
+                            <option value="{{ shift.id }}">{{ shift.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="academic_session">Academic Session:</label>
+                        <select name="academic_session" id="academic_session" class="form-select">
+                            <option value="">All Sessions</option>
+                            {% for session in academic_sessions %}
+                            <option value="{{ session.id }}">{{ session }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Late Fee Rules -->
+                <div class="alert alert-warning">
+                    <h5 class="alert-heading">Late Fee Rules</h5>
+                    <ul>
+                        <li>Tuition fees overdue by 1 month: 50 Taka fine</li>
+                        <li>Tuition fees overdue by >1 month: Re-admission Fee (replaces any existing fines)</li>
+                        <li>Hostel fees overdue: 300 Taka per month</li>
+                        <li>Fees will only be applied for the current month</li>
+                    </ul>
+                    <p class="mb-0">Are you sure you want to proceed?</p>
+                </div>
+                
+                <!-- Action Buttons -->
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-calculator me-2"></i> Calculate Late Fees
+                </button>
+                {% comment %} 
+                <a href="{% url 'delete_late_fees' %}" class="btn btn-danger ms-2">
+                    <i class="fas fa-trash-alt me-2"></i> Clear All Late Fees
+                </a>
+                {% endcomment %}
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

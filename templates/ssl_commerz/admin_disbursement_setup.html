@@ -1,0 +1,364 @@
+{% extends 'admin/base_site.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2><i class="fas fa-university"></i> SSLCommerz Bank Distribution Setup</h2>
+    
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h4>Transaction: {{ transaction.tran_id }}</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Student:</strong> {{ transaction.student_profile.student_field.name }}</p>
+                    <p><strong>Total Amount:</strong> <span class="badge bg-success">{{ transaction.amount }} BDT</span></p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Total Fee Heads:</strong> {{ total_fee_heads }}</p>
+                    <p><strong>Available Banks:</strong> {{ bank_accounts|length }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h4><i class="fas fa-cogs"></i> Configure Bank Distribution</h4>
+        </div>
+        <div class="card-body">
+            <form method="post" id="disbursementForm">
+                {% csrf_token %}
+                
+                <!-- Step 1: Select Number of Banks -->
+                <div class="mb-4 p-3 border rounded bg-light">
+                    <h5>Step 1: How many banks to distribute to?</h5>
+                    <div class="btn-group" role="group" aria-label="Number of banks">
+                        {% for i in "1234" %}
+                        <input type="radio" class="btn-check" name="num_banks" id="num{{i}}" value="{{i}}" 
+                               {% if forloop.first %}checked{% endif %}>
+                        <label class="btn btn-outline-primary" for="num{{i}}">
+                            <i class="fas fa-bank"></i> {{i}} Bank{{i|pluralize}}
+                        </label>
+                        {% endfor %}
+                    </div>
+                    <small class="text-muted d-block mt-2">SSLCommerz will split payment to selected banks</small>
+                </div>
+
+                <!-- Step 2: Bank Selection -->
+                <div class="mb-4 p-3 border rounded" id="bankSelection">
+                    <h5>Step 2: Select Banks (from SSLCommerz)</h5>
+                    <div id="bankSelectors" class="row">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Step 3: Fee Head Distribution -->
+                <div class="mb-4 p-3 border rounded" id="feeHeadDistribution" style="display: none;">
+                    <h5>Step 3: Assign Fee Heads to Banks</h5>
+                    <p class="text-muted">Assign fee heads to banks. Last bank gets remaining fee heads automatically.</p>
+                    
+                    <div id="feeHeadAssignments" class="row">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                    
+                    <div class="mt-3 alert alert-warning" id="autoAssignmentNotice" style="display: none;">
+                        <i class="fas fa-info-circle"></i>
+                        <span id="remainingText">0 fee heads will be auto-assigned to last bank</span>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-success btn-lg" id="submitBtn" disabled>
+                        <i class="fas fa-check-circle"></i> Review Distribution
+                    </button>
+                    <a href="{% url 'admin:index' %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Data from Django
+const feeHeads = [
+    {% for fh in fee_heads %}
+    {
+        id: '{{ fh.id }}',
+        name: '{{ fh.name|escapejs }}',
+        amount: '{{ fh.total_amount }}'
+    },
+    {% endfor %}
+];
+
+const banks = [
+    {% for bank in bank_accounts %}
+    {
+        id: '{{ bank.id }}',
+        name: '{{ bank.display_name|escapejs }}',
+        ssl_ref: '{{ bank.sslcz_ref_id|escapejs }}',
+        bank_type: '{{ bank.get_bank_name_display|escapejs }}'
+    },
+    {% endfor %}
+];
+
+let selectedBanks = {};
+let assignedFeeHeads = new Set();
+let numBanks = 1;
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    updateBankSelection();
+    
+    // Listen for bank number changes
+    document.querySelectorAll('input[name="num_banks"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            numBanks = parseInt(this.value);
+            updateBankSelection();
+        });
+    });
+});
+
+function updateBankSelection() {
+    // Clear previous selections
+    selectedBanks = {};
+    assignedFeeHeads.clear();
+    
+    // Generate bank selectors
+    let bankHtml = '';
+    for (let i = 1; i <= numBanks; i++) {
+        const isLast = i === numBanks;
+        bankHtml += `
+            <div class="col-md-${numBanks <= 2 ? '6' : '3'} mb-3">
+                <div class="card h-100 ${isLast ? 'border-warning' : ''}">
+                    <div class="card-header ${isLast ? 'bg-warning' : 'bg-light'}">
+                        <strong>Bank ${i}</strong>
+                        ${isLast ? '<span class="badge bg-dark float-end">Auto</span>' : ''}
+                    </div>
+                    <div class="card-body">
+                        <label class="form-label">Select Bank:</label>
+                        <select class="form-select bank-select" 
+                                name="bank_${i}" 
+                                data-bank-num="${i}"
+                                onchange="onBankSelect(${i})"
+                                required>
+                            <option value="">-- Choose --</option>
+        `;
+        
+        // Add bank options
+        banks.forEach(bank => {
+            const isSelected = selectedBanks[i] === bank.id;
+            const isUsed = Object.values(selectedBanks).includes(bank.id) && !isSelected;
+            bankHtml += `
+                <option value="${bank.id}" 
+                        ${isSelected ? 'selected' : ''}
+                        ${isUsed ? 'disabled' : ''}
+                        data-ref="${bank.ssl_ref}">
+                    ${bank.name} (${bank.bank_type})
+                </option>
+            `;
+        });
+        
+        bankHtml += `
+                        </select>
+                        ${isLast ? '<small class="text-muted d-block mt-2">Gets remaining fee heads automatically</small>' : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    document.getElementById('bankSelectors').innerHTML = bankHtml;
+    document.getElementById('feeHeadDistribution').style.display = 'block';
+    updateFeeHeadAssignment();
+    updateSubmitButton();
+}
+
+function onBankSelect(bankNum) {
+    const select = document.querySelector(`select[name="bank_${bankNum}"]`);
+    const bankId = select.value;
+    
+    // Remove previous selection
+    delete selectedBanks[bankNum];
+    
+    if (bankId) {
+        selectedBanks[bankNum] = bankId;
+        
+        // Disable this bank in other selects
+        document.querySelectorAll('.bank-select').forEach(otherSelect => {
+            if (otherSelect !== select) {
+                const option = otherSelect.querySelector(`option[value="${bankId}"]`);
+                if (option) option.disabled = true;
+            }
+        });
+    }
+    
+    // Re-enable all options first
+    document.querySelectorAll('.bank-select option').forEach(option => {
+        option.disabled = false;
+    });
+    
+    // Then disable selected ones in other selects
+    Object.entries(selectedBanks).forEach(([num, id]) => {
+        if (parseInt(num) !== bankNum) {
+            document.querySelectorAll('.bank-select').forEach(selectEl => {
+                if (selectEl.getAttribute('data-bank-num') !== num.toString()) {
+                    const option = selectEl.querySelector(`option[value="${id}"]`);
+                    if (option) option.disabled = true;
+                }
+            });
+        }
+    });
+    
+    updateFeeHeadAssignment();
+    updateSubmitButton();
+}
+
+function updateFeeHeadAssignment() {
+    const assignedBanks = Object.keys(selectedBanks).length;
+    
+    if (assignedBanks < numBanks) {
+        document.getElementById('feeHeadAssignments').innerHTML = `
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Please select all ${numBanks} banks first.
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    let feeHeadHtml = '';
+    assignedFeeHeads.clear();
+    
+    // For non-last banks
+    for (let i = 1; i < numBanks; i++) {
+        const bankId = selectedBanks[i];
+        if (!bankId) continue;
+        
+        const bank = banks.find(b => b.id == bankId);
+        if (!bank) continue;
+        
+        feeHeadHtml += `
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h6><i class="fas fa-university"></i> Bank ${i}: ${bank.name}</h6>
+                        <small class="text-muted">SSL Ref: ${bank.ssl_ref}</small>
+                    </div>
+                    <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                        <p class="text-muted">Select Fee Heads for this bank:</p>
+        `;
+        
+        feeHeads.forEach(fh => {
+            feeHeadHtml += `
+                <div class="form-check mb-2">
+                    <input class="form-check-input fee-checkbox" 
+                           type="checkbox" 
+                           name="bank_${i}_fee_heads" 
+                           value="${fh.id}" 
+                           id="bank${i}_fee${fh.id}"
+                           onchange="onFeeHeadSelect(${i}, '${fh.id}')">
+                    <label class="form-check-label" for="bank${i}_fee${fh.id}">
+                        ${fh.name} <small class="text-muted">(${fh.amount} BDT)</small>
+                    </label>
+                </div>
+            `;
+        });
+        
+        feeHeadHtml += `
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    document.getElementById('feeHeadAssignments').innerHTML = feeHeadHtml;
+    updateAutoAssignmentNotice();
+}
+
+function onFeeHeadSelect(bankNum, feeHeadId) {
+    const checkbox = document.querySelector(`#bank${bankNum}_fee${feeHeadId}`);
+    
+    if (checkbox.checked) {
+        // Remove from other checkboxes
+        document.querySelectorAll(`input[value="${feeHeadId}"]`).forEach(cb => {
+            if (cb !== checkbox) {
+                cb.checked = false;
+                const otherBankNum = cb.name.match(/bank_(\d+)_fee_heads/)[1];
+                if (assignedFeeHeads.has(`${otherBankNum}_${feeHeadId}`)) {
+                    assignedFeeHeads.delete(`${otherBankNum}_${feeHeadId}`);
+                }
+            }
+        });
+        
+        assignedFeeHeads.add(`${bankNum}_${feeHeadId}`);
+    } else {
+        assignedFeeHeads.delete(`${bankNum}_${feeHeadId}`);
+    }
+    
+    updateAutoAssignmentNotice();
+    updateSubmitButton();
+}
+
+function updateAutoAssignmentNotice() {
+    const assignedCount = assignedFeeHeads.size;
+    const remaining = feeHeads.length - assignedCount;
+    
+    const notice = document.getElementById('autoAssignmentNotice');
+    const text = document.getElementById('remainingText');
+    
+    if (remaining > 0 && numBanks > 1) {
+        notice.style.display = 'block';
+        text.textContent = `${remaining} fee head(s) will be automatically assigned to Bank ${numBanks}`;
+    } else if (remaining === 0) {
+        notice.style.display = 'block';
+        notice.className = 'mt-3 alert alert-success';
+        text.innerHTML = '<i class="fas fa-check"></i> All fee heads assigned!';
+    } else {
+        notice.style.display = 'none';
+    }
+}
+
+function updateSubmitButton() {
+    const assignedBanks = Object.keys(selectedBanks).length;
+    const btn = document.getElementById('submitBtn');
+    
+    // Enable if all banks are selected and (if more than 1 bank) at least some fee heads are assigned
+    if (assignedBanks === numBanks) {
+        if (numBanks === 1) {
+            btn.disabled = false;
+        } else {
+            // For multiple banks, need at least some assignments for non-last banks
+            const nonLastBanks = Math.min(assignedFeeHeads.size, numBanks - 1);
+            btn.disabled = (nonLastBanks === 0);
+        }
+    } else {
+        btn.disabled = true;
+    }
+}
+</script>
+
+<style>
+.bank-select:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+}
+
+.btn-check:checked + .btn-outline-primary {
+    background-color: #4e73df;
+    border-color: #4e73df;
+    color: white;
+}
+
+.card-header {
+    font-weight: 600;
+}
+
+.form-check-input:checked {
+    background-color: #4e73df;
+    border-color: #4e73df;
+}
+</style>
+{% endblock %}

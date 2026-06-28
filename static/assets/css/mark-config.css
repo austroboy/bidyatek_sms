@@ -1,0 +1,104 @@
+.grid-container table{
+  margin-bottom: 0 !important;
+  margin-top: 10px !important;
+}
+.grid-container table th, .grid-container table td{
+  /* text-transform: capitalize !important; */
+  font-size: 11px;
+}
+.grid-container table thead{
+  background-color: rgba(240, 241, 243, 0.6);
+}
+.grid-container table thead th{
+  color: rgba(0, 0, 0,0.7) !important;
+  letter-spacing: normal;
+}
+.grid-container table tbody tr td:first-child{
+  background-color: #FFFFFF;
+  color: #232321;
+}
+.grid-container table tbody tr td input{
+  min-width: 55px;
+  max-width: 65px;
+}
+.subject_mark_config_form_inner{
+
+  background-color: #fefefe;
+ 
+  margin: 20px;
+  border-radius: 5px;
+}
+.grid-container {
+  display: grid;
+  gap: 10px;
+  overflow-x: auto; /* Allow horizontal scrolling */
+}
+
+.grid-item {
+  padding: 10px;
+  border-radius: 5px;
+  color: #232321;
+  background-color: #d9e4ff;
+}
+
+.grid-item.left_item {
+  position: sticky;
+  left: 0;
+}
+.grid-item.subject_mark {
+  padding: 20px;
+  color: #232321;
+  background-color: transparent;
+  border: 1px solid rgba(35, 35, 33, 0.2);
+}
+.grid-item.subject_mark h5 {
+  text-align: center;
+  padding: 8px 0;  
+  color: #232321;
+  background-color: #d9e4ff;
+  font-size: 16px;
+  border-radius: 5px;
+  margin-bottom: 10px !important;
+}
+.header {
+  font-weight: 600;
+  text-align: center;
+  margin: 0;
+  min-width: 85px;
+}
+.single-class {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.form-field {
+  margin-bottom: 10px;
+}
+.form-field label {
+  display: block;
+  margin-bottom: 5px;
+}
+.form-field input,
+.form-field select {
+  width: 100%;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+.form-field select{
+  color: rgba(35, 35, 33, 0.7);
+}
+
+.grid-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.grid-container::-webkit-scrollbar-track {
+  background-color: #ccc;
+}
+
+.grid-container::-webkit-scrollbar-thumb {
+  background-color: #6d96ff;
+  border-radius: 12px;
+}

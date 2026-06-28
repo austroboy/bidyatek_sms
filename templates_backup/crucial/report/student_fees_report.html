@@ -1,0 +1,272 @@
+{% extends 'partials/base.html' %}
+{% load humanize custom_tags %}
+{% load tz %}
+
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+    {% include 'pageinfo.html' %}
+    <div class="card">
+        <div class="p-4">
+            <h4 class="py-2 mb-3">Student Fees Collection Report</h4>
+
+            <form method="GET" class="mb-4" id="reportForm">  <!-- Added ID -->
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label>From Date:</label>
+                        <input type="date" name="from_date" class="form-control" 
+                               value="{{ from_date|default:'' }}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label>To Date:</label>
+                        <input type="date" name="to_date" class="form-control" 
+                               value="{{ to_date|default:'' }}" required>  <!-- Added |default:'' -->
+                    </div>
+                    <div class="col-md-2">
+                        <label>Class:</label>
+                        <select name="class" class="form-select">
+                            <option value="">All</option>
+                            {% for class in classes %}
+                            <option value="{{ class.id }}" {% if selected_class == class.id|stringformat:"s" %}selected{% endif %}>
+                                {{ class.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label>Section:</label>
+                        <select name="section" class="form-select">
+                            <option value="">All</option>
+                            {% for section in sections %}
+                            <option value="{{ section.id }}" {% if selected_section == section.id|stringformat:"s" %}selected{% endif %}>
+                                {{ section.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label>Group:</label>
+                        <select name="group" class="form-select">
+                            <option value="">All</option>
+                            {% for group in groups %}
+                            <option value="{{ group.id }}" {% if selected_group == group.id|stringformat:"s" %}selected{% endif %}>
+                                {{ group.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label>Shift:</label>
+                        <select name="shift" class="form-select">
+                            <option value="">All</option>
+                            {% for shift in shifts %}
+                            <option value="{{ shift.id }}" {% if selected_shift == shift.id|stringformat:"s" %}selected{% endif %}>
+                                {{ shift.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label>Version:</label>
+                        <select name="version" class="form-select">
+                            <option value="">All</option>
+                            <option value="Bangla" {% if selected_version == "Bangla" %}selected{% endif %}>Bangla</option>
+                            <option value="English" {% if selected_version == "English" %}selected{% endif %}>English</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+            
+        {% comment %} <button type="submit" class="btn btn-primary mt-3">Filter</button> {% endcomment %}
+    {% comment %} </form> {% endcomment %}
+
+<div class="mt-3 mb-3 d-flex gap-2">
+    <button onclick="generateReport('pdf')" class="btn btn-danger">
+        <i class="fas fa-file-pdf"></i> Download PDF
+    </button>
+    <button onclick="generateReport('excel')" class="btn btn-success">
+        <i class="fas fa-file-excel"></i> Download Excel
+    </button>
+</div>
+   
+
+{% if students_data %}
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>SL NO</th>
+                    <th>Student</th>
+                    <th>Roll No</th>
+                    <th>Class</th>
+                    <th>Group</th>
+                    <th>Section</th>
+                    <th>Shift</th>
+                    <th>Version</th>
+                    {% for fee_head in used_fee_heads %}
+                    <th class="vertical-header">{{ fee_head.name }}</th>
+                    {% endfor %}
+                    <th>Other Fee</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students_data %} 
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ student.student.student_field.name|default:'Undefined Student' }}</td>
+                    <td>{{ student.student.roll_no|default:'' }}</td>
+                    <td>{{ student.class|default:'-' }}</td>
+                    <td>{{ student.group|default:'-' }}</td>
+                    <td>{{ student.section|default:'-' }}</td>
+                    <td>{{ student.shift|default:'-' }}</td>
+                    <td>{{ student.version|default:'-' }}</td>
+                    {% for amount in student.payments %} 
+                    <td>{{ amount|default:0|intcomma }}</td>
+                    {% endfor %}
+                    <td>{{ other_fee_total|default:0|intcomma }}</td>
+                    <td>{{ student.total|default:0|intcomma }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="table-active">
+                    <td colspan="8" class="text-end"><strong>Grand Total</strong></td>
+                    {% for fee_head in used_fee_heads %}
+                    <td>{{ column_totals|get_item:fee_head.id|default:0|intcomma }}</td>
+                    {% endfor %}
+                    <td>{{ other_fee_total|default:0|intcomma }}</td>
+                    <td>{{ grand_total|default:0|intcomma }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+{% else %}
+    {% comment %} <div class="alert alert-info">No data found for the selected filters</div> {% endcomment %}
+{% endif %}
+<!-- Add pagination controls -->
+{% comment %} <div class="pagination">
+    <span class="step-links">
+        {% if students_data.has_previous %}
+            <a href="?page=1{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&laquo; first</a>
+            <a href="?page={{ students_data.previous_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ students_data.number }} of {{ students_data.paginator.num_pages }}.
+        </span>
+
+        {% if students_data.has_next %}
+            <a href="?page={{ students_data.next_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">next</a>
+            <a href="?page={{ students_data.paginator.num_pages }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">last &raquo;</a>
+        {% endif %}
+    </span>
+</div> {% endcomment %}
+</div>
+</div>
+
+</div>
+<!-- Add JavaScript -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Date validation elements
+        const fromDateInput = document.querySelector('input[name="from_date"]');
+        const toDateInput = document.querySelector('input[name="to_date"]');
+        const errorDiv = document.createElement('div');
+        errorDiv.style.color = 'red';
+        errorDiv.style.marginTop = '5px';
+        errorDiv.style.display = 'none';
+        toDateInput.parentNode.appendChild(errorDiv);
+    
+        // Date validation logic
+        toDateInput.addEventListener('change', function () {
+            const fromDate = new Date(fromDateInput.value);
+            const toDate = new Date(this.value);
+            const diffTime = Math.abs(toDate - fromDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+            if (diffDays > 7) {
+                errorDiv.textContent = 'Date range cannot exceed 7 days';
+                errorDiv.style.display = 'block';
+                this.value = ''; // Clear invalid date
+            } else {
+                errorDiv.style.display = 'none';
+            }
+        });
+    
+        // Clear error when from date changes
+        fromDateInput.addEventListener('change', function () {
+            errorDiv.style.display = 'none';
+            toDateInput.value = '';
+        });
+    });
+    
+    function generateReport(type) {
+        const form = document.querySelector('#reportForm');
+        const formData = new FormData(form);
+        const params = new URLSearchParams(formData);
+    
+        const fromDate = new Date(formData.get('from_date'));
+        const toDate = new Date(formData.get('to_date'));
+    
+        if (!formData.get('from_date') || !formData.get('to_date')) {
+            alert('Please select both date ranges');
+            return;
+        }
+    
+        const diffTime = Math.abs(toDate - fromDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+        if (diffDays > 7) {
+            alert('Please select a date range within 7 days');
+            return;
+        }
+    
+        const btn = event.target;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    
+        const url = type === 'pdf'
+            ? "{% url 'student_fees_report_pdf' %}"
+            : "{% url 'student_fees_report_excel' %}";
+    
+        fetch(url + '?' + params.toString(), {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            checkStatus(data.task_id, btn, type);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            btn.disabled = false;
+            btn.innerHTML = type === 'pdf'
+                ? '<i class="fas fa-file-pdf"></i> Download PDF'
+                : '<i class="fas fa-file-excel"></i> Download Excel';
+        });
+    }
+    
+    function checkStatus(taskId, btn, type) {
+        fetch(`/check-task-status/?task_id=${taskId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'SUCCESS') {
+                    window.location.href = `/download-report/?file=${data.result}&t=${Date.now()}`;
+                    btn.innerHTML = type === 'pdf'
+                        ? '<i class="fas fa-file-pdf"></i> Download PDF'
+                        : '<i class="fas fa-file-excel"></i> Download Excel';
+                    btn.disabled = false;
+                } else if (data.status === 'PENDING' || data.status === 'STARTED') {
+                    setTimeout(() => checkStatus(taskId, btn, type), 2000);
+                } else {
+                    btn.innerHTML = 'Error generating report';
+                    btn.disabled = false;
+                }
+            });
+    }
+    </script>
+    
+{% endblock %}

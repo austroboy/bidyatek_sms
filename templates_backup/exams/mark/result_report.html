@@ -1,0 +1,188 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .highlight {
+        font-weight: bold;
+        color: #1D1E4E;
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y"> 
+    {% include 'pageinfo.html' %}
+    <!-- Form Section -->
+    <div class="card p-4">
+      <h3 class="section-title">Generate Result Report</h3>
+      <form method="POST" action="{% url 'result_overview' %}" id="reportForm">
+          {% csrf_token %}
+          <div class="row">
+              <div class="col-md-4">
+                  <label class="highlight" for="class_id">Select Class:</label>
+                  <select name="class_id" id="class_id" class="form-control" required>
+                      <option value="" disabled selected>Select Class</option>
+                      {% for class in classes %}
+                      <option value="{{ class.id }}" {% if class.id == selected_class_id %}selected{% endif %}>{{class}}</option>
+                      {% endfor %}
+                  </select>
+              </div>
+              
+              <div class="col-md-4">
+                  <label class="highlight" for="exam_id">Select Exam:</label>
+                  <select name="exam_id" id="exam_id" class="form-control" required>
+                      <option value="" disabled selected>Select Exam</option>
+                      {% for exam in exams %}
+                      <option value="{{ exam.id }}" {% if exam.id == selected_exam_id %}selected{% endif %}>{{ exam.name }}</option>
+                      {% endfor %}
+                  </select>
+              </div>
+
+              <div class=" col-md-4 text-center" >
+                <button style="margin-top: 20px;" type="submit" class="btn btn-primary">Generate Report</button>
+              </div>
+
+
+          </div>
+          
+      </form>    
+    </div>
+  
+    <!-- Report Section -->
+    {% if total_students %}
+    <div class="card p-4 mt-4">
+      <h3 class="section-title">Result Overview</h3>
+  
+      <table style="width: 500px; background-color:rgba(78, 78, 78, 0.16) !important ;" class="table mx-auto table-bordered table-custom">
+       
+        <tbody>
+            
+            <tr>
+                <td><span class="highlight">Total Students:</span></td>
+                <td>{{ total_students }}</td>
+            </tr>
+            <tr>
+                <td><span class="highlight">Passed:</span></td>
+                <td>{{ passed_students }}</td>
+            </tr>
+            <tr>
+                <td><span class="highlight">Failed:</span></td>
+                <td>{{ failed_students }}</td>
+            </tr>
+            <tr>
+                <td><span class="highlight">Absent:</span></td>
+                <td>{{ absent_students }}</td>
+            </tr>
+            
+        </tbody>
+    </table>
+  
+      <h4 class="highlight text-center py-2">GPA Distribution</h4>
+      <table class="table table-bordered table-custom">
+        <thead>
+            <tr>
+                <th>GPA Category</th>
+                <th>Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>GPA 5.00 (A+)</td>
+                <td>{{ gpa_data.gpa_5 }}</td>
+            </tr>
+            <tr>
+                <td>GPA 4.00 - 4.99 (A)</td>
+                <td>{{ gpa_data.gpa_4_to_4_99 }}</td>
+            </tr>
+            <tr>
+                <td>GPA 3.50 - 3.99 (A-)</td>
+                <td>{{ gpa_data.gpa_3_5_to_3_99 }}</td>
+            </tr>
+            <tr>
+                <td>GPA 3.00 - 3.49 (B)</td>
+                <td>{{ gpa_data.gpa_3_to_3_49 }}</td>
+            </tr>
+            <tr>
+                <td>GPA 2.00 - 2.99 (C)</td>
+                <td>{{ gpa_data.gpa_2_to_2_99 }}</td>
+            </tr>
+            <tr>
+                <td>GPA 1.00 - 1.99 (D)</td>
+                <td>{{ gpa_data.gpa_1_to_1_99 }}</td>
+            </tr>
+            <tr>
+                <td>GPA Below 1.00 (F)</td>
+                <td>{{ gpa_data.gpa_below_1 }}</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    
+    <h4 class="text-center highlight py-4"> Highest and Lowest Marks </h4>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th> <span class="highlight">Highest Marks:</span> </th>
+                <th> <span class="highlight">Lowest Marks:</span> </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <span class="highlight">{{ highest_marks|default:"N/A" }}</span>
+                </td>
+                <td>
+                    <span class="highlight">{{ lowest_marks|default:"N/A" }}</span>
+                </td>
+            </tr>
+         
+        </tbody>
+    </table>
+  
+      <h4 class="highlight text-center py-4">Subject-wise Failed and Absent</h4>
+      <table class="table table-bordered table-striped table-custom">
+        <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Total Failed</th>
+                <th>Total Absent</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for subject, failed_count in subject_wise_data.items %}
+            <tr>
+                <td>{{ subject }}</td>
+                <td>{{ failed_count|default:"0" }}</td>
+                <td>
+                    {% for absent_subject in subject_absent_counts %}
+                        {% if absent_subject.subject == subject %}
+                            {{ absent_subject.total_absent|default:"0" }}
+                        {% endif %}
+                    {% endfor %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="text-center">No data available</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    </div>
+  
+    <!-- Download PDF Button -->
+    <div class="text-center">
+        <a href="{% url 'download_result_report_pdf' %}?class_id={{ selected_class_id }}&exam_id={{ selected_exam_id }}" 
+           class="btn btn-primary mt-4">
+            Download PDF
+        </a>
+    </div>
+    {% else %}
+    <p class="text-center alert alert-warning mt-4">No data available. Please generate a report.</p>
+    {% endif %}
+  </div>
+  
+{% endblock %}
+

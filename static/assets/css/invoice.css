@@ -1,0 +1,215 @@
+
+/* invoice */
+/* .invoice__wrapper {
+  padding: 4px;
+  background-color: white;
+} */
+.invoice {
+    font-family: "Montserrat", sans-serif;
+    padding: 70px;
+    background-color: #fff;
+    color: #4c5865;
+    /* border: 2px solid rgb(228, 182, 190); */
+  }
+  
+  .invoice_data_number .title {
+    font-size: 16px;
+  }
+  .invoice p,
+  .invoice h2,
+  .invoice h3,
+  .invoice h4,
+  .invoice h5,
+  .invoice h6 {
+    margin-bottom: 1px !important;
+  }
+  .invoice__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 25px;
+    padding-bottom: 20px;
+    margin-bottom: 80px;
+    border-bottom: 1px solid #e4e4e4;
+  }
+  
+  .invoice__top img {
+    width: 120px;
+  }
+  
+  .invoice .title {
+    font-weight: bold;
+    color: #3c4652;
+  }
+  .invoice .receiver_sender {
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+    margin-bottom: 30px;
+  }
+  
+  .invoice .receiver_sender .sender{
+    text-align: right;
+  }
+  .invoice .receiver_sender h6 {
+    margin-bottom: 10px !important;
+  }
+  
+  /* invoice body */
+  .invoice__main {
+    border: 1px solid gainsboro;
+    border-radius: 2px;
+    width: 100%;
+    overflow: auto;
+  }
+  .invoice__main table {
+    min-width: 500px;
+    width: 100%;
+  }
+  .invoice__main table tbody tr:first-child td {
+    padding-top: 20px;
+  }
+  .invoice__main table tbody tr:last-child td {
+    padding-bottom: 20px;
+  }
+  .invoice__main table thead tr td {
+    font-weight: bold;
+    background-color: rgb(226, 236, 247);
+  }
+  .invoice__main table tfoot {
+    border-top: 1px solid rgb(226, 236, 247);
+  }
+  
+  .invoice__main table tr.subtotal td[colspan="3"], 
+  .invoice__main table tr.discount td[colspan="3"], 
+  .invoice__main table tr.total td[colspan="3"]{
+    text-align: right;
+  }
+  .invoice__main table tr.subtotal {
+    border-top: 1px solid rgb(226, 236, 247);
+  }
+  .invoice__main table tr.discount {
+    border-bottom: 1px solid rgb(226, 236, 247);
+  }
+  .invoice__main table tr td {
+    padding: 10px 15px;
+  }
+  .invoice__main table tr td:last-child {
+    text-align: right;
+  }
+  .invoice__main table tr.total td {
+    font-weight: bold;
+  }
+  
+  /* invoice footer */
+  .invoice .payment_method {
+    margin-top: 55px;
+  }
+  .invoice .thank {
+    font-size: 18px;
+    margin-bottom: 50px;
+  }
+  .invoice {
+    position: relative;
+    /* padding-bottom: 260px; */
+    overflow: hidden;
+  }
+  
+  .invoice .wave__wrapper .left_svg {
+    position: absolute;
+    left: -50px;
+    width: 100%;
+    bottom: 40px;
+    z-index: 5;
+  }
+  .invoice .wave__wrapper .right_svg {
+    position: absolute;
+    right: 0;
+    width: 100%;
+    bottom: 0;
+    z-index: 10;
+  }
+  
+  /* wave */
+  .wave__wrapper {
+    width: 100%;
+    height: 160px;
+    overflow: hidden;
+  }
+  @media only screen and (max-width: 768px) {
+    .invoice {
+      padding: 30px;
+    }
+    .invoice .receiver_sender {
+      margin-right: 0px;
+    }
+  
+    .invoice .receiver_sender h6 {
+      margin-bottom: 5px !important;
+    }
+  
+    /* invoice body */
+    .invoice__main {
+      margin-right: 0px;
+    }
+  
+    /* .invoice {
+      padding-bottom: 200px;
+    } */
+  
+    .invoice .wave__wrapper .left_svg {
+      bottom: 10px;
+    }
+    .wave__wrapper {
+      height: 150px;
+    }
+  }
+  @media only screen and (max-width: 480px) {
+    .invoice {
+      padding: 15px;
+      /* padding-bottom: 140px; */
+    }
+  .invoice__top{
+    flex-wrap: wrap;
+  }
+  
+  .invoice__top img{
+    order: 1;
+  }
+  .invoice__top .invoice_data_number{
+    order: 2;
+  }
+    .invoice .receiver_sender {
+      flex-wrap: wrap;
+    }
+    .invoice .receiver_sender .sender {
+      text-align: left;
+    }
+  
+    .wave__wrapper {
+      height: 100px;
+    }
+  }
+  
+  @media print {
+    @page {
+      size: A4;
+      margin: 20px;
+    }
+    .page_border {
+      position: fixed;
+      left: 0;
+      top: 0;
+      border: 4px solid rgb(211, 120, 120);
+      width: 100%;
+      height: 100%;
+      z-index: 100;
+    }
+  
+    body {
+      -webkit-print-color-adjust: exact;
+      -moz-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  }
+  

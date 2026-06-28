@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabulation Sheet</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 9px;
+            padding: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 4px;
+            text-align: center;
+            font-size: 8px;
+        }
+        th {
+            background-color: #2A3F54;
+            color: white;
+            font-size: 9px;
+        }
+        .header {
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .total {
+            font-weight: bold;
+            background-color: #f2f2f2;
+        }
+    </style>
+
+<body>
+
+    <div class="header">
+        <h2>Tabulation Sheet</h2>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th rowspan="2">Roll</th>
+                <th rowspan="2">Name</th>
+                <th rowspan="2">Stream</th>
+                <th rowspan="2">Section</th>
+                {% for subject in tabulation_data.0.subjects.keys %}
+                <th colspan="3">{{ subject }}</th>
+                {% endfor %}
+                <th rowspan="2">Total</th>
+                <th rowspan="2">GPA</th>
+                <th rowspan="2">Status</th>
+            </tr>
+            <tr>
+                {% for subject in tabulation_data.0.subjects.keys %}
+                <th>MCQ</th>
+                <th>CQ</th>
+                <th>Total</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in tabulation_data %}
+            <tr>
+                <td>{{ student.roll }}</td>
+                <td>{{ student.name }}</td>
+                <td>{{ student.stream }}</td>
+                <td>{{ student.section }}</td>
+                {% for subject, details in student.subjects.items %}
+                <td>{{ details.marks.MCQ|default:"-" }}</td>
+                <td>{{ details.marks.CQ|default:"-" }}</td>
+                <td class="total">{{ details.total }}</td>
+                {% endfor %}
+                <td class="total">{{ student.total_marks }}</td>
+                <td class="total">{{ student.total_gpa }}</td>
+                <td>{{ student.status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+
+</html>

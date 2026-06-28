@@ -1,0 +1,774 @@
+/* =============================================================================
+   EduTech — Global UI Upgrade  (modern clean / teal theme)
+   Author: UI refresh layer. Loaded LAST so it overrides the base Sneat theme.
+   Scope: shared parts only — sidebar, navbar/header, cards, buttons, tables,
+          forms, badges, dropdowns, pagination. Affects every page at once.
+   Color theme preserved & freshened (teal — accent #14a89a, deep #128a7e).
+   ============================================================================= */
+
+/* ----------------------------------------------------------------------------
+   1. DESIGN TOKENS
+---------------------------------------------------------------------------- */
+:root {
+  /* Brand teal scale — lighter & fresher */
+  --et-primary: #14a89a;          /* main accent — a brighter, fresher teal */
+  --et-primary-rgb: 20, 168, 154;
+  --et-primary-dark: #128a7e;     /* used sparingly (sidebar, hovers) */
+  --et-primary-darker: #0f6f66;
+  --et-primary-light: #2bc4b4;    /* highlights */
+  --et-primary-lighter: #5fd6c9;
+  --et-primary-soft: #e8f7f4;     /* soft tinted surface */
+  --et-primary-softer: #f3fbf9;   /* barely-there tint */
+  --et-primary-tint: #d4efeb;     /* header bar fill */
+
+  /* Sidebar — keep some depth so white text reads, but fresher than before */
+  --et-sidebar-from: #137f74;
+  --et-sidebar-to: #0e6258;
+
+  /* Neutrals */
+  --et-body-bg: #f4f7f9;
+  --et-card-bg: #ffffff;
+  --et-text: #45565f;
+  --et-text-muted: #93a1aa;
+  --et-heading: #2f4047;
+  --et-border: #eef2f4;
+
+  /* Radii */
+  --et-radius-sm: 8px;
+  --et-radius: 14px;
+  --et-radius-lg: 18px;
+  --et-radius-pill: 50rem;
+
+  /* Soft shadows — lighter, airier */
+  --et-shadow-xs: 0 1px 2px rgba(20, 80, 72, 0.04);
+  --et-shadow-sm: 0 2px 10px rgba(20, 80, 72, 0.05);
+  --et-shadow: 0 8px 28px rgba(20, 80, 72, 0.07);
+  --et-shadow-lg: 0 18px 50px rgba(20, 80, 72, 0.10);
+  --et-shadow-primary: 0 6px 18px rgba(20, 168, 154, 0.22);
+
+  --et-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Map Bootstrap's primary onto our teal so every existing utility class
+     (text-primary, bg-primary, btn-primary, border-primary…) becomes teal. */
+  --bs-primary: var(--et-primary);
+  --bs-primary-rgb: var(--et-primary-rgb);
+  --bs-link-color: var(--et-primary-dark);
+  --bs-link-hover-color: var(--et-primary);
+}
+
+/* ----------------------------------------------------------------------------
+   2. BASE / BODY
+---------------------------------------------------------------------------- */
+body {
+  background-color: var(--et-body-bg) !important;
+  color: var(--et-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.content-wrapper {
+  font-family: "Public Sans", "Poppins", system-ui, -apple-system, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 { color: var(--et-heading); }
+
+/* Kill the leftover purple Sneat defaults that bleed through */
+.text-primary { color: var(--et-primary) !important; }
+.bg-primary { background-color: var(--et-primary) !important; }
+.border-primary { border-color: var(--et-primary) !important; }
+a { color: var(--et-primary-dark); }
+a:hover { color: var(--et-primary); }
+
+/* ----------------------------------------------------------------------------
+   3. SIDEBAR  (.logicunite_side_menu / .layout-menu)
+---------------------------------------------------------------------------- */
+aside.logicunite_side_menu,
+nav.logicunite_side_menu,
+.layout-menu.logicunite_side_menu {
+  background: linear-gradient(195deg, var(--et-sidebar-from) 0%, var(--et-sidebar-to) 100%) !important;
+  border-right: none !important;
+  box-shadow: 4px 0 24px rgba(10, 63, 58, 0.18);
+}
+
+/* Menu links */
+.logicunite_side_menu .menu-inner > .menu-item .menu-link {
+  color: rgba(255, 255, 255, 0.78);
+  border-radius: var(--et-radius-sm);
+  margin: 2px 12px;
+  padding-top: 0.55rem;
+  padding-bottom: 0.55rem;
+  transition: background var(--et-transition), color var(--et-transition);
+}
+.logicunite_side_menu .menu-inner > .menu-item .menu-link:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+.logicunite_side_menu .menu-icon { color: rgba(255, 255, 255, 0.6); }
+.logicunite_side_menu .menu-link:hover .menu-icon { color: #fff; }
+
+/* Active item — soft teal-tinted highlight pill */
+.logicunite_side_menu .menu-inner > .menu-item.active > .menu-link {
+  color: #fff;
+  background: linear-gradient(90deg, var(--et-primary-light), rgba(20, 168, 154, 0.55)) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
+  font-weight: 600;
+}
+.logicunite_side_menu .menu-inner > .menu-item.active > .menu-link .menu-icon { color: #fff; }
+
+/* Remove Sneat's default right-edge active indicator (stray yellow/purple sliver) */
+.logicunite_side_menu .menu-inner > .menu-item.active::before,
+.logicunite_side_menu .menu-inner > .menu-item.active::after { display: none !important; }
+.logicunite_side_menu .menu-item .menu-link::after { background: transparent !important; }
+
+/* Submenus */
+.logicunite_side_menu .menu-sub .menu-link {
+  color: rgba(255, 255, 255, 0.62);
+  margin: 1px 12px 1px 6px;
+}
+.logicunite_side_menu .menu-sub .menu-item.active .menu-link {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.10);
+}
+.logicunite_side_menu .menu-sub .menu-link::before {
+  background-color: rgba(255, 255, 255, 0.5) !important;
+}
+.logicunite_side_menu .menu-item.active .menu-sub .menu-link::before {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Section header */
+.logicunite_side_menu .menu-header-text {
+  color: rgba(255, 255, 255, 0.42);
+  letter-spacing: 0.6px;
+  font-weight: 600;
+}
+
+/* Toggle caret */
+.logicunite_side_menu .menu-toggle::after { color: rgba(255, 255, 255, 0.55); }
+
+/* Sidebar search bar */
+.logicunite_side_menu .search-bar .search-input,
+.logicunite_side_menu .search-input {
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border-radius: var(--et-radius-sm);
+}
+.logicunite_side_menu .search-input::placeholder { color: rgba(255, 255, 255, 0.5); }
+
+/* Scrollbar inside menu */
+.logicunite_side_menu .ps__thumb-y { background: rgba(255, 255, 255, 0.25) !important; }
+
+/* ----------------------------------------------------------------------------
+   4. NAVBAR / HEADER  (.navbar_cont__wrapper)
+---------------------------------------------------------------------------- */
+.navbar_cont__wrapper {
+  background: linear-gradient(100deg, var(--et-primary-dark) 0%, var(--et-primary-light) 100%) !important;
+  border-radius: var(--et-radius) !important;
+  box-shadow: var(--et-shadow-primary) !important;
+  padding: 0.85rem 1.25rem !important;
+}
+.navbar_cont__wrapper h1 a { font-weight: 600; letter-spacing: 0.2px; }
+
+.navbar_cont__wrapper .navbar__left .img_wrapper {
+  width: 44px; height: 44px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Header icon buttons (grid / notification / profile) */
+.navbar_cont__wrapper .dots {
+  cursor: pointer;
+  border-radius: var(--et-radius-sm);
+  padding: 4px;
+  transition: background var(--et-transition);
+}
+.navbar_cont__wrapper .dots:hover { background: rgba(255, 255, 255, 0.14); }
+.navbar_cont__wrapper span { color: rgba(255, 255, 255, 0.35); }
+
+/* Dropdown overlays opened from header */
+.edit_details_overlay {
+  border: 1px solid var(--et-border) !important;
+  border-radius: var(--et-radius) !important;
+  box-shadow: var(--et-shadow-lg) !important;
+  overflow: hidden;
+}
+.shortcut__features .items .item { transition: transform var(--et-transition); }
+.shortcut__features .items .item:hover { transform: translateY(-2px); color: var(--et-primary); }
+.shortcut__features .items .item:hover * { fill: var(--et-primary); }
+
+.edit_details_overlay ul li:hover { background-color: var(--et-primary-soft); }
+.edit_details_overlay ul li:hover a,
+.notification__overlay ul li:hover { color: var(--et-primary-dark); }
+.edit_details_overlay ul li a { color: var(--et-text); }
+
+/* ----------------------------------------------------------------------------
+   5. CARDS  (.card and the project's .shadow card pattern)
+---------------------------------------------------------------------------- */
+.card {
+  border: 1px solid var(--et-border) !important;
+  border-radius: var(--et-radius) !important;
+  box-shadow: var(--et-shadow-sm) !important;
+  transition: box-shadow var(--et-transition), transform var(--et-transition);
+}
+.card:hover { box-shadow: var(--et-shadow); }
+
+.card-header {
+  border-bottom: 1px solid var(--et-border);
+  background: transparent;
+  font-weight: 600;
+}
+
+/* The system's hand-rolled card = .shadow.rounded.bg-white  */
+.shadow {
+  box-shadow: var(--et-shadow-sm) !important;
+  border-radius: var(--et-radius) !important;
+}
+.bg-white.shadow,
+.shadow.bg-white {
+  border: 1px solid var(--et-border);
+  transition: box-shadow var(--et-transition);
+}
+.bg-white.shadow:hover { box-shadow: var(--et-shadow) !important; }
+
+/* Coloured card "heading" bars used across dashboards.
+   Old design used a heavy dark teal gradient which felt gloomy and the white
+   title lost contrast. New: a light, fresh teal-tinted bar with dark-teal text,
+   separated from the card body by a hairline — clean and airy. */
+.heading {
+  background: var(--et-primary-soft) !important;
+  border-top-left-radius: var(--et-radius);
+  border-top-right-radius: var(--et-radius);
+  border-bottom: 1px solid var(--et-primary-tint);
+  padding-top: 0.9rem !important;
+  padding-bottom: 0.9rem !important;
+}
+/* Force the title text inside heading bars to dark teal (templates hard-code
+   .text-white, so override it and any nested h3/h5). */
+.heading,
+.heading h1, .heading h2, .heading h3, .heading h4, .heading h5, .heading h6,
+.heading.text-white,
+.heading .text-white {
+  color: var(--et-primary-darker) !important;
+}
+.heading h5, .heading h3 { font-weight: 600; }
+/* The three-dot menu toggle on heading bars */
+.heading .dots i,
+.heading .dropdown-toggle i { color: var(--et-primary-dark) !important; }
+.heading .btn-light {
+  background: #fff;
+  color: var(--et-primary-dark);
+  border: 1px solid var(--et-primary-tint);
+}
+
+/* Stat / summary tiles  (icon shape is left to the template's own
+   .rounded-circle / .rounded classes — we don't force a shape here) */
+.leave_sms .shadow,
+.student_teacher_stuff .shadow { border-radius: var(--et-radius) !important; }
+.student_details h3.name,
+.student_details .img_wrapper { background-color: var(--et-primary-dark); border-color: var(--et-primary-dark); }
+
+/* ----------------------------------------------------------------------------
+   6. BUTTONS
+---------------------------------------------------------------------------- */
+.btn {
+  border-radius: var(--et-radius-sm);
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  padding: 0.5rem 1.1rem;
+  transition: transform var(--et-transition), box-shadow var(--et-transition), background var(--et-transition);
+}
+.btn:active { transform: translateY(1px); }
+
+.btn-primary {
+  background: linear-gradient(100deg, var(--et-primary), var(--et-primary-dark)) !important;
+  border: none !important;
+  box-shadow: var(--et-shadow-primary);
+  color: #fff !important;
+}
+.btn-primary:hover,
+.btn-primary:focus {
+  background: linear-gradient(100deg, var(--et-primary-light), var(--et-primary)) !important;
+  box-shadow: 0 8px 22px rgba(var(--et-primary-rgb), 0.32);
+  transform: translateY(-1px);
+}
+
+.btn-outline-primary {
+  color: var(--et-primary) !important;
+  border: 1.5px solid var(--et-primary) !important;
+  background: transparent;
+}
+.btn-outline-primary:hover {
+  background: var(--et-primary) !important;
+  color: #fff !important;
+  box-shadow: var(--et-shadow-primary);
+}
+
+.btn-secondary { border-radius: var(--et-radius-sm); }
+
+/* Floating action button (.float / .btn-buy-now) */
+.float, .btn-buy-now {
+  background: linear-gradient(135deg, var(--et-primary-light), var(--et-primary-dark)) !important;
+  border: none !important;
+  box-shadow: var(--et-shadow-primary) !important;
+}
+
+/* ----------------------------------------------------------------------------
+   7. TABLES
+---------------------------------------------------------------------------- */
+.table {
+  --bs-table-hover-bg: var(--et-primary-softer);
+  border-color: var(--et-border);
+}
+.table > thead {
+  background: var(--et-primary-soft);
+}
+.table > thead th {
+  color: var(--et-primary-dark);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.74rem;
+  letter-spacing: 0.4px;
+  border-bottom: 1px solid var(--et-border) !important;
+  padding-top: 0.85rem;
+  padding-bottom: 0.85rem;
+}
+.table > tbody td {
+  vertical-align: middle;
+  border-color: var(--et-border);
+}
+.table-hover > tbody > tr { transition: background var(--et-transition); }
+
+/* Wrap bare tables in a soft rounded surface where the project uses .table-responsive */
+.table-responsive {
+  border-radius: var(--et-radius);
+  border: 1px solid var(--et-border);
+  background: var(--et-card-bg);
+  box-shadow: var(--et-shadow-xs);
+  overflow: hidden;
+}
+.table-responsive > .table { margin-bottom: 0; }
+
+/* DataTables length/filter/pagination controls */
+.dataTables_wrapper .dt-button,
+.dataTables_wrapper .paginate_button {
+  border-radius: var(--et-radius-sm) !important;
+}
+.dataTables_wrapper .paginate_button.current {
+  background: var(--et-primary) !important;
+  border-color: var(--et-primary) !important;
+  color: #fff !important;
+}
+
+/* ----------------------------------------------------------------------------
+   8. FORMS
+---------------------------------------------------------------------------- */
+.form-control,
+.form-select {
+  border-radius: var(--et-radius-sm);
+  border: 1px solid var(--et-border);
+  background-color: #fff;
+  color: var(--et-text);
+  transition: border-color var(--et-transition), box-shadow var(--et-transition);
+  padding: 0.55rem 0.85rem;
+}
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--et-primary);
+  box-shadow: 0 0 0 0.18rem rgba(var(--et-primary-rgb), 0.15);
+}
+.form-control::placeholder { color: var(--et-text-muted); }
+.form-label { color: var(--et-heading); font-weight: 500; margin-bottom: 0.35rem; }
+
+/* Native control accent (checkbox, radio, range) → teal.
+   In modern Chrome/Edge/Firefox `accent-color` also tints the highlighted
+   option in an open <select> dropdown, replacing the default bright blue. */
+:root { accent-color: var(--et-primary); }
+.form-select,
+.form-control,
+select,
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"] {
+  accent-color: var(--et-primary);
+}
+
+/* Selected / highlighted option in dropdowns — teal instead of blue.
+   (Browser support is partial for option backgrounds, but where supported this
+   turns the bright-blue highlight into the theme teal.) */
+option:checked,
+option:hover,
+option:focus {
+  background: var(--et-primary) linear-gradient(0deg, var(--et-primary), var(--et-primary)) !important;
+  color: #fff !important;
+}
+select:focus option:checked { background: var(--et-primary) !important; color: #fff !important; }
+
+.input-group-text {
+  background: var(--et-primary-soft);
+  border: 1px solid var(--et-border);
+  color: var(--et-primary-dark);
+  border-radius: var(--et-radius-sm);
+}
+
+/* Checks / switches in teal */
+.form-check-input:checked {
+  background-color: var(--et-primary);
+  border-color: var(--et-primary);
+}
+.form-check-input:focus {
+  border-color: var(--et-primary);
+  box-shadow: 0 0 0 0.18rem rgba(var(--et-primary-rgb), 0.15);
+}
+
+/* ----------------------------------------------------------------------------
+   9. BADGES, PILLS, ALERTS, PROGRESS
+---------------------------------------------------------------------------- */
+.badge { border-radius: var(--et-radius-pill); font-weight: 500; letter-spacing: 0.2px; }
+.badge.bg-primary,
+.badge.text-bg-primary { background-color: var(--et-primary) !important; }
+
+.bg-label-primary {
+  background-color: var(--et-primary-soft) !important;
+  color: var(--et-primary-dark) !important;
+}
+
+.progress { border-radius: var(--et-radius-pill); background: var(--et-primary-soft); height: 0.6rem; }
+.progress-bar { background: linear-gradient(90deg, var(--et-primary), var(--et-primary-light)); }
+
+.alert-primary {
+  background: var(--et-primary-soft);
+  border-color: rgba(var(--et-primary-rgb), 0.2);
+  color: var(--et-primary-dark);
+  border-radius: var(--et-radius);
+}
+
+.nav-tabs .nav-link.active {
+  color: var(--et-primary);
+  border-bottom-color: var(--et-primary);
+}
+.nav-pills .nav-link.active { background-color: var(--et-primary); }
+
+/* ----------------------------------------------------------------------------
+   10. MISC OVERRIDES — replace stray Sneat purple with teal
+---------------------------------------------------------------------------- */
+.student_details table th { color: var(--et-primary-dark); }
+.attendance_info .attendance .chart_info h6 { color: var(--et-primary-dark); }
+.testimonial-name { background: var(--et-primary); }
+
+/* --- DASHBOARD CARD SYNC -----------------------------------------------------
+   The dashboards nest tinted blocks (student/teacher/staff attendance, leave,
+   sms) inside a white card. Previously each had its own clashing tint (purple,
+   yellow, green) which looked unsynced. Unify them into soft neutral panels with
+   a consistent radius, gentle border, and even spacing so the card reads as ONE
+   coherent surface instead of "cards inside a card". */
+
+/* Inner attendance panels: one calm neutral fill + hairline, equal shape */
+.attendance_info .student_attendance,
+.attendance_info .teacher_attendance,
+.attendance_info .staff_attendance {
+  background: var(--et-primary-softer) !important;
+  border: 1px solid var(--et-border);
+  border-radius: var(--et-radius) !important;
+}
+/* the little white disc behind each donut chart */
+.attendance_info .pieChart_wrapper::after { background-color: #fff !important; }
+.attendance_info .attendance .chart_info h6 { font-weight: 600; }
+.attendance_info .present_number,
+.attendance_info .absent_number { font-weight: 700; font-size: 1.05rem; }
+.attendance_info .present_title,
+.attendance_info .absent_title { color: var(--et-text-muted); font-size: 0.8rem; }
+/* the three-dot menu on inner panels */
+.attendance_info .attendance .dots {
+  background: #fff;
+  box-shadow: var(--et-shadow-xs);
+}
+
+/* Leave & SMS inner tiles: shape left to template classes */
+/* The inner white tiles that sit on a card body — give them a soft neutral
+   surface + hairline so they sit calmly instead of floating with heavy shadow */
+.leave_sms .leave_student,
+.leave_sms .leave_teacher,
+.leave_sms .general_sms,
+.leave_sms .masking_sms,
+.student_teacher_stuff .student,
+.student_teacher_stuff .teacher,
+.student_teacher_stuff .stuffs,
+.student_teacher_stuff .parents {
+  background: var(--et-primary-softer);
+  border: 1px solid var(--et-border);
+  border-radius: var(--et-radius) !important;
+  box-shadow: none !important;
+}
+
+/* Card body padding rhythm — only the specific dashboard inner containers,
+   NOT every .row (that would cramp the top stat-tile grid). */
+.shadow.bg-white > .student_teacher_attendance,
+.shadow.bg-white > .notices { padding: 1rem; }
+
+/* Top summary tiles (Total Student / Staffs / Parents): equal height + lift */
+.leave_sms .shadow.bg-white,
+.student_teacher_stuff .shadow.bg-white {
+  border-radius: var(--et-radius) !important;
+}
+
+/* Donut "Total" ring count text legible */
+.pieChart_wrapper__holder .total p.fw-medium { color: var(--et-text-muted); font-size: 0.78rem; }
+.pieChart_wrapper__holder .total p:last-child { color: var(--et-heading); font-weight: 700; }
+
+/* "View All" pill that floats on heading bars */
+.heading .badge,
+.heading a.btn { background: #fff !important; color: var(--et-primary-dark) !important; border: 1px solid var(--et-primary-tint); }
+
+/* Student profile mini-card header strip */
+.student_details h3.name { background-color: var(--et-primary) !important; }
+.student_details .img_wrapper { border-color: var(--et-primary) !important; }
+.student_details .table_wrapper { background-color: var(--et-primary-softer) !important; }
+
+/* Smooth scrolling + nicer text selection */
+html { scroll-behavior: smooth; }
+::selection { background: rgba(var(--et-primary-rgb), 0.18); color: var(--et-primary-darker); }
+
+/* Page-load fade — opacity ONLY. We must NOT leave a transform on this
+   container: a lingering transform makes it a containing block for fixed/
+   absolute children, which traps Bootstrap modals & dropdowns inside the card
+   instead of the viewport (they appear stuck/unclickable). Opacity is safe. */
+.content-wrapper > .container-fluid { animation: etFadeIn 0.4s ease both; }
+@keyframes etFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Custom scrollbar (webkit) */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(var(--et-primary-rgb), 0.35);
+  border-radius: var(--et-radius-pill);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(var(--et-primary-rgb), 0.55); background-clip: content-box; }
+
+/* Responsive: tighten card radius on small screens */
+@media (max-width: 575.98px) {
+  .navbar_cont__wrapper { border-radius: var(--et-radius-sm) !important; }
+  :root { --et-radius: 12px; --et-radius-lg: 14px; }
+}
+
+/* =============================================================================
+   11. MICRO-INTERACTIONS  (subtle & professional)
+   Small lifts, soft teal shadows, smooth transitions. CSS-only — no HTML/JS
+   changes needed. Keeps an office-appropriate, calm feel (nothing bouncy).
+   ============================================================================= */
+
+/* --- Cards: gentle lift + slightly stronger teal-tinted shadow on hover ---
+   NOTE: we deliberately do NOT use `will-change: transform` here. will-change
+   creates a permanent containing block, which would trap fixed-position modals
+   and dropdowns inside the card. The transform only applies on :hover, and the
+   modal-safety section below neutralizes it whenever a modal is open. */
+.card,
+.shadow.bg-white,
+.bg-white.shadow {
+  transition: transform var(--et-transition), box-shadow var(--et-transition);
+}
+.card:hover,
+.shadow.bg-white:hover,
+.bg-white.shadow:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(var(--et-primary-rgb), 0.12) !important;
+}
+
+/* --- Top stat tiles (Total Student/Staffs/Parents): lift + the round icon
+       grows a touch and brightens. Icon shape stays (template controls it). --- */
+.leave_sms .shadow.bg-white .img_wrapper,
+.leave_sms .shadow.bg-white [class*="stat-icon"] {
+  transition: transform var(--et-transition), box-shadow var(--et-transition);
+}
+.leave_sms .shadow.bg-white:hover .img_wrapper,
+.leave_sms .shadow.bg-white:hover [class*="stat-icon"] {
+  transform: scale(1.08);
+}
+.leave_sms .shadow.bg-white .text_wrapper span {
+  transition: color var(--et-transition);
+}
+.leave_sms .shadow.bg-white:hover .text_wrapper span {
+  color: var(--et-primary-dark);
+}
+
+/* --- Inner attendance / leave / sms panels: soft highlight on hover --- */
+.attendance_info .student_attendance,
+.attendance_info .teacher_attendance,
+.attendance_info .staff_attendance,
+.leave_sms .leave_student,
+.leave_sms .leave_teacher,
+.leave_sms .general_sms,
+.leave_sms .masking_sms {
+  transition: background var(--et-transition), border-color var(--et-transition), transform var(--et-transition);
+}
+.attendance_info .student_attendance:hover,
+.attendance_info .teacher_attendance:hover,
+.attendance_info .staff_attendance:hover,
+.leave_sms .leave_student:hover,
+.leave_sms .leave_teacher:hover,
+.leave_sms .general_sms:hover,
+.leave_sms .masking_sms:hover {
+  background: var(--et-primary-soft) !important;
+  border-color: var(--et-primary-tint);
+  transform: translateY(-2px);
+}
+/* the small round icon inside leave/sms tiles nudges up with its panel */
+.leave_sms .leave_student .img_wrapper,
+.leave_sms .leave_teacher .img_wrapper,
+.leave_sms .general_sms .img_wrapper,
+.leave_sms .masking_sms .img_wrapper {
+  transition: transform var(--et-transition);
+}
+.leave_sms .leave_student:hover .img_wrapper,
+.leave_sms .leave_teacher:hover .img_wrapper,
+.leave_sms .general_sms:hover .img_wrapper,
+.leave_sms .masking_sms:hover .img_wrapper {
+  transform: scale(1.06);
+}
+
+/* --- Donut chart: a soft glow ring appears behind it on hover --- */
+.attendance_info .pieChart_wrapper {
+  transition: transform var(--et-transition);
+}
+.attendance_info .attendance:hover .pieChart_wrapper {
+  transform: scale(1.04);
+}
+
+/* --- Sidebar links: smooth slide-in + icon nudge on hover --- */
+.logicunite_side_menu .menu-inner > .menu-item .menu-link {
+  transition: background var(--et-transition), color var(--et-transition), padding-left var(--et-transition);
+}
+.logicunite_side_menu .menu-inner > .menu-item:not(.active) .menu-link:hover {
+  padding-left: 1.1rem;
+}
+.logicunite_side_menu .menu-icon { transition: transform var(--et-transition); }
+.logicunite_side_menu .menu-link:hover .menu-icon { transform: translateX(2px); }
+
+/* --- Header icon buttons: gentle scale on hover --- */
+.navbar_cont__wrapper .dots i { transition: transform var(--et-transition); }
+.navbar_cont__wrapper .dots:hover i { transform: scale(1.12); }
+
+/* --- Heading bar three-dot + "View All": subtle feedback --- */
+.heading .dots,
+.heading .badge,
+.heading a.btn {
+  transition: transform var(--et-transition), box-shadow var(--et-transition), background var(--et-transition);
+}
+.heading .dots:hover { transform: scale(1.1); }
+.heading .badge:hover,
+.heading a.btn:hover {
+  background: var(--et-primary) !important;
+  color: #fff !important;
+  border-color: var(--et-primary) !important;
+  box-shadow: var(--et-shadow-primary);
+}
+
+/* --- Table rows: a soft teal cue slides in on hover --- */
+.table-hover > tbody > tr {
+  transition: background var(--et-transition), box-shadow var(--et-transition);
+}
+.table-hover > tbody > tr:hover {
+  box-shadow: inset 3px 0 0 var(--et-primary);
+}
+
+/* --- Dropdown menu items already tint on hover; add a tiny slide --- */
+.edit_details_overlay ul li { transition: background var(--et-transition), padding-left var(--et-transition); }
+.edit_details_overlay ul li:hover { padding-left: 18px; }
+
+/* --- Badges (status pills) lift slightly so they feel tappable --- */
+.badge { transition: transform var(--et-transition); }
+a .badge:hover, .badge:hover { transform: translateY(-1px); }
+
+/* --- Profile mini-card: avatar ring + name strip respond on hover --- */
+.student_details .shadow:hover .img_wrapper { transform: scale(1.04); }
+.student_details .img_wrapper { transition: transform var(--et-transition); }
+
+/* --- Accessibility: honour users who prefer reduced motion --- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* =============================================================================
+   12. MODAL & OVERLAY SAFETY  (critical — fixes "stuck popup" bug)
+   These dashboards load Bootstrap modals via HTMX INSIDE a .card / .container.
+   A CSS `transform` on any ancestor makes that ancestor the containing block
+   for position:fixed children, so the modal gets trapped inside the card
+   (dim background, not centered, can't type or close). This section guarantees
+   modals, their backdrops, and dropdowns always escape to the viewport with
+   correct stacking — no matter what hover/animation is happening elsewhere.
+   ============================================================================= */
+
+/* 1) When ANY modal is open, Bootstrap puts .modal-open on <body>. While open,
+      kill hover/animation transforms on the big containers so nothing can trap
+      the modal. (Inner micro-interactions still work; only the trapping
+      transforms on wrappers are neutralized.) */
+body.modal-open .content-wrapper > .container-fluid,
+body.modal-open .card,
+body.modal-open .shadow.bg-white,
+body.modal-open .bg-white.shadow {
+  transform: none !important;
+  animation: none !important;
+}
+
+/* 2) Never let our hover lift apply to a card that actually contains an open
+      modal dialog (belt-and-suspenders). */
+.card:has(.modal.show):hover,
+.shadow.bg-white:has(.modal.show):hover {
+  transform: none !important;
+}
+
+/* 3) Force correct stacking + positioning for Bootstrap modals and backdrop,
+      overriding anything inherited. These are the standard Bootstrap values;
+      we re-assert them with high specificity so a stray transform context can't
+      visually break them. */
+.modal {
+  position: fixed !important;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 1055 !important;
+}
+.modal-backdrop {
+  position: fixed !important;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  z-index: 1050 !important;
+}
+.modal-dialog { z-index: 1056; }
+
+/* 4) Style the modal content to match the fresh teal theme (it was unstyled
+      before — plain white box). Rounded, soft shadow, clean header/footer. */
+.modal-content {
+  border: none !important;
+  border-radius: var(--et-radius-lg) !important;
+  box-shadow: var(--et-shadow-lg) !important;
+  overflow: hidden;
+}
+.modal-header {
+  background: var(--et-primary-soft);
+  border-bottom: 1px solid var(--et-primary-tint) !important;
+  color: var(--et-primary-darker) !important;
+  font-weight: 600;
+  padding: 1rem 1.25rem;
+}
+.modal-body { padding: 1.25rem; }
+.modal-footer { border-top: 1px solid var(--et-border) !important; padding: 0.85rem 1.25rem; }
+
+/* 5) Bootstrap dropdowns (.dropdown-menu) can suffer the same trap. Make sure
+      they always paint above content. The project's custom .edit_details_overlay
+      dropdowns are absolute by design and unaffected. */
+.dropdown-menu.show { z-index: 1056 !important; }
+
+/* 6) The floating action button uses position:fixed too — keep it below modals
+      so it never overlaps an open dialog. */
+.float, .buy-now, .btn-buy-now { z-index: 1040 !important; }

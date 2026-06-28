@@ -1,0 +1,72 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load mark_tags %} 
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'assets/css/loading.css' %}" />
+{% endblock extra_css %}
+
+{% block content %}
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+    {% include 'pageinfo.html' %}
+
+    <div class="card">
+        <div class="card-body">
+
+            <!-- Loading screen -->
+            <div id="loading-screen" style="display: none;">
+                <figure>
+                    <div class="dot white"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </figure>
+            </div>
+
+            <form id="result-form" action="{% url 'result_summary' %}" method="post">
+                {% csrf_token %}
+                <div class="row">
+
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <div>
+                                <select class="form-select" name="exam_name_id" id="exam_name" required>
+                                    <option disabled selected value="">Select Exam</option>
+                                    {% for examname in exam_list %}
+                                    <option value="{{examname.id}}">{{examname.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-6 d-flex justify-content-between gap-2 align-content-center">
+                        <div>
+                            <button id="submit-btn" class="btn btn-primary" type="submit">Send</button>
+                        </div>
+                        <div class="d-flex flex-row gap-2 align-self-center pb-3">
+                            <input class="form-control" type="text" id="examname" value="{{exam_instance}}" disabled>
+                            <input class="form-control" type="text" id="classname" value="{{class_instance}}" disabled>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- end: Content -->
+{% endblock content %}
+
+{% block extra_javascript %}
+<script>
+    document.getElementById("result-form").addEventListener("submit", function () {
+        // Show the loading screen
+        document.getElementById("loading-screen").style.display = "block";
+        // Disable the submit button to prevent multiple submissions
+        document.getElementById("submit-btn").disabled = true;
+    });
+</script>
+{% endblock extra_javascript %}

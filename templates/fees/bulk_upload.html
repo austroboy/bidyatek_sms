@@ -1,0 +1,51 @@
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Bulk Upload Unpaid Fees</h2>
+    
+    <form method="post" enctype="multipart/form-data" class="mt-4">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+            <label for="excel_file" class="form-label">Excel File</label>
+            <input type="file" class="form-control" name="excel_file" required>
+            <div class="form-text">Ensure the file has columns: RollNo, FeeHeadName, FeeAmount</div>
+        </div>
+        
+        <div class="row mb-3">
+            <div class="col">
+                <label for="month_id" class="form-label">Select Month</label>
+                <select class="form-select" name="month_id" required>
+                    <option value="">Choose...</option>
+                    {% for month in months %}
+                    <option value="{{ month.id }}">{{ month.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col">
+                <label for="academic_year_id" class="form-label">Academic Year</label>
+                <select class="form-select" name="academic_year_id" required>
+                    <option value="">Choose...</option>
+                    {% for year in academic_years %}
+                    <option value="{{ year.id }}">{{ year.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Upload</button>
+    </form>
+
+    {% if errors %}
+    <div class="mt-4 alert alert-warning">
+        <h4>Errors encountered:</h4>
+        <ul>
+            {% for error in errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

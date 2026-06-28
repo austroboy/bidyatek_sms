@@ -1,0 +1,84 @@
+{% extends 'partials/base.html' %} 
+{% load static %}
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mt-4">Fee Report</h2>
+    <form method="GET" action="{% url 'download_student_payments' %}" class="mb-4">
+        <div class="row">
+            <div class="col-md-4">
+                <label for="start_date">From Date:</label>
+                <input type="date" id="start_date" name="start_date" class="form-control" required>
+            </div>
+            <div class="col-md-4">
+                <label for="end_date">To Date:</label>
+                <input type="date" id="end_date" name="end_date" class="form-control" required>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-file-excel"></i> Download Student Payments
+                </button>
+            </div>
+        </div>
+    </form>
+    
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Roll Number</th>
+                            <th>Class</th>
+                            <th>Section</th>
+                            <th>Group</th>
+                            <th>Version</th>
+                            <th>Shift</th>
+                            <th>Amount</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in report_data %}
+                        <tr>
+                            <td>{{ item.student_name }}</td>
+                            <td>{{ item.roll_no }}</td>
+                            <td>{{ item.class }}</td>
+                            <td>{{ item.section }}</td>
+                            <td>{{ item.group }}</td>
+                            <td>{{ item.version }}</td>
+                            <td>{{ item.shift }}</td>
+                            <td>{{ item.amount }}</td>
+                            <td>{{ item.date }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center">No data available</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="pagination justify-content-center">
+                <span class="step-links">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1" class="btn btn-sm btn-outline-primary">&laquo; first</a>
+                        <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-sm btn-outline-primary">previous</a>
+                    {% endif %}
+
+                    <span class="current">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" class="btn btn-sm btn-outline-primary">next</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-sm btn-outline-primary">last &raquo;</a>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

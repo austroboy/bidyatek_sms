@@ -1,0 +1,43 @@
+{% load widget_tweaks %}
+
+{% block content %}
+<form hx-post="{{ request.path }}" hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}' class="modal-content">
+  <div>
+    <h4 class="modal-header">Add-Edit Increment</h4>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <label class="col-sm-2 col-form-label" for="employee">Employee</label>
+      
+      <select class="form-select select2" id="employee" name="employee">
+        <option selected disabled hidden>Search Employee:</option>
+        {% for employee in employee_list %}
+        <option value="{{employee.id}}">{{employee.staff_field.name}}</option>
+        {% endfor %}
+      </select>
+    </div> 
+
+    <div class="mb-3 form-check">
+      <label for="{{ form.is_percentage.id_for_label }}" class="form-check-label">is_percentage?</label>
+      {% render_field form.is_percentage class="form-check-input" %}
+    </div>
+    
+    <div class="mb-3">
+      <label for="{{ form.increment_amount.id_for_label }}" class="form-label">Increment Amount</label>
+      {% render_field form.increment_amount class+="form-control" placeholder="Increment Amount" %}
+    </div>
+
+    <div class="mb-3">
+      <label for="{{ form.effective_date.id_for_label }}" class="form-label">Effective Date</label>
+      {% render_field form.effective_date type="date" class+="form-control" placeholder="Effective Date" %}
+    </div>
+    
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+    <button type="submit" class="btn  btn-primary ">Save</button>
+  </div>
+</form>
+
+{% endblock content %}
+

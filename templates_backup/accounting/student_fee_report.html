@@ -1,0 +1,194 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% block extra_css %}
+<style>
+    .report-container {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .date-range-input {
+        max-width: 200px;
+    }
+    .btn-generate {
+        min-width: 120px;
+    }
+    .report-options {
+        background: #f8f9fa;
+        border-radius: 6px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+
+<div id="loading-screen" style="display: none;">
+    <figure>
+        <div class="dot white"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    </figure>
+</div>
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold mb-0">Student Fee Report</h4>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger alert-dismissible" role="alert">
+        {{ error }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <div class="card report-container">
+        <div class="card-body">
+            <div class="report-options">
+                <h5 class="card-title mb-3">Generate Report</h5>
+                <form id="report-form" method="post" action="{% url 'generate_student_fee_report' %}">
+                    {% csrf_token %}
+                    
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" class="form-control date-range-input" 
+                                       name="start_date" id="start_date" required>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">End Date</label>
+                                <input type="date" class="form-control date-range-input" 
+                                       name="end_date" id="end_date" required>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Report Format</label>
+                                <div class="d-flex gap-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" 
+                                               name="report_type" id="excel" value="excel" checked>
+                                        <label class="form-check-label" for="excel">
+                                            Excel Format
+                                        </label>
+                                    </div>
+                                    {% comment %} <div class="form-check">
+                                        <input class="form-check-input" type="radio" 
+                                               name="report_type" id="pdf" value="pdf">
+                                        <label class="form-check-label" for="pdf">
+                                            PDF Format
+                                        </label>
+                                    </div> {% endcomment %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <small>
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    This report will include all Receive records.
+                                    Each student's amounts will be summed and displayed in one row.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                            Clear
+                        </button>
+                        <button type="submit" class="btn btn-primary btn-generate" id="generate-btn">
+                            <i class="fas fa-download me-2"></i>Generate Report
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- end: Content -->
+
+{% endblock content %}
+
+{% block extra_javascript %}
+<script>
+    // Set default dates (current month)
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date();
+        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+        const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        
+        // Format dates as YYYY-MM-DD
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        document.getElementById('start_date').value = formatDate(firstDay);
+        document.getElementById('end_date').value = formatDate(lastDay);
+        
+        // Validate that end date is not before start date
+        document.getElementById('end_date').addEventListener('change', function() {
+            const startDate = new Date(document.getElementById('start_date').value);
+            const endDate = new Date(this.value);
+            
+            if (endDate < startDate) {
+                alert('End date cannot be before start date');
+                this.value = formatDate(new Date());
+            }
+        });
+    });
+    
+    // Clear form function
+    function clearForm() {
+        document.getElementById('report-form').reset();
+        const today = new Date();
+        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+        const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        document.getElementById('start_date').value = formatDate(firstDay);
+        document.getElementById('end_date').value = formatDate(lastDay);
+        document.getElementById('excel').checked = true;
+    }
+    
+    // Show loading screen when form is submitted
+    document.getElementById('report-form').addEventListener('submit', function(e) {
+        // Validate dates
+        const startDate = document.getElementById('start_date').value;
+        const endDate = document.getElementById('end_date').value;
+        
+        if (!startDate || !endDate) {
+            e.preventDefault();
+            alert('Please select both start and end dates');
+            return;
+        }
+        
+        // Show loading screen
+        document.getElementById('loading-screen').style.display = 'block';
+        document.getElementById('generate-btn').disabled = true;
+        document.getElementById('generate-btn').innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generating...';
+    });
+</script>
+{% endblock extra_javascript %}

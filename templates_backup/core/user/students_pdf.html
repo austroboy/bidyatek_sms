@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 1cm;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 6px;
+            word-wrap: break-word;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        td {
+            word-break: keep-all;
+            white-space: normal;
+        }
+        .nowrap {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+</head>
+<body>
+    <h1>Students List</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Roll No</th>
+                <th>Class</th>
+                <th>Group</th>
+                <th>Section</th>
+                <th>Shift</th>
+                <th>Admission Year</th>
+                <th>Session</th>
+                <th>Guardian</th>
+                <th>Phone</th>
+                <th>Version</th>
+                <th>Father's Name</th>
+                <th>Father's Phone</th>
+                <th>Mother's Name</th>
+                <th>Mother's Phone</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td class="nowrap">{{ student.student_field.name }}</td>
+                <td>{{ student.roll_no }}</td>
+                <td>{% if student.class_id.class_group_id.class_id %}{{ student.class_id.class_group_id.class_id.name }}{% endif %}</td>
+                <td>{% if student.class_id.class_group_id.group_id %}{{ student.class_id.class_group_id.group_id.name }}{% endif %}</td>
+                <td>{% if student.class_id.section_id %}{{ student.class_id.section_id.name }}{% endif %}</td>
+                <td>{% if student.class_id.shift_id %}{{ student.class_id.shift_id.name }}{% endif %}</td>
+                <td>{% if student.admission_year_id %}{{ student.admission_year_id.name }}{% endif %}</td>
+                <td>{{ student.academic_session_year }}</td>
+                <td>{% if student.parent_id %}{{ student.parent_id.name }}{% endif %}</td>
+                <td>{% if student.parent_id %}{{ student.parent_id.phone_number }}{% endif %}</td>
+                <td>{{ student.version|default:"Bangla" }}</td>
+                <td>{% if student.parent_id.parent_profile %}{{ student.parent_id.parent_profile.father_name }}{% endif %}</td>
+                <td>{% if student.parent_id.parent_profile %}{{ student.parent_id.parent_profile.father_mobile_no }}{% endif %}</td>
+                <td>{% if student.parent_id.parent_profile %}{{ student.parent_id.parent_profile.mother_name }}{% endif %}</td>
+                <td>{% if student.parent_id.parent_profile %}{{ student.parent_id.parent_profile.mother_mobile_no }}{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

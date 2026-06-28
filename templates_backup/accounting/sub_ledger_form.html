@@ -1,0 +1,215 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% load template_tags %}
+
+{% block extra_css %}
+<style>
+    .header {
+        font-size: 1.5rem;
+        font-weight: 500;
+    }
+
+    .form-grid {
+        margin-top: 1rem;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+    }
+
+    .input, .select {
+        background-color: #f7fafc;
+        width: 100%;
+        border-radius: 0.375rem;
+        padding: 0.5rem;
+        border: 1px solid #cbd5e0;
+        outline: none;
+    }
+
+    .input:focus, .select:focus {
+        border-color: #3182ce;
+    }
+
+    .button {
+        border-radius: 0.375rem;
+        margin-top: 1rem;
+        width: 11rem;
+        padding: 0.5rem;
+        background-color: #3182ce;
+        color: white;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.2s, transform 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border: none;
+    }
+
+    .button:hover {
+        background-color: #2b6cb0;
+        transform: translateY(-0.125rem);
+    }
+
+    .table-container {
+        border: 1px solid #e2e8f0;
+        margin: 1.5rem 0;
+        border-radius: 0.375rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .table {
+        width: 100%;
+        color: #4a5568;
+        font-size: 0.875rem;
+        line-height: 1.5rem;
+    }
+
+    .table th, .table td {
+        padding: 0.5rem;
+        text-align: center;
+    }
+
+    .table thead {
+        border-bottom: 2px solid #e2e8f0;
+        background-color: #ebf8ff;
+    }
+
+    .table tbody tr {
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .delete-button {
+        background-color: #ffcccc;
+        color: #a30000;
+        padding: 6px 12px;
+        border: 1px solid #ff9999;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s;
+    }
+
+    .delete-button:hover {
+        background-color: #ff9999;
+        border-color: #ff6666;
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+    {% include 'pageinfo.html' %}
+
+    <div class="card">
+        <div class="card-body">
+            <h3 class="header">Create Sub Ledger</h3>
+            <hr />
+            <form id="subLedgerForm" method="POST">
+                {% csrf_token %}
+                <div class="form-grid">
+                    <div class="space-y-2">
+                        <label for="ledger">Select Ledger</label>
+                        <select class="select" id="ledger" name="sub_category" required>
+                            <option value="">Select Ledger</option>
+                            {% for ledger in ledgers %}
+                            <option value="{{ ledger.id }}">{{ ledger.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="space-y-2">
+                        <label for="sub_name">Sub Ledger Name</label>
+                        <input class="input" placeholder="Enter Sub Ledger Name" id="sub_name" name="sub_name" required>
+                    </div>
+                    <div class="space-y-2">
+                        <label for="note">Note</label>
+                        <input class="input" placeholder="Write Note" id="note" name="note">
+                    </div>
+                </div>
+                <div class="flex justify-end">
+                    <button type="submit" class="button">Save</button>
+                </div>
+            </form>
+
+            <!-- Sub Ledger List Table -->
+            <h3 class="header text-center mt-7">Sub Ledger List</h3>
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Ledger</th>
+                            <th>Sub Ledger Name</th>
+                            <th>Note</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="subLedgerTableBody">
+                        {% for sub_ledger in sub_ledgers %}
+                        <tr id="sub-ledger-{{ sub_ledger.id }}">
+                            <td>{{ sub_ledger.id }}</td>
+                            <td>{{ sub_ledger.sub_category.name }}</td>
+                            <td>{{ sub_ledger.sub_name }}</td>
+                            <td>{{ sub_ledger.note }}</td>
+                            <td>
+                                <button class="delete-button" onclick="deleteSubLedger({{ sub_ledger.id }})">Delete</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("subLedgerForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+        let formData = new FormData(this);
+
+        fetch("{% url 'sub_ledger_create' %}", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert("Error: " + data.error);
+            } else {
+                let tableBody = document.getElementById("subLedgerTableBody");
+                let newRow = document.createElement("tr");
+                newRow.id = `sub-ledger-${data.id}`;
+
+                newRow.innerHTML = `
+                    <td>${data.id}</td>
+                    <td>${data.ledger}</td>
+                    <td>${data.sub_name}</td>
+                    <td>${data.note}</td>
+                    <td><button class="delete-button" onclick="deleteSubLedger(${data.id})">Delete</button></td>
+                `;
+
+                tableBody.appendChild(newRow);
+                document.getElementById("subLedgerForm").reset();
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    });
+
+    function deleteSubLedger(subLedgerId) {
+        if (!confirm("Are you sure you want to delete this sub-ledger?")) return;
+
+        fetch(`/sub-ledger/delete/${subLedgerId}/`, {
+            method: "POST",
+            headers: { "X-CSRFToken": "{{ csrf_token }}" }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById(`sub-ledger-${subLedgerId}`).remove();
+            }
+        })
+        .catch(error => console.error("Error deleting sub-ledger:", error));
+    }
+</script>
+
+{% endblock content %}

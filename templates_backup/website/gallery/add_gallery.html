@@ -1,0 +1,34 @@
+{% load widget_tweaks %}
+{% block content %}
+<form hx-post="{{ request.path }}" hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}' enctype="multipart/form-data" class="modal-content">
+  <div>
+    <h4 class="modal-header">Add-Edit Gallery</h4>
+  </div>
+  <div class="modal-body"> 
+    <div class="mb-3">
+      <label for="{{ form.featured.id_for_label }}">Featured:</label> 
+      {% render_field form.featured type="checkbox" class="form-check-input" %}
+    </div> 
+    <div class="mb-3">
+      <label for="{{ form.galary_image.id_for_label }}">Image:</label> 
+      {% render_field form.galary_image class="form-control" %}
+    </div> 
+    <div class="mb-3">
+      <label for="{{ form.title.id_for_label }}">Title:</label>  
+      {% render_field form.title class="form-control" %}
+    </div>
+
+    <div class="mb-3">
+      <label for="{{ form.status.id_for_label }}">Status:</label>
+      {% render_field form.status class="form-control" %}
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-danger " data-bs-dismiss="modal">Close</button>
+    <button type="submit" class="btn  btn-primary ">Save</button>
+  </div>
+</form>
+
+{% endblock content %}
+
+

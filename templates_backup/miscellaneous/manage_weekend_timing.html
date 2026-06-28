@@ -1,0 +1,153 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block extra_css %}
+<style>
+  .nav-tabs .nav-link.active {
+    background-color: #1d1e4e !important;
+    color: white !important;
+  }
+
+  .nav-tabs .nav-item .nav-link:not(.active) {
+    background-color: #4C4E7A !important;
+    color: white !important;
+  }
+
+  .form-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+  }
+
+  .form-field {
+    flex: 1;
+    min-width: 150px;
+  }
+
+  .btn-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 15px;
+  }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+  
+  <div class="">
+    <div class="nav-align-top mb-4">
+      <ul class="nav nav-tabs nav-fill" role="tablist">
+        <li class="nav-item">
+          <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab" data-bs-target="#weekend-tab"
+            aria-controls="weekend-tab" aria-selected="true">
+            WeekendDay Config
+          </button>
+        </li>
+        <li class="nav-item">
+          <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#timing-tab"
+            aria-controls="timing-tab" aria-selected="false">
+            Working Hour Config
+          </button>
+        </li>
+      </ul>
+
+      <div class="tab-content">
+        <!-- WeekendDay Config Tab -->
+        <div class="tab-pane fade show active" id="weekend-tab" role="tabpanel">
+          <form method="POST">
+            {% csrf_token %}
+            {{ weekend_formset.management_form }}
+
+            <div id="weekend-container">
+              {% for form in weekend_formset %}
+              <div class="form-container">
+                <div class="form-field">
+                  {{ form.id }}
+                  <label for="{{ form.day.id_for_label }}" class="form-label">Day</label>
+                  {% render_field form.day class+="form-control" %}
+                </div>
+                <div class="form-field">
+                    <label for="{{ form.academic_year.id_for_label }}" class="form-label">Academic Year</label>
+                    {% render_field form.academic_year class+="form-control" %}
+                </div>
+                <div style="margin-top: 30px; margin-left: 50px;" class="form-field">
+                  <label for="{{ form.DELETE.id_for_label }}" class="form-label">Delete</label>
+                  {% render_field form.DELETE class+="form-check-input" %}
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+
+            <div class="btn-container">
+              <button type="submit" name="weekend_submit" class="btn btn-primary">Save Weekend Days</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Timing Config Tab -->
+        <div class="tab-pane fade" id="timing-tab" role="tabpanel">
+          <form method="POST">
+            {% csrf_token %}
+            {{ timing_formset.management_form }}
+
+            <div id="timing-container">
+              {% for form in timing_formset %}
+              <div class="form-container">
+                <div class="form-field">
+                  {{ form.id }}
+                  <label for="{{ form.working_hour.id_for_label }}" class="form-label">Working Hours</label>
+                  {% render_field form.working_hour class+="form-control" %}
+                </div>
+                <div class="form-field">
+                  <label for="{{ form.academic_year.id_for_label }}" class="form-label">Academic Year</label>
+                  {% render_field form.academic_year class+="form-control" %}
+                </div>
+                
+                <div style="margin-top: 30px; margin-left: 50px;" class="form-field">
+                  <label for="{{ form.DELETE.id_for_label }}" class="form-label">Delete</label>
+                  {% render_field form.DELETE class+="form-check-input" %}
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+
+            <div class="btn-container">
+              <button type="submit" name="timing_submit" class="btn btn-primary">Save Timing Config</button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_javascript %}
+<script>
+    $(document).ready(function() {
+        
+  
+        // Check if a tab is stored in local storage and activate it
+        let activeTab = localStorage.getItem('activeTab');
+        if (activeTab) {
+            $('.nav-tabs button[data-bs-target="' + activeTab + '"]').tab('show');
+        }
+  
+        // Save the last active tab in local storage
+        $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+            let currentTab = $(e.target).attr("data-bs-target");
+            localStorage.setItem('activeTab', currentTab);
+        });
+    });
+  </script>
+{% endblock extra_javascript %}

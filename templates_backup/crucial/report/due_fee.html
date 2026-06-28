@@ -1,0 +1,364 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load widget_tweaks %} 
+{% block extra_css %}
+
+<link
+  rel="stylesheet"
+  href="{% static 'assets/vendor/libs/datatables/datatables.min.css' %}"
+/>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-5-theme/1.3.0/select2-bootstrap-5-theme.min.css'>
+
+<style>
+  *:focus {
+    box-shadow: none !important;
+    outline: none !important;
+  }
+  
+  a {
+    color: #369;
+  }
+  
+  .title-text {
+    margin: 2em 0;
+  }
+  
+  .table > tbody > tr > td:nth-child(1) > i {
+    margin-right: 8px;
+    margin-top: 4px;
+  }
+  
+ 
+  
+  .entries {
+    margin-top: 0;
+  }
+  
+  .pagination {
+    margin-top: 0 !important;
+  }
+  
+  .pagination > li > a {
+    background-color: white;
+    color: #4676d7;
+  }
+  
+  .pagination > li > a:focus,
+  .pagination > li > a:hover,
+  .pagination > li > span:focus,
+  .pagination > li > span:hover {
+    color: #036;
+    background-color: #eee;
+    border-color: #ddd;
+  }
+  
+  .pagination > .active > a {
+    color: white;
+    background-color: #4676d7 !important;
+    border: solid 1px #4676d7 !important;
+  }
+  
+  .pagination > .active > a:hover {
+    background-color: #4676d7 !important;
+    border: solid 1px #4676d7;
+  }
+  
+
+</style>
+
+{% endblock extra_css %} {% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+  <div class="card p-4">
+    
+    <form method="post" action="{% url 'duefee' %}" >
+      {% csrf_token %}
+      <div class="row align-items-center">
+
+          <div class="col-md-3">
+            <div id="reportrange" name="reportrange" style="background: #fff; cursor: pointer;padding: 5px 10px; border: 1px solid #ccc;border-radius: 6px; width: 100%">
+              <i class='bx bx-calendar'></i>&nbsp;
+              <span></span> <i class="fa fa-caret-down"></i>
+            </div>
+            <input type="hidden" id="start_date" name="start_date">
+            <input type="hidden" id="end_date" name="end_date">
+          </div>
+
+          <div class="col-md-2">
+              <select class="form-select" name="version">
+                  <option value="">All Versions</option>
+                  {% for value, label in version_list %}
+                  <option value="{{ value }}" {% if selected_version == value %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+              </select>
+          </div>
+        
+        <div class="col-md-2">
+                  <select class="form-select" name="class_name_id" id="class_name" required>
+                    <option disabled selected hidden value="">Select Class</option>
+                    {% for class in classList %}
+
+                    <option value="{{class.id}}">{{class}} </option>
+
+                    {% endfor %}
+                </select>
+        </div>
+
+       <div class="col-md-2" id="">
+            <select class="form-select" name="academic_year_id">
+                <option disabled hidden selected>Select Academic year</option>
+                {% for academic_year in academic_year_list %}
+                <option value="{{ academic_year.id }}">{{ academic_year.name }}</option>
+                {% endfor %}
+            </select>
+       </div>
+
+
+      <div class="col-md-2" id="academic-session-container">
+          
+              <select class="form-select" name="session_year_id">
+                  <option disabled hidden selected>Select Session year</option>
+                  {% for session_year in session_year_list %}
+                  <option value="{{ session_year.id }}">{{ session_year.start_year }} - {{ session_year.end_year }}</option>
+                  {% endfor %}
+              </select>
+      </div>
+
+      <div  class=" col-md-1 ms-auto">
+        <button  type="submit" class="btn btn-primary">Submit</button>
+      </div>
+
+    </div>
+
+  </form>
+<hr>
+  <div class="d-flex gap-2 justify-content-center" >
+    <div style="padding: 0px 4px 4px 4px;"  class="col-md-2 border rounded-3  flex-row  justify-content-between align-content-center">
+      <span class=" pt-2">Class:</span><span class="pt-1 ps-1"><input class="form-control form-control-sm text-center" type="text"
+              value="{{class_instance}}" disabled></span>
+    </div> 
+    <div style="padding: 0px 4px 4px 4px;"  class="col-md-2 border rounded-3  flex-row  justify-content-between align-content-center ">
+      <span class=" pt-2">Due:</span><span class="pt-1 ps-1"><input class="form-control form-control-sm text-center" type="text"
+              value="{{total_unpaid_amount}}" disabled></span>
+    </div> 
+  </div>
+
+
+  
+    
+    <hr>
+
+
+    <table class="table table-striped table-bordered w-100 pt-2" id="dataTable">
+      <thead class="teal-thead">
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Roll</th>
+            <th>Version</th>
+            <th>Class</th>
+            <th>Fees Amount</th>
+            <th>Discount</th>
+            <th>Partial Pay</th>
+            <th>Dues Amount</th>
+            <th>Due Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for student_id, student_data in total_student_unpaid_amount.items %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ student_data.name }}</td>
+            <td>{{ student_data.roll }}</td>
+            <td>{{ student_data.version }}</td>
+            <td>{{ student_data.class }}</td>
+            <td>{{ student_data.total_fees_amount }}</td>
+            <td>{{ student_data.total_discount }}</td>
+            <td>{{ student_data.total_partial_pay }}</td>
+            <td>{{ student_data.total_dues }}</td>
+            <td>
+                <div class="dropdown">
+                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                        <i class="bx bx-dots-vertical-rounded"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        {% for feetype, details in student_data.feetypes.items %}
+                        <div class="dropdown-item">
+                            <div class="row">
+                                <div class="col-4"><strong>{{ feetype }}</strong></div>
+                                <div class="col-8 text-end">
+                                    <span class="badge bg-label-{% if details.status == 'partial' %}warning{% else %}danger{% endif %}">
+                                        {{ details.status|upper }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="row small">
+                                <div class="col-4">Fees:</div>
+                                <div class="col-8 text-end">{{ details.fees_amount }}</div>
+                            </div>
+                            <div class="row small">
+                                <div class="col-4">Discount:</div>
+                                <div class="col-8 text-end">{{ details.discount }}</div>
+                            </div>
+                            <div class="row small">
+                                <div class="col-4">Paid:</div>
+                                <div class="col-8 text-end">{{ details.partial_pay }}</div>
+                            </div>
+                            <div class="row small">
+                                <div class="col-4">Due:</div>
+                                <div class="col-8 text-end">{{ details.dues }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    
+    <!-- Add export buttons -->
+    <div class="mb-3">
+      <a href="{% url 'export_due_fees' %}?export_type=excel&class_id={{ class_instance.id }}&academic_year_id={{ request.POST.academic_year_id }}&session_year_id={{ request.POST.session_year_id }}&version={{ selected_version }}" class="btn btn-primary">
+        Download Excel
+    </a>
+      <a href="{% url 'export_due_fees' %}?export_type=pdf&class_id={{ class_instance.id }}&academic_year_id={{ request.POST.academic_year_id }}&session_year_id={{ request.POST.session_year_id }}&version={{ selected_version }}""
+         class="btn btn-danger">
+          <i class="bx bx-download"></i> Export PDF
+      </a>
+  </div>
+  
+
+  </div>
+
+</div>
+<!-- end: Content -->
+
+{% endblock content %} 
+ 
+{% block extra_javascript %}
+
+<script src="{% static 'assets/vendor/libs/datatables/datatables.min.js' %}"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+<script>
+
+  $(document).ready(function () {
+ 
+    $('#class_name').select2({
+      theme: "bootstrap-5",
+      width: '100%', // Makes it responsive
+      placeholder: "Select Class",
+      allowClear: true
+    });
+  });
+</script>
+
+<script>
+ 
+ // Function to convert a Blob to a Data URL
+ function blobToDataURL(blob, callback) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    callback(e.target.result);
+  };
+  reader.readAsDataURL(blob);
+}
+
+$(document).ready(function() {
+   
+  fetch('{{ institute.institute_logo.url }}')
+    .then(response => response.blob())
+    .then(blob => {
+      // Convert Blob to Data URL
+      blobToDataURL(blob, function(dataURL) {
+        // DataTable initialization
+        let table = new DataTable("#dataTable", {
+          dom: "<'row'<'col-sm-12 col-md-6 mb-3'l><'col-sm-12 col-md-6 mb-3'f>>" +
+              "<'row'<'col-sm-12'tr>>" +
+              "<'row '<'col-sm-12 col-md-5 mt-3'><'col-sm-12 col-md-7 mt-3'p>>",
+          paging: true,
+          autoWidth: true,
+        });
+
+          
+        });
+      });
+    });
+
+
+</script>
+
+<script>
+  
+  $(function() {
+
+var start = moment().subtract(29, 'days');
+var end = moment();
+
+function cb(start, end) {
+    $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+    $('#start_date').val(start.format('YYYY-MM-DD'));
+    $('#end_date').val(end.format('YYYY-MM-DD'));
+
+    console.log('start_date:', start.format('YYYY-MM-DD'));
+    console.log('end_date:', end.format('YYYY-MM-DD'));
+}
+
+$('#reportrange').daterangepicker({
+    startDate: start,
+    endDate: end,
+    ranges: {
+       'Today': [moment(), moment()],
+       'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+       'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+       'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+       'This Month': [moment().startOf('month'), moment().endOf('month')],
+       'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+    }
+}, cb);
+
+cb(start, end);
+
+});
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const classField = document.getElementById("class_name");
+    const academicSessionContainer = document.getElementById("academic-session-container");
+
+    classField.addEventListener("change", function () {
+    const selectedClass = classField.value;
+    console.log("Selected class:", selectedClass); // Ensure it's picking the correct value
+    
+    if (selectedClass) {
+        fetch(`/check-class-group/${selectedClass}/`)
+            .then(response => response.json())
+            .then(data => {
+                console.log("Response data:", data);
+                if (data.has_group) {
+                    academicSessionContainer.style.display = "block";
+                } else {
+                    academicSessionContainer.style.display = "none";
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching class group:", error);
+            });
+    } else {
+        academicSessionContainer.style.display = "none";
+    }
+});
+
+});
+
+</script>
+{% endblock extra_javascript%}

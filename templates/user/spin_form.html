@@ -1,0 +1,180 @@
+<!-- templates/user/spin_form.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spin Form</title>
+
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        form {
+            background: #ffffff;
+            padding: 40px 35px 35px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            width: 350px;
+            position: relative;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        /* ===== Floating Label ===== */
+        .input-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .input-container input {
+            width: 100%;
+            padding: 12px 12px 12px 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            outline: none;
+            transition: border 0.3s, box-shadow 0.3s;
+        }
+
+        .input-container label {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: white;
+            padding: 0 5px;
+            color: #999;
+            transition: 0.3s;
+            pointer-events: none;
+        }
+
+        .input-container input:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+        }
+
+        .input-container input:focus + label,
+        .input-container input.filled + label {
+            top: -10px;
+            left: 10px;
+            color: #4CAF50;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: linear-gradient(90deg, #45a049, #4CAF50);
+            transform: translateY(-2px);
+        }
+
+        .error {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 400px) {
+            form { width: 90%; padding: 30px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <form method="POST" id="spinForm">
+        <h2>Spin Entry Form</h2>
+        {% csrf_token %}
+        <div class="input-container">
+            <input type="text" name="name" required>
+            <label>Name</label>
+        </div>
+        <div class="input-container">
+            <input type="text" name="phone" required>
+            <label>Phone Number</label>
+        </div>
+        <div class="input-container">
+            <input type="text" name="institute" required>
+            <label>Institute Name</label>
+        </div>
+        <div class="input-container">
+            <input type="number" name="num_students" required>
+            <label>Number of Students</label>
+        </div>
+        <button type="submit">Submit</button>
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+    </form>
+
+    <script>
+        $(document).ready(function(){
+            // Floating label effect
+            $('.input-container input').each(function(){
+                if($(this).val() !== "") $(this).addClass('filled');
+            });
+
+            $('.input-container input').on('focus', function(){
+                $(this).addClass('filled');
+            });
+
+            $('.input-container input').on('blur', function(){
+                if($(this).val() === "") $(this).removeClass('filled');
+            });
+
+            // Simple validation animation (shake) if empty
+            $('#spinForm').on('submit', function(e){
+                let valid = true;
+                $(this).find('input').each(function(){
+                    if($(this).val() === ""){
+                        valid = false;
+                        $(this).parent().addClass('shake');
+                        setTimeout(()=>{ $(this).parent().removeClass('shake'); }, 500);
+                    }
+                });
+                if(!valid) e.preventDefault();
+            });
+        });
+    </script>
+
+    <style>
+        /* Shake animation */
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        .shake {
+            animation: shake 0.3s;
+        }
+    </style>
+</body>
+</html>

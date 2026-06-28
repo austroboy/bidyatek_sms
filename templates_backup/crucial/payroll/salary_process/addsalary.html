@@ -1,0 +1,251 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% block extra_css %}
+ 
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css'>
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-5-theme/1.3.0/select2-bootstrap-5-theme.min.css'>
+<link 
+      rel="stylesheet"
+      href="{% static 'assets/css/loading.css' %}"
+    />
+    
+    <style>
+        .table-responsive::-webkit-scrollbar {
+          height: 8px;
+        }
+    
+        .table-responsive::-webkit-scrollbar-track {
+          box-shadow: inset 0 0 5px grey;
+          border-radius: 10px;
+        }
+    
+        .table-responsive::-webkit-scrollbar-thumb {
+          background: #5f61e6;
+          border-radius: 10px;
+        }
+    
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+          background: #5355d1;
+        }
+
+        hr{
+            margin: 5px 0px;
+        }
+
+
+      </style>
+
+
+{% endblock extra_css %} 
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+ 
+  <div class="card p-4">
+    <div class="">
+        <div class="d-flex justify-content-between">
+            <div>
+                <h4 class="card-title">Allocation Salary</h4>
+            </div>
+            <div>
+                <a href="{% url 'salary_config' %}" class="btn btn-warning">List Salary</a>
+
+            </div>
+
+        </div>
+
+        <hr>
+
+        <div id="loading-screen" style="display: none;">
+            <figure>
+                <div class="dot white"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </figure>
+        </div>
+
+        <form id="my-form" method="post" action="{% url 'salary_allocation' %}">
+            {% csrf_token %}
+            <div class="row">
+                
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label class="form-label">Salary Month</label>
+                        <div class="">
+                            <select id="salary_month_id" class="form-select" name="salary_month_id" required>
+                                <option selected hidden disabled value="" >Select Month</option>
+                    
+                                <option value="January">January</option>
+                                <option value="February">February</option>
+                                <option value="March">March</option>
+                                <option value="April">April</option>
+                                <option value="May">May</option>
+                                <option value="June">June</option>
+                                <option value="July">July</option>
+                                <option value="August">August</option>
+                                <option value="September">September</option>
+                                <option value="October">October</option>
+                                <option value="November">November</option>
+                                <option value="December">December</option>
+                                
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label for="addition_id" class="form-label">Special Addition</label>
+                        <div class="">
+                            <select id="addition_id" class="form-select" name="addition_id[]" multiple>
+                                
+                                {% for addition in special_additions %}
+                                    <option value="{{ addition.id }}">{{ addition.addition_type }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label for="deduction_id" class="form-label">Special Deduction</label>
+                        <div class="">
+                            <select id="deduction_id" class="form-select" name="deduction_id[]" multiple>
+                                
+                                {% for deduction in special_deductions %}
+                                <option value="{{deduction.id}}">{{deduction.deduction_type}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="offset-md-1 col-md-2">
+                    <div class="mb-3">
+                        <button style="margin-top: 28px;" id="submit-btn" class="btn btn-primary text-end" type="submit">Submit</button>
+                    </div>
+                </div>
+                
+            </div>
+        
+            </div>
+
+            
+        
+
+      
+
+        <div class="table-responsive">
+            <table id="fees_collection_table" class="table table-bordered table-centered table-nowrap mb-0">
+              <thead class="teal-thead">
+                
+                <tr>
+                  <th class="align-middle text-end" scope="col">
+                    <input class="form-check-input" type="checkbox" name="" id="select-all">
+                    
+
+                  </th>
+                  <th class="align-middle" scope="col">
+                    <p class="text-nowrap" >Employee ID</p>
+                    <input class="form-control mt-2" type="text" name="" id="">
+                  </th>
+                  
+                  <th class="align-middle" scope="col"> <p class="text-nowrap">Employee Name</p> 
+
+                    <input class="form-control mt-2" type="text" name="" id="">
+                  </th>
+                  <th class="align-middle" scope="col">Designation</th>
+                  <th class="align-middle" scope="col">Basic Salary</th>
+                  <th class="align-middle" scope="col">Total Additions</th>
+                  <th class="align-middle" scope="col">Total Deductions</th>
+                  <th class="align-middle" scope="col">Increment Applicable</th>
+                  <th class="align-middle" scope="col">Net Salary</th>
+
+                </tr>
+                
+              </thead>
+              <tbody>
+                {% for employee in employee_list %}
+                    {% with employee.salary_conf.all|first as salary_config %}
+                        {% if salary_config %}
+                <tr>
+
+                  <th class="text-end" scope="col">
+                    <input class="form-check-input employee-checkbox" type="checkbox" name="selected_employees[]" id="{{employee.id}}"  value="{{ employee.id }}">
+                  </th>
+
+                  <td>
+                    {{ employee.staff_field.user_id }}
+                  </td>
+
+                  <td>
+                    <p class="text-nowrap" >{{ employee.staff_field.name  }}</p>
+                  </td>
+
+                  <td>{{ employee.designation }}</td>
+                  <td>{{ salary_config.basic_salary }}</td>
+                  <td>{{ salary_config.calculate_additions|default:0 }}</td>
+                  <td>{{ salary_config.calculate_deductions|default:0 }}</td>
+                  <td>{% if salary_config.calculate_salary_increment %} <span class="text-warning"> {{ salary_config.calculate_salary_increment }} </span> {% else %} 0 {% endif %}</td>
+                  <td>{{ salary_config.total_salary }}</td>
+
+                </tr>
+                        {% endif %}
+                    {% endwith %}
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+         
+        </form>
+
+    </div>
+
+
+</div>
+
+
+
+</div>
+<!-- end: Content -->
+
+{% endblock content %} 
+{% block extra_javascript %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+<script>
+
+    $('#addition_id').select2({
+        theme: "bootstrap-5",
+        width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+      });
+    $('#salary_month_id').select2({
+        theme: "bootstrap-5",
+        width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+      });
+    $('#deduction_id').select2({
+        theme: "bootstrap-5",
+        width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+      });
+   
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const selectAllCheckbox = document.getElementById("select-all");
+        const checkboxes = document.querySelectorAll(".employee-checkbox");
+  
+        if (selectAllCheckbox) {
+            selectAllCheckbox.addEventListener("change", function () {
+                checkboxes.forEach(checkbox => checkbox.checked = selectAllCheckbox.checked);
+            });
+        }
+    });
+  </script>
+
+{% endblock extra_javascript %}

@@ -1,0 +1,50 @@
+{% load widget_tweaks %}
+{% block content %}
+<form hx-post="{{ request.path }}" hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}' class="modal-content" enctype="multipart/form-data">
+  <div>
+    <h4 class="modal-header">Add-Edit Notice</h4>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <label for="{{ form.date.id_for_label }}">Date:</label>
+      {% render_field form.date|attr:"type:date" class="form-control" %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.notice_title.id_for_label }}">Notice Title:</label>
+      {% render_field form.notice_title class="form-control" %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.notice_description.id_for_label }}">Notice Description:</label>
+      {% render_field form.notice_description|attr:"rows:'3'" class="form-control" %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.expire_date.id_for_label }}">Expire Date:</label>
+      {% render_field form.expire_date|attr:"type:date" class="form-control" %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.file_attached.id_for_label }}">File Attached:</label>
+      {% render_field form.file_attached|attr:"type:file" class="form-control" %}
+    </div>
+    
+  </div>
+
+{% if form.errors %}
+                                <div class="alert alert-danger">
+                                    <strong>Error:</strong> Please correct the following errors.
+                                    <ul>
+                                        {% for field in form %}
+                                            {% if field.errors %}
+                                                <li>{{ field.label }}: {{ field.errors|join:", " }}</li>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-danger " data-bs-dismiss="modal">Close</button>
+    <button type="submit" class="btn  btn-primary ">Save</button>
+  </div>
+</form>
+
+{% endblock content %}

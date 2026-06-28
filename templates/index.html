@@ -1,0 +1,1664 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load template_tags %}
+{% block extra_css %} 
+<link rel="stylesheet" href="{% static 'assets/vendor/css/pages/page-icons.css' %}" />
+
+{% comment %} <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css"> {% endcomment %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" integrity="sha512-tS3S5qG0BlhnQROyJXvNjeEM4UpMXHrQfTGmbQ1gKmelCxlSEBUaxhRBj/EFTzpbP4RVSrpEikbmdJobCvhE3g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css" integrity="sha512-sMXtMNL1zRzolHYKEujM2AqCLUR9F2C4/05cdbxjjLSRvMQIciEPCQZo++nk7go3BtSuK9kfa/s+a4f4i5pLkw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+{% endblock extra_css %} 
+
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% if user|is_staff_or_in_group:"" %} 
+
+  <!-- total student teacher stuffs -->
+  <div class="row leave_sms student_teacher_stuff">
+    <div class="col-lg-4 col-sm-6 col-12 leave_student student">
+      <div class="dropdown shadow p-3 mb-3 rounded bg-white position-relative">
+        <div class="dropdown-toggle dots position-absolute" id="dropdownMenuButton5" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+           <i class='bx bx-dots-horizontal' ></i>
+        </div>
+        <div class="dropdown-menu edit_details_overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton5">
+          <ul class="list-unstyled">
+            <li><a href="{% url 'add_student' %}">Add Student</a></li>
+            <li><a href="{% url 'list_student' %}">View Student</a></li>
+          </ul>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <div class="img_wrapper rounded-circle">
+            <img src="{% static 'assets/img/icons/unicons/student.png' %}" alt="" />
+          </div>
+          <div class="text_wrapper pl-2 border-left border-danger">
+            <p class="mb-0">Total Student</p>
+            <span>{{totalStudents}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4 col-sm-6 col-12 leave_teacher teacher">
+      <div class="dropdown shadow p-3 mb-3 rounded bg-white position-relative">
+        <div class="dropdown-toggle dots position-absolute" id="dropdownMenuButton5" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+           <i class='bx bx-dots-horizontal' ></i>
+        </div>
+        <div class="dropdown-menu edit_details_overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton5">
+          <ul class="list-unstyled">
+            <li><a href="{% url 'add_staff' %}">Add Staff</a></li>
+            <li><a href="{% url 'list_staff' %}">View Staff</a></li>
+          </ul>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <div class="img_wrapper rounded-circle">
+            <img src="{% static 'assets/img/icons/unicons/teacher.png' %}" alt="" />
+          </div>
+          <div class="text_wrapper pl-2 border-left border-danger">
+            <p class="mb-0">Total Staffs</p>
+            <span>{{totalStaffs}}</span>
+          </div>
+        </div>
+      </div>
+    </div> 
+    
+    <div class="col-lg-4 col-sm-6 col-12 masking_sms parents">
+      <div class="dropdown shadow p-3 mb-3 rounded bg-white position-relative">
+        <div class="dropdown-toggle dots position-absolute" id="dropdownMenuButton5" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+           <i class='bx bx-dots-horizontal' ></i>
+        </div>
+        <div class="dropdown-menu edit_details_overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton5">
+          <ul class="list-unstyled">
+            <li><a href="{% url 'add_parent' %}">Add Parent</a></li>
+            <li><a href="{% url 'list_parent' %}">View Parent</a></li>
+          </ul>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <div class="img_wrapper rounded-circle">
+            <img src="{% static 'assets/img/icons/unicons/parents.png' %}" alt="" />
+          </div>
+          <div class="text_wrapper pl-2 border-left border-danger">
+            <p class="mb-0">Total Parents</p>
+            <span>{{totalParents}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+ <!-- detials_attendance_notice -->
+ <div class="row details_attendance_notice justify-content-center">
+  <!-- student details -->
+  <div class="col-lg-3 col-md-6 col-12 student_details position-relative">
+    <div class="position-absolute edit__icon">
+      <i class='bx bx-dots-vertical' ></i>
+    </div>
+    <div class="shadow p-2 py-3 mb-3 rounded bg-white">
+      {% if user.is_authenticated %}
+      <div class="d-flex flex-column justify-content-start gap-1 align-items-center">
+        <div class="img_wrapper rounded-circle">
+          {% if user.avatar %}
+            <img src="{{user.avatar.url}}" alt="avatar" />
+          {% else %}
+            <img src="{% static 'assets/img/avatars/user.png' %}" alt="avatar" />
+          {% endif %}
+        </div>
+        <h3 class="name fs-6 rounded w-100 text-white py-1 text-center mt-2 mb-1">
+          {{user.name}}
+        </h3>
+        <div class="table_wrapper w-100 rounded">
+          <table class="">
+            <tbody>
+              <tr>
+                <th>Reg No</th>
+                <td>{{user.user_id}}</td>
+              </tr>
+              <tr>
+                <th>User Type</th>
+                <td>
+                
+                {% for group_for in request.user.groups.all %}
+                  {% if group_for.name == 'parent' %}
+                      <p class="text-primary">Parent</p>
+                  {% elif group_for.name == 'staff' %}
+                      <p class="text-primary">Staff</p>
+                  {% elif group_for.name == 'student' %}
+                      <p class="text-primary">Student</p>
+                  {% elif group_for.name == 'teacher' %}
+                      <p class="text-primary">Teacher</p>
+                  {% endif %}
+                {% endfor %}
+              </td>
+              </tr>
+              {% comment %} <tr>
+                <th>Designation</th>
+                <td>Principal</td>
+              </tr> {% endcomment %}
+              <tr>
+                <th>Phone No</th>
+                <td>{{user.phone_number}}</td>
+              </tr>
+            </tbody>
+          </table>
+          
+        </div>
+        
+      </div>
+      {% endif %}
+      
+    </div>
+  </div>
+
+  <!-- attendance info graph -->
+  <div class="col-lg-5 col-md col-12 attendance_info">
+    <div class="shadow mb-3 rounded bg-white">
+      <div class="heading rounded-top pb-3 px-3 text-white">
+        <h5 class="m-0">Attendance Information</h5>
+      </div>
+      <div
+        class="student_teacher_attendance flex-sm-nowrap flex-wrap p-3 d-flex gap-3 justify-content-center">
+        <!-- student attendance graph -->
+        <div class="dropdown attendance py-3 w-100 w-sm-50 rounded student_attendance position-relative">
+          <div class="dropdown-toggle dots position-absolute ki_holo" id="dropdownMenuButton5" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class='bx bx-dots-vertical' ></i>
+          </div>
+          <div class="dropdown-menu edit_details_overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton5">
+            <ul class="list-unstyled">
+              <li><a href="{% url 'report_student_attendance' %}">View Attendance</a></li>
+              <li><a href="#">Take Attendance</a></li>
+            </ul>
+          </div>
+          <div
+            class="d-flex align-items-center justify-content-center position-relative pieChart_wrapper__holder">
+            <div class="pieChart_wrapper">
+              <canvas id="myChart"></canvas>
+            </div>
+            <div class="total position-absolute top-50 start-50 text-center">
+              <p class="fw-medium">Total</p>
+              <p class="stuamount"></p>
+            </div>
+          </div>
+          <div class="chart_info mb-2">
+            <h6 class="text-center mt-1 mb-3 mb-md-0 mb-lg-3">
+              Students
+            </h6>
+          </div>
+
+          <div class="present_absent mt-2 px-3 d-flex align-items-center justify-content-between">
+            <div class="present item">
+              <p class="present_title">Present</p>
+              <p class="present_number">{{t_student_attend}}</p>
+            </div>
+            <div class="present border-start border-primary" style="width: 1px; height: 40px"></div>
+            <div class="absent item">
+              <p class="absent_title">Absent</p>
+              <p class="absent_number">{{t_student_absent}}</p>
+            </div>
+          </div>
+        </div>
+        <!-- teacher attendance graph -->
+        <div class="dropdown attendance w-100 w-sm-50 py-3 rounded teacher_attendance position-relative">
+          <div class="dropdown-toggle dots position-absolute" id="dropdownMenuButton5" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class='bx bx-dots-vertical' ></i>
+          </div>
+          <div class="dropdown-menu edit_details_overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton5">
+            <ul class="list-unstyled">
+              <li><a href="{% url 'report_staff_attendance' %}">View Attendance</a></li>
+              <li><a href="#">Take Attendance</a></li>
+            </ul>
+          </div>
+          <div
+            class="d-flex align-items-center justify-content-center position-relative pieChart_wrapper__holder">
+            <div class="pieChart_wrapper">
+              <canvas id="myChart2"></canvas>
+            </div>
+            <div class="total position-absolute top-50 start-50 text-center">
+              <p class="fw-medium">Total</p>
+              <p class="teaamount"></p>
+            </div>
+          </div>
+          <div class="chart_info">
+            <h6 class="text-center mt-1 mb-3 mb-md-0 mb-lg-3">
+              Staffs
+            </h6>
+          </div>
+          <div class="present_absent mt-2 px-3 d-flex align-items-center justify-content-between">
+            <div class="present item">
+              <p class="present_title">Present</p>
+              <p class="present_number">{{t_staff_attend}}</p>
+            </div>
+            <div class="present border-start border-warning" style="width: 1px; height: 40px"></div>
+            <div class="absent item">
+              <p class="absent_title">Absent</p>
+              <p class="absent_number">{{t_staff_absent}}</p>
+            </div>
+          </div>
+        </div> 
+      </div>
+    </div>
+  </div>
+
+  <!-- notices and events -->
+  <div class="col-lg-4 col-md-6 col-12">
+    <div class="shadow mb-3 rounded bg-white">
+      <div class="heading rounded-top pb-3 px-3 text-white">
+        <h5 class="m-0">Events</h5>
+      </div>
+
+      <div class="notices">
+        <ul class="list-unstyled">
+          {% for event in upcoming_events %}
+          <li>
+            <span style="font-size: 9px;" class="badge text-bg-success">{{event.start}} </span> - <span style="font-size: 9px;" class="badge text-bg-success" > {{event.start}} </span> 
+            <p style="font-size: 11px;" class="">
+              {{event.title}}
+            </p>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="text-center">
+        <a href="{% url 'event_detail' %}" style="font-size: 10px; padding: 3px; " class="btn btn-primary">View All</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <!-- leave teacher student and sms -->
+
+  <div class="row leave_sms">
+    <div class="col-12 col-md-6">
+      <div class="shadow mb-3 rounded bg-white">
+        <div
+          class="heading d-flex justify-content-between align-items-center rounded-top pb-3 px-3 text-white position-relative">
+          <h5 class="dropdown m-0">Leave Information</h5>
+          <div class="dropdown-toggle dots bg-white rounded-circle d-flex justify-content-center align-items-center" id="dropdownMenuButton5" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class='bx bx-dots-vertical text-primary' ></i>
+          </div>
+          <div class="dropdown-menu edit_details_overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton5">
+            <ul class="list-unstyled">
+              <li><a href="#">Edit</a></li>
+              <li><a href="#">View Details</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="p-3 d-flex flex-wrap flex-sm-nowrap flex-md-wrap flex-lg-nowrap gap-2">
+          <div class="shadow w-100 w-sm-50 p-3 rounded bg-white leave_student">
+            <div class="d-flex align-items-center gap-2">
+              <div class="img_wrapper rounded-circle">
+                <img src="{% static 'assets/img/essential/leave-tea.png' %}" alt="" />
+              </div>
+              <div class="text_wrapper pl-2 border-left border-danger">
+                <p class="mb-0">Leave Employee</p>
+                <span>0</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="shadow w-100 w-sm-50 p-3 rounded bg-white leave_teacher">
+            <div class="d-flex align-items-center gap-2">
+              <div class="img_wrapper rounded-circle">
+                <img src="{% static 'assets/img/essential/leave-stu.png' %}" alt="" />
+              </div>
+              <div class="text_wrapper pl-2 border-left border-danger">
+                <p class="mb-0">Leave Student</p>
+                <span>0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6">
+      <div class="shadow mb-3 rounded bg-white">
+        <div
+          class="heading d-flex justify-content-between align-items-center rounded-top pb-3 px-3 text-white position-relative">
+          <h5 class="dropdown m-0">SMS Information</h5>
+          <div class="dropdown-toggle dots bg-white rounded-circle d-flex justify-content-center align-items-center" id="dropdownMenuButton5" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class='bx bx-dots-vertical text-primary' ></i>
+          </div>
+          <div class="dropdown-menu edit_details_overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton5">
+            <ul class="list-unstyled">
+              <li><a href="#">Edit</a></li>
+              <li><a href="#">View Details</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="p-3 d-flex flex-wrap flex-sm-nowrap flex-md-wrap flex-lg-nowrap gap-2">
+          <div class="shadow w-100 w-sm-50 p-3 rounded bg-white general_sms">
+            <div class="d-flex align-items-center gap-2">
+              <div class="img_wrapper rounded-circle">
+                <img src="{% static 'assets/img/essential/sms.png' %}" alt="" />
+              </div>
+              <div class="text_wrapper pl-2 border-left border-danger">
+                <p class="mb-0">General SMS</p>
+                <span>{% if nonmasking_limit %} {{nonmasking_limit.total_sms}} {% else %} 0 {% endif %}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="shadow w-100 w-sm-50 p-3 rounded bg-white general_sms">
+            <div class="d-flex align-items-center gap-2">
+              <div class="img_wrapper rounded-circle">
+                <img src="{% static 'assets/img/essential/msms.png' %}" alt="" />
+              </div>
+              <div class="text_wrapper pl-2 border-left border-danger">
+                <p class="mb-0">Masking SMS</p>
+                <span>{% if masking_limit %} {{masking_limit.total_sms}} {% else %} 0 {% endif %}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+<!-- event and gender -->
+
+<div class="row">
+  <!-- events -->
+  <div class="col-12 col-lg-6 pb-3">
+    <div class="shadow mb-3 rounded bg-white h-100">
+      <div
+        class="heading d-flex justify-content-between align-items-center rounded-top pb-3 px-3 text-white position-relative">
+        <h5 class="dropdown m-0">Notice</h5>
+        
+      </div>
+
+      <div class="vanillar_calendar_wrapper d-flex">
+        <!-- eveent items -->
+        <div class="events notices">
+          <ul class="list-unstyled">
+            {% for notice in upcoming_notices %}  
+            <li>
+              <span class="badge text-bg-warning">{{notice.date}} </span> - <span class="badge text-bg-success" > {{notice.notice_title}} </span> 
+              <p class="">
+                {{notice.notice_description}}
+              </p>
+            </li>
+            {% endfor %}
+          </ul>
+          <div class="text-start ps-3">
+            <a href="{% url 'notice' %}" style="font-size: 10px; padding: 3px; " class="btn btn-primary">View All</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-lg-6 leave_sms male_female">
+    <!-- Gender Wise Student information -->
+    <div class="shadow mb-3 rounded bg-white">
+      <div
+        class="heading d-flex justify-content-between align-items-center rounded-top pb-3 px-3 text-white position-relative">
+        <h5 class="dropdown m-0">Gender Wise Student</h5>
+        <div class="dropdown-toggle dots bg-white rounded-circle d-flex justify-content-center align-items-center" id="dropdownMenuButton5" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class='bx bx-dots-vertical text-primary' ></i>
+        </div>
+        <div class="dropdown-menu edit_details_overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton5">
+          <ul class="list-unstyled">
+            <li><a href="#">Edit</a></li>
+            <li><a href="#">View Details</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="p-3 d-flex flex-wrap flex-sm-nowrap gap-2">
+        <div class="shadow w-100 w-sm-50 p-3 mb-1 rounded bg-white male">
+          <div class="d-flex align-items-center gap-2">
+            <div class="img_wrapper rounded-circle">
+              <img src="{% static 'assets/img/essential/male.png' %}" alt="" />
+            </div>
+            <div class="text_wrapper pl-2 border-left border-danger">
+              <p class="mb-0">Male Student</p>
+              <span>{{male_students}}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="shadow w-100 w-sm-50 p-3 mb-1 rounded bg-white female">
+          <div class="d-flex align-items-center gap-2">
+            <div class="img_wrapper rounded-circle">
+              <img src="{% static 'assets/img/essential/female.png' %}" alt="" />
+            </div>
+            <div class="text_wrapper pl-2 border-left border-danger">
+              <p class="mb-0">Female Student</p>
+              <span>{{female_students}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Gender Wise Teacher & Staff information -->
+    <div class="shadow mb-3 rounded bg-white">
+      <div
+        class="heading d-flex justify-content-between align-items-center rounded-top pb-3 px-3 text-white position-relative">
+        <h5 class="dropdown m-0">Gender Wise Teacher & Staff</h5>
+        <div class="dropdown-toggle dots bg-white rounded-circle d-flex justify-content-center align-items-center" id="dropdownMenuButton5" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class='bx bx-dots-vertical text-primary' ></i>
+        </div>
+        <div class="dropdown-menu edit_details_overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton5">
+          <ul class="list-unstyled">
+            <li><a href="#">Edit</a></li>
+            <li><a href="#">View Details</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="p-3 d-flex flex-wrap flex-sm-nowrap gap-2">
+        <div class="shadow w-100 w-sm-50 p-3 mb-1 rounded bg-white male">
+          <div class="d-flex align-items-center gap-2">
+            <div class="img_wrapper rounded-circle">
+              <img src="{% static 'assets/img/essential/male.png' %}" alt="" />
+            </div>
+            <div class="text_wrapper pl-2 border-left border-danger">
+              <p class="mb-0">Male Employee</p>
+              <span>{{male_employees}}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="shadow w-100 w-sm-50 p-3 mb-1 rounded bg-white female">
+          <div class="d-flex align-items-center gap-2">
+            <div class="img_wrapper rounded-circle">
+              <img src="{% static 'assets/img/essential/female.png' %}" alt="" />
+            </div>
+            <div class="text_wrapper pl-2 border-left border-danger">
+              <p class="mb-0">Female Employee</p>
+              <span>{{female_employees}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  {% comment %} <div class="row gx-4">
+
+    <!-- Fees info section -->
+    <div class="col-md-6 col-12">
+      <div class="shadow mb-3 rounded bg-white">
+        <div
+          class="heading d-flex justify-content-between align-items-center rounded-top pb-3 px-3 text-white position-relative">
+          <h5 class="dropdown m-0">Fees Information</h5>
+          <div class="dropdown-toggle dots bg-white rounded-circle d-flex justify-content-center align-items-center" id="dropdownMenuButton5" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class='bx bx-dots-vertical text-primary' ></i>
+          </div>
+          <div class="dropdown-menu edit_details_overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton5">
+            <ul class="list-unstyled">
+              <li><a href="#">Edit</a></li>
+              <li><a href="#">View Details</a></li>
+            </ul>
+          </div>
+        </div>
+        <section class="fees-info">
+          <form>
+            <!-- 3 select boxes -->
+            <div class="input-fields row">
+              <div class="col-4">
+                <h5>Year</h5>
+                <select id="year" name="year">
+                  <option value="" disabled selected>select year</option>
+                  <option value="2022">2022</option>
+                  <option value="2023">2023</option>
+                  <option value="2024">2024</option>
+                </select>
+              </div>
+              <div class="col-4">
+                <h5>Month</h5>
+                <select id="year" name="year">
+                  <option value="" disabled selected>select month</option>
+                  <option value="Nursary">January</option>
+                  <option value="February">February</option>
+                  <option value="March">March</option>
+                  <option value="April">April</option>
+                  <option value="May">May</option>
+                  <option value="June">June</option>
+                  <option value="July">July</option>
+                  <option value="August">August</option>
+                  <option value="September">September</option>
+                  <option value="October">October</option>
+                  <option value="November">November</option>
+                  <option value="December">December</option>
+                </select>
+              </div>
+              <div class="col-4">
+                <button type="submit" class="submit-button-orange">Search</button>
+              </div>
+            </div>
+          </form>
+
+          <h6 class="overview">Total Student Found: <span>43</span></h6>
+          <!-- show student data -->
+          <div class="table">
+            <table class="table-head">
+              <tr>
+                <th style="width:50%">Name</th>
+                <th style="width:20%">Class</th>
+                <th style="width:20%">Amount</th>
+                <th class="status" style="width:20%">Status</th>
+              </tr>
+            </table>
+            <div class="table-content scrollbar">
+              <table class="content">
+                <tr>
+                  <td style="width:45%">Samsul Islam Khan</td>
+                  <td style="width:25%">Nursery - A</td>
+                  <td style="width:18%">1234</td>
+                  <td style="width:20%"><span class="payment-status">paid</span></td>
+                </tr>
+                <tr>
+                  <td style="width:45%">Samsul Islam Khan</td>
+                  <td style="width:25%">Nursery - A</td>
+                  <td style="width:18%">1234</td>
+                  <td style="width:20%"><span class="payment-status">unpaid</span></td>
+                </tr>
+                <tr>
+                  <td style="width:45%">Samsul Islam Khan</td>
+                  <td style="width:25%">Nursery - A</td>
+                  <td style="width:18%">1234</td>
+                  <td style="width:20%"><span class="payment-status">paid</span></td>
+                </tr>
+                <tr>
+                  <td style="width:45%">Samsul Islam Khan</td>
+                  <td style="width:25%">Nursery - A</td>
+                  <td style="width:18%">1234</td>
+                  <td style="width:20%"><span class="payment-status">paid</span></td>
+                </tr>
+                <tr>
+                  <td style="width:45%">Samsul Islam Khan</td>
+                  <td style="width:25%">Nursery - A</td>
+                  <td style="width:18%">1234</td>
+                  <td style="width:20%"><span class="payment-status">paid</span></td>
+                </tr>
+                <tr>
+                  <td style="width:45%">Samsul Islam Khan</td>
+                  <td style="width:25%">Nursery - A</td>
+                  <td style="width:18%">1234</td>
+                  <td style="width:20%"><span class="payment-status">unpaid</span></td>
+                </tr>
+                <tr>
+                  <td style="width:45%">Samsul Islam Khan</td>
+                  <td style="width:25%">Nursery - A</td>
+                  <td style="width:18%">1234</td>
+                  <td style="width:20%"><span class="payment-status">paid</span></td>
+                </tr>
+                <tr>
+                  <td style="width:45%">Samsul Islam Khan</td>
+                  <td style="width:25%">Nursery - A</td>
+                  <td style="width:18%">1234</td>
+                  <td style="width:20%"><span class="payment-status">paid</span></td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Payment stat section -->
+
+    <div class="col-md-6 col-12">
+      <div class="shadow mb-3 rounded bg-white">
+        <div
+          class="heading d-flex justify-content-between align-items-center rounded-top pb-3 px-3 text-white position-relative">
+          <h5 class="dropdown m-0">Payment Statistics</h5>
+          <div class="dropdown-toggle dots bg-white rounded-circle d-flex justify-content-center align-items-center" id="dropdownMenuButton5" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class='bx bx-dots-vertical text-primary' ></i>
+          </div>
+          <div class="dropdown-menu edit_details_overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton5">
+            <ul class="list-unstyled">
+              <li><a href="#">Edit</a></li>
+              <li><a href="#">View Details</a></li>
+            </ul>
+          </div>
+        </div>
+        <section class="payment-statistics">
+
+          <form>
+            <!-- 3 select boxes -->
+            <div class="input-fields row">
+              <div class="col-4">
+                <h5>Year</h5>
+                <select id="year" name="year">
+                  <option value="" disabled selected>select year</option>
+                  <option value="2022">2022</option>
+                  <option value="2023">2023</option>
+                  <option value="2024">2024</option>
+                </select>
+              </div>
+              <div class="col-4">
+                <h5>Month</h5>
+                <select id="year" name="year">
+                  <option value="" disabled selected>select month</option>
+                  <option value="Nursary">January</option>
+                  <option value="February">February</option>
+                  <option value="March">March</option>
+                  <option value="April">April</option>
+                  <option value="May">May</option>
+                  <option value="June">June</option>
+                  <option value="July">July</option>
+                  <option value="August">August</option>
+                  <option value="September">September</option>
+                  <option value="October">October</option>
+                  <option value="November">November</option>
+                  <option value="December">December</option>
+                </select>
+              </div>
+              <div class="col-4">
+                <button type="submit" class="submit-button-orange">Search</button>
+              </div>
+            </div>
+          </form>
+
+          <h6 class="overview">Total Rows Found: <span>43</span></h6>
+          <!-- show student data -->
+          <div class="payment-overview">
+            <h4>Payment Due Summary</h4>
+            <div class="graph-and-table">
+              <!-- graph -->
+              <div class="graph">
+                <div
+                  class="d-flex align-items-center justify-content-center position-relative pieChart_wrapper__holder">
+                  <div class="pieChart_wrapper">
+                    <canvas id="myChart3"></canvas>
+                  </div>
+                  <div class="total position-absolute top-50 start-50 text-center">
+                    <p class="fw-medium"></p>
+                    <p class="amount">60%</p>
+                  </div>
+                </div>
+                <h3>Total Students</h3>
+              </div>
+              <!-- payment summary table -->
+              <div class="payment-table">
+                <table class="table-head">
+                  <tr>
+                    <th style="width:18%">Class</th>
+                    <th style="width:20%">Section</th>
+                    <th style="width:20%">T.Student</th>
+                    <th style="width:20%">Paid</th>
+                    <th style="width:22%">Unpaid</th>
+                  </tr>
+                </table>
+
+                <div class="overflow-2 scrollbar">
+                  <table class="table-content scrollbar">
+                    <tr>
+                      <td style="width:25%">Nursery</td>
+                      <td style="width:20%">A</td>
+                      <td style="width:19%">43</td>
+                      <td class="paid" style="width:21%">33</td>
+                      <td class="unpaid" style="width:20%">10</td>
+                    </tr>
+                    <tr>
+                      <td style="width:25%">Nursery</td>
+                      <td style="width:20%">A</td>
+                      <td style="width:19%">43</td>
+                      <td class="paid" style="width:21%">33</td>
+                      <td class="unpaid" style="width:20%">10</td>
+                    </tr>
+                    <tr>
+                      <td style="width:25%">Nursery</td>
+                      <td style="width:20%">A</td>
+                      <td style="width:19%">43</td>
+                      <td class="paid" style="width:21%">33</td>
+                      <td class="unpaid" style="width:20%">10</td>
+                    </tr>
+                    <tr>
+                      <td style="width:25%">Nursery</td>
+                      <td style="width:20%">A</td>
+                      <td style="width:19%">43</td>
+                      <td class="paid" style="width:21%">33</td>
+                      <td class="unpaid" style="width:20%">10</td>
+                    </tr>
+                    <tr>
+                      <td style="width:25%">Nursery</td>
+                      <td style="width:20%">A</td>
+                      <td style="width:19%">43</td>
+                      <td class="paid" style="width:21%">33</td>
+                      <td class="unpaid" style="width:20%">10</td>
+                    </tr>
+                    <tr>
+                      <td style="width:25%">Nursery</td>
+                      <td style="width:20%">A</td>
+                      <td style="width:19%">43</td>
+                      <td class="paid" style="width:21%">33</td>
+                      <td class="unpaid" style="width:20%">10</td>
+                    </tr>
+
+
+                  </table>
+                </div>
+
+
+              </div>
+            </div>
+
+          </div>
+        </section>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Expense and fund info-->
+
+  <div class="row gx-4">
+
+    <!-- Expense info  -->
+    <div class="col-md-6 col-12">
+      <div class="shadow mb-3 rounded bg-white">
+        <div
+          class="heading d-flex justify-content-between align-items-center rounded-top pb-3 px-3 text-white position-relative">
+          <h5 class="dropdown m-0">Expense Information</h5>
+          <div class="dropdown-toggle dots bg-white rounded-circle d-flex justify-content-center align-items-center" id="dropdownMenuButton5" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class='bx bx-dots-vertical text-primary' ></i>
+          </div>
+          <div class="dropdown-menu edit_details_overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton5">
+            <ul class="list-unstyled">
+              <li><a href="#">Edit</a></li>
+              <li><a href="#">View Details</a></li>
+            </ul>
+          </div>
+        </div>
+        <section class="expense-info">
+          <form>
+            <!-- 3 select boxes -->
+            <div class="input-fields row">
+              <div class="col-4">
+                <h5>Year</h5>
+                <select id="year" name="year">
+                  <option value="" disabled selected>select year</option>
+                  <option value="2022">2022</option>
+                  <option value="2023">2023</option>
+                  <option value="2024">2024</option>
+                </select>
+              </div>
+              <div class="col-4">
+                <h5>Month</h5>
+                <select id="year" name="year">
+                  <option value="" disabled selected>select month</option>
+                  <option value="Nursary">January</option>
+                  <option value="February">February</option>
+                  <option value="March">March</option>
+                  <option value="April">April</option>
+                  <option value="May">May</option>
+                  <option value="June">June</option>
+                  <option value="July">July</option>
+                  <option value="August">August</option>
+                  <option value="September">September</option>
+                  <option value="October">October</option>
+                  <option value="November">November</option>
+                  <option value="December">December</option>
+                </select>
+              </div>
+              <div class="col-4">
+                <button type="submit" class="submit-button-orange">Search</button>
+              </div>
+            </div>
+          </form>
+          <h6 class="overview-large">Total Expanse: <span>127,543</span></h6>
+          <!-- show expense data -->
+          <div class="table ">
+            <table class="table-head">
+              <tr>
+                <th style="width:25%">Type</th>
+                <th style="width:20%">Amount</th>
+                <th style="width:55%">Description</th>
+              </tr>
+            </table>
+            <div class="overflow-1 scrollbar">
+              <table class="table-content">
+                <tr>
+                  <td style="width:26%">Salary</td>
+                  <td style="width:20%">12345</td>
+                  <td style="width:54%">Mr. Hafizur march month salary</td>
+                </tr>
+                <tr>
+                  <td style="width:26%">Salary</td>
+                  <td style="width:20%">12345</td>
+                  <td style="width:54%">Mr. Hafizur march month salary</td>
+                </tr>
+                <tr>
+                  <td style="width:26%">Salary</td>
+                  <td style="width:20%">12345</td>
+                  <td style="width:54%">Mr. Hafizur march month salary</td>
+                </tr>
+                <tr>
+                  <td style="width:26%">Salary</td>
+                  <td style="width:20%">12345</td>
+                  <td style="width:54%">Mr. Hafizur march month salary</td>
+                </tr>
+                <tr>
+                  <td style="width:26%">Salary</td>
+                  <td style="width:20%">12345</td>
+                  <td style="width:54%">Mr. Hafizur march month salary</td>
+                </tr>
+                <tr>
+                  <td style="width:26%">Salary</td>
+                  <td style="width:20%">12345</td>
+                  <td style="width:54%">Mr. Hafizur march month salary</td>
+                </tr>
+                <tr>
+                  <td style="width:26%">Salary</td>
+                  <td style="width:20%">12345</td>
+                  <td style="width:54%">Mr. Hafizur march month salary</td>
+                </tr>
+                <tr>
+                  <td style="width:26%">Salary</td>
+                  <td style="width:20%">12345</td>
+                  <td style="width:54%">Mr. Hafizur march month salary</td>
+                </tr>
+                <tr>
+                  <td style="width:26%">Salary</td>
+                  <td style="width:20%">12345</td>
+                  <td style="width:54%">Mr. Hafizur march month salary</td>
+                </tr>
+                <tr>
+                  <td style="width:26%">Salary</td>
+                  <td style="width:20%">12345</td>
+                  <td style="width:54%">Mr. Hafizur march month salary</td>
+                </tr>
+                <tr>
+                  <td style="width:26%">Salary</td>
+                  <td style="width:20%">12345</td>
+                  <td style="width:54%">Mr. Hafizur march month salary</td>
+                </tr>
+
+              </table>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Fund info section -->
+    <div class="col-md-6 col-12">
+
+      <div class="shadow mb-3 rounded bg-white">
+        <div class="shadow mb-3 rounded bg-white">
+          <div
+            class="heading d-flex justify-content-between align-items-center rounded-top pb-3 px-3 text-white position-relative">
+            <h5 class="dropdown m-0">Fund Information</h5>
+            <div class="dropdown-toggle dots bg-white rounded-circle d-flex justify-content-center align-items-center" id="dropdownMenuButton5" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <i class='bx bx-dots-vertical text-primary' ></i>
+            </div>
+            <div class="dropdown-menu edit_details_overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton5">
+              <ul class="list-unstyled">
+                <li><a href="#">Edit</a></li>
+                <li><a href="#">View Details</a></li>
+              </ul>
+            </div>
+          </div>
+          <section class="fund-info">
+            <form>
+              <!-- 3 select boxes -->
+              <div class="input-fields row gx-3">
+                <div class="col-3">
+                  <h5>Year</h5>
+                  <select id="year" name="year">
+                    <option value="" disabled selected>select year</option>
+                    <option value="2022">2022</option>
+                    <option value="2023">2023</option>
+                    <option value="2024">2024</option>
+                  </select>
+                </div>
+                <div class="col-3">
+                  <h5>Month</h5>
+                  <select id="year" name="year">
+                    <option value="" disabled selected>select month</option>
+                    <option value="January">January</option>
+                    <option value="February">February</option>
+                    <option value="March">March</option>
+                    <option value="April">April</option>
+                    <option value="May">May</option>
+                    <option value="June">June</option>
+                    <option value="July">July</option>
+                    <option value="August">August</option>
+                    <option value="September">September</option>
+                    <option value="October">October</option>
+                    <option value="November">November</option>
+                    <option value="December">December</option>
+                  </select>
+                </div>
+                <div class="col-3">
+                  <h5>Fund</h5>
+                  <select id="fund" name="fund">
+                    <option value="" disabled selected>select fund</option>
+                    <option value="organizing-fund">Organizing Fund</option>
+                    <option value="maintenance-fund">Maintenance Fund</option>
+                    <option value="allumni-fund">Allumni Fund</option>
+                  </select>
+                </div>
+                <div class="col-3">
+                  <button type="submit" class="submit-button-orange">Search</button>
+                </div>
+              </div>
+            </form>
+            <h6 class="overview-large">Total Fund Available: <span>127,543</span></h6>
+            <!-- show expense data -->
+            <div class="table">
+              <table class="table-head">
+                <tr>
+                  <th style="width:20%">Date</th>
+                  <th style="width:20%">Fund</th>
+                  <th style="width:20%">Debit</th>
+                  <th style="width:20%">Credit</th>
+                  <th style="width:20%">Remaining</th>
+                </tr>
+              </table>
+              <div class="overflow-1 scrollbar">
+                <table class="table-content">
+                  <tr>
+                    <td style="width:20%">12/01/2024</td>
+                    <td style="width:21%">General</td>
+                    <td style="width:21%">0</td>
+                    <td style="width:21%">1234</td>
+                    <td style="width:16%">7654</td>
+                  </tr>
+                  <tr>
+                    <td style="width:20%">12/01/2024</td>
+                    <td style="width:21%">General</td>
+                    <td style="width:21%">0</td>
+                    <td style="width:21%">1234</td>
+                    <td style="width:16%">7654</td>
+                  </tr>
+                  <tr>
+                    <td style="width:20%">12/01/2024</td>
+                    <td style="width:21%">General</td>
+                    <td style="width:21%">0</td>
+                    <td style="width:21%">1234</td>
+                    <td style="width:16%">7654</td>
+                  </tr>
+                  <tr>
+                    <td style="width:20%">12/01/2024</td>
+                    <td style="width:21%">General</td>
+                    <td style="width:21%">0</td>
+                    <td style="width:21%">1234</td>
+                    <td style="width:16%">7654</td>
+                  </tr>
+                  <tr>
+                    <td style="width:20%">12/01/2024</td>
+                    <td style="width:21%">General</td>
+                    <td style="width:21%">0</td>
+                    <td style="width:21%">1234</td>
+                    <td style="width:16%">7654</td>
+                  </tr>
+                  <tr>
+                    <td style="width:20%">12/01/2024</td>
+                    <td style="width:21%">General</td>
+                    <td style="width:21%">0</td>
+                    <td style="width:21%">1234</td>
+                    <td style="width:16%">7654</td>
+                  </tr>
+                  <tr>
+                    <td style="width:20%">12/01/2024</td>
+                    <td style="width:21%">General</td>
+                    <td style="width:21%">0</td>
+                    <td style="width:21%">1234</td>
+                    <td style="width:16%">7654</td>
+                  </tr>
+                  <tr>
+                    <td style="width:20%">12/01/2024</td>
+                    <td style="width:21%">General</td>
+                    <td style="width:21%">0</td>
+                    <td style="width:21%">1234</td>
+                    <td style="width:16%">7654</td>
+                  </tr>
+
+                </table>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="row gx-4">
+    <!-- Payslip section  -->
+    <div class="col-md-6 col-12">
+      <div class="shadow mb-3 rounded bg-white">
+        <div
+          class="heading d-flex justify-content-between align-items-center rounded-top pb-3 px-3 text-white position-relative">
+          <h5 class="dropdown m-0">Marks</h5>
+          <div class="dropdown-toggle  bg-white rounded-circle d-flex justify-content-center align-items-center" id="dropdownMenuButton5" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class='bx bx-dots-vertical text-primary' ></i>
+          </div>
+          <div class="edit_details_overlay bg-white rounded shadow position-absolute dropdown-menu" aria-labelledby="dropdownMenuButton5">
+            <ul class="list-unstyled">
+              <li><a href="#">Edit</a></li>
+              <li><a href="#">View Details</a></li>
+            </ul>
+          </div>
+        </div>
+        <!-- marks -->
+        <section class="marks class-routine">
+          <form>
+            <!-- 3 select boxes -->
+            <div class="input-fields row gx-3">
+
+              <div class="col-3">
+                <h5>Class</h5>
+                <select id="class" name="class">
+                  <option value="" disabled selected>
+                    select class
+                  </option>
+                  <option value="Nursary">Nursary</option>
+                  <option value="class-one">Class One</option>
+                  <option value="class-two">Class Two</option>
+                </select>
+              </div>
+
+              <div class="col-3">
+                <h5>Section</h5>
+                <select id="section" name="section">
+                  <option value="" disabled selected>
+                    select section
+                  </option>
+                  <option value="A">A</option>
+                  <option value="B">B</option>
+                  <option value="C">C</option>
+                  <option value="D">D</option>
+                </select>
+              </div>
+              <div class="col-3">
+                <h5>Subject</h5>
+                <select id="section" name="section">
+                  <option value="" disabled selected>
+                    select subject
+                  </option>
+                  <option value="A">Bangla</option>
+                  <option value="B">English</option>
+                </select>
+              </div>
+              <div class="col-3">
+                <button type="submit" class="submit-button-orange">
+                  Search
+                </button>
+              </div>
+            </div>
+          </form>
+          <h6 class="overview">
+            Total Students Found: <span>06</span>
+          </h6>
+          <!-- show marks -->
+          <div class="routine">
+            <h3 class="heading">
+              Class: Nine | Section: A | Subject: English
+            </h3>
+            <div class="routines scrollbar">
+              <div class="single-mark">
+                <div class="top">
+                  <h3>Md. Hakim Ali</h3>
+                  <h3>Roll: 17</h3>
+                  <h4>Written: 60</h4>
+                  <h4>Oral: 20</h4>
+                  <h4>Total: 80</h4>
+                </div>
+              </div>
+              <div class="single-mark">
+                <div class="top">
+                  <h3 title="Md. Hekmat Ali Shah Ahmed Babul">Md. Hekmat Ali</h3>
+                  <h3>Roll: 17</h3>
+                  <h4>Written: 60</h4>
+                  <h4>Oral: 20</h4>
+                  <h4>Total: 80</h4>
+                </div>
+              </div>
+              <div class="single-mark">
+                <div class="top">
+                  <h3>Md. Hakim Ali</h3>
+                  <h3>Roll: 17</h3>
+                  <h4>Written: 60</h4>
+                  <h4>Oral: 20</h4>
+                  <h4>Total: 80</h4>
+                </div>
+              </div>
+              <div class="single-mark">
+                <div class="top">
+                  <h3 title="Md. Hekmat Ali Shah Ahmed Babul">Md. Hekmat Ali</h3>
+                  <h3>Roll: 17</h3>
+                  <h4>Written: 60</h4>
+                  <h4>Oral: 20</h4>
+                  <h4>Total: 80</h4>
+                </div>
+              </div>
+              <div class="single-mark">
+                <div class="top">
+                  <h3>Md. Hakim Ali</h3>
+                  <h3>Roll: 17</h3>
+                  <h4>Written: 60</h4>
+                  <h4>Oral: 20</h4>
+                  <h4>Total: 80</h4>
+                </div>
+              </div>
+              <div class="single-mark">
+                <div class="top">
+                  <h3 title="Md. Hekmat Ali Shah Ahmed Babul">Md. Hekmat Ali</h3>
+                  <h3>Roll: 17</h3>
+                  <h4>Written: 60</h4>
+                  <h4>Oral: 20</h4>
+                  <h4>Total: 80</h4>
+                </div>
+              </div>
+              <div class="single-mark">
+                <div class="top">
+                  <h3>Md. Hakim Ali</h3>
+                  <h3>Roll: 17</h3>
+                  <h4>Written: 60</h4>
+                  <h4>Oral: 20</h4>
+                  <h4>Total: 80</h4>
+                </div>
+              </div>
+              <div class="single-mark">
+                <div class="top">
+                  <h3 title="Md. Hekmat Ali Shah Ahmed Babul">Md. Hekmat Ali</h3>
+                  <h3>Roll: 17</h3>
+                  <h4>Written: 60</h4>
+                  <h4>Oral: 20</h4>
+                  <h4>Total: 80</h4>
+                </div>
+              </div>
+              <div class="single-mark">
+                <div class="top">
+                  <h3>Md. Hakim Ali</h3>
+                  <h3>Roll: 17</h3>
+                  <h4>Written: 60</h4>
+                  <h4>Oral: 20</h4>
+                  <h4>Total: 80</h4>
+                </div>
+              </div>
+              <div class="single-mark">
+                <div class="top">
+                  <h3 title="Md. Hekmat Ali Shah Ahmed Babul">Md. Hekmat Ali</h3>
+                  <h3>Roll: 17</h3>
+                  <h4>Written: 60</h4>
+                  <h4>Oral: 20</h4>
+                  <h4>Total: 80</h4>
+                </div>
+              </div>
+              <div class="single-mark">
+                <div class="top">
+                  <h3>Md. Hakim Ali</h3>
+                  <h3>Roll: 17</h3>
+                  <h4>Written: 60</h4>
+                  <h4>Oral: 20</h4>
+                  <h4>Total: 80</h4>
+                </div>
+              </div>
+              <div class="single-mark">
+                <div class="top">
+                  <h3 title="Md. Hekmat Ali Shah Ahmed Babul">Md. Hekmat Ali</h3>
+                  <h3>Roll: 17</h3>
+                  <h4>Written: 60</h4>
+                  <h4>Oral: 20</h4>
+                  <h4>Total: 80</h4>
+                </div>
+              </div>
+              <div class="single-mark">
+                <div class="top">
+                  <h3>Md. Hakim Ali</h3>
+                  <h3>Roll: 17</h3>
+                  <h4>Written: 60</h4>
+                  <h4>Oral: 20</h4>
+                  <h4>Total: 80</h4>
+                </div>
+              </div>
+              <div class="single-mark">
+                <div class="top">
+                  <h3 title="Md. Hekmat Ali Shah Ahmed Babul">Md. Hekmat Ali</h3>
+                  <h3>Roll: 17</h3>
+                  <h4>Written: 60</h4>
+                  <h4>Oral: 20</h4>
+                  <h4>Total: 80</h4>
+                </div>
+              </div>
+              <div class="single-mark">
+                <div class="top">
+                  <h3>Md. Hakim Ali</h3>
+                  <h3>Roll: 17</h3>
+                  <h4>Written: 60</h4>
+                  <h4>Oral: 20</h4>
+                  <h4>Total: 80</h4>
+                </div>
+              </div>
+              <div class="single-mark">
+                <div class="top">
+                  <h3 title="Md. Hekmat Ali Shah Ahmed Babul">Md. Hekmat Ali</h3>
+                  <h3>Roll: 17</h3>
+                  <h4>Written: 60</h4>
+                  <h4>Oral: 20</h4>
+                  <h4>Total: 80</h4>
+                </div>
+              </div>
+              <div class="single-mark">
+                <div class="top">
+                  <h3>Md. Hakim Ali</h3>
+                  <h3>Roll: 17</h3>
+                  <h4>Written: 60</h4>
+                  <h4>Oral: 20</h4>
+                  <h4>Total: 80</h4>
+                </div>
+              </div>
+              <div class="single-mark">
+                <div class="top">
+                  <h3 title="Md. Hekmat Ali Shah Ahmed Babul">Md. Hekmat Ali</h3>
+                  <h3>Roll: 17</h3>
+                  <h4>Written: 60</h4>
+                  <h4>Oral: 20</h4>
+                  <h4>Total: 80</h4>
+                </div>
+              </div>
+              <div class="single-mark">
+                <div class="top">
+                  <h3>Md. Hakim Ali</h3>
+                  <h3>Roll: 17</h3>
+                  <h4>Written: 60</h4>
+                  <h4>Oral: 20</h4>
+                  <h4>Total: 80</h4>
+                </div>
+              </div>
+              <div class="single-mark">
+                <div class="top">
+                  <h3 title="Md. Hekmat Ali Shah Ahmed Babul">Md. Hekmat Ali</h3>
+                  <h3>Roll: 17</h3>
+                  <h4>Written: 60</h4>
+                  <h4>Oral: 20</h4>
+                  <h4>Total: 80</h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Class routine section -->
+    <div class="col-md-6 col-12">
+      <div class="shadow mb-3 rounded bg-white">
+        <div
+          class="heading d-flex justify-content-between align-items-center rounded-top pb-3 px-3 text-white position-relative">
+          <h5 class="dropdown m-0">Class Routine</h5>
+          <div class="dropdown-toggle  bg-white rounded-circle d-flex justify-content-center align-items-center" id="dropdownMenuButton5" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class='bx bx-dots-vertical text-primary' ></i>
+          </div>
+          <div class="edit_details_overlay bg-white rounded shadow position-absolute dropdown-menu" aria-labelledby="dropdownMenuButton5">
+            <ul class="list-unstyled">
+              <li><a href="#">Edit</a></li>
+              <li><a href="#">View Details</a></li>
+            </ul>
+          </div>
+        </div>
+        <section class="class-routine">
+          <form>
+            <!-- 3 select boxes -->
+            <div class="input-fields row gx-3">
+              <div class="col-3">
+                <h5>Date</h5>
+                <input type="date" id="date" name="date" />
+              </div>
+              <div class="col-3">
+                <h5>Class</h5>
+                <select id="class" name="class">
+                  <option value="" disabled selected>
+                    select class
+                  </option>
+                  <option value="Nursary">Nursary</option>
+                  <option value="class-one">Class One</option>
+                  <option value="class-two">Class Two</option>
+                </select>
+              </div>
+              <div class="col-3">
+                <h5>Section</h5>
+                <select id="section" name="section">
+                  <option value="" disabled selected>
+                    select section
+                  </option>
+                  <option value="A">A</option>
+                  <option value="B">B</option>
+                  <option value="C">C</option>
+                  <option value="D">D</option>
+                </select>
+              </div>
+              <div class="col-3">
+                <button type="submit" class="submit-button-orange">
+                  Search
+                </button>
+              </div>
+            </div>
+          </form>
+          <h6 class="overview">
+            Total Class Found: <span>06</span>
+          </h6>
+          <!-- show class routine -->
+          <div class="routine">
+            <h3 class="heading">
+              12 July 2024 | Class: Nine | Section: A
+            </h3>
+            <div class="routines scrollbar">
+              <div class="single-routine">
+                <div class="first">
+                  <div class="book-img">
+                    <img src="../assets/img/book.png" alt="" />
+                  </div>
+                  <div class="details">
+                    <h3>English 1st Paper</h3>
+                    <h4>Time: 10:00 am - 11:00 am</h4>
+                  </div>
+                </div>
+                <div class="second">
+                  <h5 class="room">Room: 301</h5>
+                  <div class="additional">
+                    <h4>Period: 1st Period</h4>
+                    <h5>Teacher: AKM</h5>
+                  </div>
+                </div>
+              </div>
+              <div class="single-routine">
+                <div class="first">
+                  <div class="book-img">
+                    <img src="../assets/img/book.png" alt="" />
+                  </div>
+                  <div class="details">
+                    <h3>English 1st Paper</h3>
+                    <h4>Time: 10:00 am - 11:00 am</h4>
+                  </div>
+                </div>
+                <div class="second">
+                  <h5 class="room">Room: 301</h5>
+                  <div class="additional">
+                    <h4>Period: 1st Period</h4>
+                    <h5>Teacher: AKM</h5>
+                  </div>
+                </div>
+              </div>
+              <div class="single-routine">
+                <div class="first">
+                  <div class="book-img">
+                    <img src="../assets/img/book.png" alt="" />
+                  </div>
+                  <div class="details">
+                    <h3>English 1st Paper</h3>
+                    <h4>Time: 10:00 am - 11:00 am</h4>
+                  </div>
+                </div>
+                <div class="second">
+                  <h5 class="room">Room: 301</h5>
+                  <div class="additional">
+                    <h4>Period: 1st Period</h4>
+                    <h5>Teacher: AKM</h5>
+                  </div>
+                </div>
+              </div>
+              <div class="single-routine">
+                <div class="first">
+                  <div class="book-img">
+                    <img src="../assets/img/book.png" alt="" />
+                  </div>
+                  <div class="details">
+                    <h3>English 1st Paper</h3>
+                    <h4>Time: 10:00 am - 11:00 am</h4>
+                  </div>
+                </div>
+                <div class="second">
+                  <h5 class="room">Room: 301</h5>
+                  <div class="additional">
+                    <h4>Period: 1st Period</h4>
+                    <h5>Teacher: AKM</h5>
+                  </div>
+                </div>
+              </div>
+              <div class="single-routine">
+                <div class="first">
+                  <div class="book-img">
+                    <img src="../assets/img/book.png" alt="" />
+                  </div>
+                  <div class="details">
+                    <h3>English 1st Paper</h3>
+                    <h4>Time: 10:00 am - 11:00 am</h4>
+                  </div>
+                </div>
+                <div class="second">
+                  <h5 class="room">Room: 301</h5>
+                  <div class="additional">
+                    <h4>Period: 1st Period</h4>
+                    <h5>Teacher: AKM</h5>
+                  </div>
+                </div>
+              </div>
+              <div class="single-routine">
+                <div class="first">
+                  <div class="book-img">
+                    <img src="../assets/img/book.png" alt="" />
+                  </div>
+                  <div class="details">
+                    <h3>English 1st Paper</h3>
+                    <h4>Time: 10:00 am - 11:00 am</h4>
+                  </div>
+                </div>
+                <div class="second">
+                  <h5 class="room">Room: 301</h5>
+                  <div class="additional">
+                    <h4>Period: 1st Period</h4>
+                    <h5>Teacher: AKM</h5>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div> {% endcomment %}
+
+
+  {% endif %}  
+
+</div>  
+  
+  
+<div class="modal" tabindex="-1" id="myModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-primary">Success!</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p> Session Year updated successfully! </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+{% endblock content %} 
+{% block extra_javascript %}  
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'assets/js/extended-ui-perfect-scrollbar.js' %}"></script>
+<!-- Place this tag in your head or just before your close body tag. -->
+<script async defer src="https://buttons.github.io/buttons.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js" integrity="sha512-bPs7Ae6pVvhOSiIcyUClR7/q2OAsRiovw4vAkX+zJbw3ShAeeqezq50RIIcIURq7Oa20rW2n2q+fyXBNcU9lrw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script>
+  $(document).ready(function () {
+      $("#submitBtn").click(function () {
+          var formData = $("#sessionForm").serialize();
+
+          $.ajax({
+              url: "/set_session_year/",  // Update the URL based on your Django project
+              type: "POST",
+              data: formData,
+              dataType: "json",
+              success: function (data) {
+                  if (data.success) {
+                    $('#myModal').modal('show');
+
+                        // Automatically close the modal after 2000 milliseconds (2 seconds)
+                        setTimeout(function () {
+                            $('#myModal').modal('hide');
+                        }, 1000);
+                  } else {
+                      // Handle failure, e.g., display an error message
+                      alert(data.message);
+                  }
+              },
+              error: function () {
+                  // Handle AJAX error
+                  alert("Session Year Not Valid !!!");
+              }
+          });
+      });
+  });
+
+
+</script>
+
+
+  <!-- js for pie chart -->
+  <script>
+    const ctx = document.getElementById("myChart");
+    const ctx2 = document.getElementById("myChart2");
+    const ctx3 = document.getElementById("myChart3");
+    const ctx4 = document.getElementById("myChart4");
+
+    const studentData = {
+      labels: ["Present", "Absent"],
+      datasets: [
+        {
+          label: "",
+          borderWidth: 0,
+          data: [{{t_student_attend}}, {{t_student_absent}}],
+          backgroundColor: ["#77DF40", "#FF3E1D"],
+          hoverOffset: 2,
+        },
+      ],
+    };
+
+    // student attendance chart
+
+    const studentAttendancePieChart = new Chart(ctx, {
+      type: "doughnut",
+      data: studentData,
+      options: {
+        responsive: true,
+        backgroundColor: "#fff",
+        cutout: "75%",
+        radius: 48,
+        plugins: {
+          legend: {
+            display: false,
+            position: "bottom",
+          },
+          title: {
+            display: false,
+            text: "Students",
+          },
+        },
+      },
+    });
+
+    document.querySelector(".student_attendance .present_title").style.color =
+      studentData.datasets[0].backgroundColor[0];
+    document.querySelector(".student_attendance .absent_title").style.color =
+      studentData.datasets[0].backgroundColor[1];
+    document.querySelector(".student_attendance .total .stuamount").textContent =
+      studentData.datasets[0].data[0] + studentData.datasets[0].data[1];
+
+    // teacher attendance chart
+
+    const teacherData = {
+      labels: ["Present", "Absent"],
+      datasets: [
+        {
+          label: "",
+          borderWidth: 0,
+          data: [{{t_staff_attend}}, {{t_staff_absent}}],
+          backgroundColor: ["#77DF40", "#FF3E1D"],
+          hoverOffset: 2,
+        },
+      ],
+    };
+
+    const teacherAttendancePieChart = new Chart(ctx2, {
+      type: "doughnut",
+      data: teacherData,
+      options: {
+        responsive: true,
+        backgroundColor: "#fff",
+        cutout: "75%",
+        radius: 48,
+        plugins: {
+          legend: {
+            display: false,
+            position: "bottom",
+          },
+          title: {
+            display: false,
+            text: "Students",
+          },
+        },
+      },
+    });
+    document.querySelector(".teacher_attendance .present_title").style.color =
+    teacherData.datasets[0].backgroundColor[0];
+    document.querySelector(".teacher_attendance .absent_title").style.color =
+    teacherData.datasets[0].backgroundColor[1];
+    document.querySelector(".teacher_attendance .total .teaamount").textContent =
+    teacherData.datasets[0].data[0] + teacherData.datasets[0].data[1];
+
+      
+    // student payment chart
+
+    const student_payment_data = {
+      labels: ["Paid", "Unpaid"],
+      datasets: [
+        {
+          label: "",
+          borderWidth: 0,
+          data: [300, 45],
+          backgroundColor: ["#77DF40", "#FF3E1D"],
+          hoverOffset: 2,
+        },
+      ],
+    };
+
+    const studentPaymentPieChart = new Chart(ctx3, {
+      type: "doughnut",
+      data: student_payment_data,
+      options: {
+        responsive: true,
+        backgroundColor: "#fff",
+        cutout: "75%",
+        radius: 50,
+        plugins: {
+          legend: {
+            display: false,
+            position: "bottom",
+          },
+          title: {
+            display: false,
+            text: "Payment",
+          },
+        },
+      },
+    });
+
+  </script>
+
+
+{% endblock extra_javascript%}

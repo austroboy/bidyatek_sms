@@ -1,0 +1,230 @@
+{% extends 'partials/base.html' %} {% load static %}
+
+{% block extra_css %}
+
+<link rel="stylesheet" href="{% static 'assets/vendor/libs/datatables/datatables.min.css' %}" />
+<style>
+  *:focus {
+    box-shadow: none !important;
+    outline: none !important;
+  }
+  
+  a {
+    color: #369;
+  }
+  
+  .title-text {
+    margin: 2em 0;
+  }
+  
+  .table > tbody > tr > td:nth-child(1) > i {
+    margin-right: 8px;
+    margin-top: 4px;
+  }
+  
+  .entries {
+    margin-top: 0;
+  }
+  
+  .pagination {
+    margin-top: 0 !important;
+  }
+  
+  .pagination > li > a {
+    background-color: white;
+    color: #4676d7;
+  }
+  
+  .pagination > li > a:focus,
+  .pagination > li > a:hover,
+  .pagination > li > span:focus,
+  .pagination > li > span:hover {
+    color: #036;
+    background-color: #eee;
+    border-color: #ddd;
+  }
+  
+  .pagination > .active > a {
+    color: white;
+    background-color: #4676d7 !important;
+    border: solid 1px #4676d7 !important;
+  }
+  
+  .pagination > .active > a:hover {
+    background-color: #4676d7 !important;
+    border: solid 1px #4676d7;
+  }
+</style>
+
+{% endblock extra_css %} {% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+
+  <div class="card">
+    <div
+      class="row card-body mt-1"
+      id="incomeadd"
+      hx-get="{% url 'list_incomeitem' %}"
+      hx-trigger="load, incomeitemChanged from:body"
+    >
+      <!-- list class -->
+    </div>
+
+    <!-- modal settings -->
+
+    <div id="incomemodal" class="modal">
+      <div id="incomedialog" class="modal-dialog modal-dialog-centered" hx-target="this"></div>
+    </div>
+  </div>
+</div>
+<!-- end: Content -->
+
+{% endblock content %} {% block extra_javascript %}
+
+<script src="https://unpkg.com/htmx.org@1.8.4"></script>
+<script src="{% static 'assets/vendor/libs/datatables/pdfmake.min.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/datatables/vfs_fonts.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/datatables/datatables.min.js' %}"></script>
+
+<script>
+  pdfMake.fonts = {
+    Roboto: {
+      normal: 'Roboto-Regular.ttf',
+      bold: 'Roboto-Medium.ttf',
+      italics: 'Roboto-Italic.ttf',
+      bolditalics: 'Roboto-MediumItalic.ttf'
+    },
+    nikosh: {
+      normal: "NikoshBAN.ttf",
+      bold: "NikoshBAN.ttf",
+      italics: "NikoshBAN.ttf",
+      bolditalics: "NikoshBAN.ttf"
+    }
+  };
+
+  function blobToDataURL(blob, callback) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      callback(e.target.result);
+    };
+    reader.readAsDataURL(blob);
+  }
+
+  function initializeDataTable() {
+    fetch('{{ institute.institute_logo.url }}')
+      .then(response => response.blob())
+      .then(blob => {
+        // Convert Blob to Data URL
+        blobToDataURL(blob, function(dataURL) {
+          // Ensure the table is fully loaded before initializing DataTable
+          setTimeout(() => {
+            // Check if the DataTable is already initialized
+            if ($.fn.DataTable.isDataTable('#dataTable')) {
+              $('#dataTable').DataTable().destroy();
+            }
+
+            let table = new DataTable("#dataTable", {
+              dom: "<'row'<'col-sm-12 col-md-6 mb-3'l><'col-sm-12 col-md-6 mb-3'f>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row '<'col-sm-12 col-md-5 mt-3'B><'col-sm-12 col-md-7 mt-3'p>>",
+              paging: true,
+              autoWidth: true,
+              buttons: [
+                'excel',
+                {
+                  extend: 'pdfHtml5',
+                  exportOptions: {
+                    columns: ':not(:last-child):not(:nth-child(6))' // Exclude the last column and the Description column (6th column)
+                  },
+                  customize: function(doc) {
+                    doc.defaultStyle = {
+                      font: 'nikosh'
+                    };
+                    
+                    // Set the table width to fit the page
+                    var colCount = doc.content[1].table.body[0].length;
+                    var colWidths = [];
+                    for (var i = 0; i < colCount; i++) {
+                      colWidths.push('*');
+                    }
+                    doc.content[1].table.widths = colWidths;
+                    
+                    // Set page margins
+                    doc.pageMargins = [10, 10, 10, 10];
+                    
+                    // Center-align the table headers
+                    doc.content[1].table.body[0].forEach(function (header) {
+                      header.alignment = 'center';
+                    });
+                    
+                    // Center-align the table content
+                    doc.content[1].table.body.slice(1).forEach(function (row) {
+                      row.forEach(function (cell) {
+                        cell.alignment = 'center';
+                      });
+                    });
+                    
+                    // Set page orientation to landscape if table is too wide
+                    if (colCount > 5) {
+                      doc.pageOrientation = 'landscape';
+                    }
+                    
+                    // Auto-size columns based on content
+                    doc.content[1].table.body.forEach(function (row, rowIndex) {
+                      row.forEach(function (cell, cellIndex) {
+                        if (rowIndex === 0) {
+                          cell.fillColor = '#1D1E4E';
+                        }
+                      });
+                    });
+                  }
+                }
+              ],
+            });
+          }, 100); // Delay of 100ms to ensure the table is rendered
+        });
+      });
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    initializeDataTable();
+  });
+
+  htmx.on("htmx:afterSwap", (e) => {
+    if (e.detail.target.id == "incomeadd") {
+      initializeDataTable();
+    }
+  });
+
+  htmx.on("htmx:afterSwap", (e) => {
+    const modal = new bootstrap.Modal(document.getElementById("incomemodal"));
+    if (e.detail.target.id == "incomedialog") {
+      modal.show();
+    }
+  });
+
+  htmx.on("htmx:beforeSwap", (e) => {
+    const modal = new bootstrap.Modal(document.getElementById("incomemodal"));
+    if (e.detail.target.id == "incomedialog" && !e.detail.xhr.response) {
+      modal.hide();
+      e.detail.shouldSwap = false;
+      if (e.detail.xhr.getResponseHeader("HX-Trigger")) {
+        const hxTriggerHeader = e.detail.xhr.getResponseHeader("HX-Trigger");
+        if (hxTriggerHeader) {
+          const hxTriggerData = JSON.parse(hxTriggerHeader);
+          if (hxTriggerData.messages === "Success") {
+            htmx.trigger("#pageinfo", "refresh");
+          }
+        }
+      }
+    }
+  });
+
+  htmx.on("hidden.bs.modal", () => {
+    document.getElementById("incomedialog").innerHTML = "";
+  });
+</script>
+
+{% endblock extra_javascript %}

@@ -1,0 +1,387 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load salary_tags %}
+{% load widget_tweaks %}
+{% block extra_css %} 
+<link rel="stylesheet" href="{% static 'assets/css/class-routine.css' %}" />
+
+<style>
+    
+
+@media print {
+  @page {
+    size: landscape;
+    margin: 20px;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact;
+    -moz-print-color-adjust: exact;
+    visibility: hidden;
+    margin: 0;
+    padding: 0;
+  }
+
+  #routine_button {
+    display: none;
+  }
+}
+
+  #fixed-button {
+    position: fixed;
+    right: 0px;
+    z-index: 1000!important;
+    top: 50%; /* Set top to 50% */
+    transform: translateY(-50%);
+  }
+
+  #fixed-button button {
+    color: #FCCF14;
+    display: block;
+    height: 50px;
+    position: relative;
+    text-align: center; 
+    line-height: 40px;
+    width: 50px;
+    margin-bottom: 1px;
+    z-index: 1000;
+    border: none;
+  }
+
+  #fixed-button button:hover {
+    right: 5px;
+    opacity: 1;
+  }
+
+  .fixed-icon {
+    background-color: #1D1E4E;
+  }
+</style>
+
+{% endblock extra_css %} 
+
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+    {% include 'pageinfo.html' %}
+
+    <div class="d-none d-md-block" id="fixed-button">
+        <div>
+          <button class="fixed-icon" id="print-routine">
+            <i class="bx bxs-printer fs-1"></i>
+          </button>
+        </div>
+        <div>
+          <button class="fixed-icon" id="download-routine">
+            <i class="bx bxs-file-pdf fs-1"></i>
+          </button>
+        </div>
+        <div>
+          <button class="fixed-icon" id="previous">
+            <i class='bx bx-skip-previous fs-1'></i>
+          </button>
+        </div>
+      </div>
+    
+    <div class=" ">
+      <form id="classRoutineForm" method="post">
+        {% csrf_token %}
+
+        <div id="subjects">
+            {% for item in teacher_subjects %}
+            <div class="subject" draggable="true">
+                <input type="hidden" name="class_id" value="{{class_id}}">
+                <input type="hidden" name="subject_id" value="{{item.subject.id}}">
+                <input type="hidden" name="teacher_name" value="{{item.teacher.id}}">
+                <p class="subject_name">{{ item.subject.name }}</p>
+                <p class="teacher_name">({{ item.teacher.staff_field.name }})</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="table-collapse">
+            <button type="button" id="table-collapse-button"><i class='bx bx-collapse'></i></button>
+        </div>
+
+        <div id="schedule-container">
+            <div class="school-info">
+                <div>
+                    <img src="{{institute.institute_logo.url}}"
+                        alt="" />
+                </div>
+                <div>
+                    <h3>Class Routine</h3>
+                    <div class="class-info">
+                        <p>Class: {{class_instance.class_group_id}}</p>
+                        <p>Section: {{class_instance.section_id}}</p>
+                        <p>Shift: {{class_instance.shift_id}}</p>
+                    </div>
+                </div>
+                <div>
+                    <p>Date: 12th january, 2025</p>
+                </div>
+            </div>
+            <div data-working-days='{{ working_days_json|safe }}'
+                data-wdays="{{working_days|length}}" data-periods="{{period_configs|length}}"
+                id="schedule"
+                style="grid-template-columns: 100px repeat({{period_configs|length}}, 1fr)">
+                <div class="header"></div>
+                {% for period_config in period_configs %}
+                {% if period_config.break_time %}
+                <div class="break header">
+                    <p>Break</p>
+                    <p class="time">({{period_config.start_time}} - {{period_config.end_time}})
+                    </p>
+                </div>
+                {% else %}
+                <div class="header">
+                    <p>{{period_config.period_id.name}}</p>
+                    <p class="time">({{period_config.start_time}} - {{period_config.end_time}})
+                    </p>
+                </div>
+                {% endif %}
+                {% endfor %}
+
+                {% for working_day in working_days %}
+                <div class="day-label">
+                    {{working_day}}
+                    <i class="bx bx-copy"></i><i class="bx bx-paste"></i>
+                </div>
+                {% for period_config in period_configs %}
+                {% if period_config.break_time %}
+                <div class="break period">
+                    Break
+                </div>
+                {% else %}
+                <div class="period" id="{{ working_day|lower }}-p" data-start-time="{{ period_config.start_time }}" 
+                data-end-time="{{ period_config.end_time }}">
+                    {% with routines|get_routine_item:working_day as day_routine %}
+                    {% if day_routine %}
+                    {% with day_routine|get_routine_item:period_config.period_id.name as time_routine %}
+                    {% if time_routine %}
+                    <div class="subject">
+                        <input type="hidden" name="class_id" value="{{class_id}}">
+                        <input type="hidden" name="subject_id"
+                            value="{{time_routine.subject_id}}">
+                        <input type="hidden" name="teacher_name"
+                            value="{{time_routine.teacher_id}}">
+                        <p class="subject_name">{{ time_routine.subject_name }}</p>
+                        <p class="teacher_name">({{ time_routine.teacher_name }})</p>
+                    </div>
+                    <input type="hidden" name="period_id" value="{{ period_config.id }}">
+                    <button type="button" class="delete">X</button>
+                    {% else %}
+                    <input type="hidden" name="period_id" value="{{ period_config.id }}">
+                    <button type="button" class="delete">X</button>
+                    {% endif %}
+                    {% endwith %}
+                    {% else %}
+                    <input type="hidden" name="period_id" value="{{ period_config.id }}">
+                    <button type="button" class="delete">X</button>
+                    {% endif %}
+                    {% endwith %}
+
+                    
+                </div>
+                {% endif %}
+                
+                {% endfor %}
+
+                {% endfor %}
+
+                <div id="">
+                  <input type="hidden" name="routine_data" id="routine_data">
+                  <button class="btn btn-primary" type="submit" id="routine_button" >Save Routine</button>
+               </div>
+            </div>
+
+            
+        </div>
+
+        
+      </form>
+
+    </div>
+ 
+  
+</div>
+<!-- end: Content -->
+
+{% endblock content %} 
+{% block extra_javascript %} 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", async () => {
+    let existingRoutines = [];
+
+    // Fetch existing routine data
+    async function fetchExistingRoutines() {
+        try {
+            const response = await fetch("/get_existing_routines/");
+            existingRoutines = await response.json();
+            // console.log("Fetched routines:", existingRoutines);  // Debugging
+        } catch (error) {
+            console.error("Error fetching routine data:", error);
+        }
+    }
+
+    await fetchExistingRoutines(); // Wait for data to load before allowing drag and drop
+
+    const subjects = document.querySelectorAll(".subject");
+    const periods = document.querySelectorAll(".period");
+
+    subjects.forEach(subject => {
+        subject.addEventListener("dragstart", dragStart);
+    });
+
+    periods.forEach(period => {
+        period.addEventListener("dragover", dragOver);
+        period.addEventListener("dragleave", dragLeave);
+        period.addEventListener("drop", drop);
+    });
+
+    function dragStart(e) {
+        e.dataTransfer.setData("text/plain", e.target.innerHTML);
+        e.dataTransfer.setData("subject_id", e.target.querySelector("input[name='subject_id']").value);
+        e.dataTransfer.setData("teacher_id", e.target.querySelector("input[name='teacher_name']").value);
+    }
+
+    function dragOver(e) {
+        e.preventDefault();
+        e.currentTarget.classList.add("drag-over");
+    }
+
+    function dragLeave(e) {
+        e.currentTarget.classList.remove("drag-over");
+    }
+
+    function drop(e) {
+    e.preventDefault();
+    e.currentTarget.classList.remove("drag-over");
+
+    const subjectText = e.dataTransfer.getData("text/plain");
+    const teacherId = e.dataTransfer.getData("teacher_id");
+    const periodElement = e.currentTarget;
+    const periodId = periodElement.querySelector("input[name='period_id']").value;
+
+    // **Find the correct day name by iterating through previous siblings**
+    let dayName = null;
+    let prevElement = periodElement.previousElementSibling;
+    
+    while (prevElement) {
+        if (prevElement.classList.contains("day-label")) {
+            dayName = prevElement.innerText.trim();
+            break;
+        }
+        prevElement = prevElement.previousElementSibling;
+    }
+
+    if (!dayName) {
+        console.error("❌ Could not determine the day name for the period.");
+        return;
+    }
+
+    // **Get start time and end time correctly & Remove AM/PM**
+    const rawStartTime = periodElement.getAttribute("data-start-time") || null;
+    const rawEndTime = periodElement.getAttribute("data-end-time") || null;
+
+    // **Remove AM/PM & Ensure Proper Formatting**
+    const startTime = formatTime(rawStartTime);
+    const endTime = formatTime(rawEndTime);
+
+    // console.log("Dropping:", { teacherId, dayName, startTime, endTime });  // Debugging
+
+    if (!startTime || !endTime) {
+        Swal.fire({
+            title: "Invalid Time!",
+            confirmButtonColor: "#d33",
+            width: "350px",  // ✅ Set smaller width
+            padding: "10px", // ✅ Reduce padding for a smaller look
+            customClass: {
+                popup: "small-alert", // ✅ Add custom class for further styling if needed
+            }
+        });
+        return;
+    }
+
+    // **Check if the teacher is already assigned on the same day and time**
+    const isConflict = existingRoutines.some(routine => 
+        routine.teacher_id == teacherId && 
+        routine.day_name === dayName && 
+        routine.start_time === startTime && 
+        routine.end_time === endTime
+    );
+
+    if (isConflict) {
+      Swal.fire({
+      title: "Schedule Conflict!",
+      confirmButtonColor: "#d33",
+      width: "350px",  // ✅ Set smaller width
+      padding: "10px", // ✅ Reduce padding for a smaller look
+      customClass: {
+          popup: "small-alert", // ✅ Add custom class for further styling if needed
+    }
+});
+
+        return;
+    }
+
+    // **Remove old subject if exists**
+    const prevSubject = e.currentTarget.querySelector(".subject");
+    if (prevSubject) prevSubject.remove();
+
+    // **Append new subject**
+    const clonedSubject = document.createElement("div");
+    clonedSubject.className = "subject";
+    clonedSubject.innerHTML = subjectText;
+    e.currentTarget.appendChild(clonedSubject);
+
+    // **Success Message**
+    // Swal.fire({
+    //     icon: "success",
+    //     title: "Assigned Successfully!",
+    //     text: `Teacher assigned for ${dayName} (${startTime} - ${endTime})`,
+    //     confirmButtonColor: "#3085d6",
+    // });
+}
+
+/**
+ * Function to format time as HH:MM (removes AM/PM and ensures two digits for minutes)
+ */
+function formatTime(timeStr) {
+    if (!timeStr) return null;
+    
+    // Remove AM/PM
+    timeStr = timeStr.replace(/\s?(a\.m\.|p\.m\.)/gi, '');
+    
+    // Ensure it has minutes (convert "11" -> "11:00")
+    if (/^\d{1,2}$/.test(timeStr)) {
+        return `${timeStr}:00`; 
+    }
+
+    return timeStr;
+}
+
+
+
+});
+
+</script>
+
+<script src="{% static 'assets/js/routine.js' %}"></script>
+
+
+<script src="{% static 'assets/vendor/libs/print/jQuery.print.js' %}"></script>
+
+<script>
+  $("#fixed-button").on("click", function () {
+      $("#schedule-container").print({
+          title: "Routine",
+          doctype: "<!doctype html>",
+      });
+  });
+</script>
+
+{% endblock extra_javascript%}

@@ -1,0 +1,62 @@
+{% load static %}
+{% block footer %}
+
+<!-- Footer Start -->
+<div class="container-fluid bg-dark text-light footer overflow-hidden pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
+  <div class=" py-5">
+      <div class="row px-4 g-5">
+          <div class="col-lg-3 col-md-6">
+            <h4 class="text-white mb-3">{{institute.institute_name}}</h4>
+            <p>এ স্কুলের লক্ষ্য ও উদ্দেশ্য হচ্ছে সুপরিকল্পিত পাঠ্যক্রম, সহ-পাঠ্যক্রম কর্মসূচির যথাযথ বাস্তবায়নের মাধ্যমে ছাত্রদের শারীরিক ও মানসিক গুণাবলীর সর্বোচ্চ উৎকর্ষ সাধন যাতে তারা সুনাগরিক হিসেবে গড়ে উঠতে পারে এবং ভবিষ্যতে দেশ ও জাতিকে উপযুক্ত নেতৃত্ব দিতে পারে।</p>
+            
+          </div>
+          <div class="col-lg-3 col-md-6">
+              <h4 class="text-white mb-3">Quick Link</h4>
+              <a class="btn btn-link" href="">About Us</a>
+              <a class="btn btn-link" href="">Contact Us</a>
+              <a class="btn btn-link" href="">Privacy Policy</a>
+              <a class="btn btn-link" href="">Terms & Condition</a>
+              <a class="btn btn-link" href="">FAQs & Help</a>
+          </div>
+          <div class="col-lg-3 col-md-6">
+              <h4 class="text-white mb-3">Contact</h4>
+              <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>{{contact.office_address}}</p>
+              <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>{{contact.mobile}}</p>
+              <p class="mb-2"><i class="fa fa-envelope me-3"></i>{{contact.email}}</p>
+              <div class="d-flex pt-2">
+                  <a class="btn btn-outline-light btn-social" href="#"><i class="fab fa-twitter"></i></a>
+                  <a class="btn btn-outline-light btn-social" href="#"><i class="fab fa-facebook-f"></i></a>
+                  <a class="btn btn-outline-light btn-social" href="#"><i class="fab fa-youtube"></i></a>
+                  <a class="btn btn-outline-light btn-social" href="#"><i class="fab fa-linkedin-in"></i></a>
+              </div>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <h4 class="text-white mb-3">Important Link</h4>
+            <a class="btn btn-link" href="">মাধ্যমিক ও উচ্চ মাধ্যমিক শিক্ষা বোর্ড, ঢাকা</a>
+            <a class="btn btn-link" href="">মাধ্যমিক ও উচ্চ শিক্ষা বিভাগ</a>
+            <a class="btn btn-link" href="">মাধ্যমিক ও উচ্চ শিক্ষা অধিদপ্তর</a>
+            <a class="btn btn-link" href="">জাতীয় ওয়েব পোর্টাল</a>
+            <a class="btn btn-link" href="">Ministry of education board BD Bangladesh</a>
+            <a class="btn btn-link" href="">Education Board Result</a>
+        </div>
+          
+      </div>
+  </div> 
+  <div class="">
+      <div class="copyright">
+          <div class="row">
+              <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                  &copy; <a class="border-bottom" href="#">{{institute.institute_name}}</a>, All Right Reserved.
+              </div>
+              <div class="col-md-6 text-center text-md-end">
+                  <div class="footer-menu">
+                      <a href="http://BIDYATekbdl.com/">Design & Development By BIDYATek</a>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+<!-- Footer End -->
+
+{% endblock footer %}

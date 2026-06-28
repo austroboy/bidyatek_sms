@@ -1,0 +1,48 @@
+{% block content %}
+<div class="container">
+    <h2>Duplicate Fee Entries</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Student Name</th>
+                <th>Roll</th>
+                <th>Class</th>
+                <th>Group</th>
+                <th>Section</th>
+                <th>Version</th>
+                <th>Shift</th>
+                <th>Fee Type</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for fee in fees %}
+            <tr>
+                <td>{{ fee.student_name }}</td>
+                <td>{{ fee.roll }}</td>
+                <td>{{ fee.class }}</td>
+                <td>{{ fee.group }}</td>
+                <td>{{ fee.section }}</td>
+                <td>{{ fee.version }}</td>
+                <td>{{ fee.shift }}</td>
+                <td>{{ fee.feetype_id }}</td>
+                <td>{{ fee.amount }}</td>
+                <td>{{ fee.status }}</td>
+                <td>
+                    <form method="post" action="{% url 'delete_duplicate_fee' fee.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="12" class="text-center">No duplicate entries found</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

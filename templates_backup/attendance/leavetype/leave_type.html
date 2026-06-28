@@ -1,0 +1,76 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% block extra_css %}
+
+{% endblock extra_css %} 
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+
+  <div class="card">
+    <div class="row mt-1 card-body" id="leavetypeadd" hx-get="{% url 'list_leave_type' %}"
+            hx-trigger="load, leavetypeListChanged from:body">
+            <!-- list class -->
+    </div>
+
+    <!-- modal settings -->
+
+    <div id="leavetypemodal" class="modal">
+        <div id="leavetypedialog" class="modal-dialog modal-dialog-centered" hx-target="this">
+
+        </div>
+    </div>
+  </div>
+</div>
+<!-- end: Content -->
+
+{% endblock content %} {% block extra_javascript %}
+
+<script src="https://unpkg.com/htmx.org@1.8.4"></script>
+
+
+<script>
+    ; (function () {
+        const modal = new bootstrap.Modal(document.getElementById("leavetypemodal"))
+
+        htmx.on("htmx:afterSwap", (e) => {
+            // Response targeting #dialog => show the modal
+            if (e.detail.target.id == "leavetypedialog") {
+                modal.show()
+            }
+        })
+
+        htmx.on("htmx:beforeSwap", (e) => {
+            // Empty response targeting #dialog => hide the modal
+            if (e.detail.target.id == "leavetypedialog" && !e.detail.xhr.response) {
+                modal.hide()
+                e.detail.shouldSwap = false
+                if (e.detail.xhr.getResponseHeader("HX-Trigger")) {
+                    // Extract the 'HX-Trigger' header value (which is a JSON string)
+                    const hxTriggerHeader = e.detail.xhr.getResponseHeader("HX-Trigger");
+          
+                    if (hxTriggerHeader) {
+                      const hxTriggerData = JSON.parse(hxTriggerHeader);
+          
+                      if (hxTriggerData.messages === "Success") {
+                        
+                          htmx.trigger("#pageinfo", "refresh");
+                          
+                      }
+                    }
+                  }
+            }
+        })
+
+        // Remove dialog content after hiding
+        htmx.on("hidden.bs.modal", () => {
+            document.getElementById("leavetypedialog").innerHTML = ""
+        })
+    })()
+</script>
+
+
+
+{% endblock extra_javascript%}

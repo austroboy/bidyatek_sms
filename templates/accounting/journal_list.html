@@ -1,0 +1,145 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .header {
+        font-size: 1.5rem;
+        font-weight: 500;
+    }
+
+    .totals {
+        font-size: 1rem;
+        font-weight: normal;
+        color: #333;
+        background-color: #ebf8ff;
+        padding: 10px;
+        border-radius: 8px;
+    }
+
+    .table-container {
+        border: 1px solid #e2e8f0;
+        margin: 1.5rem 0;
+        border-radius: 0.375rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .table {
+        width: 100%;
+        color: #4a5568;
+        font-size: 0.875rem;
+        line-height: 1.5rem;
+    }
+
+    .table th, .table td {
+        padding: 0.75rem;
+        text-align: center;
+    }
+
+    .table thead {
+        border-bottom: 2px solid #e2e8f0;
+        background-color: #ebf8ff;
+    }
+
+    .table tbody tr {
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .total-row {
+        font-weight: bold;
+        background-color: #ebf8ff;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        list-style: none;
+        padding: 0;
+    }
+
+    .pagination li {
+        margin: 0 5px;
+    }
+
+    .pagination a {
+        padding: 8px 12px;
+        text-decoration: none;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        color: #333;
+    }
+
+    .pagination .active a {
+        background-color: #007bff;
+        color: white;
+        border: 1px solid #007bff;
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+
+    <!-- Header with totals -->
+    <div class="header-container">
+        <h1 class="header">Journal Transactions for {{ ledger.name }}</h1>
+        <div class="totals">
+            <span>Total Debit:<strong> {{ total_debit }}</strong></span> |
+            <span>Total Credit:<strong> {{ total_credit }}</strong></span>
+        </div>
+    </div>
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Voucher No</th>
+                    <th>Transaction Date</th>
+                    <th>Debit Amount</th>
+                    <th>Credit Amount</th>
+                    <th>Note</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in journal_entries %}
+                    <tr>
+                        <td>{{ entry.voucher_no }}</td>
+                        <td>{{ entry.transaction_date }}</td>
+                        <td>{{ entry.debit_amount }}</td>
+                        <td>{{ entry.credit_amount }}</td>
+                        <td>{{ entry.note }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">No journal transactions available for this ledger.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <nav aria-label="Journal Transactions Pagination">
+        <ul class="pagination">
+            {% if journal_entries.has_previous %}
+                <li><a href="?page=1">« First</a></li>
+                <li><a href="?page={{ journal_entries.previous_page_number }}">‹ Prev</a></li>
+            {% endif %}
+
+            <li class="active"><a href="#">Page {{ journal_entries.number }} of {{ journal_entries.paginator.num_pages }}</a></li>
+
+            {% if journal_entries.has_next %}
+                <li><a href="?page={{ journal_entries.next_page_number }}">Next ›</a></li>
+                <li><a href="?page={{ journal_entries.paginator.num_pages }}">Last »</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+{% endblock content %}

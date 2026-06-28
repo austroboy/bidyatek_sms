@@ -1,0 +1,201 @@
+{% load static %}
+
+<!-- ── INCOME CATEGORIES ─────────────────────────────────────────────────── -->
+<div class="card shadow-sm mb-4">
+  <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+    <h6 class="mb-0 fw-bold text-success"><i class='bx bx-trending-up me-2'></i>Income Categories</h6>
+    {% if budget.status == 'DRAFT' %}
+    <button class="btn btn-sm btn-success"
+            hx-get="{% url 'budget_category_add' budget.pk %}?type=INCOME"
+            hx-target="#budgetdialog"
+            hx-swap="innerHTML">
+      <i class='bx bx-plus me-1'></i> Add Income Category
+    </button>
+    {% endif %}
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead style="background:rgba(46,125,50,0.08);">
+        <tr>
+          <th>#</th>
+          <th>Income Head</th>
+          <th class="text-end">Planned (৳)</th>
+          <th class="text-end">Actual (৳)</th>
+          <th class="text-end">Variance (৳)</th>
+          <th class="text-center" style="width:120px;">% Used</th>
+          <th class="text-center">Monthly</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cat in income_cats %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td class="fw-semibold">{{ cat.name }}</td>
+          <td class="text-end">{{ cat.planned_amount|floatformat:2 }}</td>
+          <td class="text-end {% if cat._actual > 0 %}text-success{% else %}text-muted{% endif %}">
+            {{ cat._actual|floatformat:2 }}
+          </td>
+          <td class="text-end {% if cat._variance >= 0 %}text-success{% else %}text-danger{% endif %}">
+            {{ cat._variance|floatformat:2 }}
+          </td>
+          <td class="text-center">
+            <div class="d-flex align-items-center gap-1">
+              <div class="progress flex-grow-1" style="height:8px;">
+                <div class="progress-bar bg-{{ cat._status }}"
+                     style="width:{% if cat._pct > 100 %}100{% else %}{{ cat._pct }}{% endif %}%;"></div>
+              </div>
+              <span class="small fw-bold text-{{ cat._status }}">{{ cat._pct }}%</span>
+            </div>
+          </td>
+          <td class="text-center">
+            <a href="{% url 'budget_monthly' cat.pk %}" class="btn btn-xs btn-outline-secondary" style="font-size:12px; padding:2px 8px;">
+              <i class='bx bx-calendar'></i>
+            </a>
+          </td>
+          <td class="text-center">
+            <button class="btn btn-xs btn-outline-primary me-1"
+                    hx-get="{% url 'budget_category_edit' cat.pk %}"
+                    hx-target="#budgetdialog"
+                    hx-swap="innerHTML"
+                    style="font-size:12px; padding:2px 8px;">
+              <i class='bx bx-edit'></i>
+            </button>
+            {% if budget.status == 'DRAFT' %}
+            <button class="btn btn-xs btn-outline-danger"
+                    hx-delete="{% url 'budget_category_delete' cat.pk %}"
+                    hx-confirm="Delete this income category?"
+                    hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+                    style="font-size:12px; padding:2px 8px;">
+              <i class='bx bx-trash'></i>
+            </button>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="text-center text-muted py-4">
+            No income categories yet.
+            {% if budget.status == 'DRAFT' %}
+              <button class="btn btn-sm btn-success ms-2"
+                      hx-get="{% url 'budget_category_add' budget.pk %}?type=INCOME"
+                      hx-target="#budgetdialog"
+                      hx-swap="innerHTML">
+                Add one
+              </button>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+        {% if income_cats %}
+        <tr class="table-success fw-bold">
+          <td colspan="2">Total Income</td>
+          <td class="text-end">{% for c in income_cats %}{% if forloop.last %}{{ budget.total_income_budget|floatformat:2 }}{% endif %}{% endfor %}</td>
+          <td class="text-end text-success">{{ budget.total_actual_income|floatformat:2 }}</td>
+          <td class="text-end" colspan="4"></td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── EXPENSE CATEGORIES ─────────────────────────────────────────────────── -->
+<div class="card shadow-sm">
+  <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+    <h6 class="mb-0 fw-bold text-danger"><i class='bx bx-trending-down me-2'></i>Expense Categories</h6>
+    {% if budget.status == 'DRAFT' %}
+    <button class="btn btn-sm btn-danger"
+            hx-get="{% url 'budget_category_add' budget.pk %}?type=EXPENSE"
+            hx-target="#budgetdialog"
+            hx-swap="innerHTML">
+      <i class='bx bx-plus me-1'></i> Add Expense Category
+    </button>
+    {% endif %}
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead style="background:rgba(198,40,40,0.06);">
+        <tr>
+          <th>#</th>
+          <th>Expense Head</th>
+          <th class="text-end">Planned (৳)</th>
+          <th class="text-end">Actual (৳)</th>
+          <th class="text-end">Variance (৳)</th>
+          <th class="text-center" style="width:120px;">% Spent</th>
+          <th class="text-center">Monthly</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cat in expense_cats %}
+        <tr {% if cat._pct >= 100 %}class="table-danger"{% elif cat._pct >= 80 %}class="table-warning"{% endif %}>
+          <td>{{ forloop.counter }}</td>
+          <td class="fw-semibold">{{ cat.name }}</td>
+          <td class="text-end">{{ cat.planned_amount|floatformat:2 }}</td>
+          <td class="text-end {% if cat._actual > 0 %}text-danger{% else %}text-muted{% endif %}">
+            {{ cat._actual|floatformat:2 }}
+          </td>
+          <td class="text-end {% if cat._variance >= 0 %}text-success{% else %}text-danger fw-bold{% endif %}">
+            {% if cat._variance < 0 %}-{% endif %}{{ cat._variance|floatformat:2 }}
+          </td>
+          <td class="text-center">
+            <div class="d-flex align-items-center gap-1">
+              <div class="progress flex-grow-1" style="height:8px;">
+                <div class="progress-bar bg-{{ cat._status }}"
+                     style="width:{% if cat._pct > 100 %}100{% else %}{{ cat._pct }}{% endif %}%;"></div>
+              </div>
+              <span class="small fw-bold text-{{ cat._status }}">{{ cat._pct }}%</span>
+            </div>
+          </td>
+          <td class="text-center">
+            <a href="{% url 'budget_monthly' cat.pk %}" class="btn btn-xs btn-outline-secondary" style="font-size:12px; padding:2px 8px;">
+              <i class='bx bx-calendar'></i>
+            </a>
+          </td>
+          <td class="text-center">
+            <button class="btn btn-xs btn-outline-primary me-1"
+                    hx-get="{% url 'budget_category_edit' cat.pk %}"
+                    hx-target="#budgetdialog"
+                    hx-swap="innerHTML"
+                    style="font-size:12px; padding:2px 8px;">
+              <i class='bx bx-edit'></i>
+            </button>
+            {% if budget.status == 'DRAFT' %}
+            <button class="btn btn-xs btn-outline-danger"
+                    hx-delete="{% url 'budget_category_delete' cat.pk %}"
+                    hx-confirm="Delete this expense category?"
+                    hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+                    style="font-size:12px; padding:2px 8px;">
+              <i class='bx bx-trash'></i>
+            </button>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="text-center text-muted py-4">
+            No expense categories yet.
+            {% if budget.status == 'DRAFT' %}
+              <button class="btn btn-sm btn-danger ms-2"
+                      hx-get="{% url 'budget_category_add' budget.pk %}?type=EXPENSE"
+                      hx-target="#budgetdialog"
+                      hx-swap="innerHTML">
+                Add one
+              </button>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+        {% if expense_cats %}
+        <tr class="table-danger fw-bold">
+          <td colspan="2">Total Expense</td>
+          <td class="text-end">{{ budget.total_expense_budget|floatformat:2 }}</td>
+          <td class="text-end text-danger">{{ budget.total_actual_expense|floatformat:2 }}</td>
+          <td class="text-end" colspan="4"></td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>

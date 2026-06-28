@@ -1,0 +1,107 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+
+{% block extra_javascript %}
+<script src="https://unpkg.com/htmx.org@1.8.4"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="fw-bold mb-0" style="color:#2D6A73;"><i class='bx bx-bell me-2'></i>Budget Alerts</h4>
+      <small class="text-muted">Monitor budget threshold breaches</small>
+    </div>
+    <a href="{% url 'budget_dashboard' %}" class="btn btn-outline-secondary btn-sm">
+      <i class='bx bx-arrow-back me-1'></i>Back to Budget
+    </a>
+  </div>
+
+  <!-- Filters -->
+  <div class="card shadow-sm mb-3">
+    <div class="card-body py-2">
+      <div class="d-flex gap-2 flex-wrap align-items-center">
+        <span class="text-muted small fw-semibold me-2">Filter:</span>
+        <a href="{% url 'budget_alerts' %}" class="btn btn-sm {% if not filter_type %}btn-primary{% else %}btn-outline-primary{% endif %}">All</a>
+        <a href="{% url 'budget_alerts' %}?type=WARNING" class="btn btn-sm {% if filter_type == 'WARNING' %}btn-warning{% else %}btn-outline-warning{% endif %}">Warning (80%)</a>
+        <a href="{% url 'budget_alerts' %}?type=CRITICAL" class="btn btn-sm {% if filter_type == 'CRITICAL' %}btn-danger{% else %}btn-outline-danger{% endif %}">Critical (100%)</a>
+        <a href="{% url 'budget_alerts' %}?type=OVERSPEND" class="btn btn-sm {% if filter_type == 'OVERSPEND' %}btn-dark{% else %}btn-outline-dark{% endif %}">Overspend</a>
+        <div class="ms-auto">
+          <a href="?{% if filter_type %}type={{ filter_type }}&{% endif %}acknowledged={% if show_ack %}0{% else %}1{% endif %}"
+             class="btn btn-sm {% if show_ack %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
+            {% if show_ack %}Hide Acknowledged{% else %}Show Acknowledged{% endif %}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alerts List -->
+  <div id="alerts-list">
+    {% for alert in alerts %}
+    <div class="card shadow-sm mb-2 border-0" id="alert-{{ alert.pk }}"
+         style="border-left: 4px solid {% if alert.alert_type == 'WARNING' %}#F9A825{% elif alert.alert_type == 'CRITICAL' %}#C62828{% else %}#B71C1C{% endif %} !important;">
+      <div class="card-body py-3">
+        <div class="row align-items-center">
+          <div class="col-md-1 text-center">
+            {% if alert.alert_type == 'WARNING' %}
+              <i class='bx bx-error text-warning' style="font-size:1.8rem;"></i>
+            {% else %}
+              <i class='bx bx-error-circle text-danger' style="font-size:1.8rem;"></i>
+            {% endif %}
+          </div>
+          <div class="col-md-3">
+            <strong>{{ alert.budget_category.name }}</strong>
+            <div class="text-muted small">{{ alert.budget_category.budget_year.title }}</div>
+          </div>
+          <div class="col-md-2">
+            {% if alert.alert_type == 'WARNING' %}
+              <span class="badge bg-warning text-dark fs-6">⚠ WARNING</span>
+            {% elif alert.alert_type == 'CRITICAL' %}
+              <span class="badge bg-danger fs-6">🔴 CRITICAL</span>
+            {% else %}
+              <span class="badge bg-dark fs-6">🚨 OVERSPEND</span>
+            {% endif %}
+          </div>
+          <div class="col-md-2 text-center">
+            <div class="text-muted small">Threshold</div>
+            <strong>{{ alert.threshold_percent }}%</strong>
+          </div>
+          <div class="col-md-2 text-center">
+            <div class="text-muted small">Actual at Trigger</div>
+            <strong class="text-danger">৳ {{ alert.actual_at_trigger|floatformat:0 }}</strong>
+          </div>
+          <div class="col-md-1 text-center">
+            <div class="text-muted small">Date</div>
+            <span class="small">{{ alert.created_at|date:"d M Y" }}</span>
+          </div>
+          <div class="col-md-1 text-end">
+            {% if not alert.is_acknowledged %}
+            <button class="btn btn-sm btn-outline-success"
+                    hx-post="{% url 'budget_alert_acknowledge' alert.pk %}"
+                    hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+                    hx-target="#alert-{{ alert.pk }}"
+                    hx-swap="outerHTML"
+                    title="Mark as acknowledged">
+              <i class='bx bx-check'></i>
+            </button>
+            {% else %}
+            <span class="badge bg-light text-muted">Done</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="card shadow-sm">
+      <div class="card-body text-center py-5 text-muted">
+        <i class='bx bx-check-shield' style="font-size:3rem; color:#2D6A73; opacity:0.4;"></i>
+        <p class="mt-2 mb-0">No alerts found. All budget categories are within limits.</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

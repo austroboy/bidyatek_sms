@@ -1,0 +1,32 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% block title %}Payment Cancelled{% endblock title %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link href="{% static 'css/table.css' %}" rel="stylesheet" type="text/css" />
+{% endblock extra_css %}
+
+{% block content %}
+<div class="page-content mt-4">
+    <div class="container-fluid">
+        <div class="alert alert-danger text-center">
+            <h1 class="display-4">Payment Cancelled</h1>
+            <p class="lead">We couldn’t process your payment. Please try again.</p>
+            <hr>
+            <p><strong>Transaction ID:</strong> {{ transaction.tran_id }}</p>
+        </div>
+        <div class="text-center mt-4">
+            <a href="{% url 'home_page' %}" class="btn btn-secondary">Return to Home</a>
+            <a href="{% url 'retry_payment' %}" class="btn btn-primary">Retry Payment</a>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_javascript %}
+<script src="https://unpkg.com/htmx.org@1.8.4"></script>
+<script>
+    // Add any additional JavaScript logic here if necessary.
+</script>
+{% endblock extra_javascript %}

@@ -1,0 +1,53 @@
+{% block content %}
+<form
+  hx-post="{{ request.path }}"
+  hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+  class="modal-content"
+  enctype="multipart/form-data"
+>
+  <div>
+    <h4 class="modal-header">Edit Salary Configuration</h4>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <div class="mb-3">
+        <label class=" col-form-label" for="employee">Employee</label>
+        <select class="form-select" id="employee" name="employee">
+          <option value="{{ salary_conf.employee.id }}" selected>{{ salary_conf.employee.name }}</option>
+          {% for employee in employee_list %}
+            <option value="{{ employee.id }}">{{ employee.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="basic_salary" class="form-label">Basic Salary:</label>
+      <input
+        class="form-control"
+        type="number"
+        name="basic_salary"
+        id="basic_salary"
+        value="{{ salary_conf.basic_salary }}"
+        placeholder="Basic Salary input here..."
+      />
+    </div>
+    <div class="mb-3">
+      <label for="tax_rate" class="form-label">Tax:</label>
+      <input
+        class="form-control"
+        type="number"
+        name="tax_rate"
+        id="tax_rate"
+        value="{{ salary_conf.tax_rate }}"
+        placeholder="Tax input here..."
+      />
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+      Close
+    </button>
+    <button type="submit" class="btn btn-primary">Save</button>
+  </div>
+</form>
+{% endblock content %}

@@ -1,0 +1,63 @@
+{% load widget_tweaks %}
+{% block content %}
+<form hx-post="{{ request.path }}" hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}' class="modal-content">
+  <div>
+    <h4 class="modal-header">Add-Edit Fee Head</h4>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <label for="{{ form.fee_head.id_for_label }}" class="form-label">Fee Head</label>
+      {% render_field form.fee_head class+="form-control" placeholder="Select Fee Head" %}
+    </div>
+ 
+    <div class="mb-3">
+      <label for="{{ form.fee_Schedule.id_for_label }}" class="form-label">Fee Schedule</label>
+      {% render_field form.fee_Schedule class+="form-control" placeholder="Fee Type" %}
+    </div>
+     
+    
+    <div class="mb-3">
+      <label for="{{ form.late_fee_percentage.id_for_label }}" class="form-label">Late Fee %</label>
+      {% render_field form.late_fee_percentage|attr:"type:number" class+="form-control" placeholder="Start Date" %}
+    </div>
+
+    <div class="mb-3">
+      <label for="{{ form.status.id_for_label }}" class="form-label">Status</label>
+      {% render_field form.status|attr:"type:number" class+="form-control" placeholder="Start Date" %}
+    </div>
+
+    <div class="mb-3">
+      <label for="{{ form.status.id_for_label }}" class="form-label">Version</label>
+      {% render_field form.version class+="form-control"%}
+    </div>
+
+    
+    <div class="mb-3">
+      <label for="{{ form.academic_year.id_for_label }}" class="form-label">Admission Year</label>
+      {% render_field form.academic_year class+="form-control" placeholder="Admission Year" %} 
+    </div>
+
+    <div class="mb-3 d-flex gap-4">
+      <div>
+        {% render_field form.is_hostel_fee class+="form-check-input" %} 
+        <label for="{{ form.is_hostel_fee.id_for_label }}" class="form-label">is hostel fee?</label>
+      </div>
+      <div>
+        {% render_field form.is_transport_fee class+="form-check-input" %} 
+        <label for="{{ form.is_transport_fee.id_for_label }}" class="form-label">is transport fee?</label>
+      </div>
+      <div>
+        {% render_field form.is_coaching_fee class+="form-check-input" %} 
+        <label for="{{ form.is_coaching_fee.id_for_label }}" class="form-label">is coaching fee?</label>
+      </div>
+      
+    </div>
+    
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+    <button type="submit" class="btn btn-primary ">Save</button>
+  </div>
+</form>
+
+{% endblock content %}

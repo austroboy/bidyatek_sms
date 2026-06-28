@@ -1,0 +1,168 @@
+{% load static %}
+
+{% load custom_tags %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <style>
+        body { 
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .header { 
+            text-align: center; 
+            margin-bottom: 10px;
+            padding: 5px;
+        }
+        .header h1 { 
+            font-size: 16px; 
+            margin: 2px 0; 
+        }
+        .header h2 {
+            font-size: 12px;
+            margin: 2px 0;
+        }
+        .header p {
+            font-size: 10px;
+            margin: 2px 0;
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto; /* Allows scrolling if the table is too wide */
+        }
+
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            font-size: 7px; /* Reduced size for better fit */
+            table-layout: fixed; /* Ensures the table stays within page */
+            page-break-inside: auto;
+        }
+
+        th, td { 
+            border: 1px solid #000; 
+            padding: 3px; 
+            word-wrap: break-word;
+            text-align: center;
+            min-width: auto; /* Adjust width dynamically */
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        th { 
+            background-color: #f2f2f2; 
+            font-weight: bold;
+            white-space: normal; /* Allows headers to break into multiple lines */
+            word-wrap: break-word; /* Ensures long text does not get cut off */
+        }
+
+        .vertical-header {
+            writing-mode: vertical-lr;
+            text-orientation: upright;
+            white-space: normal; /* Allows multi-line headers */
+            padding: 5px 3px;
+            min-width: 35px; /* Slightly wider for readability */
+            max-width: 55px;
+        }
+
+        .text-right { 
+            text-align: right;
+            padding-right: 4px !important;
+        }
+
+        @page { 
+            size: legal landscape; 
+            margin: 10mm;
+        }
+
+        .total-in-words {
+            font-size: 9px;
+            margin-top: 10px;
+        }
+
+        .signature-table {
+            width: 100%;
+            margin-top: 20px;
+            font-size: 9px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        
+        <div>
+            <h1>RAJUK UTTARA MODEL COLLEGE</h1>
+            <p class="est">EST : 1994</p>
+            <p class="est">Education For Humanization</p>
+        </div>
+    </div>
+    <h2 style="text-align: center;">Master Head Wise Collection Sum Report</h2>
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th>Version</th>
+                <th>Shift</th>
+                {% for fee_head_id, fee_title in all_fee_heads.items %}
+                    <th>{{ fee_title }}</th>
+                {% endfor %}
+                <th>Previous Software's Due</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in data %}
+            <tr>
+                <td>{{ item.version }}</td>
+                <td>{{ item.shift }}</td>
+                {% for fee_head_id in all_fee_heads.keys %}
+                    <td>{{ item.fee_head_totals|get_item:fee_head_id|default:"0.00" }}</td>
+                {% endfor %}
+                <td>{{ item.previous_due_total }}</td>
+                <td>{{ item.grand_total }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr class="table-footer">
+                <td colspan="2"><strong>Overall Total</strong></td>
+                {% for fee_head_id in all_fee_heads.keys %}
+                    <td>{{ overall_totals|get_item:fee_head_id|default:"0.00" }}</td>
+                {% endfor %}
+                <td>{{ overall_totals.previous_due_total }}</td>
+                <td>{{ overall_grand_total }}</td>
+            </tr>
+        </tfoot>
+    </table>
+    
+    <table style="width: 100%; margin-top: 50px; font-size: 12px; text-align: center; border-collapse: collapse;">
+        <tr>
+            <td style="width: 25%; padding-top: 30px;">
+                <div style="width: 80%; margin: auto; height: 20px;"></div> 
+                <p style="font-weight: bold; margin: 2px 0 0 0;line-height: 1;">Examined By</p>
+                <p style="margin: 0; line-height: 1;">Sr. Accounts Officer</p>
+            </td>
+            <td style="width: 25%; padding-top: 30px;">
+                <div style="width: 80%; margin: auto; height: 20px;"></div>
+                <p style="font-weight: bold; margin: 2px 0 0 0;">Checked By</p>
+                <p style="margin: 0;">Asst. Accounts Officer</p>
+            </td>
+            <td style="width: 25%; padding-top: 30px;">
+                <div style="width: 80%; margin: auto; height: 20px;"></div>
+                <p style="font-weight: bold; margin: 2px 0 0 0;">Checked By</p>
+                <p style="margin: 0;">Accountant</p>
+            </td>
+            <td style="width: 25%; padding-top: 30px;">
+                <div style="width: 80%; margin: auto; height: 20px;"></div>
+                <p style="font-weight: bold; margin: 2px 0 0 0;">Prepared By</p>
+                <p style="margin: 0;">Accounts Assistant</p>
+            </td>
+        </tr>
+    </table>
+    
+    
+    
+</body>
+</html>

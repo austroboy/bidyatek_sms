@@ -1,0 +1,266 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load template_tags %} 
+{% block extra_css %} 
+<link 
+      rel="stylesheet"
+      href="{% static 'libs/toast/jquery.toast.min.css' %}"
+    />
+
+  
+{% endblock extra_css %} 
+
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+    {% include 'pageinfo.html' %}
+    
+    <div class="card ">
+        
+        <div class="card-body">
+            <div class="row">
+                <form action="{% url 'mark_list' %}" method="post" id="markForm">
+                    {% csrf_token %}
+                    <div class="row">
+    
+                        <div class="col-md-2">
+                            <div class="mb-3">
+    
+                                <div class="">
+                                    <select class="form-select" name="exam_name_id" id="exam_name" required>
+                                        <option disabled selected value="">Select Exam</option>
+                                        {% for examname in exam_list %}
+                                        <option value="{{examname.id}}">{{examname.name}}</option>
+                                        {% endfor %}
+    
+                                    </select>
+                                </div> 
+                            </div>
+                        </div>
+    
+                        <div class="col-md-2">
+                            <div class="mb-3">
+                                <div class="">
+                                    <select class="form-select" name="class_name_id" id="class_name" required>
+                                        <option disabled selected value="">Select Class</option>
+    
+                                        {% for class in class_list %}
+                                        <option value="{{class.id}}">{{class}}</option>
+                                        {%endfor%}
+    
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+
+                        <div class="col-md-2">
+                            <div class="mb-3">
+                                <div class="">
+                                    <select class="form-select" name="subject_name_id" id="subject_name" required>
+                                        <option disabled selected hidden value="">Select Subject</option>
+                                        <!-- Options will be dynamically populated using AJAX -->
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-2 mb-md-0">
+                            <button class="btn btn-primary " type="submit">Load</button>
+                        </div>
+                        
+                        <div class="col-md-4 d-flex justify-content-between gap-2 align-content-center">
+                            
+                            <div  class=" d-flex flex-row  gap-2 align-self-center pb-3">
+                                <input class="form-control form-control" type="text" id="examname" value="{{exam_instance}}"
+                                    disabled>
+                                <input class="form-control form-control" type="text" id="classname" value="{{class_instance}}"
+                                    disabled>
+                                <input class="form-control form-control" type="text" id="subject" value="{{subject_instance.subject_id}}"
+                                    disabled>
+                            </div>
+    
+    
+                        </div>
+                    </div>
+    
+    
+                </form>
+            </div>
+    
+            <div class="row pt-2">
+                <div class="col-12">
+                    
+                    <div id="tbl1" class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Roll</th>
+                                    <!-- Dynamic headers based on mark_conf_list -->
+                                    {% for mark_config in mark_conf_list %}
+                                        <th data-id="{{ mark_config.mark_type_id.id }}" data-mark-type="{{ mark_config.mark_type_id.id }}" ><span>{{ mark_config.mark_type_id }} </span> <span class="text-primary text-nowrap ms-auto">[TM: {{ mark_config.mark }} - PM: {{ mark_config.pass_mark }}]</span> </th>
+                                    {% endfor %}
+                                    <th>Total Mark</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student_data in marks_data %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ student_data.student.student_field.name }}</td>
+                            <td>{{ student_data.student.roll_no }}</td>
+
+                            
+                                {% for mark in student_data.marks|slice:"0:-1" %}
+                                    <td>
+                                        <input class="form-control form-control-sm student-mark-input" type="number" data-id="{{student_data.student.id}}_{{subject_instance.id}}_{{exam_instance.id}}" name="marks_{{student_data.student.id}}" value="{{ mark|default:"" }}">
+                                    </td>
+                                {% endfor %}
+                            
+
+                            <td class="total-marks">{{ student_data.marks|last|default:'' }}</td>
+                        </tr>
+                    {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div> <!-- end col -->
+            </div> <!-- end row -->
+        
+        </div>
+
+        
+    </div>
+ 
+  
+</div>
+<!-- end: Content -->
+
+{% endblock content %} 
+{% block extra_javascript %} 
+<script src="{% static 'libs/toast/jquery.toast.min.js' %}"></script>
+<script>
+    $(document).ready(function () {
+    // Handle class_name change to populate subject_name dynamically
+    $('#class_name').change(function () {
+        var classId = $(this).val();
+        if (classId) {
+            $.ajax({
+                url: '/get_class_subjects/', // Replace with the correct endpoint
+                type: 'GET',
+                data: { 'class_id': classId },
+                success: function (data) {
+                    $('#subject_name').empty();
+                    $('#subject_name').append('<option value="" selected hidden>Select Subject</option>');
+                    for (var i = 0; i < data.length; i++) {
+                        {% if user|in_group:"teacher" %}
+                        $('#subject_name').append('<option value="' + data[i].subject_id__id + '">' + data[i].subject_id__name + '</option>');
+                        {% else %}
+                        $('#subject_name').append('<option value="' + data[i].id + '">' + data[i].subject_id__name + '</option>');
+                        {% endif %}
+                    }
+
+                    // Set the subject_name value from sessionStorage if available
+                    const savedSubject = sessionStorage.getItem('subject_name_id');
+                    if (savedSubject) {
+                        $('#subject_name').val(savedSubject);
+                    }
+                }
+            });
+        } else {
+            // Reset the subject select field if no class is selected
+            $('#subject_name').empty();
+            $('#subject_name').append('<option value="" selected hidden>Select Subject</option>');
+        }
+    });
+
+    // Dynamically calculate total marks for a student
+    $(document).on('input', '.student-mark-input', function () {
+        var totalMarks = 0;
+        var $row = $(this).closest('tr');
+
+        // Skip the first three cells (counter, name, roll_no)
+        $row.find('td:gt(2)').each(function () {
+            var mark = parseInt($(this).find('input').val()) || 0;
+            totalMarks += mark;
+        });
+
+        $row.find('.total-marks').text(totalMarks);
+    });
+
+    // Send updated marks to the server
+    $('#tbl1').on("change", '.student-mark-input', function () {
+        var dataId = $(this).attr("data-id");
+        var columnIndex = $(this).closest('td').index();
+        var mark_id = $('#tbl1 th:eq(' + columnIndex + ')').data('id');
+        var value = $(this).val();
+        sendToServer(dataId, value, mark_id);
+    });
+
+    // Function to send mark updates to the server
+    function sendToServer(id, value, mark_id) {
+        $.ajax({
+            url: "/get_mark_subjects/", // Replace with the correct endpoint
+            type: "POST",
+            data: { id: id, value: value, mark_id: mark_id },
+        })
+        .done(function (response) {
+            console.log(response);
+        })
+        .fail(function (xhr, status, error) {
+            if (xhr.status === 400) {
+                var errorResponse = JSON.parse(xhr.responseText);
+                $.toast({
+                    heading: 'Error',
+                    text: 'Subject mark is greater than main mark. Subject mark not saved.',
+                    bgColor: '#FF1356',
+                    textColor: 'white',
+                    position: 'mid-center',
+                });
+            } else {
+                alert("An error occurred: " + error);
+            }
+        });
+    }
+
+    // Save form data to sessionStorage when the form is submitted
+    $('#markForm').on('submit', function () {
+        const examName = $('#exam_name').val();
+        const className = $('#class_name').val();
+        const subjectName = $('#subject_name').val();
+
+        sessionStorage.setItem('exam_name_id', examName);
+        sessionStorage.setItem('class_name_id', className);
+        sessionStorage.setItem('subject_name_id', subjectName);
+    });
+
+    // Load form data from sessionStorage on page load
+    function loadFormData() {
+        const examName = sessionStorage.getItem('exam_name_id');
+        const className = sessionStorage.getItem('class_name_id');
+        const subjectName = sessionStorage.getItem('subject_name_id');
+
+        if (examName) $('#exam_name').val(examName);
+        if (className) {
+            $('#class_name').val(className).trigger('change'); // Trigger AJAX to load subjects
+
+            // Wait for subjects to load and set the subject value
+            const interval = setInterval(() => {
+                if ($('#subject_name option').length > 1) {
+                    if (subjectName) $('#subject_name').val(subjectName);
+                    clearInterval(interval);
+                }
+            }, 100);
+        }
+    }
+
+    loadFormData(); // Call the function to prepopulate the form
+});
+
+</script>
+
+    
+{% endblock extra_javascript%}

@@ -1,0 +1,325 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% block extra_css %}
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css'>
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-5-theme/1.3.0/select2-bootstrap-5-theme.min.css'>
+<link rel="stylesheet" href="{% static 'assets/css/loading.css' %}" />
+{% endblock extra_css %} 
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+ 
+  <div class="card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between">
+            <div>
+                <h4 class="card-title mb-4">Create Fee</h4>
+            </div>
+            <div>
+                <a href="{% url 'fees_master' %}" class="btn btn-warning">List Fee</a>
+            </div>
+        </div>
+
+        <div id="loading-screen" style="display: none;">
+            <figure>
+                <div class="dot white"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </figure>
+        </div>
+
+        <form id="my-form" method="post" action="{% url 'fees_master' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label">Fee type</label>
+                        <div>
+                            <select id="feetype_id" class="form-select" name="feetype_id" required>
+                                <option selected hidden disabled value="">Select Fee Type</option>
+                                {% for fee in stufeetype %}
+                                <option value="{{ fee.id }}" data-hostel="{{ fee.is_hostel_fee }}" data-transport="{{ fee.is_transport_fee }}" data-coaching="{{ fee.is_coaching_fee }}">{{ fee.fee_head }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4" id="class-container">
+                    <div class="mb-3">
+                        <label class="form-label">Select class</label>
+                        <div>
+                            <select id="class_id" class="form-select" name="additional_class_ids[]" multiple required>
+                                <option hidden disabled>Select Class</option>
+                                {% for class in stuclass %}
+                                <option value="{{ class.id }}">{{ class }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4" id="class-container">
+                    <div class="mb-3">
+                        <label class="form-label">Select Admission Year</label>
+                        <div>
+                            <select id="admission_id" class="form-select" name="admission_id" required>
+                                <option hidden disabled>Select Admission Year</option>
+                                {% for admission_year in admission_year_list %}
+                                <option value="{{ admission_year.id }}">{{ admission_year }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+        
+                
+            
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card mb-4" style="height: 400px;">
+                        <h5 class="teal-thead" class="card-header text-center">Select Month</h5>
+                        <div class="card-body" id="additional-classes-container">
+                        </div>
+                    </div>
+                    <button id="submit-btn" class="btn btn-primary" type="submit">Submit</button>
+                    <button type="button" id="add-class-btn" class="btn btn-secondary">Custom Month</button>
+        
+                </div>
+                <div class="col-md-6">
+                    <div class="card mb-4" style="height: 800px;">
+                        <h5 class="teal-thead" class="card-header text-center d-flex justify-content-between align-items-center">
+                            <span>Already Assigned Class Fees</span>
+                            <input type="text" id="searchFees" class="form-control form-control-sm w-25" placeholder="Search Class..." />
+                        </h5>
+                        <div class="card-body" id="fees">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Fees Title</th>
+                                            <th>Class</th>
+                                            <th>Start Date</th>
+                                            <th>End Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        
+        </form>
+            
+    </div>
+</div>
+
+
+
+</div>
+<!-- end: Content -->
+
+{% endblock content %} 
+{% block extra_javascript %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const feetypeSelect = document.getElementById('feetype_id');
+        const classContainer = document.getElementById('class-container');
+        const classSelect = document.getElementById('class_id');
+        if (feetypeSelect && classContainer) {
+            feetypeSelect.addEventListener('change', function () {
+                const selectedOption = feetypeSelect.options[feetypeSelect.selectedIndex];
+                const isHostelFee = selectedOption.getAttribute('data-hostel') === 'True';
+                const isTransportFee = selectedOption.getAttribute('data-transport') === 'True';
+                const isCoachingFee = selectedOption.getAttribute('data-coaching') === 'True';
+    
+    
+                if (isHostelFee || isTransportFee || isCoachingFee) {
+                    classContainer.style.display = 'none';
+                    classSelect.removeAttribute('required');
+                    
+                } else {
+                    classContainer.style.display = 'block';
+                    classSelect.setAttribute('required', 'required');
+                }
+            });
+        }
+    
+        const fees = document.getElementById('fees');
+        const month = document.getElementById('additional-classes-container');
+    
+        // Initialize Perfect Scrollbar
+        if (fees) {
+            new PerfectScrollbar(fees, {
+                wheelPropagation: false
+            });
+        }
+        if (month) {
+            new PerfectScrollbar(month, {
+                wheelPropagation: false
+            });
+        }
+    
+        // Initialize Select2
+        $(document).ready(function() {
+            $('#class_id').select2({
+                theme: "bootstrap-5",
+                width: '100%'
+            });
+        });
+    
+        $('#feetype_id').change(function() {
+            var feetype_id = $(this).val();
+            if (feetype_id) {
+                $.ajax({
+                    url: "{% url 'get_number_of_months' %}",
+                    data: {
+                        'feetype_id': feetype_id
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                        if (data.months) {
+                            $('#number_of_months').val(data.months);
+                            generateAdditionalClassFields(data.months);
+                        } else if (data.error) {
+                            alert(data.error);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("AJAX request failed:", status, error);
+                    }
+                });
+    
+                $.ajax({
+                    url: "{% url 'get_existing_fees' %}",  // Update this URL
+                    data: {
+                        'feetype_id': feetype_id
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        var fees = response.fees;
+                        var feesTableBody = $('#fees tbody');
+                        feesTableBody.empty();  // Clear existing rows
+                        $.each(fees, function(index, fee) {
+                            var rowHtml = `
+                                <tr>
+                                    <td>${fee.fees_title}</td>
+                                    <td>${fee.class} ${fee.group}</td>
+                                    <td>${fee.startdate}</td>
+                                    <td>${fee.enddate}</td>
+                                </tr>`;
+                            feesTableBody.append(rowHtml);
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("AJAX request failed:", status, error);
+                    }
+                });
+            }
+        });
+    
+        $('#add-class-btn').click(function() {
+            generateAdditionalClassFields(1);
+        }); 
+    
+        $(document).on('click', '.delete-btn', function() {
+            $(this).closest('.additional-class-row').remove();
+        });
+    
+        function generateAdditionalClassFields(numberOfFields) {
+            $('#additional-classes-container').empty();
+            var classSelectHtml = $('#class_id').html();
+            var monthSelectHtml = generateMonthOptions(); 
+            var additionalClassHtml = '';
+    
+            for (var i = 0; i < numberOfFields; i++) {
+                additionalClassHtml += `
+                    <div class="row additional-class-row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Select Month</label>
+                                <select class="form-select additional-month" name="additional_month_ids[]">
+                                    ${monthSelectHtml}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" class="form-control" name="additional_start_dates[]" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">End Date</label>
+                                <input type="date" class="form-control" name="additional_end_dates[]" required>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <button style="margin-top: 30px !important;" type="button" class="btn btn-danger delete-btn"><i class='bx bxs-trash'></i></button>
+                        </div>
+                    </div>`;
+            }
+    
+            $('#additional-classes-container').append(additionalClassHtml);
+    
+            if (month) {
+                new PerfectScrollbar(month, {
+                    wheelPropagation: false
+                });
+            }
+        }
+    
+        function generateMonthOptions() {
+            var monthSelectHtml = '';
+            {% for month in monthlist %}
+                monthSelectHtml += `<option value="{{ month.id }}">{{ month.name }}</option>`;
+            {% endfor %}
+            return monthSelectHtml;
+        }
+    });
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("searchFees");
+
+    searchInput.addEventListener("keyup", function () {
+        let filterValue = searchInput.value.toLowerCase();
+        let tableRows = document.querySelectorAll("#fees tbody tr");
+
+        tableRows.forEach(row => {
+            let classColumn = row.querySelector("td:nth-child(2)"); // Select the 2nd column (Class & Group)
+            
+            if (classColumn) {
+                let textValue = classColumn.textContent.trim().toLowerCase();
+
+                // Check if the text starts with the search value
+                if (textValue.startsWith(filterValue)) {
+                    row.style.display = ""; // Show row
+                } else {
+                    row.style.display = "none"; // Hide row
+                }
+            }
+        });
+    });
+});
+
+
+    
+</script>
+
+{% endblock extra_javascript %}

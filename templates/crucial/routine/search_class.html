@@ -1,0 +1,268 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% block extra_css %}
+
+<style>
+  #p-hide{
+    display: none!important;
+  }
+
+  @media print {
+      
+    @page {
+      size: A4 landscape;
+      margin: 20px;
+    }
+    
+    #p-hide{
+      display: block!important;;
+    }
+    #p-hide {
+      display: flex;
+      justify-content: center !important;
+      align-items: center !important;
+      text-align: center;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    #p-hide img {
+      margin: 0 auto;
+    }
+
+    #p-hide h6, #p-hide p {
+      margin: 0;
+    }
+    body {
+      -webkit-print-color-adjust: exact;
+    }
+  }
+
+  #fixed-button {
+    position: fixed;
+    right: 0px;
+    z-index: 1000!important;
+    top: 50%; /* Set top to 50% */
+    transform: translateY(-50%);
+  }
+
+  #fixed-button button {
+    color: #FCCF14;
+    display: block;
+    height: 50px;
+    position: relative;
+    text-align: center; 
+    line-height: 40px;
+    width: 50px;
+    margin-bottom: 1px;
+    z-index: 1000;
+    border: none;
+  }
+
+  #fixed-button button:hover {
+    right: 5px;
+    opacity: 1;
+  }
+
+  .fixed-icon {
+    background-color: #1D1E4E;
+  }
+</style>
+
+{% endblock extra_css %} 
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+  <!-- Hoverable Table rows -->
+  <div class="card">
+    <div class="card-body">
+    
+        <div class="d-none d-md-block" id="fixed-button">
+            <div>
+              <button class="fixed-icon" id="print-routine">
+                <i class="bx bxs-printer fs-1"></i>
+              </button>
+            </div>
+            <div>
+              <button class="fixed-icon" id="download-routine">
+                <i class="bx bxs-file-pdf fs-1"></i>
+              </button>
+            </div>
+            <div>
+              <button class="fixed-icon" id="previous">
+                <i class='bx bx-skip-previous fs-1'></i>
+              </button>
+            </div>
+          </div>
+        
+        <div id="configRoutine">
+          <div class="d-flex gap-5 justify-content-center  " id="p-hide" >
+            <div class="align-self-center"> 
+              <img
+                width="80px"
+                src="{{institute.institute_logo.url }}" 
+                alt=""
+              />
+              
+            </div>
+            <div>
+              <h5 class="fw-bold">{{ institute.institute_name }},{{ institute.education_thana_id }}, {{ institute.education_district_id }}</h5>
+            </div>
+            
+          </div>
+          <div class="col-auto">
+              <label for="class_id" class="visually-hidden">Select Class</label>
+              <select class="form-select mb-3" id="classSelect" name="class_id" required>
+                  <option disabled hidden selected>Select Class</option>
+                  {% for class in classList %}
+
+                  <option value="{{class.id}}">{{class.class_shift_id.class_id}} {{class.class_shift_id.shift_id| default:""}} {{class.section_id}}</option>
+
+                  {% endfor %}
+
+              </select>
+          </div>
+          
+
+          <div  class="table-responsive" id="configRoutine">
+              <table id="classRoutine" class="table table-nowrap mb-0">
+              <thead  style="background-color: rgba(252, 207, 20, 0.2) !important;">
+                  <tr>
+                      <th>Time Slot</th>
+                      <th data-day="Saturday">Saturday</th>
+                      <th data-day="Sunday">Sunday</th>
+                      <th data-day="Monday">Monday</th>
+                      <th data-day="Tuesday">Tuesday</th>
+                      <th data-day="Wednesday">Wednesday</th>
+                      <th data-day="Thursday">Thursday</th>
+                  </tr>
+              </thead>
+              <tbody>
+
+              </tbody>
+              </table>
+          </div>
+        </div>
+
+
+  </div>
+  </div>
+  
+
+</div>
+<!-- end: Content -->
+
+{% endblock content %} 
+
+
+
+{% block extra_javascript %}
+
+<script src="{% static 'assets/vendor/libs/print/html2pdf.bundle.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/print/jQuery.print.js' %}"></script>
+
+
+    <script>
+        $("#classSelect").change(function () {
+            var selectedClassId = $(this).val();
+
+            // Clear existing table rows
+            $("#classRoutine tbody").empty();
+
+            // Make an AJAX request to fetch the subject list for the selected class
+            $.ajax({
+                type: "GET",
+                url: `{% url 'get_routinelist' class_id=0 %}`.replace('0', selectedClassId),
+                dataType: "json",
+                success: function (data) {
+                    
+                    data.classRoutineList.forEach(function (entry) {
+                        addSubject(entry.day_name, entry.period_id__name, entry.subject_id__name, entry.teacher_name__name);
+                    });
+
+                },
+                error: function (error) {
+                    console.error(error);
+                }
+            });
+        });
+
+        function addSubject(day, timeSlot, subject, teacherName) {
+            var table = document.getElementById('classRoutine');
+            var tbody = table.getElementsByTagName('tbody')[0];
+
+            // Check if a row with the given time slot already exists
+            var existingRow = tbody.querySelector('tr[data-time="' + timeSlot + '"]');
+
+            if (!existingRow) {
+                // If the row does not exist, create a new one
+                var newRow = document.createElement('tr');
+                newRow.setAttribute('data-time', timeSlot);
+
+                // Create a cell for the time slot
+                var timeSlotCell = document.createElement('td');
+                timeSlotCell.innerText = timeSlot;
+                newRow.appendChild(timeSlotCell);
+
+                // Create cells for each day
+                for (var i = 0; i < 6; i++) {
+                    var dayCell = document.createElement('td');
+                    dayCell.setAttribute('data-day', table.rows[0].cells[i + 1].getAttribute('data-day'));
+                    newRow.appendChild(dayCell);
+                }
+
+                // Append the new row to the table body
+                tbody.appendChild(newRow);
+                existingRow = newRow;
+            }
+
+            // Find the index of the day column for the specified day
+            var dayIndex = Array.from(existingRow.cells).findIndex(cell => cell.getAttribute('data-day') === day);
+
+            existingRow.cells[dayIndex].innerHTML = `<strong>${subject}</strong><br><em>${teacherName}</em>`;
+            // Update the cell for the specified day with subject and teacher's name
+           //existingRow.cells[dayIndex].innerText = subject + '\n' +  teacherName ;
+        }
+
+        $(document).ready(function () {
+          function pdfGenerator() {
+            let pdfsave = $("#configRoutine").html();
+            var opt = {
+              margin: 0.2,
+              filename: "Routine.pdf",
+              image: { type: "jpeg", quality: 0.99 },
+              html2canvas: { dpi: 192, letterRendering: true, useCORS: true },
+              jsPDF: { unit: "in", format: "a4", orientation: "landscape" },
+            };
+  
+            html2pdf().set(opt).from(pdfsave).save();
+          }
+  
+          // Download Invoice button click event
+          $("#download-routine").on("click", function () {
+            pdfGenerator();
+          });
+  
+          $("#print-routine").on("click", function () {
+            $("#configRoutine").print({
+              globalStyles: true,
+              mediaPrint: false,
+              stylesheet: null,
+              noPrintSelector: ".no-print",
+              iframe: true,
+              append: null,
+              prepend: null,
+              manuallyCopyFormValues: true,
+              deferred: $.Deferred(),
+              timeout: 750,
+              title: "Invoice",
+              doctype: "<!doctype html>",
+            });
+          });
+  
+        });
+    </script>
+
+{% endblock extra_javascript%}

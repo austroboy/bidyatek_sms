@@ -1,0 +1,79 @@
+
+
+<div class="d-flex justify-content-between pb-0">
+  <div class="p-2 align-items-center">
+    <button class="btn btn-primary" hx-get="{% url 'add_leave_type' %}" hx-target="#leavetypedialog"> 
+      <i class='bx bx-plus-circle me-2'></i>
+      Add
+    </button>
+  </div>
+  <div class="d-flex"> 
+    <div class="form-group d-none d-md-block">
+      <input class="form-control" type="text" id="searchName" ng-model="searchName" placeholder="Type name to search" />
+    </div>
+  </div>
+</div>
+
+
+<div class="card-body">
+
+  <div class="table-responsive">
+    <table class="table table-nowrap mb-0">
+      <thead class="teal-thead">
+        <tr class="shadow-sm">
+          <th>#</th>
+          <th class="text-nowrap">Leave Type Name </th>
+          <th class="text-nowrap">is_special ? </th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for leavetype in leavetypelist %}
+
+        <tr>
+          <td>
+            {{forloop.counter}}
+          </td>
+          <td>
+            {{leavetype.name}}
+          </td>
+          <td>
+            {{leavetype.is_special}}
+          </td>
+          
+          <td>
+            <div class="dropdown">
+              <button
+                type="button"
+                class="btn p-0 dropdown-toggle hide-arrow"
+                data-bs-toggle="dropdown"
+              >
+                <i class="bx bx-dots-vertical-rounded"></i>
+              </button>
+              <div class="dropdown-menu">
+                <a
+                  class="dropdown-item"
+                  href="javascript:void(0);"
+                  hx-get="{% url 'edit_leave_type' pk=leavetype.pk %}"
+                  hx-target="#leavetypedialog"
+                  ><i class="bx bx-edit-alt me-1"></i> Edit</a
+                >
+                <a
+                  class="dropdown-item"
+                  hx-delete="{% url 'del_leave_type' pk=leavetype.pk %}"
+                  href="javascript:void(0);"
+                  hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+                  hx-target="#leavetypeadd"
+                  hx-confirm="are you want to delete?"
+                  ><i class="bx bx-trash me-1"></i> Delete</a
+                >
+              </div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>

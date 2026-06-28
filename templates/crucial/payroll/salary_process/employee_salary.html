@@ -1,0 +1,194 @@
+{% extends 'partials/base.html' %} 
+{% load static %}
+{% load template_tags %}  
+{% block extra_css %}
+
+<link 
+      rel="stylesheet"
+      href="{% static 'assets/vendor/libs/datatables/datatables.min.css' %}"
+    />
+<link rel="stylesheet" href="{% static 'assets/css/datatable.css' %}" />
+
+
+<link 
+      rel="stylesheet"
+      href="{% static 'assets/vendor/libs/select2/select2-bootstrap-5-theme.min.css' %}" 
+    />
+<style>
+  .select2-container--open {
+    z-index: 999999;
+}
+</style>
+
+{% endblock extra_css %} {% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+  <!-- Hoverable Table rows -->
+  <div class="card p-4">
+    <div class="table-responsive">
+      <table
+        id="datatable"
+        class="table table-md table-striped table-hover compact hover stripe"
+        width="100%"
+      >
+        <thead style="background-color: rgba(252, 207, 20, 0.2) !important;">
+          <tr class="shadow-sm">
+            <th>#</th>
+            <th>Employee Name</th>
+            <th>Designation</th>
+            <th>Employee Type</th>
+            <th>Salary Month</th>
+            <th>Salary</th>
+            <th>Created By</th>
+            <th>Updated By</th>
+          </tr>
+        </thead>
+        <tbody class="table-border-bottom-0">
+          {% for salary_process in salary_process_list %}
+
+          <tr>
+            <td>{{forloop.counter}}</td>
+
+            <td>{{salary_process.employee_salary.employee}}</td>
+
+            <td>{{salary_process.employee_salary.employee.teacher_profile.designation}} {{salary_process.employee_salary.employee.staff_profile.designation}}</td> 
+            
+            <td>{{salary_process.employee_salary.employee.teacher_profile.employee_type}} {{salary_process.employee_salary.employee.staff_profile.employee_type}}</td>
+
+            <td>{{salary_process.salary_month}}</td>
+
+            <td>{{salary_process.total_salary}}</td>
+
+            <td>{{salary_process.created_by}}</td>
+
+            <td>{{salary_process.updated_by}}</td>
+
+           
+          </tr>
+          {% endfor %}
+        </tbody> 
+      </table>
+    </div>
+  </div>
+  <!--/ Hoverable Table rows -->
+</div> 
+
+
+{% endblock content %} {% block extra_javascript %}
+
+<script src="{% static 'assets/vendor/libs/datatables/pdfmake.min.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/datatables/vfs_fonts.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/datatables/datatables.min.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/select2/select2.min.js' %}"></script>
+<script>
+    "use strict";
+    pdfMake.fonts = {
+      Roboto: {
+        normal: 'Roboto-Regular.ttf',
+        bold: 'Roboto-Medium.ttf',
+        italics: 'Roboto-Italic.ttf',
+        bolditalics: 'Roboto-MediumItalic.ttf'
+      },
+      nikosh: {
+        normal: "NikoshBAN.ttf",
+        bold: "NikoshBAN.ttf",
+        italics: "NikoshBAN.ttf",
+        bolditalics: "NikoshBAN.ttf"
+      }
+    };
+  $(document).ready(function () {
+    const dtSelector = "#datatable";
+    const dt = $(dtSelector).DataTable({
+      fixedHeader: { header: true },
+      //   dom: "<'row'<'col-sm-4'B><'col-sm-8'f>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+      dom: `<'row'<'col-sm-12 col-md-6'B><'col-sm-12 col-md-6 d-none d-sm-flex justify-content-end'fl>>
+              <'row dt-row'<'col-sm-12'tr>>
+              <'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>`,
+
+      buttons: {
+
+      buttons: [
+          
+          {
+              extend: "collection",
+              text: "Export",
+              autoClose: true,
+              buttons: [
+              'excel', 'print',
+              {
+                extend: "pdfHtml5",
+                exportOptions: {
+                  columns: function (idx, data, node) {
+                    return idx !== 0 && idx !== dt.column(':last').index();
+                  },
+                }, 
+                customize: function (doc) {
+                  doc.defaultStyle = {
+                    font: 'nikosh'
+                  };
+                  
+                  // Set the table width to fit page
+                  var colCount = doc.content[1].table.body[0].length;
+                  var colWidths = [];
+                  for (var i = 0; i < colCount; i++) {
+                    colWidths.push('*');
+                  }
+                  doc.content[1].table.widths = colWidths;
+                  
+                  // Set page margins
+                  doc.pageMargins = [10, 10, 10, 10];
+                  
+                  // Center-align the table headers
+                  doc.content[1].table.body[0].forEach(function (header) {
+                    header.alignment = 'center';
+                  });
+                  
+                  // Center-align the table content
+                  doc.content[1].table.body.slice(1).forEach(function (row) {
+                    row.forEach(function (cell) {
+                      cell.alignment = 'center';
+                    });
+                  });
+  
+                  // Set page orientation to landscape if table is too wide
+                  if (colCount > 5) {
+                    doc.pageOrientation = 'landscape';
+                  }
+  
+                  // Auto-size columns based on content
+                  doc.content[1].table.body.forEach(function (row, rowIndex) {
+                    row.forEach(function (cell, cellIndex) {
+                      if (rowIndex === 0) {
+                        cell.fillColor = '#1D1E4E';
+                      }
+                    });
+                  });
+
+                  
+                },
+              },
+            ],
+          },
+        ],
+    },
+      pagingType: "simple_numbers",
+      pageLength: 25,
+      scrollX: true,
+    });
+
+
+  });
+
+
+  $('#employee_id').select2({
+    theme: "bootstrap-5",
+    width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+    dropdownParent: $("#offcanvasBoth")
+  });
+</script>
+
+
+
+{% endblock extra_javascript%}

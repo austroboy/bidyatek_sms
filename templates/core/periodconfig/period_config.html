@@ -1,0 +1,152 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load template_tags %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'assets/css/period_config.css' %}" />
+
+{% endblock extra_css %} 
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+
+  <div class="card">
+        <div class="row">
+
+            <form method="post">
+                {% csrf_token %}
+                <div style="grid-template-columns: repeat({{ periods|length|add:1 }}, 1fr);" id="examRoutine" class="grid-container">
+                    <div class="grid-item header">Classes</div>
+                    {% for period in periods %}
+                    <div class="teal-thead" class="grid-item header">{{ period.name }}</div>
+                    {% endfor %}
+            
+                    {% for class in classes %}
+        
+                    <div  data-cls="{{class.id}}" style="position: relative; display: flex; align-items: center; justify-content: center; background-color:rgba(20, 168, 154, 0.12) !important ;" class="grid-item single-class">
+                        <div class="d-flex flex-column">
+                            <p class="fw-bold">{{ class.class_group_id }}</p>
+                            <p class="fw-bold">{{ class.section_id|default:"" }}</p>
+                            <p class="fw-bold">{{ class.shift_id|default:"" }}</p>
+                        </div>
+                        
+                        <i style="cursor: pointer; position: absolute; right: 5px; top: 5px;" class="bx bx-copy"></i>
+                        <i style="cursor: pointer; position: absolute; left: 5px; top: 5px;" class="bx bx-paste"></i>
+                    </div>
+                  
+                    {% for period in periods %}
+                    <div data-prd="prd{{class.id}}" class="grid-item">
+                        <input type="hidden" name="class_id" value="{{ class.id }}">
+                        <input type="hidden" name="period_id" value="{{ period.id }}">
+                        {% with grouped_configs|get_item:class.class_group_id.class_id.name as class_config %}
+                        {% if class_config %}
+                        {% with class_config|get_item:period.name as period_config %}
+                        {% if period_config %}
+                        <div class="form-field">
+                            <label>Start Time</label>
+                            <input type="time" name="start_time_{{ class.id }}_{{ period.id }}" value="{{ period_config.start_time|time:'H:i' }}">
+                        </div>
+                        <div class="form-field">
+                            <label>End Time</label>
+                            <input type="time" name="end_time_{{ class.id }}_{{ period.id }}" value="{{ period_config.end_time|time:'H:i' }}">
+                        </div>
+                        <div class="">
+                            <input type="checkbox" name="break_time_{{ class.id }}_{{ period.id }}" {% if period_config.break_time %}checked{% endif %}>
+                            <label>Is it Break Period?</label>
+                        </div>
+                        {% else %}
+                        <div class="form-field">
+                            <label>Start Time</label>
+                            <input type="time" name="start_time_{{ class.id }}_{{ period.id }}">
+                        </div>
+                        <div class="form-field">
+                            <label>End Time</label>
+                            <input type="time" name="end_time_{{ class.id }}_{{ period.id }}">
+                        </div>
+                        <div class="">
+                            <input type="checkbox" name="break_time_{{ class.id }}_{{ period.id }}">
+                            <label>Is it Break Period?</label>
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+                        {% else %}
+                        <div class="form-field">
+                            <label>Start Time</label>
+                            <input type="time" name="start_time_{{ class.id }}_{{ period.id }}">
+                        </div>
+                        <div class="form-field">
+                            <label>End Time</label>
+                            <input type="time" name="end_time_{{ class.id }}_{{ period.id }}">
+                        </div>
+                        <div class="">
+                            <input type="checkbox" name="break_time_{{ class.id }}_{{ period.id }}">
+                            <label>Is it Break Period?</label>
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+                    </div>
+                    {% endfor %}
+                    {% endfor %}
+                    <div>
+                        <button class="btn btn-primary btn-block">Save</button>
+                    </div>
+                </div>
+                
+            </form>
+
+        </div>
+  </div>
+</div>
+<!-- end: Content -->
+
+{% endblock content %} 
+
+{% block extra_javascript %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let copiedData = null; // To store the copied data
+
+        // Handle copy functionality
+        document.querySelectorAll('.bx-copy').forEach(copyIcon => {
+        copyIcon.addEventListener('click', function () {
+            const clsId = this.closest('[data-cls]').getAttribute('data-cls');
+            const periods = document.querySelectorAll(`[data-prd="prd${clsId}"]`);
+
+            copiedData = Array.from(periods).map(period => {
+            const startTime = period.querySelector('input[name^="start_time"]').value;
+            const endTime = period.querySelector('input[name^="end_time"]').value;
+            const breakTime = period.querySelector('input[type="checkbox"]').checked;
+            return { startTime, endTime, breakTime };
+            });
+
+        });
+        });
+
+        // Handle paste functionality
+        document.querySelectorAll('.bx-paste').forEach(pasteIcon => {
+        pasteIcon.addEventListener('click', function () {
+            if (!copiedData) {
+            alert('No data to paste. Please copy first!');
+            return;
+            }
+
+            const clsId = this.closest('[data-cls]').getAttribute('data-cls');
+            const periods = document.querySelectorAll(`[data-prd="prd${clsId}"]`);
+
+            periods.forEach((period, index) => {
+            const data = copiedData[index];
+            if (data) {
+                period.querySelector('input[name^="start_time"]').value = data.startTime;
+                period.querySelector('input[name^="end_time"]').value = data.endTime;
+                period.querySelector('input[type="checkbox"]').checked = data.breakTime;
+            }
+            });
+
+        });
+        });
+    });
+</script>
+
+{% endblock extra_javascript%}

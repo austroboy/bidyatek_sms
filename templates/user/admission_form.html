@@ -1,0 +1,734 @@
+{% extends 'partials/base.html' %} 
+{% load static %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="text-center">
+        <img class="mt-3" src="{% static 'image/rumc.png' %}" id="logoViewer"
+        style="width: 80px; height: 80px;"
+        alt="School Logo">
+    </div>
+    
+    <h3 class="text-decoration-underline text-center">Online Application Form</h3>
+    <div class="text-center">
+        <span class="border border-2 border-dark p-1">Online Admission 2025</span>
+    </div>
+    
+    <!-- Success and Error Messages -->
+    <div id="success-message" class="alert alert-success d-none mt-3"></div>
+    <div id="error-message" class="alert alert-danger d-none mt-3"></div>
+    <div id="payment-message" class="alert alert-info d-none mt-3"></div>
+
+    <form id="admissionForm" style="background-color: #ffffff;" class="p-3 admission_form rounded" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <fieldset class="border rounded-3 p-3">
+            <legend class="float-none w-auto px-3 text-center fs-6">BASIC INFORMATION</legend>
+
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="item">
+                        <label class="fw-normal">The Class in Which Admission is Sought</label>
+                        <input class="form-control" required type="text" name="class_sought" id="class_sought"
+                            value="" placeholder="Class Name">
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <div class="item">
+                            <div class="d-flex gap-2 pt-2">
+                                <label class="fw-normal pe-2">Shift:</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="shift" id="morning" value="Morning">
+                                    <label class="form-check-label" for="morning">Morning</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="shift" id="day" value="Day" checked>
+                                    <label class="form-check-label" for="day">Day</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div class="d-flex gap-2 pt-2">
+                                <label class="fw-normal pe-2">Version:</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="version" id="bangla" value="Bangla">
+                                    <label class="form-check-label" for="bangla">Bangla</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="version" id="english" value="English" checked>
+                                    <label class="form-check-label" for="english">English</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center text-white" style="width: 100px; margin: 0 auto;">
+                        <!-- Drag & Drop Area -->
+                        <div id="photoDiv"
+                            class="photo border position-relative mb-2 d-flex align-items-center justify-content-center"
+                            style="width: 100px; height: 100px; padding: 3px; cursor: pointer; background-color: #f8f9fa;"
+                            ondragover="event.preventDefault(); this.classList.add('border-primary')"
+                            ondragleave="this.classList.remove('border-primary')" ondrop="handleDrop(event)">
+                            <img src="{% static 'image/upload.png' %}" id="photoViewer"
+                                style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;"
+                                alt="Photo Preview">
+                        </div>
+                        <!-- Hidden file input -->
+                        <input type="file" name="photo" id="photo" accept="image/*" style="display: none;"
+                            onchange="ShowPreview(this)">
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset class="border rounded-3 p-3 mt-3">
+            <legend class="float-none w-auto px-3 text-center fs-6">APPLICANT INFORMATION</legend>
+            <div class="applicant_information">
+                <div class="basic_info_photo row">
+                    <div class="basic_info col-md-6 col-12">
+                        <div class="item">
+                            <label class="fw-normal">Applicant's Name [English]</label>
+                            <input class="form-control" required type="text" name="fullName" id="fullName"
+                                value="" placeholder="Name of Student">
+                        </div>
+
+                        <div class="item">
+                            <label class="fw-normal">Nick Name</label>
+                            <input class="form-control" required type="text" name="nickName" id="nickName"
+                                value="" placeholder="Nick Name of Student">
+                        </div>
+
+                        <div class="item">
+                            <label class="fw-normal">Birth Register Certificate Number</label>
+                            <input class="form-control" required type="text" name="brcn" id="brcn" value=""
+                                placeholder="Birth Register Certificate Number">
+                        </div>
+
+                        <div class="item">
+                            <label class="fw-normal">Gender</label>
+                            <select class="form-control" name="gender" id="gender" title="Select a Gender">
+                                <option selected value="Female">Female</option>
+                                <option value="Male">Male</option>
+                            </select>
+                        </div>
+
+                        <div class="item">
+                            <label class="fw-normal">Religion</label>
+                            <select class="form-control" name="religion" id="religion">
+                                <option selected value="Islam">Islam</option>
+                                <option value="Hindu">Hindu</option>
+                                <option value="Christian">Christian</option>
+                                <option value="Buddha">Buddha</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="photo col-md-6 col-12">
+                        <div class="item">
+                            <label class="fw-normal">Applicant's Name[বাংলা]</label>
+                            <input class="form-control" required type="text" name="fullNameBangla"
+                                id="fullNameBangla" value="" placeholder="বাংলা নাম">
+                        </div>
+
+                        <div class="item">
+                            <label class="fw-normal">Date of Birth</label>
+                            <input class="form-control" required type="date" name="birthDate" id="birthDate"
+                                value="2019-11-13" placeholder="YYYY-MM-DD" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"
+                                onchange="getAge();" onfocus="resetAgeDiv();" class="hasDatepicker">
+                        </div>
+
+                        <div class="item">
+                            <label class="fw-normal">Blood Group</label>
+                            <select class="form-control" name="bloodGroup" id="bloodGroup"
+                                title="Select a Blood Group">
+                                <option value=""></option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                                <option selected value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                            </select>
+                        </div>
+
+                        <div class="item">
+                            <label class="fw-normal">Nationality</label>
+                            <input class="form-control" required type="text" name="nationality"
+                                id="nationality" value="" placeholder="Nationality">
+                        </div>
+
+                        <div class="item pb-2">
+                            <label class="fw-normal">Catchment Area</label>
+                            <div class="form-check form-switch pt-2">
+                                <input class="form-check-input" type="checkbox" name="catchmentArea" id="catchmentArea">
+                                <label class="form-check-label" for="catchmentArea">(Only applicable for those
+                                    applicants who lives at Uttara Thana)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="other_important_info">
+                    <div class="row">
+                        <div class="col item-md-6 col-12">
+                            <div class="item">
+                                <label class="fw-normal" colspan="2">Quota</label>
+                                <div class="d-flex gap-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="quota" id="na" value="N/A" checked>
+                                        <label class="form-check-label" for="na">N/A</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="quota" id="FQ" value="FQ">
+                                        <label class="form-check-label" for="FQ">FQ</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="quota" id="EQ" value="EQ">
+                                        <label class="form-check-label" for="EQ">EQ</label>
+                                    </div>
+                                </div>
+                                <p class="m-0">(FQ: Quota for children / Grandchildren of Freedom Fighters, EQ:
+                                    Quota for children of Officer's Employee of Ministry of Education)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset class="border rounded-3 p-3 mt-3">
+            <legend class="float-none w-auto px-3 text-center fs-6">ACADEMIC INFORMATION</legend>
+            <div class="applicant_information">
+                <div class="basic_info_photo row">
+                    <div class="basic_info col-md-6 col-12">
+                        <div class="item">
+                            <label class="fw-normal">Class</label>
+                            <input class="form-control" required type="text" name="previous_class" id="previous_class" value="" placeholder="Class">
+                        </div>
+
+                        <div class="item">
+                            <label class="fw-normal">Board Roll</label>
+                            <input class="form-control" required type="text" name="boardRoll" id="boardRoll" value=""
+                                placeholder="Board Roll">
+                        </div>
+
+                        <div class="item">
+                            <label class="fw-normal">Board Name</label>
+                            <input class="form-control" required type="text" name="boardName" id="boardName" value=""
+                                placeholder="Board Name">
+                        </div>
+                    </div>
+                    <div class="photo col-md-6 col-12">
+                        <div class="item">
+                            <label class="fw-normal">Exam Name</label>
+                            <select class="form-control" name="exam" id="exam">
+                                <option selected value="PEC">PEC</option>
+                                <option value="JSC">JSC</option>
+                                <option value="SSC">SSC</option>
+                            </select>
+                        </div>
+
+                        <div class="item">
+                            <label class="fw-normal">Reg No.</label>
+                            <input class="form-control" required type="text" name="registrationNo" id="registrationNo" value=""
+                                placeholder="Registration No">
+                        </div>
+
+                        <div class="item">
+                            <label class="fw-normal">GPA</label>
+                            <input class="form-control" required type="text" name="gpa" id="gpa" value=""
+                                placeholder="GPA">
+                        </div>
+                    </div>
+                </div>
+                <div class="other_important_info">
+                    <div class="row">
+                        <div class="col item-md-6 col-12">
+                            <div class="item">
+                                <label class="fw-normal">Name of School attending at Present</label>
+                                <input class="form-control" required type="text" name="spa" id="spa" value=""
+                                    placeholder="Present School Name">
+                            </div>
+                            <div class="item">
+                                <label class="fw-normal">Address of School attending at Present</label>
+                                <input class="form-control" required type="text" name="apa" id="apa" value=""
+                                    placeholder="Present School Address">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- father info -->
+        <fieldset class="border rounded-3 p-3 mt-3">
+            <legend class="float-none w-auto px-3 text-center fs-6">FATHER INFORMATION</legend>
+            <div class="father_info">
+                <div class="row row-cols-1 row-cols-md-2">
+                    <div class="item col">
+                        <label class="fw-normal">Father's Name</label>
+                        <input class="form-control" required type="text" name="fatherName" id="fatherName"
+                            placeholder="Father Name">
+                    </div>
+                    <div class="item col">
+                        <label class="fw-normal">Father's Name(বাংলা নাম)</label>
+                        <input class="form-control" type="text" name="fatherNameBangla" id="fatherNameBangla"
+                            placeholder="বাংলা নাম">
+                    </div>
+                    <div class="item col">
+                        <label class="fw-normal">Father's Mobile#</label>
+                        <input class="form-control" autocomplete="off" type="text" name="fatherMobile"
+                            id="fatherMobile" onkeyup="this.value=this.value.replace(/[^\d]/,'');"
+                            placeholder="Father Mobile">
+                    </div>
+                    <div class="item col">
+                        <label class="fw-normal">Academic Qualification</label>
+                        <input class="form-control" required type="text" name="qualification" id="qualification"
+                            placeholder="Qualification">
+                    </div>
+                    <div class="item col">
+                        <label class="fw-normal">Father's Occupation</label>
+                        <select class="form-control" name="fatherOccupation" id="fatherOccupation"
+                            title="Select Father Occupation">
+                            <option value=""></option>
+                            <option value="Service">Service</option>
+                            <option value="Business">Business</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="item col">
+                        <label class="fw-normal">If Service</label>
+                        <select class="form-control" name="fatherService" id="fatherService"
+                            title="Select Father Occupation">
+                            <option value=""></option>
+                            <option value="Govt. Service">Govt. Service</option>
+                            <option value="Non Gov.">Non Gov.</option>
+                            <option value="Private">Private</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="item col">
+                        <label class="fw-normal">Designation</label>
+                        <input class="form-control" required type="text" name="fatherDesignation"
+                            id="fatherDesignation" placeholder="Father's Designation">
+                    </div>
+                    <div class="item col">
+                        <label class="fw-normal">Organization Name</label>
+                        <input class="form-control" required type="text" name="fatherOrganization"
+                            id="fatherOrganization" placeholder="Organization Name">
+                    </div>
+                    <div class="item col">
+                        <label class="fw-normal">Yearly Income</label>
+                        <input class="form-control" required type="text" name="fatherYearlyIncome"
+                            id="fatherYearlyIncome" placeholder="Yearly Income">
+                    </div>
+                    <div class="item col">
+                        <label class="fw-normal">Income Source</label>
+                        <input class="form-control" required type="text" name="fatherIncomeSource"
+                            id="fatherIncomeSource" placeholder="Income Source">
+                    </div>
+                    <div class="item col">
+                        <label class="fw-normal" colspan="1">Father's NID</label>
+                        <input class="form-control" required type="text" name="fnid" id="fnid"
+                            placeholder="Father National ID">
+                    </div>
+                    <div class="item col">
+                        <label class="fw-normal" colspan="1">E-TIN Certificate Number</label>
+                        <input class="form-control" required type="text" name="fEtin" id="fEtin"
+                            placeholder="Father E-TIN">
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- mother info -->
+        <fieldset class="border rounded-3 p-3 mt-3">
+            <legend class="float-none w-auto px-3 text-center fs-6">MOTHER INFORMATION</legend>
+            <div class="mother_info">
+                <div class="row row-cols-1 row-cols-md-2">
+                    <div class="item col">
+                        <label class="fw-normal">Mother's Name</label>
+                        <input class="form-control" required type="text" name="motherName" id="motherName"
+                            placeholder="Mother Name">
+                    </div>
+                    <div class="item col">
+                        <label class="fw-normal">Mother's Name(বাংলা নাম)</label>
+                        <input class="form-control" type="text" name="motherNameBangla" id="motherNameBangla"
+                            placeholder="বাংলা নাম">
+                    </div>
+                    <div class="item col">
+                        <label class="fw-normal">Mother's Mobile#</label>
+                        <input class="form-control" autocomplete="off" type="text" name="motherMobile"
+                            id="motherMobile" onkeyup="this.value=this.value.replace(/[^\d]/,'');"
+                            placeholder="Mother Mobile">
+                    </div>
+                    <div class="item col">
+                        <label class="fw-normal">Academic Qualification</label>
+                        <input class="form-control" required type="text" name="mqualification" id="mqualification"
+                            placeholder="Qualification">
+                    </div>
+                    <div class="item col">
+                        <label class="fw-normal">Mother's Occupation</label>
+                        <select class="form-control" name="motherOccupation" id="motherOccupation"
+                            title="Select Mother Occupation">
+                            <option value=""></option>
+                            <option value="Service">Service</option>
+                            <option value="Business">Business</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="item col">
+                        <label class="fw-normal">If Service</label>
+                        <select class="form-control" name="motherService" id="motherService"
+                            title="Select Mother Occupation">
+                            <option value=""></option>
+                            <option value="Govt. Service">Govt. Service</option>
+                            <option value="Non Gov.">Non Gov.</option>
+                            <option value="Private">Private</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="item col">
+                        <label class="fw-normal">Designation</label>
+                        <input class="form-control" required type="text" name="motherDesignation"
+                            id="motherDesignation" placeholder="Mother's Designation">
+                    </div>
+                    <div class="item col">
+                        <label class="fw-normal">Organization Name</label>
+                        <input class="form-control" required type="text" name="motherOrganization"
+                            id="motherOrganization" placeholder="Organization Name">
+                    </div>
+                    <div class="item col">
+                        <label class="fw-normal">Yearly Income</label>
+                        <input class="form-control" required type="text" name="motherYearlyIncome"
+                            id="motherYearlyIncome" placeholder="Yearly Income">
+                    </div>
+                    <div class="item col">
+                        <label class="fw-normal">Income Source</label>
+                        <input class="form-control" required type="text" name="motherIncomeSource"
+                            id="motherIncomeSource" placeholder="Income Source">
+                    </div>
+                    <div class="item col">
+                        <label class="fw-normal" colspan="1">Mother's NID</label>
+                        <input class="form-control" required type="text" name="mNid" id="mNid"
+                            placeholder="Mother National ID">
+                    </div>
+                    <div class="item col">
+                        <label class="fw-normal" colspan="1">E-TIN Certificate Number</label>
+                        <input class="form-control" required type="text" name="mEtin" id="mEtin"
+                            placeholder="Mother E-TIN">
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- guardian info -->
+        <fieldset class="border rounded-3 p-3 mt-3">
+            <legend class="float-none w-auto px-3 text-center fs-6">GUARDIAN INFORMATION (If applicable)</legend>
+            <div class="gurdian_info">
+                <div class="row row-cols-1 row-cols-md-2">
+                    <div class="col item">
+                        <label class="fw-normal"><span>Guardian's Name</span><small>(in absence of parents)</small></label>
+                        <input class="form-control" type="text" name="guardianName" id="guardianName"
+                            placeholder="Guardian Name">
+                    </div>
+                    <div class="col item">
+                        <label class="fw-normal">Guardian's Mobile#</label>
+                        <input class="form-control" autocomplete="off" type="text" name="guardianMobile"
+                            id="guardianMobile" onkeyup="this.value=this.value.replace(/[^\d]/,'');"
+                            placeholder="Guardian Mobile">
+                    </div>
+                    <div class="col item">
+                        <label class="fw-normal">Relation With Student</label>
+                        <input class="form-control" type="text" name="guardianRelation" id="guardianRelation"
+                            placeholder="Relation">
+                    </div>
+                    <div class="col item">
+                        <label class="fw-normal" colspan="1">Guardian's NID</label>
+                        <input class="form-control" type="text" name="gnid" id="gnid"
+                            placeholder="Guardian National ID">
+                    </div>
+                    <div class="col item">
+                        <label class="fw-normal" colspan="1">Address</label>
+                        <input class="form-control" type="text" name="gAddress" id="gAddress" placeholder="Address">
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- present address -->
+        <fieldset class="border rounded-3 p-3 mt-3">
+            <legend class="float-none w-auto px-3 text-center fs-6">PRESENT ADDRESS</legend>
+            <div class="present_address">
+                <div class="row row-cols-1 row-cols-md-2">
+                    <div class="col item">
+                        <label class="fw-normal">Address: </label>
+                        <input class="form-control" type="text" name="praddress" id="praddress" value=""
+                            placeholder="4/A, ABC House" required>
+                    </div>
+                    <div class="item col">
+                        <label class="fw-normal">Country: </label>
+                        <input class="form-control" type="text" name="prCountry" id="prCountry" value=""
+                            placeholder="Country" required>
+                    </div>
+                    <div class="col item">
+                        <label class="fw-normal">District: </label>
+                        <input class="form-control" type="text" name="prDistrict" id="prDistrict" value=""
+                            placeholder="District" required>
+                    </div>
+                    <div class="col item">
+                        <label class="fw-normal">Telephone: </label>
+                        <input class="form-control" type="text" name="prTelephone" id="prTelephone" value=""
+                            placeholder="Telephone" required>
+                    </div>
+                    <div class="col item">
+                        <label class="fw-normal">Thana/Upazilla: </label>
+                        <input class="form-control" type="text" name="prThana" id="prThana" value=""
+                            placeholder="Thana/Upazilla" required>
+                    </div>
+                    <div class="col item">
+                        <label class="fw-normal">Mobile: </label>
+                        <input class="form-control" type="text" name="prMobile" id="prMobile" value=""
+                            placeholder="Mobile" required>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <div class="item text-center">
+            <input class="" type="checkbox" name="sameAsPresent" id="sameAsPresent" title="Same as Present Address"
+                value="yes" onclick="copyPresentAddress()">
+            <label class="fw-bold" colspan="2">Same as Present Address</label>
+        </div>
+
+        <!-- PERMANENT address -->
+        <fieldset class="border rounded-3 p-3 mt-3">
+            <legend class="float-none w-auto px-3 text-center fs-6">PERMANENT ADDRESS</legend>
+            <div class="present_address">
+                <div class="row row-cols-1 row-cols-md-2">
+                    <div class="col item">
+                        <label class="fw-normal">Address: </label>
+                        <input class="form-control" type="text" name="paddress" id="paddress" value=""
+                            placeholder="4/A, ABC House" required>
+                    </div>
+                    <div class="item col">
+                        <label class="fw-normal">Country: </label>
+                        <input class="form-control" type="text" name="pCountry" id="pCountry" value=""
+                            placeholder="Country" required>
+                    </div>
+                    <div class="col item">
+                        <label class="fw-normal">District: </label>
+                        <input class="form-control" type="text" name="pDistrict" id="pDistrict" value=""
+                            placeholder="District" required>
+                    </div>
+                    <div class="col item">
+                        <label class="fw-normal">Telephone: </label>
+                        <input class="form-control" type="text" name="pTelephone" id="pTelephone" value=""
+                            placeholder="Telephone" required>
+                    </div>
+                    <div class="col item">
+                        <label class="fw-normal">Thana/Upazilla: </label>
+                        <input class="form-control" type="text" name="pThana" id="pThana" value=""
+                            placeholder="Thana/Upazilla" required>
+                    </div>
+                    <div class="col item">
+                        <label class="fw-normal">Mobile: </label>
+                        <input class="form-control" type="text" name="pMobile" id="pMobile" value=""
+                            placeholder="Mobile" required>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <div class="other_info">
+            <div class="">
+                <div class="item">
+                    <label><span>Mobile Number For Contact/SMS</span>
+                        <small class="fw-normal">It should be your active mobile number</small>
+                    </label>
+                    <input class="form-control" required autocomplete="off" type="text" name="smsAlertNumber"
+                        id="smsAlertNumber" onkeyup="this.value=this.value.replace(/[^\d]/,'');" value=""
+                        placeholder="01xxxxxxxxx" pattern="[0-9]{11}">
+                </div>
+                <!-- Add this emergency contact field -->
+                <div class="item">
+                    <label><span>Emergency Contact Number</span></label>
+                    <input class="form-control" required autocomplete="off" type="text" name="emergencyContact"
+                        id="emergencyContact" onkeyup="this.value=this.value.replace(/[^\d]/,'');" value=""
+                        placeholder="01xxxxxxxxx" pattern="[0-9]{11}">
+                </div>
+            </div>
+        </div>
+
+        <fieldset class="border rounded-3 p-3 mt-3">
+            <legend class="float-none w-auto px-3 text-center fs-6">PAYMENT INFORMATION</legend>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="item">
+                        <label class="fw-normal">Admission Fee</label>
+                        <input class="form-control" type="text" id="admissionFee" readonly>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="item">
+                        <label class="fw-normal">Payment Method</label>
+                        <select class="form-control" name="payment_method" id="paymentMethod" required>
+                            {% comment %} <option value="">Select Payment Method</option> {% endcomment %}
+                            <option value="sslcommerz" selected>SSLCommerz (Credit/Debit Card, Mobile Banking)</option>
+                            {% comment %} <option value="bank">Bank Payment</option> {% endcomment %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                <div id="paymentButton" class="d-none">
+                    <button type="button" class="btn btn-success" onclick="initiatePayment()">
+                        <i class="fas fa-credit-card me-2"></i>Pay Admission Fee
+                    </button>
+                </div>
+            </div>
+        </fieldset>
+
+        <div class="text-center mt-4">
+            <button type="button" class="btn btn-danger me-2" onclick="resetForm()">Reset</button>
+            <button type="submit" class="btn btn-primary">Submit Application</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Form submission handler - updated for payment integration
+    document.getElementById('admissionForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+    
+        const form = e.target;
+        const formData = new FormData(form);
+    
+        // Show loading state
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+    
+        fetch("{% url 'admission_form' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url; // Redirect to payment gateway
+                } else {
+                    showSuccessMessage(data.message);
+                }
+            } else {
+                showErrorMessage(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorMessage('An error occurred while submitting the form. Please try again.');
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Application';
+        });
+    });
+    
+    // Calculate and display admission fee based on class
+    document.getElementById('class_sought').addEventListener('change', function() {
+        const classSought = this.value;
+        let admissionFee = 1000.00; // Default fee
+    
+        // Must match your backend fee_structure in get_admission_fee()
+        const feeStructure = {
+            'Six': 1000.00,
+            'Eight': 1500.00,
+            'Nine': 2000.00
+        };
+    
+        if (feeStructure[classSought]) {
+            admissionFee = feeStructure[classSought];
+        }
+    
+        document.getElementById('admissionFee').value = '৳' + admissionFee.toFixed(2);
+        document.getElementById('paymentButton').classList.remove('d-none');
+    });
+    
+    // Trigger payment from custom button
+    function initiatePayment() {
+        document.getElementById('admissionForm').dispatchEvent(new Event('submit'));
+    }
+    
+    // Success and Error Message Utilities
+    function showSuccessMessage(message) {
+        const successMsg = document.getElementById('success-message');
+        successMsg.textContent = message;
+        successMsg.classList.remove('d-none');
+        document.getElementById('error-message').classList.add('d-none');
+        successMsg.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function showErrorMessage(message) {
+        const errorMsg = document.getElementById('error-message');
+        errorMsg.textContent = message;
+        errorMsg.classList.remove('d-none');
+        document.getElementById('success-message').classList.add('d-none');
+        errorMsg.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Copy present address to permanent
+    function copyPresentAddress() {
+        if (document.getElementById('sameAsPresent').checked) {
+            document.getElementById('paddress').value = document.getElementById('praddress').value;
+            document.getElementById('pCountry').value = document.getElementById('prCountry').value;
+            document.getElementById('pDistrict').value = document.getElementById('prDistrict').value;
+            document.getElementById('pThana').value = document.getElementById('prThana').value;
+            document.getElementById('pTelephone').value = document.getElementById('prTelephone').value;
+            document.getElementById('pMobile').value = document.getElementById('prMobile').value;
+        }
+    }
+    
+    // Photo Upload Preview
+    document.getElementById('photoDiv').addEventListener('click', function() {
+        document.getElementById('photo').click();
+    });
+    
+    function ShowPreview(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('photoViewer').src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    
+    function handleDrop(event) {
+        event.preventDefault();
+        event.currentTarget.classList.remove('border-primary');
+    
+        const files = event.dataTransfer.files;
+        if (files && files[0]) {
+            document.getElementById('photo').files = files;
+            ShowPreview(document.getElementById('photo'));
+        }
+    }
+    
+    // Reset form
+    function resetForm() {
+        document.getElementById('admissionForm').reset();
+        document.getElementById('photoViewer').src = "{% static 'image/upload.png' %}";
+        document.getElementById('success-message').classList.add('d-none');
+        document.getElementById('error-message').classList.add('d-none');
+    }
+    
+    // Placeholder (if you use age fields later)
+    function getAge() {}
+    function resetAgeDiv() {}
+    </script>
+    
+{% endblock %}

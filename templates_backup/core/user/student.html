@@ -1,0 +1,324 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load widget_tweaks %}
+{% block extra_css %} 
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
+
+<style>
+    .custom-height {
+        height: 50px; /* Adjust the height as needed */
+      }
+      .required-field::after {
+        content: " *";
+        color: red;
+    }
+</style>
+{% endblock extra_css %} 
+
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+    {% include 'pageinfo.html' %}
+    
+    <div class="card">
+
+        <div class="p-4" >
+            
+            <form method="post" enctype="multipart/form-data" autocomplete="">
+            {% csrf_token %}
+            <div class="d-flex border-bottom py-2 justify-content-between">
+                <h3>Student Registration</h3>
+                <div class="d-flex gap-1 ">
+                    <a class="btn btn-secondary d-none d-sm-block"  href="/static/doc/student_sample.xlsx" download>Sample Download</a>
+
+                  <a href="#" class="btn btn-danger d-none d-sm-block" data-bs-toggle="modal" data-bs-target="#modalCenter" >
+                    Bulk Registration
+                  </a>
+      
+                  <a
+                    href="{% url 'list_student' %}"
+                    class="btn btn-warning"
+                  >
+                    Student List
+                  </a>
+                </div>
+              </div>
+
+
+            
+            <div><p class="py-2 fw-bold" >Personal Information</p></div>
+            <!-- CustomUser fields -->
+
+            
+
+            <div class="row mt-3" >
+                <div class="col-md-6 form-group">
+                    <label for="{{ form.avatar.id_for_label }}">Avatar:</label>
+                    {{ form.avatar|add_class:"form-control" }}
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="{{ form.phone_number.id_for_label }}">Student Phone Number:</label>
+                    {{ form.phone_number|add_class:"form-control" }}
+                </div>
+            </div>
+
+            <div class="row  mt-3" >
+                <div class="col-md-6 form-group">
+                    <label class="required-field  text-danger" for="{{ form.name.id_for_label }}">Name:</label>
+                    {{ form.name|add_class:"form-control"|attr:"required" }}
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="{{ form.gender.id_for_label }}">Gender:</label>
+                    {{ form.gender|add_class:"form-control" }}
+                </div>
+            </div>
+
+            <div class="row  mt-3" >
+                <div class="col-md-6 form-group">
+                    <label for="date">Date of Birth:</label>
+                    {{ form.dob|attr:"type:date"|add_class:"form-control" }}
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="{{ form.nid.id_for_label }}">NID:</label>
+                    {{ form.nid|add_class:"form-control" }}
+                </div>
+            </div>
+
+            <div class="row  mt-3" >
+                <div class="col-md-6 form-group">
+                    <label for="{{ form.religion.id_for_label }}">Religion</label>
+                    {{ form.religion|add_class:"form-control" }}
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="{{ form.blood_group.id_for_label }}">Blood Group:</label>
+                    {{ form.blood_group|add_class:"form-control" }}
+                </div>
+            </div>
+
+            <div class="row  mt-3" >
+                <div class="col-md-6 form-group">
+                    <label for="{{ form.email.id_for_label }}">Email:</label>
+                    {{ form.email|add_class:"form-control" }}
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="{{ form.rfid.id_for_label }}">RFID:</label>
+                    {{ form.rfid|add_class:"form-control" }}
+                </div>
+                
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-md-6 form-group">
+                  <label for="{{ form.present_address.id_for_label }}">Present Address</label>
+                  {{ form.present_address|add_class:"form-control custom-height" }}
+                </div>
+                <div class="col-md-6 form-group">
+                  <label for="{{ form.permanent_address.id_for_label }}">Permanent Address:</label>
+                  {{ form.permanent_address|add_class:"form-control custom-height" }}
+                </div>
+              </div>
+
+            <div><p class="py-2 fw-bold" >Academic Information</p></div>
+            
+            
+
+            <div class="row  mt-3" >
+                <div class="col-md-6 form-group">
+                    <label class="required-field  text-danger" for="{{ form.class_id.id_for_label }}">Class:</label>
+                    {{ form.class_id|add_class:"form-control"|attr:"required" }}
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="{{ form.roll_no.id_for_label }}">Roll No:</label>
+                    {{ form.roll_no|add_class:"form-control" }}
+                </div>
+            </div>
+
+            <div class="row  mt-3" >
+                <div class="col-md-6 form-group">
+                    <label class="required-field text-warning" for="{{ form.user_id.id_for_label }}">Student ID:</label>
+                    {{ form.user_id|add_class:"form-control" }}
+                </div>
+
+                <div class="col-md-6 form-group">
+                    <label class="required-field  text-danger" for="{{ form.admission_year_id.id_for_label }}">Admission Year:</label>
+                    {{ form.admission_year_id|add_class:"form-control"|attr:"required" }}
+                </div>
+                
+            </div>
+
+            <div class="row  mt-3" >
+                <div class="col-md-6 form-group">
+                    <label class="text-warning" for="{{ form.academic_session_year.id_for_label }}">Academic Session:</label>
+                    {{ form.academic_session_year|add_class:"form-control" }}
+                </div>
+                
+            </div>
+
+
+            <div><p class="py-2 fw-bold" >Admission Information</p></div>
+            
+            
+
+            <div class="row  mt-3" >
+                <div class="col-md-6 form-group">
+                    <label for="{{ form.class_id.id_for_label }}">Date:</label>
+                    {{ form.admission_date|attr:"type:date"|add_class:"form-control" }}
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="{{ form.tc_no.id_for_label }}">Tc No:</label>
+                    {{ form.tc_no|add_class:"form-control" }}
+                </div>
+            </div>
+
+            <div class="row  mt-3" >
+                <div class="col-md-6 form-group">
+                    <label for="{{ form.birth_certificate_no.id_for_label }}">Birth Certificate:</label>
+                    {{ form.birth_certificate_no|add_class:"form-control" }}
+                </div>
+
+                <div class="col-md-6 form-group">
+                    <label for="{{ form.nationality.id_for_label }}">Nationality:</label>
+                    {{ form.nationality|add_class:"form-control" }}
+                </div>
+                
+            </div>
+
+            <div><p class="py-2 fw-bold" >Guardian Information</p></div>
+
+            <div class="row  mt-3" >
+                <div class="col-md-6 form-group">
+                    <label for="{{ form.parent_id.id_for_label }}">Parent:</label>
+                    {{ form.parent_id|add_class:"form-control" }}
+                </div>
+                <div class="col-md-6 form-group">
+                    <label class="required-field  text-danger" for="{{ form.guardian_name.id_for_label }}">Guardian Name:</label>
+                    {{ form.guardian_name|add_class:"form-control"|attr:"required" }}
+                </div>
+            </div>
+
+            <div class="row  mt-3" >
+                <div class="col-md-6 form-group">
+                    <label for="{{ form.relation.id_for_label }}">Relation:</label>
+                    {{ form.relation|add_class:"form-control" }}
+                </div>
+                <div class="col-md-6 form-group">
+                    <label class="required-field  text-warning" for="{{ form.guardian_phone_number.id_for_label }}">Guardian Phone Number:</label>
+                    {{ form.guardian_phone_number|add_class:"form-control" }}
+                </div>
+            </div>
+
+            <div class="row  mt-3" >
+                <div class="col-md-6 form-group">
+                    <label for="{{ form.father_name.id_for_label }}">Father Name:</label>
+                    {{ form.father_name|add_class:"form-control" }}
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="{{ form.father_mobile_no.id_for_label }}">Father Phone Number:</label>
+                    {{ form.father_mobile_no|add_class:"form-control" }}
+                </div>
+            </div>
+
+            <div class="row  mt-3" >
+                <div class="col-md-6 form-group">
+                    <label for="{{ form.mother_name.id_for_label }}">Mother Name:</label>
+                    {{ form.father_name|add_class:"form-control" }}
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="{{ form.mother_mobile_no.id_for_label }}">Mother Phone Number:</label>
+                    {{ form.mother_mobile_no|add_class:"form-control" }}
+                </div>
+            </div>
+
+            <div class="row  mt-3" >
+                <div class="col-md-6 form-group">
+                    <label for="{{ form.guardian_occupation.id_for_label }}">Guardian Occupation:</label>
+                    {{ form.guardian_occupation|add_class:"form-control" }}
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="{{ form.guardian_nid.id_for_label }}">Guardian NID:</label>
+                    {{ form.guardian_nid|add_class:"form-control" }}
+                </div>
+            </div>
+
+            {% if form.errors %}
+                <div class="alert alert-danger">
+                    <strong>Error:</strong> Please correct the following errors.
+                    <ul>
+                        {% for field in form %}
+                            {% if field.errors %}
+                                <li>{{ field.label }}: {{ field.errors|join:", " }}</li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+                            
+            <button type="submit" class="btn btn-primary my-4">Submit</button>
+        </form>
+        </div>
+    </div>
+ 
+  
+</div>
+<!-- end: Content -->
+
+<!-- Modal -->
+<form method="post" action="{% url 'student_import_data' %}" enctype="multipart/form-data" >
+    {% csrf_token %}
+    <div class="modal" id="modalCenter" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="modalCenterTitle">Bulk Registration</h5>
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            <div class="row">
+                <div class="col mb-0">
+                <label  class="form-label">Submit File</label>
+                <input
+                    type="file" accept=".xls,.xlsx"
+                    class="form-control" name="file" required />
+                </div>
+            </div>
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+                Close
+            </button>
+            
+            <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        </div>
+        </div>
+    </div>
+</form>
+{% endblock content %} 
+{% block extra_javascript %} 
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Initialize the Bootstrap 5 date picker
+        $('.datepicker').datepicker({
+            format: 'dd/mm/yyyy', // Set the desired format here
+            autoclose: true, // Close the datepicker when a date is selected
+            todayHighlight: true // Highlight today's date
+        });
+
+        // Prevent form submission when pressing Enter in the datepicker input
+        $('.datepicker').keydown(function (e) {
+            e.preventDefault();
+            return false;
+        });
+    });
+</script>
+
+
+{% endblock extra_javascript%}

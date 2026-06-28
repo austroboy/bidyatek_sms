@@ -1,0 +1,304 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load widget_tweaks %} 
+{% block extra_css %}
+
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css"
+/>
+<style>
+  .required-field::after {
+    content: " *";
+    color: red;
+}
+
+</style>
+{% endblock extra_css %} {% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+
+  <div class="card">
+    <div class="p-4">
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="d-flex border-bottom py-2 justify-content-between">
+          <h3>Teacher Registration</h3>
+          <div class="d-flex gap-1">
+            <a
+              class="btn btn-secondary d-none d-sm-block"
+              href="/static/doc/teacher_sample.xlsx"
+              download
+              >Sample Download</a
+            >
+            <a
+              href="#"
+              class="btn btn-danger d-none d-sm-block"
+              data-bs-toggle="modal"
+              data-bs-target="#modalCenter"
+            >
+              Bulk Registration
+            </a>
+
+            <a href="{% url 'list_teacher' %}" class="btn btn-warning">
+              Teacher List
+            </a>
+          </div>
+        </div>
+
+        <div><p class="py-2 fw-bold">Personal Information</p></div>
+        
+        <!-- User Registration Fields -->
+        <div class="row mt-3">
+          <div class="col-md-6 form-group">
+            <label for="{{ form.avatar.id_for_label }}">Avatar:</label>
+          {{ form.avatar|add_class:"form-control" }}
+          </div>
+          <div class="col-md-6 form-group">
+            <label class="required-field  text-danger" for="{{ form.phone_number.id_for_label }}"
+              >Phone Number:</label
+            >
+            {{ form.phone_number|add_class:"form-control"|attr:"required" }}
+          </div>
+        </div>
+
+        <div class="row mt-3">
+          <div class="col-md-6 form-group">
+            <label class="required-field  text-danger" for="{{ form.name.id_for_label }}">Name:</label>
+            {{ form.name|add_class:"form-control"|attr:"required" }}
+          </div>
+          <div class="col-md-6 form-group">
+            <label for="{{ form.gender.id_for_label }}">Gender:</label>
+            {{ form.gender|add_class:"form-control" }}
+          </div>
+        </div>
+
+        <div class="row mt-3">
+          <div class="col-md-6 form-group">
+            <label for="{{ form.blood_group.id_for_label }}"
+              >Blood Group:</label
+            >
+            {{ form.blood_group|add_class:"form-control" }}
+          </div>
+          <div class="col-md-6 form-group">
+            <label for="{{ form.email.id_for_label }}">Email:</label>
+            {{ form.email|add_class:"form-control" }}
+          </div>
+        </div>
+
+        <div class="row mt-3">
+          <div class="col-md-6 form-group">
+            <label for="{{ form.nid.id_for_label }}">NID:</label>
+            {{ form.nid|add_class:"form-control" }}
+          </div>
+          <div class="col-md-6 form-group">
+            <label for="{{ form.dob.id_for_label }}">Date of Birth:</label>
+            {{ form.dob|attr:"type:date"|add_class:"form-control" }}
+          </div>
+        </div>
+
+        <div class="row mt-3">
+          <div class="col-md-6 form-group">
+            <label for="{{ form.rfid.id_for_label }}"
+              >RFID:</label
+            >
+            {{ form.rfid|add_class:"form-control" }}
+          </div>
+
+          <div class="col-md-6 form-group">
+            <label for="{{ form.religion.id_for_label }}">Religion:</label>
+            {{ form.religion|add_class:"form-control" }}
+          </div>
+        </div>
+
+        <!-- Teacher Profile Fields -->
+        <div class="row mt-3">
+          <div class="col-md-6 form-group">
+            <label for="{{ profile_form.fathers_name.id_for_label }}"
+              >Father's Name:</label
+            >
+            {{ profile_form.fathers_name|add_class:"form-control" }}
+          </div>
+          <div class="col-md-6 form-group">
+            <label for="{{ profile_form.mothers_name.id_for_label }}"
+              >Mother's Name:</label
+            >
+            {{ profile_form.mothers_name|add_class:"form-control" }}
+          </div>
+        </div>
+
+        <div class="row mt-3">
+          <div class="col-md-6 form-group">
+            <label for="{{ profile_form.marital_status.id_for_label }}"
+              >Marital Status:</label
+            >
+            {{ profile_form.marital_status|add_class:"form-control" }}
+          </div>
+
+          <div class="col-md-6 form-group">
+            <label for="{{ profile_form.spouse_name.id_for_label }}"
+              >Spouse's Name:</label
+            >
+            {{ profile_form.spouse_name|add_class:"form-control" }}
+          </div>
+        </div>
+
+        <div class="row mt-3">
+          <div class="col-md-6 form-group">
+            <label for="{{ profile_form.spouse_phone_number.id_for_label }}"
+              >Spouse's Phone Number:</label
+            >
+            {{ profile_form.spouse_phone_number|add_class:"form-control" }}
+          </div>
+
+          <div class="col-md-6 form-group">
+            <label for="{{ profile_form.children_no.id_for_label }}"
+              >Number of Children:</label
+            >
+            {{ profile_form.children_no|add_class:"form-control" }}
+          </div>
+        </div>
+
+        <div><p class="py-2 fw-bold">Employee Information</p></div>
+
+        <div class="row mt-3">
+          <div class="col-md-6 form-group">
+            <label class="required-field  text-danger" for="{{ form.user_id.id_for_label }}"
+              >Teacher ID Number:</label
+            >
+            {{ form.user_id|add_class:"form-control"|attr:"required" }}
+          </div>
+
+          <div class="col-md-6 form-group">
+            <label for="{{ profile_form.joining_date.id_for_label }}"
+              >Joining Date:</label
+            >
+            {{profile_form.joining_date|attr:"type:date"|add_class:"form-control"}}
+          </div>
+        </div>
+        <div class="row mt-3">
+          <div class="col-md-6 form-group">
+            <label for="{{ profile_form.qualification.id_for_label }}"
+              >Qualification:</label
+            >
+            {{ profile_form.qualification|add_class:"form-control" }}
+          </div>
+
+          <div class="col-md-6 form-group">
+            <label for="{{ profile_form.designation.id_for_label }}"
+              >Designation:</label
+            >
+            {{ profile_form.designation|add_class:"form-control" }}
+          </div>
+        </div>
+
+        <div class="row mt-3">
+          
+          <div class="col-md-12 form-group">
+            <label for="{{ profile_form.employee_type.id_for_label }}"
+              >Employee Type:</label
+            >
+            {{ profile_form.employee_type|add_class:"form-control" }}
+          </div>
+        </div>
+
+        <div><p class="py-2 fw-bold">Contact Information</p></div>
+
+        <div class="row mt-3">
+          <div class="col-md-6 form-group">
+            <label for="{{ form.permanent_address.id_for_label }}"
+              >Permanent Address:</label
+            >
+            {{ form.permanent_address|attr:"rows:'2'"|add_class:"form-control"}}
+          </div>
+
+          <div class="col-md-6 form-group">
+            <label for="{{ form.present_address.id_for_label }}"
+              >Present Address:</label
+            >
+            {{ form.present_address|attr:"rows:'2'"|add_class:"form-control" }}
+          </div>
+        </div>
+
+        
+        {% if form.errors %}
+        <div class="alert alert-danger">
+          <strong>Error:</strong> Please correct the following errors.
+          <ul>
+            {% for field in form %} {% if field.errors %}
+            <li>{{ field.label }}: {{ field.errors|join:", " }}</li>
+            {% endif %} {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-primary my-4">Submit</button>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- end: Content -->
+
+<!-- Modal -->
+<form
+  method="post"
+  action="{% url 'teacher_import_data' %}"
+  enctype="multipart/form-data"
+>
+  {% csrf_token %}
+  <div class="modal" id="modalCenter" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalCenterTitle">Bulk Registration</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col mb-0">
+              <label for="emailWithTitle" class="form-label">Submit File</label>
+              <input type="file" class="form-control" name="file" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+            Close
+          </button>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+{% endblock content %} 
+{% block extra_javascript %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+<script>
+  $(document).ready(function () {
+    // Initialize the Bootstrap 5 date picker
+    $(".datepicker").datepicker({
+      format: "dd/mm/yyyy", // Set the desired format here
+      autoclose: true, // Close the datepicker when a date is selected
+      todayHighlight: true, // Highlight today's date
+    });
+
+    // Prevent form submission when pressing Enter in the datepicker input
+    $(".datepicker").keydown(function (e) {
+      e.preventDefault();
+      return false;
+    });
+  });
+</script>
+
+{% endblock extra_javascript%}

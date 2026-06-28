@@ -1,0 +1,302 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="light-style layout-menu-fixed layout-compact" dir="ltr" data-theme="theme-default" data-assets-path="../assets/" data-template="vertical-menu-template-free">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+    <title>School Layout</title>
+    <meta name="description" content="" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Protest+Guerrilla&amp;family=Rouge+Script&amp;display=swap" rel="stylesheet">
+    <style>
+        .transcript_wrapper h1,
+        .transcript_wrapper h3,
+        .transcript_wrapper h2,
+        .transcript_wrapper p {
+            margin-bottom: 0 !important;
+        }
+
+        .transcript_wrapper {
+            width: 210mm;
+            height: 297mm;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .transcript_wrapper .controller_sign {
+            flex-grow: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 55px;
+            text-align: center;
+        }
+
+        .transcript_border {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            /* border: 1px solid black; */
+        }
+
+        .transcript_border img {
+            width: 100%;
+            height: 100%;
+            /* object-fit: contain; */
+            /* display: none; */
+        }
+
+        .transcript_heading h1 {
+            font-size: 17px;
+        }
+
+        .transcript_wrapper h2 {
+            font-size: 16px !important;
+            font-weight: bold;
+            text-align: center;
+            margin: 10px 0 !important;
+        }
+
+        /* letter grade row */
+        .transcript_letter_grade {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            justify-content: space-between;
+        }
+
+        .transcript_letter_grade .logo {
+            text-align: center;
+        }
+
+        .transcript_letter_grade .logo h3 {
+            text-decoration: underline;
+            font-size: 17px;
+            margin-top: 10px !important;
+        }
+
+        .transcript_letter_grade .grade {
+            margin-left: auto;
+        }
+
+        .transcript_letter_grade .grade table {
+            border-collapse: collapse;
+            border: 1px solid rgb(88, 88, 88);
+            text-align: center;
+            font-size: 11px;
+            width: 150px;
+        }
+
+        .transcript_letter_grade .grade table tr th,
+        .transcript_letter_grade .grade table tr td {
+            border: 1px solid rgb(88, 88, 88);
+        }
+
+        .transcript_letter_grade .serial {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .transcript_wrapper .student_details {
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .transcript_wrapper .center_details {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .transcript_wrapper .student_details table tr th {
+            padding-right: 10px;
+            font-weight: 700;
+        }
+
+        .transcript_wrapper .student_details table tr td {
+            font-family: "Rouge Script", cursive;
+            font-size: 22px;
+            font-style: italic;
+            line-height: 28px;
+        }
+
+        .transcript_wrapper .center_details table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .transcript_wrapper .center_details table tr th {
+            padding-right: 10px;
+            font-weight: 700;
+        }
+
+        .transcript_wrapper .center_details table tr td {
+            font-family: "Rouge Script", cursive;
+            font-size: 22px;
+            font-style: italic;
+            line-height: 28px;
+        }
+
+        /* subject wise result table */
+        .transcript_wrapper .subject_wise_result table {
+            border: 1px solid black;
+            width: 100%;
+            text-align: center;
+            border-collapse: collapse;
+        }
+
+        .transcript_wrapper .subject_wise_result table tr th,
+        .transcript_wrapper .subject_wise_result table tr td {
+            border: 1px solid black;
+            padding: 7px 0;
+        }
+
+        .transcript_wrapper .subject_wise_result table tr:nth-last-of-type(1) td {
+            padding: 0;
+        }
+
+        .transcript_wrapper .subject_wise_result table tr:nth-last-of-type(2) td {
+            padding: 0;
+        }
+
+        @media print {
+            @page {
+                size: auto;
+            }
+            body {
+                -webkit-print-color-adjust: exact;
+            }
+
+
+        }
+    </style>
+</head>
+
+<body>
+    <div class="transcript_wrapper">
+        <div class="transcript_border">
+            <img src="{% static 'img/Frame.svg' %}" alt="transcript bg">
+        </div>
+        <div class="transcript_heading">
+            <h1>{{ transcript.institute_name }}</h1>
+            <p>BANGLADESH</p>
+        </div>
+        <h2 class="title">{{ transcript.exam_name }}</h2>
+        <div class="transcript_letter_grade">
+            <div>
+                <p>Serial No: {{ transcript.serial_no }}</p>
+                <p>{{ transcript.additional_serial_no }}</p>
+            </div>
+            <div>
+                <img src="{% static 'img/school.png' %}" alt="School Logo" style="width: 100px;">
+                <h3>ACADEMIC TRANSCRIPT</h3>
+            </div>
+            <div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Letter Grade</th>
+                            <th>Class Interval</th>
+                            <th>Grade Point</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for grade in grades %}
+                        <tr>
+                            <td>{{ grade.letter }}</td>
+                            <td>{{ grade.interval }}</td>
+                            <td>{{ grade.point }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="student_details">
+            <table>
+                <tr>
+                    <th>Student Name</th>
+                    <td>{{ transcript.student_name }}</td>
+                </tr>
+                <tr>
+                    <th>Father's Name</th>
+                    <td>{{ transcript.father_name }}</td>
+                </tr>
+                <tr>
+                    <th>Mother's Name</th>
+                    <td>{{ transcript.mother_name }}</td>
+                </tr>
+                <tr>
+                    <th>Name of Institution</th>
+                    <td>{{ transcript.institute_name }}</td>
+                </tr>
+            </table>
+        </div>
+        <div class="center_details">
+            <table>
+                <tr>
+                    <th>Name of Center</th>
+                    <td>{{ transcript.center_name }}</td>
+                    <th>Type</th>
+                    <td>{{ transcript.student_type }}</td>
+                </tr>
+                <tr>
+                    <th>Roll No.</th>
+                    <td>{{ transcript.roll_no }}</td>
+                    <th>Registration No.</th>
+                    <td>{{ transcript.registration_no }}</td>
+                </tr>
+                <tr>
+                    <th>Group</th>
+                    <td>{{ transcript.group }}</td>
+                    <th>Date of Birth</th>
+                    <td>{{ transcript.date_of_birth }}</td>
+                </tr>
+            </table>
+        </div>
+        <div class="subject_wise_result">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Sl. No.</th>
+                        <th>Name of Subjects</th>
+                        <th>Letter Grade</th>
+                        <th>Grade Point</th>
+                        <th>GPA <br>(Without Optional)</th>
+                        <th>Final GPA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for subject in transcript.subjects %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ subject.name }}</td>
+                        <td>{{ subject.letter_grade }}</td>
+                        <td>{{ subject.grade_point }}</td>
+                        {% if forloop.first %}
+                        <td rowspan="{{ transcript.subjects|length }}">{{ transcript.gpa_without_optional }}</td>
+                        <td rowspan="{{ transcript.subjects|length }}">{{ transcript.final_gpa }}</td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="controller_sign">
+            <div>
+                <p>Date of Publication of Result: {{ transcript.publication_date }}</p>
+            </div>
+            <div>
+                <p>------------------------</p>
+                <p>Controller</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

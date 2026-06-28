@@ -1,0 +1,79 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+
+  <div class="row justify-content-center">
+    <div class="col-md-7">
+
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="{% url 'budget_dashboard' %}" style="color:#2D6A73;">Budget</a></li>
+          <li class="breadcrumb-item active">Create New Budget Year</li>
+        </ol>
+      </nav>
+
+      <div class="card shadow-sm">
+        <div class="card-header py-3" style="background:linear-gradient(135deg,#2D6A73,#1E4D55);">
+          <h5 class="mb-0 text-white">
+            <i class='bx bx-plus-circle me-2'></i>Create New Budget Year
+          </h5>
+        </div>
+        <div class="card-body p-4">
+          <form method="post">
+            {% csrf_token %}
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Budget Title <span class="text-danger">*</span></label>
+              {{ form.title }}
+              {% if form.title.errors %}
+                <div class="text-danger small">{{ form.title.errors }}</div>
+              {% endif %}
+              <div class="form-text">e.g. "Budget 2025-2026" or "Academic Year 2025"</div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">Year Start <span class="text-danger">*</span></label>
+                {{ form.year_start }}
+                {% if form.year_start.errors %}
+                  <div class="text-danger small">{{ form.year_start.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">Year End <span class="text-danger">*</span></label>
+                {{ form.year_end }}
+                {% if form.year_end.errors %}
+                  <div class="text-danger small">{{ form.year_end.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-semibold">Notes</label>
+              {{ form.notes }}
+            </div>
+
+            <!-- Info box -->
+            <div class="alert alert-info border-0 py-2 mb-4" style="background:rgba(45,106,115,0.08);">
+              <i class='bx bx-info-circle me-1' style="color:#2D6A73;"></i>
+              <small style="color:#2D6A73;">The budget will be saved as <strong>DRAFT</strong>. You can add income and expense categories on the next page, then activate it when ready.</small>
+            </div>
+
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-primary">
+                <i class='bx bx-save me-1'></i>Create Budget & Add Categories
+              </button>
+              <a href="{% url 'budget_dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

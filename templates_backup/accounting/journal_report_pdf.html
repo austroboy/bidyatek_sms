@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Journal Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            font-size: 12px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 20px;
+        }
+        .filter-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .filter-details {
+            margin-bottom: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            page-break-inside: auto;
+        }
+        tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f5f5f5;
+            padding: 8px;
+            text-align: left;
+            font-weight: bold;
+        }
+        td {
+            padding: 8px;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .text-success {
+            color: #28a745;
+        }
+        .text-danger {
+            color: #dc3545;
+        }
+        .journal-header {
+            background-color: #e9ecef;
+            font-weight: bold;
+        }
+        .total-row {
+            font-weight: bold;
+            background-color: #f8f9fa;
+        }
+        .balance-status {
+            text-align: center;
+            margin: 20px 0;
+            font-weight: bold;
+            color: {% if is_balanced %}#28a745{% else %}#dc3545{% endif %};
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: right;
+            font-size: 10px;
+        }
+        @media print {
+            body {
+                margin: 0;
+                padding: 15px;
+            }
+        }
+        .powered-by{
+            text-align: right;
+            color: #28a745;   /* green */
+            font-weight: 600;
+            margin-top: 10px;
+            font-size: 12px;
+          }          
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Journal Report</h1>
+    </div>
+    
+    <div class="filter-info">
+        <div class="filter-details"><strong>Period:</strong> {{ from_date }} to {{ to_date }}</div>
+        <div class="filter-details"><strong>Generated On:</strong> {% now "Y-m-d H:i" %}</div>
+    </div>
+
+    {% if journal_data %}
+        {% for journal in journal_data %}
+        <table>
+            <tr class="journal-header">
+                <td colspan="5">
+                    <strong>Voucher No:</strong> {{ journal.voucher_no }} | 
+                    <strong>Date:</strong> {{ journal.date }}
+                </td>
+            </tr>
+            <tr>
+                <th width="50%">Account</th>
+                <th width="15%" class="text-right">Debit</th>
+                <th width="15%" class="text-right">Credit</th>
+            </tr>
+            
+            {% for debit in journal.debits %}
+            <tr>
+                <td>{{ debit.ledger.name }}</td>
+                <td class="text-right text-success">{{ debit.amount|floatformat:2 }}</td>
+                <td class="text-right">-</td>
+            </tr>
+            {% endfor %}
+            
+            {% for credit in journal.credits %}
+            <tr>
+                <td>{{ credit.ledger.name }}</td>
+                <td class="text-right">-</td>
+                <td class="text-right text-danger">{{ credit.amount|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+            
+            <tr class="total-row">
+                <td><strong>Journal Total</strong></td>
+                <td class="text-right text-success"><strong>{{ journal.debit_total|floatformat:2 }}</strong></td>
+                <td class="text-right text-danger"><strong>{{ journal.credit_total|floatformat:2 }}</strong></td>
+            </tr>
+        </table>
+        {% endfor %}
+        
+        <table>
+            <tr class="total-row">
+                <td><strong>Grand Total</strong></td>
+                <td class="text-right text-success"><strong>{{ total_debit|floatformat:2 }}</strong></td>
+                <td class="text-right text-danger"><strong>{{ total_credit|floatformat:2 }}</strong></td>
+            </tr>
+        </table>
+        
+        <div class="balance-status">
+            {% if is_balanced %}
+                Debits and Credits are Balanced ✓
+            {% else %}
+                Debits and Credits are NOT Balanced ✗
+            {% endif %}
+        </div>
+    {% else %}
+        <table>
+            <tr>
+                <td colspan="5" class="text-center">No journal entries found for the selected period</td>
+            </tr>
+        </table>
+    {% endif %}
+    <p class="powered-by">Powered by BIDYATek</p>
+</body>
+</html>

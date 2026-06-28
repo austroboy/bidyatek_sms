@@ -1,0 +1,217 @@
+{% extends 'partials/base.html' %}
+{% load humanize custom_tags %}
+
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+    <h4 class="py-3 mb-4">Student Head-wise Fees Report</h4>
+
+    <form method="GET" class="mb-4">
+        <!-- Filter Form -->
+        <div class="row g-3">
+            <!-- Date and Head -->
+            <div class="col-md-3">
+                <label>From Date:</label>
+                <input type="date" name="from_date" class="form-control" value="{{ request.GET.from_date }}" required>
+            </div>
+            <div class="col-md-3">
+                <label>To Date:</label>
+                <input type="date" name="to_date" class="form-control" value="{{ request.GET.to_date }}" required>
+            </div>
+            <div class="col-md-3">
+                <label>Head:</label>
+                <select name="head" class="form-select" required>
+                    <option value="">Select Head</option>
+                    {% for head in heads %}
+                    <option value="{{ head.id }}" {% if selected_head.id == head.id %}selected{% endif %}>{{ head.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label>Search Student:</label>
+                <input type="text" name="search" class="form-control" value="{{ search_term }}" placeholder="Name or Roll No">
+            </div>
+        </div>
+        <div class="row mt-2">
+            <!-- Class, Section, Group, Shift, Version -->
+            <div class="col-md-2">
+                <label>Class:</label>
+                <select name="class" class="form-select">
+                    <option value="">All</option>
+                    {% for class in classes %}
+                    <option value="{{ class.id }}" {% if selected_class == class.id|stringformat:"s" %}selected{% endif %}>{{ class.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label>Section:</label>
+                <select name="section" class="form-select">
+                    <option value="">All</option>
+                    {% for section in sections %}
+                    <option value="{{ section.id }}" {% if selected_section == section.id|stringformat:"s" %}selected{% endif %}>{{ section.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label>Group:</label>
+                <select name="group" class="form-select">
+                    <option value="">All</option>
+                    {% for group in groups %}
+                    <option value="{{ group.id }}" {% if selected_group == group.id|stringformat:"s" %}selected{% endif %}>{{ group.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label>Shift:</label>
+                <select name="shift" class="form-select">
+                    <option value="">All</option>
+                    {% for shift in shifts %}
+                    <option value="{{ shift.id }}" {% if selected_shift == shift.id|stringformat:"s" %}selected{% endif %}>{{ shift.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label>Version:</label>
+                <select name="version" class="form-select">
+                    <option value="">All</option>
+                    <option value="Bangla" {% if selected_version == "Bangla" %}selected{% endif %}>Bangla</option>
+                    <option value="English" {% if selected_version == "English" %}selected{% endif %}>English</option>
+                </select>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Filter</button>
+    </form>
+
+    <button onclick="generateReport('pdf')" class="btn btn-danger mb-3">
+        <i class="fas fa-file-pdf"></i> Download PDF
+    </button>
+    <button onclick="generateReport('excel')" class="btn btn-success mb-3">
+        <i class="fas fa-file-excel"></i> Download Excel
+    </button>
+
+    {% if page_obj %}
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>SL NO</th>
+                    <th>Student</th>
+                    <th>Roll No</th>
+                    <th>Class</th>
+                    <th>Group</th>
+                    <th>Section</th>
+                    <th>Shift</th>
+                    <th>Version</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in page_obj.object_list %}
+                <tr>
+                    <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
+                    <td>{{ student.student.student_field.name }}</td>
+                    <td>{{ student.roll_no }}</td>
+                    <td>{{ student.class }}</td>
+                    <td>{{ student.group }}</td>
+                    <td>{{ student.section }}</td>
+                    <td>{{ student.shift }}</td>
+                    <td>{{ student.version }}</td>
+                    <td>{{ student.amount|intcomma }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="table-active">
+                    <td colspan="8" class="text-end"><strong>Grand Total</strong></td>
+                    <td>{{ grand_total|default:0|intcomma }}</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <!-- Pagination Controls -->
+        <div class="pagination">
+            <span class="step-links">
+                {% with request.GET.urlencode as query_string %}
+                    {% if page_obj.has_previous %}
+                        <a href="?{{ query_string|cut:'page='|add:'&page=1' }}">&laquo; first</a>
+                        <a href="?{{ query_string|cut:'page='|add:'&page='|add:page_obj.previous_page_number|stringformat:'s' }}">previous</a>
+                    {% endif %}
+
+                    <span class="current">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                    </span>
+
+                    {% if page_obj.has_next %}
+                        <a href="?{{ query_string|cut:'page='|add:'&page='|add:page_obj.next_page_number|stringformat:'s' }}">next</a>
+                        <a href="?{{ query_string|cut:'page='|add:'&page='|add:page_obj.paginator.num_pages|stringformat:'s' }}">last &raquo;</a>
+                    {% endif %}
+                {% endwith %}
+
+            </span>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">No data found for the selected filters</div>
+    {% endif %}
+</div>
+
+<script>
+    function generateReport(type) {
+        const form = document.querySelector('form');
+        const formData = new FormData(form);
+        const params = new URLSearchParams(formData);
+    
+        const fromDate = formData.get('from_date');
+        const toDate = formData.get('to_date');
+        const head = formData.get('head');
+
+        console.log('From Date:', fromDate);
+        console.log('To Date:', toDate);
+        console.log('Head:', head);
+    
+        if (!fromDate || !toDate || !head) {
+            alert('Please select date range and head');
+            return;
+        }
+    
+        const url = type === 'pdf'
+            ? "{% url 'student_head_report_pdf' %}"
+            : "{% url 'student_head_report_excel' %}";
+    
+        // ✅ Simply redirect the browser to initiate file download
+        window.location.href = url + '?' + params.toString();
+    }
+
+function checkStatus(taskId, btn, type) {
+    fetch(`/check-task-status/?task_id=${taskId}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'SUCCESS') {
+            window.location.href = `/download-report/?file=${data.result}&t=${Date.now()}`;
+            resetButton(btn, type);
+        } else if (data.status === 'FAILURE') {
+            btn.innerHTML = 'Error: ' + (data.error || 'Unknown error');
+            resetButton(btn, type);
+        } else if (['PENDING', 'STARTED'].includes(data.status)) {
+            setTimeout(() => checkStatus(taskId, btn, type), 2000);
+        } else {
+            btn.innerHTML = 'Unexpected status: ' + data.status;
+            resetButton(btn, type);
+        }
+    })
+    .catch(error => {
+        console.error('Status check failed:', error);
+        btn.innerHTML = 'Status check failed';
+        resetButton(btn, type);
+    });
+}
+
+function resetButton(btn, type) {
+    setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = type === 'pdf'
+            ? '<i class="fas fa-file-pdf"></i> Download PDF'
+            : '<i class="fas fa-file-excel"></i> Download Excel';
+    }, 3000);
+}
+</script>
+{% endblock %}

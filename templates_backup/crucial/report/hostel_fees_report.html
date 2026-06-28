@@ -1,0 +1,190 @@
+{% extends 'partials/base.html' %}
+{% block content %}
+
+<style>
+.container {
+    max-width: 90%;
+    margin: auto;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.col-md-6 {
+    flex: 1 1 48%;
+    min-width: 300px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    background: #fff;
+    border-radius: 8px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+}
+
+.table th, .table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+h4 {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.alert-info {
+    margin-top: 20px;
+    padding: 15px;
+}
+
+.filter-header {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 5px;
+}
+</style>
+
+<div class="container">
+    <h2>Hostel Fees Report</h2>
+    
+    <form method="get" class="mb-4">
+        <div class="row">
+            <div class="col-md-3">
+                <input type="date" name="start_date" class="form-control" 
+                       value="{{ start_date|default:'' }}" required>
+            </div>
+            <div class="col-md-3">
+                <input type="date" name="end_date" class="form-control" 
+                       value="{{ end_date|default:'' }}" required>
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Statuses</option>
+                    <option value="paid" {% if status_filter == 'paid' %}selected{% endif %}>Paid</option>
+                    <option value="unpaid" {% if status_filter == 'unpaid' %}selected{% endif %}>Unpaid</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+                {% if start_date and end_date %} 
+                    <div class="mt-2">
+                        <a href="?{{ request.GET.urlencode }}&download=1" class="btn btn-success w-100">Download CSV</a>
+                        <a href="?{{ request.GET.urlencode }}&download_pdf=1" class="btn btn-danger w-100 mt-2">Download PDF</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+
+    {% if error %}
+        <div class="alert alert-danger">
+            {{ error }}
+        </div>
+    {% elif start_date and end_date %}
+        <div class="filter-header">
+            <h4>Filter Criteria</h4>
+            <p><strong>Date Range:</strong> {{ start_date }} to {{ end_date }}</p>
+            <p><strong>Months Included:</strong> {{ fee_months|join:", " }}</p>
+            <p><strong>Status Filter:</strong> {{ status_filter|title }}</p>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <h4>Paid Students ({{ total_paid }})</h4>
+                {% if paid_students %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>SL No</th>
+                                <th>Name</th>
+                                <th>Class</th>
+                                <th>Section</th>
+                                <th>Paid Date</th>
+                                <th>Month</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in paid_students %}
+                                <tr>
+                                    <td>{{ student.serial }}</td>
+                                    <td>{{ student.name }}</td>
+                                    <td>{{ student.class }}</td>
+                                    <td>{{ student.section }}</td>
+                                    <td>{{ student.paid_date }}</td>
+                                    <td>{{ student.selected_month }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                    <div class="alert alert-info">No paid students found in selected range</div>
+                {% endif %}
+            </div>
+
+            <div class="col-md-6">
+                <h4>Unpaid Students ({{ total_unpaid }})</h4>
+                {% if unpaid_students %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>SL No</th>
+                                <th>Name</th>
+                                <th>Class</th>
+                                <th>Section</th>
+                                <th>Amount Due</th>
+                                <th>Month</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in unpaid_students %}
+                                <tr>
+                                    <td>{{ student.serial }}</td>
+                                    <td>{{ student.name }}</td>
+                                    <td>{{ student.class }}</td>
+                                    <td>{{ student.section }}</td>
+                                    <td>{{ student.amount }}</td>
+                                    <td>{{ student.selected_month }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                    <div class="alert alert-info">No unpaid students found in selected range</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mt-4 p-3 bg-light rounded">
+            <h4>Summary</h4>
+            <div class="row">
+                <div class="col-md-4">
+                    <p><strong>Total Unpaid Amount:</strong> {{ total_amount }}</p>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>Total Paid Students:</strong> {{ total_paid }}</p>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>Total Unpaid Students:</strong> {{ total_unpaid }}</p>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            Please select a date range to view the hostel fees report
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

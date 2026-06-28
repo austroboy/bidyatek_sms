@@ -1,0 +1,281 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load widget_tweaks %} 
+{% block extra_css %}
+
+<link
+  rel="stylesheet"
+  href="{% static 'assets/vendor/libs/datatables/datatables.min.css' %}"
+/>
+<style>
+  *:focus {
+    box-shadow: none !important;
+    outline: none !important;
+  }
+  
+  a {
+    color: #369;
+  }
+  
+  .title-text {
+    margin: 2em 0;
+  }
+  
+  .table > tbody > tr > td:nth-child(1) > i {
+    margin-right: 8px;
+    margin-top: 4px;
+  }
+  
+ 
+  
+  .entries {
+    margin-top: 0;
+  }
+  
+  .pagination {
+    margin-top: 0 !important;
+  }
+  
+  .pagination > li > a {
+    background-color: white;
+    color: #4676d7;
+  }
+  
+  .pagination > li > a:focus,
+  .pagination > li > a:hover,
+  .pagination > li > span:focus,
+  .pagination > li > span:hover {
+    color: #036;
+    background-color: #eee;
+    border-color: #ddd;
+  }
+  
+  .pagination > .active > a {
+    color: white;
+    background-color: #4676d7 !important;
+    border: solid 1px #4676d7 !important;
+  }
+  
+  .pagination > .active > a:hover {
+    background-color: #4676d7 !important;
+    border: solid 1px #4676d7;
+  }
+  
+
+</style>
+
+{% endblock extra_css %} {% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+  <div class="card p-4">
+    <form method="post" action="{% url 'report_time_student_attendance' %}" >
+        {% csrf_token %}
+        <div class="row align-items-center">
+          
+          <div class="col-md-2">
+            <div class="mb-3">
+                <label class="col-form-label">Select Class</label>
+                <div class="">
+                    <select class="form-select" name="class_id" required>
+                        <option selected hidden disabled value="">Select Class</option>
+                        {% for class_id in class_list  %}
+                        <option value="{{class_id.id}}">{{class_id}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="mb-3">
+                <label class="form-label" for="validamount">Date</label>
+                <input type="date" class="form-control" id="validamount"
+                    value="" name="date" required>
+                
+            </div>
+        </div>
+
+        
+
+          <div  class="pt-2 col-md-1 text-md-end">
+            <button  type="submit" class="btn btn-primary">Submit</button>
+          </div>
+
+
+          <div style="padding: 0px 4px 4px 4px;"  class="mt-2 col-md-2 border rounded-3 d-flex flex-row  justify-content-between align-content-center ms-auto">
+            <span class="fw-bold pt-2">Present:</span><span class="pt-1 ps-1"><input class="form-control form-control-sm text-center" type="text"
+                    value="{{present_count}}" disabled></span>
+          </div> 
+          <div style="padding: 0px 4px 4px 4px;"  class="mt-2 col-md-2 border rounded-3 d-flex flex-row  justify-content-between align-content-center ms-auto">
+            <span class="fw-bold pt-2">Absent:</span><span class="pt-1 ps-1"><input class="form-control form-control-sm text-center" type="text"
+                    value="{{absent_count}}" disabled></span>
+          </div> 
+          <div style="padding: 0px 4px 4px 4px;"  class="mt-2 col-md-2 border rounded-3 d-flex flex-row  justify-content-between align-content-center ms-auto">
+            <span class="fw-bold pt-2">Date:</span><span class="pt-1"><input class="form-control form-control-sm text-center" type="text"
+                    value="{{search_date}}" disabled></span>
+          </div> 
+        </div>
+
+    </form>
+    
+    <hr>
+
+    <table class="table table-striped table-bordered w-100 pt-2" id="dataTable">
+      <thead class="teal-thead">
+        <tr>
+            <th>#</th>
+            <th>Date</th>
+            <th>Name</th>
+            <th>Roll</th>
+            <th>Status</th>
+            <th>In time</th>
+            <th>Out time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for attendance in attendance_records %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ attendance.attendance_date }}</td>
+            <td>{{ attendance.name.student_field.name }}</td>
+            <td>{{ attendance.name.roll_no }}</td>
+            <td>
+              {% if attendance.status == True  %}
+              <p>Present</p>
+              {% else %}
+              <p>Absent</p>
+              {% endif %}
+            </td>
+              {% if attendance.status == True  %}
+                <td>{{ attendance.created_at|time:"H:i A" }}</td>
+              {% else %}
+              <td class="text-center" >-</td>
+              {% endif %}
+              {% if attendance.status == True  %}
+                {% if attendance.created_at|time:"H:i:s" != attendance.updated_at|time:"H:i:s" %}
+                    <td>{{ attendance.updated_at|time:"H:i A" }}</td>
+                {% else %}
+                    <td class="text-center" >-</td>
+                {% endif %}
+              {% else %}
+              <td class="text-center" >-</td>
+              {% endif %}
+          
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+<!-- end: Content -->
+
+{% endblock content %} 
+
+{% block extra_javascript %}
+<script src="{% static 'assets/vendor/libs/datatables/pdfmake.min.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/datatables/vfs_fonts.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/datatables/datatables.min.js' %}"></script>
+<script>
+  pdfMake.fonts = {
+    Roboto: {
+      normal: 'Roboto-Regular.ttf',
+      bold: 'Roboto-Medium.ttf',
+      italics: 'Roboto-Italic.ttf',
+      bolditalics: 'Roboto-MediumItalic.ttf'
+    },
+    nikosh: {
+      normal: "NikoshBAN.ttf",
+      bold: "NikoshBAN.ttf",
+      italics: "NikoshBAN.ttf",
+      bolditalics: "NikoshBAN.ttf"
+    }
+  };
+</script>
+<script>
+ 
+ // Function to convert a Blob to a Data URL
+ function blobToDataURL(blob, callback) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    callback(e.target.result);
+  };
+  reader.readAsDataURL(blob);
+}
+
+$(document).ready(function() {
+   
+  fetch('{{ institute.institute_logo.url }}')
+    .then(response => response.blob())
+    .then(blob => {
+      // Convert Blob to Data URL
+      blobToDataURL(blob, function(dataURL) {
+        // DataTable initialization
+        let table = new DataTable("#dataTable", {
+          dom: "<'row'<'col-sm-12 col-md-6 mb-3'l><'col-sm-12 col-md-6 mb-3'f>>" +
+            "<'row'<'col-sm-12'tr>>" +
+            "<'row '<'col-sm-12 col-md-5 mt-3'B><'col-sm-12 col-md-7 mt-3'p>>",
+          paging: true,
+          autoWidth: true,
+          buttons: [
+              "excel",
+              {
+                extend: "pdfHtml5",
+                exportOptions: {
+                  columns: ":not(:last-child)", // Exclude the last column
+                },
+                customize: function (doc) {
+                  doc.defaultStyle = {
+                    font: "nikosh",
+                  };
+
+                  // Set the table width to fit the page
+                  var colCount = doc.content[1].table.body[0].length;
+                  var colWidths = [];
+                  for (var i = 0; i < colCount; i++) {
+                    colWidths.push("*");
+                  }
+                  doc.content[1].table.widths = colWidths;
+
+                  // Set page margins
+                  doc.pageMargins = [10, 10, 10, 10];
+
+                  // Center-align the table headers
+                  doc.content[1].table.body[0].forEach(function (header) {
+                    header.alignment = "center";
+                  });
+
+                  // Center-align the table content
+                  doc.content[1].table.body.slice(1).forEach(function (row) {
+                    row.forEach(function (cell) {
+                      cell.alignment = "center";
+                    });
+                  });
+
+                  // Set page orientation to landscape if table is too wide
+                  if (colCount > 5) {
+                    doc.pageOrientation = "landscape";
+                  }
+
+                  // Auto-size columns based on content
+                  doc.content[1].table.body.forEach(function (row, rowIndex) {
+                    row.forEach(function (cell, cellIndex) {
+                      if (rowIndex === 0) {
+                        cell.fillColor = "#1D1E4E";
+                      }
+                    });
+                  });
+                },
+              },
+            ],
+        });
+      });
+    });
+
+
+
+});
+</script>
+{% endblock extra_javascript%}

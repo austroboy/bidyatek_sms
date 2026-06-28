@@ -1,0 +1,121 @@
+{% extends 'admin/base_site.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Review Disbursement Distribution</h2>
+    
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h4>Transaction: {{ transaction.tran_id }}</h4>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info">
+                <h5><i class="fas fa-info-circle"></i> Summary</h5>
+                <p><strong>Student:</strong> {{ transaction.student_profile.student_field.name }}</p>
+                <p><strong>Total Amount:</strong> {{ transaction.amount }} BDT</p>
+                <p><strong>Number of Banks:</strong> {{ transaction.disbursement_data|length }}</p>
+            </div>
+            
+            <h5 class="mt-4">Bank Distribution Details</h5>
+            <table class="table table-bordered table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Bank</th>
+                        <th>Amount (BDT)</th>
+                        <th>Fee Heads</th>
+                        <th>SSLCommerz Reference ID</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in transaction.disbursement_data %}
+                    <tr>
+                        <td>
+                            <strong>{{ item.bank_name }}</strong><br>
+                            <small class="text-muted">Bank Account ID: {{ item.bank_account_id }}</small>
+                        </td>
+                        <td class="text-end">
+                            <span class="badge bg-primary fs-6">{{ item.amount }} BDT</span>
+                        </td>
+                        <td>
+                            {% for fee_head_id in item.fee_head_ids %}
+                                {% for fee_head in fee_heads %}
+                                    {% if fee_head.id == fee_head_id %}
+                                        • {{ fee_head.name }}<br>
+                                    {% endif %}
+                                {% endfor %}
+                            {% empty %}
+                                <span class="text-muted">No specific fee heads assigned</span>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            <code>{{ item.sslcz_ref_id }}</code>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="table-info">
+                    <tr>
+                        <th>Total</th>
+                        <th class="text-end">{{ transaction.amount }} BDT</th>
+                        <th colspan="2">
+                            {{ fee_heads|length }} Fee Head(s) distributed across {{ transaction.disbursement_data|length }} bank(s)
+                        </th>
+                    </tr>
+                </tfoot>
+            </table>
+            
+            <h5 class="mt-4">SSLCommerz Disbursement JSON</h5>
+            <div class="card">
+                <div class="card-body">
+                    <pre><code>{{ transaction.disbursement_data_json|safe }}</code></pre>
+                    <small class="text-muted">This JSON will be sent to SSLCommerz for disbursement</small>
+                </div>
+            </div>
+            
+            <div class="alert alert-warning mt-4">
+                <h5><i class="fas fa-exclamation-triangle"></i> Important Notes</h5>
+                <ul>
+                    <li>The payment will be split according to the above distribution when processed through SSLCommerz.</li>
+                    <li>Each bank will receive the specified amount directly from SSLCommerz.</li>
+                    <li>The student will make a single payment of {{ transaction.amount }} BDT.</li>
+                </ul>
+            </div>
+            
+            <div class="mt-4">
+                <form method="post" action="{% url 'ssl_commerz:process_disbursement_payment' transaction.tran_id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="fas fa-credit-card"></i> Proceed to Payment
+                    </button>
+                    <a href="{% url 'ssl_commerz:admin_disbursement_setup' transaction.tran_id %}" 
+                       class="btn btn-secondary">
+                        <i class="fas fa-edit"></i> Modify Distribution
+                    </a>
+                    <a href="{% url 'admin:index' %}" class="btn btn-outline-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    pre {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .table th {
+        background-color: #4e73df;
+        color: white;
+    }
+    
+    .badge {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+</style>
+{% endblock %}

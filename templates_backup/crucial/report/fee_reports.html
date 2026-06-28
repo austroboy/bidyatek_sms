@@ -1,0 +1,149 @@
+{% extends 'partials/base.html' %}
+{% load humanize custom_tags %}
+
+{% block extra_css %}
+<style>
+    .table-container {
+        width: 100%;
+        overflow-x: auto; /* Horizontal scroll for the table */
+        white-space: nowrap; /* Prevent table from wrapping */
+    }
+    .table > tbody > tr > td {
+        vertical-align: middle;
+        text-align: center;
+    }
+    .table thead th {
+        background-color: rgba(105, 108, 255, 0.16);
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+    <h4 class="font-weight-bold py-3 mb-4">Fees Collection Report</h4>
+
+    <form method="GET" class="mb-4">
+        <div class="row">
+            <div class="col-md-2">
+                <label for="class">Class:</label>
+                <select name="class" id="class" class="form-select" required>
+                    <option value="">Select Class</option>
+                    {% for class in classes %}
+                    <option value="{{ class.id }}" {% if class.id == selected_class %}selected{% endif %}>{{ class.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="section">Section:</label>
+                <select name="section" id="section" class="form-select">
+                    <option value="">All Sections</option>
+                    {% for section in sections %}
+                    <option value="{{ section.id }}" {% if section.id == selected_section %}selected{% endif %}>{{ section.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="version">Version:</label>
+                <select name="version" id="version" class="form-select">
+                    <option value="">All Versions</option>
+                    {% for version in versions %}
+                    <option value="{{ version }}" {% if version == selected_version %}selected{% endif %}>{{ version }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="group">Group:</label>
+                <select name="group" id="group" class="form-select">
+                    <option value="">All Groups</option>
+                    {% for group in groups %}
+                    <option value="{{ group.id }}" {% if group.id == selected_group %}selected{% endif %}>{{ group.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="month">Month:</label>
+                <select name="month" id="month" class="form-select" required>
+                    <option value="">Select Month</option>
+                    {% for month in months %}
+                    <option value="{{ month.id }}" {% if month.id == selected_month %}selected{% endif %}>{{ month.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="status">Status:</label>
+                <select name="status" id="status" class="form-select" required>
+                    <option value="">Select Status</option>
+                    <option value="Paid" {% if selected_status == 'Paid' %}selected{% endif %}>Paid</option>
+                    <option value="Unpaid" {% if selected_status == 'Unpaid' %}selected{% endif %}>Unpaid</option>
+                </select>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Filter</button>
+        {% comment %} {% if paid_students or unpaid_students %}
+        <button type="submit" name="download" value="Download PDF" class="btn btn-secondary mt-3">Download PDF</button>
+        {% endif %} {% endcomment %}
+
+        {% if paid_students or unpaid_students %}
+    <a href="?class={{ selected_class }}&section={{ selected_section }}&version={{ selected_version }}&group={{ selected_group }}&month={{ selected_month }}&status={{ selected_status }}&download=true" 
+       class="btn btn-secondary mt-3">
+        Download PDF
+    </a>
+    {% endif %}
+
+    </form>
+    
+    {% if selected_status == 'Paid' and paid_students %}
+    <h2>Paid Students Report</h2>
+    <div class="table-container">
+        <table class="table table-striped table-bordered mt-4">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Roll No</th>
+                    <th>Class</th>
+                    <th>Section</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in paid_students %}
+                <tr>
+                    <td>{{ student.student_field.name }}</td>
+                    <td>{{ student.roll_no|default:"N/A" }}</td>
+                    <td>{{ student.class_id.class_group_id.class_id.name }}</td>
+                    <td>{{ student.class_id.section_id.name|default:"-" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if selected_status == 'Unpaid' and unpaid_students %}
+    <h2>Unpaid Students Report</h2>
+    <div class="table-container">
+        <table class="table table-striped table-bordered mt-4">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Roll No</th>
+                    <th>Class</th>
+                    <th>Section</th>
+                    <th>Total Unpaid</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in unpaid_students %}
+                <tr>
+                    <td>{{ entry.student.student_field.name }}</td>
+                    <td>{{ entry.student.roll_no|default:"N/A" }}</td>
+                    <td>{{ entry.student.class_id.class_group_id.class_id.name }}</td>
+                    <td>{{ entry.student.class_id.section_id.name|default:"-" }}</td>
+                    <td>{{ entry.total_unpaid }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock content %}

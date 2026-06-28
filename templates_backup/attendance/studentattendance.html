@@ -1,0 +1,264 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% load attendance_tags %}
+{% block extra_css %}
+
+{% endblock extra_css %}
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+
+  <div class="card">
+    <div class="card-body">
+        <div class="row">
+            <form action="{% url 'student_attendance' %}" method="post">
+                {% csrf_token %}
+                <div class="row align-items-center">
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <div class="">
+                                <select class="form-select" name="class_name_id">
+                                    <option disabled hidden selected>Select Class</option>
+                                    {% for class in classList %}
+                                    <option value="{{ class.id }}">{{ class }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="mb-3">
+                            <div class="">
+                                <select class="form-select" name="admission_year_id">
+                                    <option disabled hidden selected>Select Admission year</option>
+                                    {% for admission_year in admission_year_list %}
+                                    <option value="{{ admission_year.id }}">{{ admission_year.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="mb-3">
+                            <div class="">
+                                <select class="form-select" name="session_year_id"> 
+                                    <option disabled hidden selected>Select Session year</option>
+                                    {% for session_year in session_year_list %}
+                                    <option value="{{ session_year.id }}">{{ session_year.start_year }} - {{ session_year.end_year }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-2 mb-md-0">
+                        <div class="mb-3">
+                            <button class="btn btn-primary" type="submit">Get Data</button>
+                        </div>
+                    </div>
+                    <div style="padding: 0px 4px 4px 4px" class="mb-3 col-md-3 border rounded-3 d-flex flex-row justify-content-between align-content-center ms-auto">
+                        <span class="fw-bold pt-2">Date:</span>
+                        <span class="pt-1 ps-1">
+                            <input class="form-control form-control-sm text-center" type="text" id="atdate" value="{{ attendance_date }}" disabled />
+                        </span>
+                    </div>
+                </div>
+            </form>
+
+            <div class="table-responsive">
+                <form action="">
+                    <table style="width: 100%;" class="table table-centered table-nowrap mb-0">
+                        <thead class="teal-thead">
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">Image</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Roll</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">PREVIOUS 7 DAYS STATUS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in studentList %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>
+                                    {% if student.student_field.avatar %}
+                                    <img class="avatar-xs rounded-circle" width="32px" height="32px" src="{{ student.student_field.avatar.url }}" alt="" />
+                                    {% endif %}
+                                </td>
+                                <td>{{ student.student_field.name }}</td>
+                                <td>{{ student.roll_no }}</td>
+                                <td>
+                                    <div class="form-check form-check-inline">
+                                        <label class="form-check-label">
+                                            <input class="form-check-input attend" type="radio" id="{{ student.id }}True" data-id="{{ student.id }}" name="{{ student.id }}" value="True">
+                                            Present
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <label class="form-check-label">
+                                            <input class="form-check-input unattend" data-id="{{ student.id }}" type="radio" id="{{ student.id }}False" name="{{ student.id }}" value="False">
+                                            Absent
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% with student.id as student_id %}
+                                        {% for status in attendance_data|get_value:student_id %}
+                                        
+                                            {% if status == True %} 
+                                                <i class="bx bx-radio-circle-marked text-success me-1"></i>
+                                            {% elif status == 'holiday' %}
+                                                <i class="bx bx-radio-circle-marked text-warning me-1"></i>
+                                            {% elif status == 'weekend' %}
+                                                <i class="bx bx-radio-circle-marked text-muted me-1"></i>
+                                            {% else %}
+                                                <i class="bx bx-radio-circle-marked text-danger me-1"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endwith %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+ 
+{% block extra_javascript %}
+
+<script>
+    $(document).ready(function () {
+        var attenddate = $('#atdate').val();
+
+        function loadData() {
+            $.ajax({
+                url: "/get_student_attendance/",
+                type: "POST",
+                data: { date: attenddate },
+                success: function (response) {
+                    const data = response.attendance;
+                    data.forEach((element, index) => {
+                        var status = element.status;
+                        var studentId = element.name;
+
+                        if (status === true) {
+                            $(`#${studentId}True`).prop('checked', true);
+                        } else {
+                            $(`#${studentId}False`).prop('checked', true);
+                        }
+                    });
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+
+        loadData();
+
+        $(document).on("click", 'input[type="radio"]', function () {
+            var value = $(this).val();
+            var dataId = $(this).attr("data-id");
+            sendToServer(dataId, value);
+        });
+
+        function sendToServer(id, value) {
+            $.ajax({
+                url: "/student_attendance_save/",
+                type: "POST",
+                data: { id: id, value: value },
+            })
+                .done(function (response) {
+                    console.log(response);
+                })
+                .fail(function () {
+                    console.log("Error Occured");
+                });
+        }
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    const classGroupMapping = JSON.parse('{{ class_group_mapping|escapejs }}');
+    const classSelect = document.querySelector('select[name="class_name_id"]');
+    const admissionYearSelect = document.querySelector('select[name="admission_year_id"]').closest('.col-md-2');
+    const sessionYearSelect = document.querySelector('select[name="session_year_id"]').closest('.col-md-2');
+
+    // Function to toggle visibility of year fields based on selected class
+    function toggleYearSelect() {
+        const selectedClassId = classSelect.value;
+
+        if (!selectedClassId || classGroupMapping[selectedClassId] === undefined) {
+            // Default behavior if no class is selected
+            admissionYearSelect.style.display = 'block';
+            sessionYearSelect.style.display = 'none';
+            return;
+        }
+
+        if (classGroupMapping[selectedClassId] === true) {
+            admissionYearSelect.style.display = 'block';
+            sessionYearSelect.style.display = 'block';
+        } else {
+            admissionYearSelect.style.display = 'block';
+            sessionYearSelect.style.display = 'none';
+        }
+    }
+
+    // Restore saved value from localStorage and trigger toggle
+    const savedClass = localStorage.getItem("class_name_id");
+    if (savedClass) {
+        classSelect.value = savedClass;
+    }
+
+    // Initialize toggle based on restored or default value
+    toggleYearSelect();
+
+    // Attach event listener for changes to the class select field
+    classSelect.addEventListener('change', function () {
+        // Save the selected value to localStorage
+        localStorage.setItem("class_name_id", classSelect.value);
+        toggleYearSelect();
+    });
+});
+
+
+
+</script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const form = document.querySelector("form[action='{% url 'student_attendance' %}']");
+    const classNameSelect = document.querySelector("select[name='class_name_id']");
+    const admissionYearSelect = document.querySelector("select[name='admission_year_id']");
+    const sessionYearSelect = document.querySelector("select[name='session_year_id']");
+
+    // Load stored values from localStorage
+    const savedClass = localStorage.getItem("class_name_id");
+    const savedAdmissionYear = localStorage.getItem("admission_year_id");
+    const savedSessionYear = localStorage.getItem("session_year_id");
+
+    if (savedClass) classNameSelect.value = savedClass;
+    if (savedAdmissionYear) admissionYearSelect.value = savedAdmissionYear;
+    if (savedSessionYear) sessionYearSelect.value = savedSessionYear;
+
+    // Store form values on submit
+    form.addEventListener("submit", function () {
+        localStorage.setItem("class_name_id", classNameSelect.value);
+        localStorage.setItem("admission_year_id", admissionYearSelect.value);
+        localStorage.setItem("session_year_id", sessionYearSelect.value);
+    });
+});
+
+</script>
+
+{% endblock extra_javascript %}

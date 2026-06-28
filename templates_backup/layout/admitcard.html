@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admitcard</title>
+
+    <style>
+        /* admit card */
+        p {
+            margin-bottom: 0 !important;
+        }
+
+        .admitcard {
+            position: relative;
+            width: 1080px;
+            height: 720px;
+            overflow: hidden;
+        }
+
+        .admitcard .admitcard_border {
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+        }
+
+        .admitcard_border img {
+            width: 100%;
+            height: 100%;
+        }
+
+        .admitCard__wrapper {
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .admitCard {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            box-sizing: border-box;
+            padding: 37px 71px;
+        }
+
+        .admitCard__top {
+            padding: 15px 10px;
+            background: #d2f2d4;
+            display: flex;
+            align-items: center;
+            border-radius: 2px 2px 0 0;
+            justify-content: space-between;
+        }
+
+        .admitCard__top .img_wrapper {
+            padding: 0 6px;
+            width: 61px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .admitCard__top .heading_wrapper {
+            text-align: center;
+            width: calc(100% - 100px);
+            padding-right: 20px;
+        }
+
+        .admitCard__top .heading_wrapper h1 {
+            font-size: 25px;
+            color: #1d1e4e;
+            text-transform: uppercase;
+            line-height: 20px;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        .admitCard__top .heading_wrapper p {
+            color: rgba(0, 0, 0, 0.713);
+            font-size: 13px;
+            margin: 0 !important;
+        }
+
+        .admitCard__address {
+            background: #e9f9ea;
+            color: rgba(0, 0, 0, 0.713);
+            text-align: center;
+            line-height: 18px;
+            font-weight: 500;
+            padding: 15px;
+        }
+
+        .admitCard__address p {
+            margin-bottom: 0 !important;
+        }
+
+        /* admit card main body part */
+        .admitCard__main {
+            position: relative;
+            background: #fff;
+            border-radius: 0 0 2px 2px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .admitCard__main__bg {
+            position: absolute;
+            opacity: 0.1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 90%;
+            overflow: hidden;
+            font-size: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 200px;
+            z-index: 10000;
+        }
+        
+        .admitCard__main__bg p{
+            color: #b8bcb8;
+        }
+
+        .admitCard__main .heading {
+            text-align: center;
+        }
+
+        .admitCard__main .heading h2 {
+            display: inline-block;
+            color: #fff;
+            border-radius: 3px;
+            padding: 7px 15px;
+            padding-bottom: 7px;
+            line-height: 14px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            background: #1d1e4e;
+            margin-top: 21px;
+            font-size: 18px;
+        }
+
+        .admitCard__main .heading p {
+            color: darkblue;
+            font-weight: bold;
+            line-height: 17px;
+            margin-bottom: 25px !important;
+        }
+
+        /* admit card form */
+        .admitCard__form {
+            padding-right: 15px;
+        }
+
+        .admitCard__form .item span {
+            white-space: nowrap;
+        }
+
+        .admitCard__form .item>.dots {
+            width: 100%;
+            height: 17px;
+            border-bottom: 1px dotted darkblue;
+        }
+
+        .admitCard__form .subitem p {
+            margin-top: 0 !important;
+        }
+
+        .admitCard__form .subitem {
+            display: flex;
+            align-items: center;
+        }
+        .admitCard__form .subitem p{
+            width: 150px;
+        }
+
+        .admitCard__form .subitem .dots {
+            width: 100%;
+            height: 17px;
+            border-bottom: 1px dotted darkblue;
+        }
+
+        .admitCard__address {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .special_info {
+            color: rgb(242, 102, 102);
+            border-radius: 2px;
+            padding: 10px 0;
+        }
+
+        .sign_wrapper {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 3px;
+            min-width: 300px;
+            margin-top: auto;
+        }
+
+        .sign_wrapper .sign {
+            border-top: 1px dotted #1d1e4e;
+        }
+
+        /* exam routine */
+        .exam_routine {
+            margin-top: 10px;
+            width: 100%;
+            flex-grow: 1;
+            margin-top: 25px;
+            height: 250px;
+        }
+
+        .exam_routine table {
+            width: 100%;
+            text-align: left;
+        }
+
+        .exam_routine table td,
+        .exam_routine table th {
+            font-size: 14px;
+            font-weight: normal;
+        }
+
+        .exam_routine table tr:first-of-type th {
+            border-top: none;
+        }
+
+        .exam_routine table tr:last-of-type td {
+            border-bottom: none;
+        }
+
+        .exam_routine table tr th:first-of-type,
+        .exam_routine table tr th:last-of-type,
+        .exam_routine table tr td:first-of-type,
+        .exam_routine table tr td:last-of-type {
+            border-left: none;
+            border-right: none;
+        }
+
+        .exam_routine h3 {
+            text-align: center;
+            font-size: 16px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .exam_routine table tr:first-of-type th {
+            font-weight: 500;
+        }
+
+        .form_routine_wrap {
+            padding: 0px;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            flex-grow: 1;
+            padding-bottom: 0;
+            margin-bottom: 10px;
+        }
+
+        /* ========== printer icon ========= */
+        .printer_icon {
+            position: fixed;
+            right: 0;
+            top: 45%;
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        .admitCard__address .exam_date {
+            display: flex;
+        }
+
+        .special_info_sign {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* print media query */
+        @media print {
+            * {
+                margin: 0;
+                padding: 0;
+            }
+
+            @page {
+                margin: 20px;
+                size: landscape;
+            }
+
+
+            body {
+                -webkit-print-color-adjust: exact;
+                -moz-print-color-adjust: exact;
+                margin: 0;
+                padding: 0;
+            }
+        }
+
+        
+
+        .special_info_sign {
+            margin-bottom: 25px;
+        }
+
+        .admitCard__wrapper {
+            margin: 0 auto;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .admitCard__top {
+            padding: 3px 0;
+        }
+
+        .admitCard__top .heading_wrapper h1 {
+            margin-bottom: 0;
+            font-size: 20px;
+        }
+
+        .form_routine_wrap {
+            padding: 4px;
+        }
+
+        .admitCard__main .heading h2 {
+            margin-top: 11px;
+        }
+
+        .admitCard__main .heading p {
+            margin-bottom: 0 !important;
+        }
+
+        .admitCard__form .item {
+            margin-bottom: 0;
+        }
+
+        #fixed-button {
+            position: fixed;
+            right: 0px;
+            z-index: 1000 !important;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        #fixed-button button {
+            color: #FCCF14;
+            display: block;
+            height: 50px;
+            position: relative;
+            text-align: center;
+            line-height: 40px;
+            width: 50px;
+            margin-bottom: 1px;
+            z-index: 1000;
+            border: none;
+        }
+
+        #fixed-button button:hover {
+            right: 5px;
+            opacity: 1;
+        }
+
+        .fixed-icon {
+            background-color: #1D1E4E;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Basic Layout -->
+     {% for student in students %}
+     <div class="admitcard">
+        <div class="admitcard_border">
+            <img src="{{ border_img }}" alt="certificatb">
+        </div>
+        <div class="admitCard__wrapper">
+            <div class="admitCard">
+                <div class="admitCard__top">
+                    <div class="img_wrapper">
+                        <img style="width: 60px;" src="{{ student.profile_picture }}" alt="logo">
+                    </div>
+                    <div class="heading_wrapper">
+                        <h1>{{student.ins_name}}</h1>
+                        <p>Gulshan, Dhaka</p>
+                    </div>
+
+                    <div class="img_wrapper">
+                        <img style="width: 61px;" src="{{ student.ins_logo }}" alt="pro pic">
+                    </div> 
+
+                </div>
+                <div class="admitCard__address">
+                    <p>Exam name: {{student.exam_id.name}}</p>
+                    <div class="exam_date">
+                        <div class="dots"><p style="white-space: nowrap;">Examination Date: {{exam_schedules.0.exam_date}}</p></div>
+                    </div>
+                </div>
+                <div class="admitCard__main">
+                    <div class="admitCard__main__bg">
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+                        <p>{{student.ins_name}}     </p>
+
+
+
+                    </div>
+                    <div class="heading">
+                        <h2>Admit Card</h2>
+                    </div>
+                    <div class="form_routine_wrap">
+                        <div class="admitCard__form">
+                            <div style="display: flex; justify-content: space-between; align-items: center;"
+                                class="std_with_box">
+                                <div class="item class_sec_roll">
+                                    <div class="class subitem">
+                                        <p class="title">Name </p>
+                                        <div>
+                                            <p class="desc">: {{student.name}}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="class subitem">
+                                        <p class="title">Class </p>
+                                        <div>
+                                            <p class="desc">: {{student.class_id.name}}</p>
+                                        </div>
+                                    </div>
+                                    <div class="sec subitem">
+                                        <p class="title">Section </p>
+                                        <div>
+                                            <p class="desc">: {{student.section}}</p>
+                                        </div>
+                                    </div>
+                                    <div class="roll subitem">
+                                        <p class="title">Roll </p>
+                                        <div>
+                                            <p class="desc">: {{student.roll}}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="border: 1.5px solid #494949; width: 150px; padding: 10px;" class="box">
+                                    <div class="box_item" style="margin-bottom: 3px;">
+                                        <p style="padding-left: 3px;">Roll: {{student.roll}}</p>
+                                    </div>
+                                    <div class="box_item" style="margin-bottom: 3px;">
+                                        <p style="padding-left: 3px;">Reg: {{student.registration_number}}</p>
+                                    </div>
+                                    <div class="box_item" style="margin-bottom: 3px;">
+                                        <p style="padding-left: 3px;">Session:
+                                            {{student.session_start_year}}-{{student.session_end_year}}</p>
+                                    </div>
+
+                                </div>
+                            </div>
+
+
+
+                        </div>
+                        <!-- exam routine -->
+                        <div class="exam_routine" style="text-align: center;">
+                            <table>
+                                <thead style="background: #e9f9ea;">
+                                    <tr class="text-center">
+                                        <th>Subject</th>
+                                        <th>Date</th>
+                                        <th>Start Time</th>
+                                        <th>Subject</th>
+                                        <th>Date</th>
+                                        <th>Start Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in exam_schedules %}
+                                    {% cycle '<tr class="text-center">' '' %}
+                                        <td>{{ item.subject_id.name }}</td>
+                                        <td>{{ item.exam_date }}</td>
+                                        <td>{{ item.start_time }}</td>
+                                        {% cycle '' '</tr>' %}
+                                    {% endfor %}
+                                </tbody>
+
+                            </table>
+                        </div>
+
+                        <div class="special_info_sign">
+                            <div class="special_info">
+                                <p>E.B.: Bring this Admit Card to the Exam Hall</p>
+                                <p>E.B.: Every student should be presenrt before 15 minutes of exam
+                                </p>
+
+                                <p>E.B.: Every student should bring the following necessary stuffs.
+                                    Such
+                                    as
+                                    Board, Sharpener, Ruler, Pencil, Pen and Eraser.</p>
+                            </div>
+                            <div style="margin-top: 50px;" class="sign_wrapper">
+                                <div class="sign">
+                                    <p >Sign. of Exam-in-Charge</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+     {% endfor %}
+    
+
+</body>
+
+</html>

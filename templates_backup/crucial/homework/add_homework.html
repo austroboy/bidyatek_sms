@@ -1,0 +1,54 @@
+{% load widget_tweaks %}
+{% block content %}
+<form hx-post="{{ request.path }}" hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}' class="modal-content" enctype="multipart/form-data">
+  <div>
+    <h4 class="modal-header">Add-Edit Homework</h4>
+  </div>
+  <div class="modal-body">
+    
+    <div class="mb-3">
+      <label for="{{ form.class_id.id_for_label }}">Class:</label>
+      {% render_field form.class_id class="form-control" %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.subject_id.id_for_label }}">Subject:</label>
+      {% render_field form.subject_id class="form-control" %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.homework_title.id_for_label }}">Homework Title:</label>
+      {% render_field form.homework_title class="form-control" %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.homework_description.id_for_label }}">Homework Description:</label>
+      {% render_field form.homework_description|attr:"rows:'3'" class="form-control" %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.homework_date.id_for_label }}">Expire Date:</label>
+      {% render_field form.homework_date|attr:"type:date" class="form-control" %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.file_attachment.id_for_label }}">File Attached:</label>
+      {% render_field form.file_attachment|attr:"type:file" class="form-control" %}
+    </div>
+  </div>
+
+{% if form.errors %}
+                                <div class="alert alert-danger">
+                                    <strong>Error:</strong> Please correct the following errors.
+                                    <ul>
+                                        {% for field in form %}
+                                            {% if field.errors %}
+                                                <li>{{ field.label }}: {{ field.errors|join:", " }}</li>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-danger text-light " data-bs-dismiss="modal">Close</button>
+    <button type="submit" class="btn  btn-submit ">Save</button>
+  </div>
+</form>
+
+{% endblock content %}

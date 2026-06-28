@@ -1,0 +1,47 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% block title %}Payment Failed - Trust Bank{% endblock title %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link href="{% static 'css/table.css' %}" rel="stylesheet" type="text/css" />
+<style>
+    .fail-card {
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .trust-logo {
+        max-width: 200px;
+        margin: 20px auto;
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="page-content mt-4">
+    <div class="container-fluid d-flex justify-content-center align-items-center" style="height: 80vh;">
+        <div class="card shadow-lg p-4 text-center fail-card">
+            <img src="{% static 'path/to/trust-bank-logo.png' %}" alt="Trust Bank" class="trust-logo">
+            <h1 class="text-danger display-4 mb-4">Payment Failed</h1>
+            <div class="alert alert-danger">
+                <i class="fa fa-times-circle fa-3x"></i>
+                <p class="lead mt-3">We couldn't process your payment through Trust Bank.</p>
+            </div>
+
+            <div class="transaction-details mt-4">
+                <p><strong>Transaction ID:</strong> {{ transaction.tran_id }}</p>
+                <p><strong>Amount:</strong> ৳{{ transaction.amount }}</p>
+            </div>
+
+            <div class="mt-4">
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                    <i class="fa fa-home"></i> Return to Dashboard
+                </a>
+                <a href="{% url 'ssl_commerz:initiate_payment' %}" class="btn btn-danger">
+                    <i class="fa fa-refresh"></i> Retry Payment
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

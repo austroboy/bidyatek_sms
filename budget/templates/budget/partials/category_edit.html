@@ -1,0 +1,144 @@
+{% load static %}
+
+{% if is_active %}
+<!-- ACTIVE budget: show revision form -->
+<form hx-post="{% url 'budget_category_edit' cat.pk %}"
+      hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+      class="modal-content">
+
+  <div class="modal-header" style="background:linear-gradient(135deg,#E07B39,#C05A20);">
+    <h5 class="modal-title text-white">
+      <i class='bx bx-edit me-2'></i>Revise Budget — {{ cat.name }}
+    </h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+  </div>
+
+  <div class="modal-body">
+    <div class="alert alert-warning border-warning py-2 mb-3">
+      <i class='bx bx-info-circle me-1'></i>
+      <small>This budget is <strong>ACTIVE</strong>. Changes are tracked as revisions.</small>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-6">
+        <div class="bg-light rounded p-3 text-center">
+          <div class="text-muted small">Current Planned</div>
+          <strong class="fs-5">৳ {{ cat.planned_amount|floatformat:2 }}</strong>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="bg-light rounded p-3 text-center">
+          <div class="text-muted small">Actual Spent</div>
+          <strong class="fs-5 text-danger">৳ {{ cat.get_actual_amount|floatformat:2 }}</strong>
+        </div>
+      </div>
+    </div>
+
+    {% if rev_form.non_field_errors %}
+    <div class="alert alert-danger py-2">{{ rev_form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="mb-3">
+      <label class="form-label fw-semibold">New Planned Amount (৳) <span class="text-danger">*</span></label>
+      {{ rev_form.new_amount }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Reason for Revision <span class="text-danger">*</span></label>
+      {{ rev_form.reason }}
+    </div>
+
+    <!-- Revision history -->
+    {% if cat.revisions.count > 0 %}
+    <div class="mt-3">
+      <small class="text-muted fw-semibold">Revision History</small>
+      <ul class="list-unstyled mt-1">
+        {% for rev in cat.revisions.all|slice:":3" %}
+        <li class="small border-start border-warning ps-2 mb-1">
+          <span class="text-muted">{{ rev.revised_at|date:"d M Y" }}</span>
+          ৳{{ rev.old_amount }} → ৳{{ rev.new_amount }}
+          <em class="text-muted">"{{ rev.reason|truncatechars:50 }}"</em>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+    <button type="submit" class="btn btn-warning text-white">
+      <i class='bx bx-save me-1'></i>Save Revision
+    </button>
+  </div>
+</form>
+
+{% else %}
+<!-- DRAFT budget: full edit form -->
+<form hx-post="{% url 'budget_category_edit' cat.pk %}"
+      hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+      class="modal-content">
+
+  <div class="modal-header" style="background:linear-gradient(135deg,#2D6A73,#1E4D55);">
+    <h5 class="modal-title text-white">
+      <i class='bx bx-edit me-2'></i>Edit Category — {{ cat.name }}
+    </h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+  </div>
+
+  <div class="modal-body">
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger py-2">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <input type="hidden" name="category_type" value="{{ cat.category_type }}">
+
+    {% if cat.category_type == 'INCOME' %}
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Income Head</label>
+      {{ form.income_head }}
+    </div>
+    {% else %}
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Expense Head</label>
+      {{ form.expense_head }}
+    </div>
+    {% endif %}
+
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Planned Amount (৳)</label>
+      {{ form.planned_amount }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Distribution Type</label>
+      {{ form.distribution_type }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Notes</label>
+      {{ form.notes }}
+    </div>
+
+    {% if revisions %}
+    <div class="mt-2">
+      <small class="text-muted fw-semibold">Past Revisions</small>
+      <ul class="list-unstyled mt-1">
+        {% for rev in revisions %}
+        <li class="small text-muted border-start ps-2 mb-1">
+          {{ rev.revised_at|date:"d M Y" }}: ৳{{ rev.old_amount }} → ৳{{ rev.new_amount }}
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+    <button type="submit" class="btn btn-primary">
+      <i class='bx bx-save me-1'></i>Save Changes
+    </button>
+  </div>
+</form>
+{% endif %}

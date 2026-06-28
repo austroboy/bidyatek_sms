@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">{{ heading }}</h4>
+        <p class="card-subtitle">{{ subheading }}</p>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{% url 'download_admit_cards' %}">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="class_name_id">Class</label>
+                        <select class="form-control" id="class_name_id" name="class_name_id" required>
+                            <option value="">Select Class</option>
+                            {% for class in classList %}
+                            <option value="{{ class.id }}">{{ class.class_group_id.class_id.name }} 
+                                {% if class.class_group_id.group_id %}- {{ class.class_group_id.group_id.name }}{% endif %}
+                                {% if class.section_id %}- {{ class.section_id.name }}{% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="exam_name_id">Exam</label>
+                        <select class="form-control" id="exam_name_id" name="exam_name_id" required>
+                            <option value="">Select Exam</option>
+                            {% for exam in examList %}
+                            <option value="{{ exam.id }}">{{ exam.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group text-center mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-download"></i> Download Admit Cards
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

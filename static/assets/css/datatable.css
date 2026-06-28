@@ -1,0 +1,20 @@
+.dataTables_length,
+.dataTables_filter {
+  display: inline-block;
+  margin-left: 1.5rem;
+}
+
+.dt-button-collection {
+  width: auto !important;
+}
+.dt-button-collection .dt-button:not(.dt-btn-split-drop) {
+  min-width: 4rem !important;
+}
+
+.table .col-actions {
+  width: 7rem;
+}
+
+table.dataTable tbody tr:hover {
+  background-color: rgba(13, 148, 136, 0.16) !important; /* Set your preferred hover background color */
+}

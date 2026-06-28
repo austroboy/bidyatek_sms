@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Deposit Form</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        .form-section {
+            width: 32%;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        .form-section::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: -10px;
+            height: 100%;
+            border-right: 1px dashed #ccc;
+        }
+        .form-section:last-child::after {
+            display: none;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 15px;
+        }
+        .institute-logo {
+            max-height: 70px;
+            margin-bottom: 10px;
+        }
+        .institute-name {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 5px 0;
+        }
+        .section-title {
+            background-color: #3498db;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 18px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .student-info {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+        .info-row {
+            display: flex;
+            margin-bottom: 8px;
+        }
+        .info-label {
+            font-weight: 600;
+            min-width: 120px;
+            color: #2c3e50;
+        }
+        .info-value {
+            flex-grow: 1;
+        }
+        .fee-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .fee-table th {
+            background-color: #3498db;
+            color: white;
+            padding: 10px;
+            text-align: left;
+        }
+        .fee-table td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .fee-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .total-row {
+            font-weight: bold;
+            background-color: #e3f2fd !important;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+        .signature-area {
+            height: 80px;
+            margin-top: 40px;
+            border-top: 1px dashed #aaa;
+            text-align: center;
+            padding-top: 10px;
+            color: #7f8c8d;
+        }
+        .cut-line {
+            position: absolute;
+            top: 0;
+            right: -1px;
+            height: 100%;
+            border-right: 2px dashed #e74c3c;
+        }
+        .watermark {
+            position: absolute;
+            opacity: 0.1;
+            font-size: 120px;
+            transform: rotate(-45deg);
+            z-index: -1;
+            top: 40%;
+            left: 10%;
+            white-space: nowrap;
+        }
+        @media print {
+            body {
+                padding: 0;
+                background: white;
+            }
+            .container {
+                display: block;
+            }
+            .form-section {
+                width: 100%;
+                margin-bottom: 20px;
+                page-break-inside: avoid;
+            }
+            .form-section::after {
+                display: none;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Bank Section -->
+        <div class="form-section">
+            <div class="watermark">BANK COPY</div>
+            <div class="header">
+                {% if institute.institute_logo %}
+                    <img src="{{ institute.institute_logo.url }}" alt="Logo" class="institute-logo">
+                {% endif %}
+                <div class="institute-name">{{ institute.institute_name }}</div>
+                <h2>FEE DEPOSIT FORM</h2>
+            </div>
+            
+            <div class="section-title">FOR BANK</div>
+            
+            <div class="student-info">
+                <div class="info-row">
+                    <div class="info-label">Student Name:</div>
+                    <div class="info-value">{{ student.student_field.name }}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Class:</div>
+                    <div class="info-value">{{ student.class_id.class_group_id.class_id.name }}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Section:</div>
+                    <div class="info-value">{{ student.class_id.section_id.name|default:"NA" }}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Group:</div>
+                    <div class="info-value">{{ student.class_id.class_group_id.group_id.name|default:"NA" }}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Shift:</div>
+                    <div class="info-value">{{ student.class_id.shift_id.name|default:"NA" }}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Version:</div>
+                    <div class="info-value">{{ student.get_version_display }}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Roll No:</div>
+                    <div class="info-value">{{ student.roll_no|default:"NA" }}</div>
+                </div>
+            </div>
+            
+            <table class="fee-table">
+                <thead>
+                    <tr>
+                        <th>Fee Type</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fee in unpaid_fees %}
+                    <tr>
+                        <td>{{ fee.feetype_id.fees_title }}</td>
+                        <td>{{ fee.amount }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td>Late Fee</td>
+                        <td>{{ total_late }}</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td>TOTAL DUE</td>
+                        <td>{{ total_due }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="footer">
+                <div class="signature-area">
+                    Bank Stamp & Signature<br>
+                    Date: _______________
+                </div>
+            </div>
+        </div>
+        
+        <!-- Guardian Section -->
+        <div class="form-section">
+            <div class="watermark">GUARDIAN COPY</div>
+            <div class="header">
+                {% if institute.institute_logo %}
+                    <img src="{{ institute.institute_logo.url }}" alt="Logo" class="institute-logo">
+                {% endif %}
+                <div class="institute-name">{{ institute.institute_name }}</div>
+                <h2>FEE DEPOSIT FORM</h2>
+            </div>
+            
+            <div class="section-title">FOR GUARDIAN</div>
+            
+            <div class="student-info">
+                <div class="info-row">
+                    <div class="info-label">Student Name:</div>
+                    <div class="info-value">{{ student.student_field.name }}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Class:</div>
+                    <div class="info-value">{{ student.class_id.class_group_id.class_id.name }}</div>
+                </div>
+                <!-- Repeated student info same as bank section -->
+            </div>
+            
+            <table class="fee-table">
+                <thead>
+                    <tr>
+                        <th>Fee Type</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fee in unpaid_fees %}
+                    <tr>
+                        <td>{{ fee.feetype_id.fees_title }}</td>
+                        <td>{{ fee.amount }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td>Late Fee</td>
+                        <td>{{ total_late }}</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td>TOTAL DUE</td>
+                        <td>{{ total_due }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="footer">
+                <div class="signature-area">
+                    Guardian's Signature<br>
+                    Date: _______________
+                </div>
+            </div>
+        </div>
+        
+        <!-- College Section -->
+        <div class="form-section">
+            <div class="watermark">COLLEGE COPY</div>
+            <div class="header">
+                {% if institute.institute_logo %}
+                    <img src="{{ institute.institute_logo.url }}" alt="Logo" class="institute-logo">
+                {% endif %}
+                <div class="institute-name">{{ institute.institute_name }}</div>
+                <h2>FEE DEPOSIT FORM</h2>
+            </div>
+            
+            <div class="section-title">FOR COLLEGE</div>
+            
+            <div class="student-info">
+                <div class="info-row">
+                    <div class="info-label">Student Name:</div>
+                    <div class="info-value">{{ student.student_field.name }}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Class:</div>
+                    <div class="info-value">{{ student.class_id.class_group_id.class_id.name }}</div>
+                </div>
+                <!-- Repeated student info same as bank section -->
+            </div>
+            
+            <table class="fee-table">
+                <thead>
+                    <tr>
+                        <th>Fee Type</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fee in unpaid_fees %}
+                    <tr>
+                        <td>{{ fee.feetype_id.fees_title }}</td>
+                        <td>{{ fee.amount }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td>Late Fee</td>
+                        <td>{{ total_late }}</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td>TOTAL DUE</td>
+                        <td>{{ total_due }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="footer">
+                <div class="signature-area">
+                    College Stamp & Signature<br>
+                    Date: _______________
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

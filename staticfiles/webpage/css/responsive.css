@@ -1,0 +1,151 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Wide Mobile Layout: 480px. */
+@media only screen and (min-width: 576px) and (max-width: 767px) { 
+
+
+
+}
+/* Wide Mobile Layout: 480px. end */
+
+
+
+
+
+
+/* Tablet & Mobile Layout: 768px. */
+@media only screen and (max-width: 991px) {
+
+
+
+
+/* menu */
+.main-menu-wrap li {
+    margin: 0;
+    padding: 0;
+}
+
+.main-menu-wrap li.has-child-menu .sub-menu .has-child-menu .sub-menu {
+  position: relative;
+  top: unset;
+  left: unset;
+}
+
+.main-menu-wrap li.has-child-menu:hover > .sub-menu {
+  transform: unset;
+  opacity: unset;
+  visibility: unset;
+}
+
+.main-menu-wrap li.has-child-menu .sub-menu li a {
+  padding: 1em 10%;
+}
+
+.main-menu-wrap li.has-child-menu .sub-menu {
+  position: relative;
+  top: unset;
+  min-width: unset;
+  list-style: none;
+  transform: unset;
+  opacity: 1;
+  visibility: visible;
+  transition: unset;
+  background: unset;
+  box-shadow: unset;
+  border-radius: unset;
+  border: unset;
+  padding: 0;
+}
+
+.main-menu-wrap li.has-child-menu::before {
+  display: none;
+}
+
+.mean-container .mean-nav {
+  position: relative;
+  margin-top: 55px;
+}
+
+.mean-container .mean-nav > ul {
+  height: 60vh;
+  overflow-y: auto;
+}
+
+.mean-container .mean-bar {
+  position: absolute;
+  background: transparent;
+  padding: 0px 0;
+  min-height: 0px;
+  z-index: 2;
+  top: -9px;
+  right: 0;
+}
+
+.mean-container a.meanmenu-reveal {
+  right: 12px !important;
+  color: #fff;
+  font-weight: 400;
+  background: #ff9505;
+  border-radius: 50%;
+  top: -2px;
+}
+
+.mean-container a.meanmenu-reveal span {
+  background: #fff;
+}
+
+.mean-container .mean-nav ul li a.mean-expand {
+  height: 33px;
+  border-left: unset !important;
+  border-bottom: unset !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 27px !important;
+  font-weight: 200;
+  background: none;
+}
+
+.mean-container .mean-nav ul li a.mean-expand:hover {
+  background: none;
+}
+
+.main-menu-wrap li.has-child-menu .sub-menu li a{
+  color: #ffffffeb;
+  font-size: 14px;
+}
+
+
+
+/* Menu button */
+
+.meanmenu-reveal ~ .mean-nav .menu-btn-wrap {
+  display: none;
+}
+
+.meanmenu-reveal.meanclose ~ .mean-nav .menu-btn-wrap {
+  display: block;
+}
+
+/* Menu button End */
+
+/* menu End */
+
+
+
+}
+

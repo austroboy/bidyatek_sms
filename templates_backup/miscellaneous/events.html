@@ -1,0 +1,224 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load template_tags %}
+{% block extra_css %} 
+<link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.css" rel="stylesheet" />
+<link
+rel="stylesheet"
+href="{% static 'assets/css/events.css' %}"
+/>
+
+{%endblock extra_css %} 
+
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+    {% include 'pageinfo.html' %}
+    <div class="row mb-4">
+
+        <div class="col-xl-12">
+            <div class="card mb-0">
+                <div class="card-body">
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        </div> <!-- end col -->
+    </div> <!-- end row-->
+    <div style='clear:both'></div>
+
+</div>
+<!-- end: Content -->
+{% if user|is_staff_or_in_group:"" or user|has_role:"Manager" or user|has_role:"HR" %}
+<!-- Add New Event MODAL --> 
+<div class="modal" id="event-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+        <div class="modal-header py-3 px-4">
+            <h5 class="modal-title" id="modal-title">Event</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+ 
+        <div class="modal-body p-4">
+            <form class="needs-validation" name="event-form" id="form-event" novalidate>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="mb-3">
+                            <label class="form-label">Event Name</label>
+                            <input class="form-control" placeholder="Insert Event Name" type="text"
+                                name="title" id="event-title" required value="">
+                            <div class="invalid-feedback">Please provide a valid event name
+                            </div>
+                        </div>
+                    </div> <!-- end col-->
+
+                </div> <!-- end row-->
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="event_start_date">Event start</label>
+                            <input type="datetime-local" name="start" id="event_start_date"
+                                class="form-control onlydatepicker" placeholder="Event start date">
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="event_end_date">Event end</label>
+                            <input type="datetime-local" name="end" id="event_end_date" class="form-control"
+                                placeholder="Event end date">
+                        </div>
+                    </div>
+
+                </div> <!-- end row-->
+                <div class="row mt-2">
+                    <div class="col-6">
+                        <button type="button" class="btn btn-info" id="btn-delete-event">Delete</button>
+                    </div> <!-- end col-->
+                    <div class="col-6 text-end">
+                        <button type="button" class="btn btn-secondary me-1"
+                            data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" id="submitButton">Save</button>
+                    </div> <!-- end col-->
+                </div> <!-- end row-->
+            </form>
+        </div>
+    </div>
+    <!-- end modal-content-->
+</div>
+<!-- end modal dialog-->
+</div>
+<!-- end modal-->
+
+<!-- HTML for the confirmation modal -->
+<div class="modal" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to remove this event?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteButton">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endif %}
+
+{% endblock content %} 
+{% block extra_javascript %} 
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.js"></script>
+
+<script>
+
+    $(document).ready(function () {
+
+        var calendar = $('#calendar').fullCalendar({
+            header: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'month'
+            },
+            events: '/eventlist/',
+            selectable: true,
+            selectHelper: true,
+            editable: true,
+            eventLimit: true,
+            select: function (start, end, allDay) {
+
+                $('#event-modal').modal('show');
+
+                $('#event_start_date').val(moment(start).format('YYYY-MM-DD HH:mm:ss'));
+                $('#event_end_date').val(moment(end).format('YYYY-MM-DD HH:mm:ss'));
+
+                $('#submitButton').on('click', function (e) {
+                    e.preventDefault();
+                    var title = $('#event-title').val();
+
+                    if (title) {
+                        var start = $("#event_start_date").val();
+                        var end = $('#event_end_date').val();
+
+                        $.ajax({
+                            type: "GET",
+                            url: '/add_event/',
+                            data: { 'title': title, 'start': start, 'end': end },
+                            dataType: "json",
+                            success: function (data) {
+                                calendar.fullCalendar('refetchEvents');
+                                location.reload();
+                            },
+                            error: function (data) {
+                                alert('There is a problem!!!');
+                            }
+                        });
+                        $('#form-event').trigger("reset");
+                        $('#event-modal').hide();
+                        $(".modal-backdrop").remove();
+                    }
+
+                });
+
+            },
+               eventResize: function (event) {
+                   var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD HH:mm:ss");
+                   var end = $.fullCalendar.formatDate(event.end, "Y-MM-DD HH:mm:ss");
+                   var title = event.title;
+                   var id = event.id;
+                   $.ajax({
+                       type: "GET",
+                       url: '/update_event/',
+                       data: {'title': title, 'start': start, 'end': end, 'id': id},
+                       dataType: "json",
+                       success: function (data) {
+                           calendar.fullCalendar('refetchEvents');
+                           alert('Event Update');
+                       },
+                       error: function (data) {
+                           alert('There is a problem!!!');
+                       }
+                   });
+               },
+
+         
+
+               eventClick: function (event) {
+                $('#deleteConfirmationModal').modal('show'); // Show the modal
+                var id = event.id;
+                
+                // Handle the delete action when the user confirms
+                $('#confirmDeleteButton').on('click', function () {
+                    $.ajax({
+                        type: "GET",
+                        url: '/remove_event/',
+                        data: { 'id': id },
+                        dataType: "json",
+                        success: function (data) {
+                            calendar.fullCalendar('refetchEvents');
+                           
+                            $('#deleteConfirmationModal').modal('hide'); // Hide the modal
+                        },
+                        error: function (data) {
+                           
+                            $('#deleteConfirmationModal').modal('hide'); // Hide the modal on error
+                        }
+                    });
+                });
+            },
+
+        });
+    });
+
+</script>
+
+
+{% endblock extra_javascript%}

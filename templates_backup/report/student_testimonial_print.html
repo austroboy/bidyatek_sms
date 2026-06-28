@@ -1,0 +1,169 @@
+{% load static %}  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Testimonial</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+
+        body, html {
+            margin: 0!important;
+            padding: 0!important;
+        }
+
+        .text-center {
+          text-align: center;
+        }
+
+      .testimonial{
+        background-color: #696cff; 
+        display: inline-block;
+        padding: 10px;
+        color: #fff; 
+        font-size: 18px;
+        text-align: center !important;
+        margin-top: 2px;
+      }
+
+        .center {
+          max-width: fit-content;
+          margin-left: auto;
+          margin-right: auto;
+          
+        }
+
+        .img-center {
+          display: block;
+          margin-left: auto;
+          margin-right: auto;
+          
+        }
+        html body div[size="A4"][layout="landscape"] {
+          width: 28.65cm !important;
+            height: 19.6cm !important;
+            border: 40px solid transparent !important;
+            border-image: url("{% static 'assets/img/bd.svg' %}") 40 round !important;
+            margin: 0 !important; 
+            padding: 0 !important;
+        }
+
+        @media print {
+            
+            @page {
+              width: 28.65cm !important;
+                height: 19.6cm !important;
+                margin: 20px !important; 
+                padding: 0 !important;
+            }
+
+            body {
+                -webkit-print-color-adjust: exact;
+            }
+        }
+
+        #fixed-button {
+          position: fixed; 
+          left: 0px;
+          z-index: 1000!important;
+          top: 50%; /* Set top to 50% */
+          transform: translateY(-50%);
+        }
+      
+        #fixed-button button {
+          color: #FCCF14;
+          display: block;
+          height: 50px;
+          position: relative;
+          text-align: center; 
+          line-height: 40px;
+          width: 50px;
+          margin-bottom: 1px;
+          z-index: 1000;
+          border: none;
+        }
+      
+        #fixed-button button:hover {
+          right: 5px;
+          opacity: 1;
+        }
+      
+        .fixed-icon {
+          background-color: #1D1E4E;
+        }
+
+
+        
+
+
+    </style>
+</head>
+<body>
+    <div id="fixed-button">
+        <div>
+          <button class="fixed-icon" id="print-testimonial">
+            <i style="font-size: 2.5rem !important;" class="bx bxs-printer fs-1"></i>
+          </button>
+        </div>
+
+        
+        <div>
+          <button class="fixed-icon" id="previous">
+            <i style="font-size: 2.5rem !important;" class="bx bx-skip-previous fs-1"></i>
+          </button>
+        </div>
+    </div>
+    <div class="center">
+      <div  size="A4" layout="landscape" class="container" id="printTestimonial">
+        <div style="padding: 50px;">
+          <h1 class="text-center">{{institute.institute_name}}</h1>
+          <h5 style="margin-bottom: 2px;" class="text-center">{{institute.education_district_id}} , {{institute.education_thana_id}}</h5>
+          <div class="text-center">
+            <img class="img-center" src="{{institute.institute_logo.url}}" alt="logo" height="70px">
+            <p class="testimonial">TESTIMONIAL</p>
+        </div>
+        <div style="display: flex; justify-content:space-between">
+          <p>SL:</p>
+          <p style="margin-right: 60px;">Issue Date:</p>
+        </div>
+
+        <p style="font-size: 20px;line-height: 30px;">
+          This is to certify that <b>{{ student.student_field.name }}</b> son of <b>{{ student.parent_id.name }}</b> and <b>{% if student.parent_id.mother_name %} {{ student.parent_id.mother_name }} {% else %} _________________  {% endif %} </b> Village <b>Wabda Colony</b>, Post Office
+          <b>Keraniganj</b>, Police Station / Upazilla <b>Demra</b> , District <b>Dhaka</b>  was a student of this
+          institute. He duly passed the <b>PEC</b>  exam under the Board of Intermediate and
+          Secondary Education, <b>Dhaka</b> held in <b>2019</b> from COMMON group bearing Roll No.
+           <b>548615</b> and Registration No. <b>628529</b>  in the session <b>2019-2020</b>  and achieved G.P.A
+           <b>5.0</b>  . His date of birth is <b>20-05-2014</b>.
+        </p>
+
+        <p style="font-size: 20px;line-height: 30px;">He is a Bangladeshi by birth. To the best of my knowledge he did not take part in any
+          subversive activity to the state or of discipline.</p>
+
+        <p style="font-size: 20px;line-height: 30px;">He has a good moral character. I wish his every success in life.</p>
+
+           </div>
+      </div>
+  </div>
+    
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery.print/1.6.2/jQuery.print.min.js" integrity="sha512-t3XNbzH2GEXeT9juLjifw/5ejswnjWWMMDxsdCg4+MmvrM+MwqGhxlWeFJ53xN/SBHPDnW0gXYvBx/afZZfGMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+          $("#print-testimonial").on("click", function () {
+            $("#printTestimonial").print({ 
+              
+              title: "Invoice",
+              doctype: "<!doctype html>",
+            });
+          });
+  
+          $("#previous").on("click", function () {
+            window.history.back(); 
+          });
+        });
+      </script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+{% extends 'partials/base.html' %} 
+{% block content %}
+<div class="container py-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">Bulk Fee Upload</h2>
+        </div>
+        
+        <div class="card-body">
+            {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label class="form-label">Excel File Format:</label>
+                    <table class="table table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Roll Number</th>
+                                <th>Transaction ID</th>
+                                <th>Amount</th>
+                                <th>Date (MM/DD/YY)</th>
+                                <th>Time (HH:MM:SS)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>John Doe</td>
+                                <td>123456</td>
+                                <td>TXN_001</td>
+                                <td>5000.00</td>
+                                <td>6/15/25</td>
+                                <td>14:30:00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="excel_file" class="form-label">Upload Excel File:</label>
+                    <input type="file" class="form-control" 
+                           name="excel_file" accept=".xlsx, .xls" required>
+                </div>
+                
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-upload me-2"></i>Upload Fees
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

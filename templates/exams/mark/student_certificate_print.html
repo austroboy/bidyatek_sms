@@ -1,0 +1,123 @@
+{% load static %}  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Certificate</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+
+        body, html {
+            margin: 0!important;
+            padding: 0!important;
+        }
+
+        .center { 
+          max-width: fit-content;
+          margin-left: auto;
+          margin-right: auto;
+          
+        }
+        html body div[size="A4"][layout="landscape"] {
+          width: 28.65cm !important;
+            height: 19cm !important;
+            border: 80px solid transparent !important;
+            border-image: url("{% static 'assets/img/certificate.svg' %}") 120 fill !important;
+            margin: 0 !important; 
+            padding: 0 !important;
+        }
+
+        @media print {
+            
+            @page {
+              width: 28.65cm !important;
+                height: 19.6cm !important;
+                margin: 0 !important; 
+                padding: 0 !important;
+            }
+
+            body {
+                -webkit-print-color-adjust: exact;
+            }
+        }
+
+        #fixed-button {
+          position: fixed;
+          left: 0px;
+          z-index: 1000!important;
+          top: 50%; /* Set top to 50% */
+          transform: translateY(-50%);
+        }
+      
+        #fixed-button button {
+          color: #FCCF14;
+          display: block;
+          height: 50px;
+          position: relative;
+          text-align: center; 
+          line-height: 40px;
+          width: 50px;
+          margin-bottom: 1px;
+          z-index: 1000;
+          border: none;
+        }
+      
+        #fixed-button button:hover {
+          right: 5px;
+          opacity: 1;
+        }
+      
+        .fixed-icon {
+          background-color: #1D1E4E;
+        }
+
+
+
+    </style>
+</head>
+<body>
+    <div id="fixed-button">
+        <div>
+          <button class="fixed-icon" id="print-testimonial">
+            <i style="font-size: 2.5rem !important;" class="bx bxs-printer fs-1"></i>
+          </button>
+        </div>
+
+        
+        <div>
+          <button class="fixed-icon" id="previous">
+            <i style="font-size: 2.5rem !important;" class="bx bx-skip-previous fs-1"></i>
+          </button>
+        </div>
+    </div>
+    <div class="center">
+        <div  size="A4" layout="landscape" class="container" id="printTestimonial">
+          <div style="padding: 100px;">
+            {{student.student_id}}
+            
+          </div>
+        </div>
+    </div>
+    
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery.print/1.6.2/jQuery.print.min.js" integrity="sha512-t3XNbzH2GEXeT9juLjifw/5ejswnjWWMMDxsdCg4+MmvrM+MwqGhxlWeFJ53xN/SBHPDnW0gXYvBx/afZZfGMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+          $("#print-testimonial").on("click", function () {
+            $("#printTestimonial").print({
+              
+              title: "Invoice",
+              doctype: "<!doctype html>",
+            });
+          });
+  
+          $("#previous").on("click", function () {
+            window.history.back(); 
+          });
+        });
+      </script>
+</body>
+</html>

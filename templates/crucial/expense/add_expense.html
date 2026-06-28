@@ -1,0 +1,46 @@
+{% load widget_tweaks %}
+{% block content %}
+<form hx-post="{{ request.path }}" hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}' enctype="multipart/form-data" class="modal-content">
+  <div>
+    <h1 class="modal-header">Add-Edit Expense</h1>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <label for="{{ form.expensetype_id.id_for_label }}" class="form-label">Expense Head</label>
+      {% render_field form.expensetype_id class+="form-control" %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.name.id_for_label }}" class="form-label">Expense Name</label>
+      {% render_field form.name class+="form-control" %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.amount.id_for_label }}" class="form-label">Amount</label>
+      {% render_field form.amount class+="form-control" %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.employee_id.id_for_label }}" class="form-label">Employee Name</label>
+      {% render_field form.employee_id class+="form-control" %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.expense_date.id_for_label }}" class="form-label">Date</label>
+      {% render_field form.expense_date|attr:"type:date" class+="form-control" %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.attach_doc.id_for_label }}" class="form-label"> Attach Document</label>
+      {% render_field form.attach_doc class+="form-control" %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+      {% render_field form.description class+="form-control" %}
+    </div>
+    
+   
+   
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-danger " data-bs-dismiss="modal">Close</button>
+    <button type="submit" class="btn btn-primary ">Save</button>
+  </div>
+</form>
+
+{% endblock content %}

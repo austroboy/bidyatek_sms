@@ -1,0 +1,32 @@
+{% load widget_tweaks %}
+{% block content %}
+<form hx-post="{{ request.path }}" hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}' class="modal-content">
+  <div>
+    <h1 class="modal-header">Add-Edit Grade</h1>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <label for="{{ form.title.id_for_label }}" class="form-label">Grade name</label>
+      {% render_field form.grade_name class+="form-control" placeholder="Grade name" %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.title.id_for_label }}" class="form-label">GPA</label>
+      {% render_field form.gpa class+="form-control" placeholder="GPA" %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.title.id_for_label }}" class="form-label">Min mark</label>
+      {% render_field form.min_mark class+="form-control" placeholder="Min mark" %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.title.id_for_label }}" class="form-label">Max mark</label>
+      {% render_field form.max_mark class+="form-control" placeholder="Max mark" %}
+    </div>
+    
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+    <button type="submit" class="btn btn-primary ">Save</button>
+  </div>
+</form>
+
+{% endblock content %}

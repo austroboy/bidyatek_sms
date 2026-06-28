@@ -1,0 +1,245 @@
+{% extends 'fpartials/base.html' %} 
+{% load static %} 
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css"  />
+<style>
+
+  
+  .video-gallery {
+    position: relative;
+    margin: 0 auto;
+    max-width: 100%;
+    text-align: center;
+  }
+
+  .video-gallery .gallery-item {
+    position: relative;
+    float: left;
+    overflow: hidden;
+    margin: 10px 1%;
+    min-width: 320px;
+    max-width: 50%;
+    max-height: 360px;
+    width: 48%;
+    background: #000;
+    cursor: pointer;
+  }
+
+  .video-gallery .gallery-item img {
+    position: relative;
+    display: block;
+    opacity: .45;
+    width: 105%;
+    height: 300px;
+    transition: opacity 0.35s, transform 0.35s;
+    transform: translate3d(-23px, 0, 0);
+    backface-visibility: hidden;
+  }
+
+  .video-gallery .gallery-item .gallery-item-caption {
+    padding: 2em;
+    color: #fff;
+    text-transform: uppercase;
+    font-size: 1.25em;
+  }
+
+  .video-gallery .gallery-item .gallery-item-caption,
+  .video-gallery .gallery-item .gallery-item-caption > a {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .video-gallery .gallery-item h2 {
+    font-weight: 300;
+    overflow: hidden;
+    padding: 0.5em 0;
+  }
+
+
+  .video-gallery .gallery-item h2,
+  .video-gallery .gallery-item p {
+    position: relative;
+    margin: 0;
+    z-index: 10;
+  }
+
+  .video-gallery .gallery-item p {
+    letter-spacing: 1px;
+    font-size: 68%;
+
+    padding: 1em 0;
+    opacity: 0;
+    transition: opacity 0.35s, transform 0.35s;
+    transform: translate3d(10%, 0, 0);
+  }
+
+  .video-gallery .gallery-item:hover img {
+    opacity: .3;
+    transform: translate3d(0, 0, 0);
+
+  }
+
+  .video-gallery .gallery-item .gallery-item-caption {
+    text-align: left;
+  }
+
+  .video-gallery .gallery-item h2::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 15%;
+    height: 1px;
+    background: #fff;
+    
+    transition: transform 0.3s;
+    transform: translate3d(-100%, 0, 0);
+  }
+
+  .video-gallery .gallery-item:hover h2::after {
+    transform: translate3d(0, 0, 0);
+  }
+
+  .video-gallery .gallery-item:hover p {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  @media screen and (max-width: 50em) {
+    .video-gallery .gallery-item {
+      display: inline-block;
+      float: none;
+      margin: 10px auto;
+      width: 100%;
+    }
+  }
+
+  .video-play-button {
+    position: relative;
+    display: inline-block;
+    width: 100px; /* Adjust as needed */
+    height: 100px; /* Adjust as needed */
+}
+  
+  .video-play-button:before {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    display: block;
+    width: 80px;
+    height: 80px;
+    background: #ba1f24;
+    border-radius: 50%;
+    animation: pulse-border 1500ms ease-out infinite;
+  }
+  
+  .video-play-button:after {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    display: block;
+    width: 80px;
+    height: 80px;
+    background: #fa183d;
+    border-radius: 50%;
+    transition: all 200ms;
+  }
+  
+  .video-play-button:hover:after {
+    background-color: darken(#fa183d, 10%);
+  }
+  
+  .video-play-button img {
+    position: relative;
+    z-index: 3;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+  }
+  
+  .video-play-button span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: block;
+    width: 0;
+    height: 0;
+    border-left: 25px solid #fff; /* Adjust the size of the triangle */
+    border-top: 11px solid transparent; /* Adjust the size of the triangle */
+    border-bottom: 11px solid transparent; /* Adjust the size of the triangle */
+}
+  
+  @keyframes pulse-border {
+    0% {
+      transform: translateX(-50%) translateY(-50%) translateZ(0) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(-50%) translateY(-50%) translateZ(0) scale(1.5);
+      opacity: 0;
+    }
+  }
+</style>
+{% endblock extra_css %} 
+{% block content %}
+
+    <!-- Video Gallery Start -->
+    <div class="container-xxl py-5 wow fadeInUp" data-wow-delay="0.1s">
+        
+        <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+            <h6 class="section-title bg-white text-center text-primary px-3">Video Gallery</h6>
+            <h1 class="mb-5">School Video Gallery</h1>
+        </div>
+        <div class="row">
+          <div class="video-gallery mb-5">
+
+              {% for vedio in vedioList %}
+                <div class="gallery-item">
+                  {% if vedio.img %}
+                  <img src="{{vedio.img.url}}"  />
+                  {% endif %}
+                  <div class="gallery-item-caption">
+                    <div>
+                      <h2 class="text-white fs-3">{{vedio.heading}}</h2>
+                      <p class="text-white ">{{vedio.sub_heading}}</p>
+                    </div>
+                    <button  class=""></button>
+                    <a id="play-video" class="vimeo-popup video-play-button middle-button" href="{{vedio.link}}"><span style="z-index: 100;" class="text-white"></span></a>
+                  </div>
+                </div> 
+    
+              {% endfor %}
+            
+          </div>
+             
+      </div>
+
+      </div>
+
+
+{% endblock content %} 
+{% block extra_javascript %} 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js" ></script>
+<script>
+    $(document).ready(function() {
+        $('.video-gallery').magnificPopup({
+        delegate: 'a', 
+        type: 'iframe',
+        gallery:{
+            enabled:true
+        }
+        });
+    });
+</script>
+{% endblock extra_javascript%}
+{% comment %} https://codepen.io/DocZaious/pen/eYNZogR {% endcomment %}

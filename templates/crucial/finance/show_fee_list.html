@@ -1,0 +1,193 @@
+{% extends 'partials/base.html' %} 
+{% load static %}
+{% load template_tags %}  
+{% block extra_css %}
+
+<link
+  href="https://cdn.datatables.net/v/bs5/jszip-3.10.1/dt-1.13.6/b-2.4.1/b-html5-2.4.1/datatables.min.css"
+  rel="stylesheet"
+/>
+<link rel="stylesheet" href="{% static 'assets/css/datatable.css' %}" />
+
+<style>
+  .select2-container--open {
+    z-index: 999999;
+}
+</style>
+
+{% endblock extra_css %} {% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+  <!-- Hoverable Table rows -->
+  <div class="card p-4">
+    <div class="table-responsive">
+      <table
+        id="datatable"
+        class="table table-md table-striped table-hover compact hover stripe"
+        width="100%"
+      >
+        <thead class="table-primary">
+          <tr class="shadow-sm">
+            
+            <th data-fee="feetype" >STUDENT NAME</th>
+            <th data-fee="feetype" >FEE TYPE</th>
+            <th data-fee="amount" >AMOUNT</th>
+            <th data-fee="startdate" >START DATE</th>
+            <th data-fee="enddate" >END DATE</th>
+            <th data-fee="late_fee" >LATE FEE</th>
+            <th data-fee="discount" >DISCOUNT</th>
+            <th data-fee="total_fee" >FINAL AMOUNT</th>
+            <th >STATUS</th>
+          </tr>
+        </thead>
+        <tbody class="table-border-bottom-0">
+          {% for fee in feelist %}
+
+          <tr>
+            
+            <td>{{fee.student_id}}</td>
+
+            <td>{{fee.feetype_id}}</td> 
+
+            <td>{{fee.amount}}</td> 
+            
+            <td>{{fee.feetype_id.startdate}}</td>
+
+            <td>{{fee.feetype_id.enddate}}</td>
+
+            <td>
+              {% if fee.status == "paid" or fee.status == "partial" %}
+                  {{ fee.late_amount|floatformat:2 }}
+              {% else %}
+                  {{ fee.calculate_late_fee|floatformat:2 }}
+              {% endif %}
+            </td> 
+
+            <td>{{fee.discount_amount|floatformat:2}}</td>
+            
+            
+            {% if fee.status == 'paid' %}
+            <td> {{fee.total_fee_after_discount|floatformat:2}} </td> 
+            
+            {% else  %} 
+              <td class="position-relative partial-final">
+                <span>
+                    {{ fee.total_fee_after_partial_payments|default_if_none:"0.00"|floatformat:2 }}
+                </span>
+                {% if fee.status == 'partial' %}
+                <span class="position-absolute bottom-0" style="font-size: 0.75rem;">
+                    <i class='bx text-danger bx-arrow-to-bottom' ></i> 
+                    <span class="text-success">
+                        {{ fee.total_paid_amount|default_if_none:"0.00"|floatformat:2 }}
+                    </span>
+                </span>
+                {% endif %}
+              </td>
+            {% endif %}
+
+            
+            <td>{% if fee.status == 'paid' %}
+              <p class="text-uppercase text-success">{{fee.status}}</p>
+              {% else  %} 
+              <p class="text-uppercase text-danger">{{fee.status}}</p>
+              {% endif %}
+              
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody> 
+      </table>
+    </div>
+
+    <div class="row mt-4 d-md-none d-block ">
+      <hr>
+      <div class="col-md-3 fw-bold d-flex justify-content-between"><span>Total Amount:</span> <span>{{total_amount}}/=</span> </div>
+      <hr>
+      <div class="col-md-3 fw-bold d-flex justify-content-between"><span>Discount:</span> <span>{{total_discount_amount}}/=</span> </div>
+      <hr>
+      <div class="col-md-3 fw-bold d-flex justify-content-between"><span>Net Total:</span> <span>{{total_amount_paid}}/=</span> </div>
+      <hr>
+      <div class="col-md-3 fw-bold d-flex justify-content-between"><span>Due:</span> <span>{{total_amount_unpaid}}/=</span> </div>
+      <hr>
+    </div>
+  </div>
+  <!--/ Hoverable Table rows -->
+
+  <div class="card mt-3 d-none d-md-block">
+    
+      
+      <div style="" class="d-flex justify-content-around">
+        <div style="  border-right: 1px dotted white; background-color: #ccc;" class="flex-grow-1 d-flex flex-column  text-center text-danger fs-5 pt-1">
+          <label class="control-label">Total Amount</label>
+          <input disabled style="width: 50%;" type="number" id="totalSum" name="totalSum" class=" mb-2 align-self-center fw-bold form-control center-placeholder text-center" value="{{total_amount}}"/>
+        </div>
+        <div style=" border-right: 1px dotted white; background-color: #ccc;" class="flex-grow-1 d-flex flex-column text-center text-danger fs-5 pt-1">
+          <label class="control-label">Discount</label>
+          <input disabled style="width: 50%;" type="number" id="discount" name="discount" class=" mb-2 align-self-center fw-bold form-control center-placeholder text-center" value="{{total_discount_amount}}"/>
+        </div>
+        <div style=" border-right: 1px dotted white; background-color: #ccc;" class="flex-grow-1 d-flex flex-column text-center text-danger fs-5 pt-1">
+          <label class="control-label">Net Total</label>
+          <input disabled style="width: 50%;" type="number" id="net_Total" name="net_Total" class=" mb-2 align-self-center fw-bold form-control center-placeholder text-center" value="{{total_amount_paid}}"/>
+        </div>
+        
+        <div style=" border-right: 1px dotted white; background-color: #ccc;" class="flex-grow-1 d-flex flex-column text-center text-danger  fs-5 pt-1">
+          <label class="control-label">Due</label>
+          <input disabled style="width: 50%;" type="number" id="due" name="due" class=" mb-2  align-self-center fw-bold form-control center-placeholder text-center" value="{{total_amount_unpaid}}"/>
+        </div>
+      </div>
+    
+  </div>
+</div> 
+<!-- end: Content -->
+
+
+{% endblock content %} {% block extra_javascript %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/v/bs5/jszip-3.10.1/dt-1.13.6/b-2.4.1/b-html5-2.4.1/datatables.min.js"></script>
+{% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script> {% endcomment %}
+<script>
+    "use strict";
+
+  $(document).ready(function () {
+    const dtSelector = "#datatable";
+    const dt = $(dtSelector).DataTable({
+      fixedHeader: { header: true },
+      
+      dom: `<'row'<'col-sm-12 col-md-6'B><'col-sm-12 col-md-6 d-none d-sm-flex justify-content-end'fl>>
+              <'row dt-row'<'col-sm-12'tr>>
+              <'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>`,
+
+      buttons: {
+
+      buttons: [ 
+      
+          {
+              extend: "collection",
+              text: "Export",
+              autoClose: true,
+              buttons: ["csvHtml5", "pdfHtml5"]
+          },
+
+      ]
+  },
+      pagingType: "simple_numbers",
+      pageLength: 15,
+      scrollX: true,
+    });
+
+
+    
+
+
+  });
+
+
+</script>
+
+
+
+{% endblock extra_javascript%}

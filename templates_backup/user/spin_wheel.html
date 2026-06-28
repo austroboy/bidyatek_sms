@@ -1,0 +1,183 @@
+<!-- templates/user/spin_wheel.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spin Wheel</title>
+
+<!-- jQuery CDN -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #ff7e5f, #feb47b);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        color: white;
+        overflow: hidden;
+    }
+
+    h1 {
+        font-size: 2.5em;
+        margin-bottom: 30px;
+        text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+    }
+
+    #wheel-container {
+        position: relative;
+        width: 400px;
+        height: 400px;
+        margin-bottom: 30px;
+    }
+
+    #wheel {
+        border-radius: 50%;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        transition: transform 5s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    #pointer {
+        position: absolute;
+        top: -40px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 20px solid transparent;
+        border-right: 20px solid transparent;
+        border-top: 40px solid gold;
+        z-index: 10;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    }
+
+    #spin-btn {
+        padding: 12px 25px;
+        background: linear-gradient(90deg, #FFD700, #FFC700);
+        color: #333;
+        font-size: 18px;
+        font-weight: bold;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    #spin-btn:hover:not(:disabled) {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    }
+
+    #spin-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+
+    #result {
+        margin-top: 25px;
+        font-size: 1.8em;
+        padding: 10px 20px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        text-align: center;
+        display: none;
+        color: #fff;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+        animation: fadeIn 1s forwards;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.8); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    @media (max-width: 450px) {
+        #wheel-container { width: 300px; height: 300px; }
+        #wheel { width: 300px; height: 300px; }
+        h1 { font-size: 2em; }
+    }
+</style>
+</head>
+<body>
+
+<h1>Spin the Wheel!</h1>
+<div id="wheel-container">
+    <div id="pointer"></div>
+    <canvas id="wheel" width="400" height="400"></canvas>
+</div>
+<button id="spin-btn">Spin</button>
+<div id="result"></div>
+
+<script>
+$(document).ready(function() {
+    const canvas = document.getElementById('wheel');
+    const ctx = canvas.getContext('2d');
+    const segments = 25;
+    const segAngle = 2 * Math.PI / segments;
+    const colors = ['#FF5733','#FFC300','#DAF7A6','#900C3F','#581845','#C70039','#FF8C00','#FFD700','#ADFF2F','#32CD32','#00FA9A','#00CED1','#1E90FF','#0000CD','#4B0082','#8A2BE2','#FF1493','#FF69B4','#FFB6C1','#FFDAB9','#FFE4B5','#FAFAD2','#F0E68C','#EEE8AA','#BDB76B'];
+
+    function drawWheel() {
+        for (let i = 0; i < segments; i++) {
+            ctx.beginPath();
+            ctx.moveTo(200, 200);
+            ctx.arc(200, 200, 200, i * segAngle, (i + 1) * segAngle);
+            ctx.fillStyle = colors[i % colors.length];
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.save();
+            ctx.translate(200, 200);
+            ctx.rotate(i * segAngle + segAngle/2);
+            ctx.textAlign = 'right';
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText((i + 1) + ' Taka/Student', 180, 5);
+            ctx.restore();
+        }
+    }
+    drawWheel();
+
+    let isSpinning = false;
+    $('#spin-btn').click(async function() {
+        if (isSpinning) return;
+        isSpinning = true;
+        $(this).prop('disabled', true);
+        $('#result').hide();
+
+        // Get rigged result from server
+        try {
+            const response = await fetch('/get-result/');
+            const data = await response.json();
+            if(data.error) { alert(data.error); isSpinning=false; $('#spin-btn').prop('disabled', false); return; }
+            const targetSegment = data.result - 1;
+
+            const extraSpins = -5 * 2 * Math.PI;
+            const targetAngle = Math.PI/2 - (targetSegment * segAngle + segAngle/2) + extraSpins;
+
+            $(canvas).css('transition', 'transform 5s cubic-bezier(0.33,1,0.68,1)');
+            $(canvas).css('transform', `rotate(${targetAngle}rad)`);
+
+            setTimeout(() => {
+                isSpinning = false;
+                $('#spin-btn').prop('disabled', false);
+                $('#result').text(`You won ${data.result} Taka per Student!`).fadeIn();
+            }, 5000);
+        } catch(err) {
+            alert("Server error!");
+            isSpinning = false;
+            $('#spin-btn').prop('disabled', false);
+        }
+    });
+});
+</script>
+
+</body>
+</html>

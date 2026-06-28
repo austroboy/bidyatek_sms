@@ -1,0 +1,82 @@
+{% extends 'partials/base.html' %} 
+{% block content %}
+<div class="container">
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% if show_payment_button %}
+            <div class="text-center mt-3">
+                <a href="{% url 'initiate_admission_payment' applicant.applicant_id %}" class="btn btn-success">
+                    <i class="fas fa-credit-card me-2"></i>Complete Payment Now
+                </a>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="card mt-4">
+            <div class="card-header text-center">
+                <h2>Admit Card</h2>
+                <h4>Admission Test 2025</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 text-center">
+                        <img src="{{ applicant.photo.url }}" alt="Applicant Photo" class="img-thumbnail" style="width: 150px; height: 150px;">
+                    </div>
+                    <div class="col-md-9">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>Applicant ID</th>
+                                <td>{{ applicant.applicant_id }}</td>
+                                <th>Class Sought</th>
+                                <td>{{ applicant.class_sought }}</td>
+                            </tr>
+                            <tr>
+                                <th>Name</th>
+                                <td>{{ applicant.full_name }}</td>
+                                <th>Father's Name</th>
+                                <td>{{ applicant.father_name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Date of Birth</th>
+                                <td>{{ applicant.dob }}</td>
+                                <th>Mother's Name</th>
+                                <td>{{ applicant.mother_name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Exam Date</th>
+                                <td>{{ exam_date }}</td>
+                                <th>Exam Center</th>
+                                <td>{{ exam_center }}</td>
+                            </tr>
+                            <tr>
+                                <th>Payment Status</th>
+                                <td colspan="3">
+                                    {% if applicant.is_payment_completed %}
+                                        <span class="badge bg-success">Paid</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Pending</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <h5>Instructions:</h5>
+                    <ol>
+                        <li>Bring this admit card to the exam center.</li>
+                        <li>Arrive at least 30 minutes before the exam time.</li>
+                        <li>Bring your own pen, pencil, and other necessary items.</li>
+                        <li>No electronic devices are allowed in the exam hall.</li>
+                    </ol>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button class="btn btn-primary" onclick="window.print()">Print Admit Card</button>
+                    <a href="{% url 'home' %}" class="btn btn-secondary">Back to Home</a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

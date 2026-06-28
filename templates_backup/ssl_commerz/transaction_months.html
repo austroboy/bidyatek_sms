@@ -1,0 +1,70 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+
+{% block extra_css %}
+
+{% endblock extra_css %} 
+
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+
+  <div class="card">
+    <div class="card-body">
+      <!-- Transaction History -->
+      <h3 class="mb-4">Transaction History</h3>
+      <div class="list-group">
+        {% for month in months %}
+        <a href="{% url 'ssl_commerz:transaction_month_detail' year=month.month.year month=month.month.month %}" 
+           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+            {{ month.month|date:"F Y" }}
+            <span class="badge bg-primary rounded-pill">{{ month.total }}</span>
+        </a>
+        {% empty %}
+        <div class="alert alert-info">No transactions found</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+<!-- end: Content -->
+
+{% endblock content %} 
+
+{% block extra_javascript %}
+<script src="https://unpkg.com/htmx.org@1.8.4"></script>
+
+<script>
+    ; (function () {
+        const modal = new bootstrap.Modal(document.getElementById("incomeheadmodal"))
+
+        htmx.on("htmx:afterSwap", (e) => {
+            if (e.detail.target.id == "incomeheaddialog") {
+                modal.show()
+            }
+        })
+
+        htmx.on("htmx:beforeSwap", (e) => {
+            if (e.detail.target.id == "incomeheaddialog" && !e.detail.xhr.response) {
+                modal.hide()
+                e.detail.shouldSwap = false
+                if (e.detail.xhr.getResponseHeader("HX-Trigger")) {
+                  const hxTriggerHeader = e.detail.xhr.getResponseHeader("HX-Trigger");
+                  if (hxTriggerHeader) {
+                    const hxTriggerData = JSON.parse(hxTriggerHeader);
+                    if (hxTriggerData.messages === "Success") {
+                        htmx.trigger("#pageinfo", "refresh");
+                    }
+                  }
+                }
+            }
+        })
+
+        htmx.on("hidden.bs.modal", () => {
+            document.getElementById("incomeheaddialog").innerHTML = ""
+        })
+    })()
+</script>
+{% endblock extra_javascript %}

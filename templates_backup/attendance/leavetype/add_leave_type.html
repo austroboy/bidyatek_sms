@@ -1,0 +1,25 @@
+{% load widget_tweaks %}
+{% block content %}
+<form hx-post="{{ request.path }}" hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}' class="modal-content">
+  <div>
+    <h4 class="modal-header">Add-Edit Leave Type</h4>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <label for="{{ form.title.id_for_label }}" class="form-label">Name</label>
+      {% render_field form.name class+="form-control" placeholder="Name" %}
+    </div> 
+
+    <div class="mb-3 form-check">
+      <label for="{{ form.is_special.id_for_label }}" class="form-check-label">is special?</label>
+      {% render_field form.is_special class+="form-check-input" %}
+    </div> 
+   
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+    <button type="submit" class="btn  btn-primary ">Save</button>
+  </div>
+</form>
+
+{% endblock content %}

@@ -1,0 +1,349 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load mark_tags %} 
+
+{% block extra_css %} 
+<style>
+
+.result-header {
+  display: flex;
+  align-items: top;
+  justify-content: space-between;
+}
+
+.logo { 
+  height: 120px;
+  width: 120px;
+  background: #000;
+}
+
+.institute-info {
+  text-align: center;
+}
+
+.institute-info h3 {
+  margin-bottom: 8px;
+} 
+
+.institute-info h5 {
+  margin: 8px 0px;
+  padding: 10px 30px;
+  border-radius: 6px;
+  background-color: #e7e7ff;
+}
+
+.result-info {
+  padding-bottom: 10px;
+}
+
+.standard-grading-table,
+.standard-grading-table th,
+.standard-grading-table td {
+  border: 1px solid #dddddd;
+  border-collapse: collapse;
+  text-align: center;
+  font-size: 10px;
+}
+
+.standard-grading-table td {
+  line-height: 12px;
+}
+
+.result-info {
+  display: flex;
+  margin: 35px 0 0;
+}
+
+.result-info h6 {
+  width: 20%;
+}
+
+.result-table,
+.result-table th,
+.result-table td {
+  border: 1px solid #dddddd;
+  border-collapse: collapse;
+  text-align: center;
+}
+
+.result-table {
+  margin: 0 12px;
+  width: calc(100% - 24px);
+}
+
+.result-table th {
+  background-color: #e7e7ff;
+}
+
+.result-table td,
+.exam-numbers h6 {
+  padding: 3px 4px;
+}
+
+.result-table th.two-numbers {
+  position: relative;
+  padding-bottom: 85px;
+}
+
+.item-rotate {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) rotate(269deg);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.item-rotate h6 {
+  margin-bottom: 0px;
+  text-align: start;
+}
+
+.result-table .exam-numbers {
+  display: flex;
+  /* gap: 0px; */
+  justify-content: center;
+  align-items: center;
+}
+
+#display_status{
+  display: none !important;
+}
+
+@media print {
+  @page {
+    size: A4 landscape; /* Set page size to A4 landscape */
+    
+  }
+
+  body {
+    -webkit-print-color-adjust: exact;
+    background-color: white;
+  }
+
+  #display_status{
+    display: flex !important;
+  }
+  
+}
+
+
+#fixed-button {
+  position: fixed;
+  right: 0px;
+  z-index: 1000!important;
+  top: 50%; /* Set top to 50% */
+  transform: translateY(-50%);
+}
+
+#fixed-button button {
+  color: #FCCF14;
+  display: block;
+  height: 50px;
+  position: relative;
+  text-align: center; 
+  line-height: 40px;
+  width: 50px;
+  margin-bottom: 1px;
+  z-index: 1000;
+  border: none;
+}
+
+#fixed-button button:hover {
+  right: 5px;
+  opacity: 1;
+}
+
+.fixed-icon {
+  background-color: #1D1E4E;
+}
+
+</style>
+{% endblock extra_css %} 
+
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y"> 
+  {% include 'pageinfo.html' %}
+
+  <div id="fixed-button">
+      <div>
+        <button class="fixed-icon" id="print-tabulation">
+          <i class="bx bxs-printer fs-1"></i>
+        </button>
+      </div>
+
+      <div> 
+        <button class="fixed-icon" id="previous">
+          <i class="bx bx-skip-previous fs-1"></i>
+        </button>
+      </div>
+  </div>
+  
+  <div class="card ">
+      <div class="card-body">
+          <form action="{% url 'narrow_tabulation_report' %}" method="post">
+            {% csrf_token %}
+            <div class="row">
+
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <div class="">
+                            <select class="form-select" name="exam_name_id" id="exam_name" required>
+                                <option disabled selected value="">Select Exam</option>
+                                {% for examname in exam_list %}
+                                <option value="{{examname.id}}">{{examname.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <div class="">
+                            <select class="form-select" name="class_name_id" id="class_name" required>
+                                <option disabled selected value="">Select Class</option>
+                                {% for class in class_list %}
+                                <option value="{{class.id}}">{{class}}</option>
+                                {%endfor%}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 d-flex justify-content-between gap-2 align-content-center">
+                    <div>
+                        <button class="btn btn-primary " type="submit">Load</button>
+                    </div>
+                    <div  class=" d-flex flex-row  gap-2 align-self-center pb-3">
+                        <input class="form-control form-control" type="text" id="examname" value="{{exam_instance}}" disabled>
+                        <input class="form-control form-control" type="text" id="classname" value="{{class_instance}}" disabled>
+                    </div>
+                </div>
+            </div>
+        </form>
+          <hr>
+          <div class="row result-container" id="printTabulation">
+            <div class="result-header " id="display_status">
+              <img src="{{ institute.institute_logo.url }}" alt="school logo" class="logo">
+              <div class="institute-info">
+                <h3>{{ institute.institute_name }}</h3> 
+                <h6>District</h6>
+                <h5>Tabulation Sheet</h5>
+                <h6>Exam Name: {{exam_instance}}</h6>
+              </div>
+              <table class="standard-grading-table">
+                <thead>
+                  <tr>
+                    <th style="width: 45px">Range</th>
+                    <th style="width: 54px">Grade</th>
+                    <th style="width: 45px">GPA</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for graderule in graderules %}
+                    <tr>
+                      <td>{{ graderule.min_mark }}-{{ graderule.max_mark }}</td>
+                      <td>{{ graderule.grade_name }}</td>
+                      <td>{{ graderule.gpa }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <div class="result-info text-center">
+              <h6>Class: {{class_instance.class_shift_id.class_id}}</h6>
+              <h6>Section: {{class_instance.section_id}}</h6>
+              <h6>Session: {{admission_year}}</h6>
+             </div>
+             <div class="table-responsive p-0 pt-4" >
+              <table class="result-table">
+                <thead>
+                  <tr>
+                    <th>Roll</th>
+                    <th>Student Name</th>
+                    {% for subject in subjects_list %}
+                        <th colspan="4">{{ subject.subject_id__name }}</th>
+                    {% endfor %}
+                    <th>Total Marks</th>
+                    <th>GPA</th>
+                    <th>Grade</th>
+                  </tr>
+                  <tr>
+                    <th></th>
+                    <th></th>
+                    {% for subject in subjects_list %}
+                        <th>MCQ</th>
+                        <th>CQ</th>
+                        <th>Practical</th>
+                        <th>Total</th>
+                    {% endfor %}
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for student, details in subject_mark_dict.items %}
+                      <tr>
+                          <td>{{ student.roll_no }}</td>
+                          <td>{{ student.student_field.name }}</td>
+                          
+                          {% for subject_name, mark_dict in details.subject_marks.items %}
+                              <td>{{ mark_dict.MCQ|default:"-" }}</td>
+                              <td>{{ mark_dict.CQ|default:"-" }}</td>
+                              <td>{{ mark_dict.Practical|default:"-" }}</td> <!-- ✅ Display Practical Marks -->
+                              <td><b>{{ mark_dict.Total|default:"-" }}</b></td>
+                          {% endfor %}
+                          
+                          <td><b>{{ details.total_marks|default:"-" }}</b></td> <!-- ✅ Total Marks -->
+                          <td><b>{{ details.overall_gpa|default:"-" }}</b></td> <!-- ✅ Correct GPA -->
+                          <td><b>{{ details.overall_letter|default:"-" }}</b></td> <!-- ✅ Correct Grade -->
+                      </tr>
+                  {% endfor %}
+              </tbody>
+              
+              
+              </table>
+             </div>
+          </div>
+      </div>
+  </div>
+</div>
+
+<!-- end: Content -->
+
+{% endblock content %} 
+
+{% block extra_javascript %} 
+<script src="{% static 'assets/vendor/libs/print/jQuery.print.js' %}"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+      
+      
+      $("#print-tabulation").on("click", function () {
+        $("#printTabulation").print({
+          globalStyles: true,
+          mediaPrint: false,
+          stylesheet: null,
+          noPrintSelector: ".no-print",
+          iframe: true,
+          append: null,
+          prepend: null,
+          manuallyCopyFormValues: true,
+          deferred: $.Deferred(),
+          timeout: 750,
+          title: "Tabulation Sheet",
+          doctype: "<!doctype html>",
+        });
+      });
+
+      $("#previous").on("click", function () {
+        window.history.back(); 
+      });
+    });
+  </script>
+{% endblock extra_javascript %}

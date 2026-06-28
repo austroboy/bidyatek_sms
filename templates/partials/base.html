@@ -1,0 +1,217 @@
+{% load static %}
+<!DOCTYPE html>
+<html
+  lang="en"
+  class="light-style layout-menu-fixed layout-compact"
+  dir="ltr"
+  data-theme="theme-default"
+  data-template="vertical-menu-template-free"
+>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+    />
+
+    <title>{{heading}} | EduTech</title>
+
+    <meta name="description" content="" />
+    {% block css %}
+    <!-- Favicon -->
+    
+
+    <link rel="icon" type="image/x-icon" href="{% static 'assets/img/favicon/favicon.ico' %}">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <link
+      href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/boxicons/2.1.0/css/boxicons.min.css"  />
+   
+    <link
+      rel="stylesheet"
+      href="{% static 'assets/vendor/css/core.css' %}"
+      class="template-customizer-core-css"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static 'assets/vendor/css/theme-default.css' %}"
+      class="template-customizer-theme-css"
+    />
+  
+    <link 
+      rel="stylesheet"
+      href="{% static 'assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css' %}"
+    />
+
+    <link
+      rel="stylesheet"
+      href="{% static 'assets/css/custom.css' %}"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static 'assets/css/custom.css' %}"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static 'assets/css/clock.css' %}"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static 'assets/css/menu_search.css' %}"
+    />
+
+    <link rel="stylesheet" href="{% static 'assets/css/dashboard.css' %}" />
+<link rel="stylesheet" href="{% static 'assets/css/dashboard_table.css' %}" />
+
+    <!-- Global UI upgrade layer (loaded LAST so it overrides the base theme). Teal theme preserved. -->
+    <link rel="stylesheet" href="{% static 'assets/css/ui-upgrade.css' %}" />
+
+    <!-- Global Select2 (already bundled in project) + teal theme override -->
+    <link rel="stylesheet" href="{% static 'libs/select2/dist/css/select2.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/css/select2-teal.css' %}" />
+
+    <style>
+      .float{
+        position:fixed;
+        width:60px;
+        height:60px;
+        bottom:40px;
+        right:40px;
+        background-color:#0C9;
+        color:#FFF;
+        border-radius:50px;
+        text-align:center;
+        box-shadow: 2px 2px 3px #999;
+      }
+      
+      .my-float{
+        margin-top:22px;
+      }
+    </style>
+
+    <!-- Page CSS -->
+
+    <!-- Helpers -->
+    <script src="{% static 'assets/vendor/js/helpers.js' %}"></script>
+    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
+
+    <script src="{% static 'assets/js/config.js' %}"></script>
+
+    
+
+    {% block extra_css %} {% endblock extra_css %} {% endblock css %}
+  </head>
+
+  <body>
+    <!-- <body data-layout="horizontal" data-topbar="dark"> -->
+
+    <!-- Begin page -->
+    <div class="layout-wrapper layout-content-navbar">
+      <div class="layout-container">
+        {% block sidebar %} {% include 'partials/sidebar.html' %} {% endblock sidebar %}
+
+        <div class="layout-page">
+          {% block header %} {% include 'partials/header.html' %} {% endblock header %}
+
+          <div class="content-wrapper">
+            {% block content %}
+
+            <!-- ============================================================== -->
+            <!-- Start right Content here -->
+            <!-- ============================================================== -->
+            
+            {% endblock content %} 
+            {% block footer %} 
+            {% include 'partials/footer.html' %} 
+            {% endblock footer %} 
+            
+            <div class="buy-now">
+
+              <button
+              type="button"
+                class="btn btn-danger btn-buy-now"
+                data-bs-toggle="modal"
+                data-bs-target="#youTubeModal"
+                ><i class='bx bxs-right-arrow'></i></button
+              >
+            </div>
+
+            <div class="modal fade" id="youTubeModal" tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered" role="document">
+                  <div class="modal-content">
+                      <div class="embed-responsive embed-responsive-16by9">
+                          {% comment %} <iframe id="youtubeIframe" class="embed-responsive-item" width="100%" height="350" src="https://www.youtube.com/embed/EngW7tLk6R8" allowfullscreen></iframe> {% endcomment %}
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+            <div class="content-backdrop fade"></div>
+          </div>
+        </div>
+      </div>
+      <div class="layout-overlay layout-menu-toggle"></div>
+    </div>
+    <!-- END layout-wrapper -->
+
+    {% block javascript %}
+
+    <script src="{% static 'assets/vendor/libs/jquery/jquery.js' %}"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+
+    <script src="{% static 'assets/vendor/libs/popper/popper.js' %}"></script>
+    <script src="{% static 'assets/vendor/js/bootstrap.js' %}"></script>
+    <script src="{% static 'assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js' %}"></script>
+    <script src="{% static 'assets/vendor/js/menu.js' %}"></script>
+    <script src="{% static 'assets/js/main.js' %}"></script>
+    <script src="{% static 'assets/js/custom.js' %}"></script>
+    <script src="{% static 'assets/js/clock.js' %}"></script>
+    <script src="{% static 'assets/js/menu_search.js' %}"></script>
+
+    <!-- Global Select2 library + auto-enhancer (teal dropdowns, all browsers) -->
+    <script src="{% static 'libs/select2/dist/js/select2.min.js' %}"></script>
+    <script src="{% static 'assets/js/select2-init.js' %}"></script>
+
+    <script>
+      var player;
+  
+      function onYouTubeIframeAPIReady() {
+          player = new YT.Player('youtubeIframe', {
+              events: {
+                  'onStateChange': onPlayerStateChange
+              }
+          });
+      }
+  
+      function onPlayerStateChange(event) {
+          if (event.data == YT.PlayerState.PLAYING) {
+              // Start checking for full-screen
+              checkFullScreen();
+          }
+      }
+  
+      function checkFullScreen() {
+          if (document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement) {
+              // Full-screen is enabled, do something if needed
+          } else {
+              // Full-screen is exited, do something if needed
+          }
+      }
+
+
+
+  </script>
+
+      
+    {% block extra_javascript %} 
+    {% endblock extra_javascript %} 
+    {% endblock javascript %}
+  </body>
+</html>

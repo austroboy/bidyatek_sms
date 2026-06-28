@@ -1,0 +1,97 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% block title %}Exam List{% endblock title %}
+{% block extra_css %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link href="{% static 'css/table.css' %}" rel="stylesheet" type="text/css" />
+
+{% endblock extra_css %}
+{% block content %}
+
+<div class="page-content mt-4">
+    <div class="container-fluid">
+
+
+        <div class="row mt-4" id="homeworkadd" hx-get="{% url 'list_homework' %}"
+            hx-trigger="load, homeworkListChanged from:body">
+            <!-- list class -->
+        </div>
+        
+
+        <!-- modal settings -->
+
+        <div id="homeworkmodal" class="modal">
+            <div id="homeworkdialog" class="modal-dialog modal-dialog-centered" hx-target="this">
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock content %}
+
+
+
+
+
+
+
+
+
+{% block extra_javascript %}
+
+
+<script src="https://unpkg.com/htmx.org@1.8.4"></script>
+
+
+
+<script>
+    ; (function () {
+        const modal = new bootstrap.Modal(document.getElementById("homeworkmodal"))
+
+        htmx.on("htmx:afterSwap", (e) => {
+            // Response targeting #dialog => show the modal
+            if (e.detail.target.id == "homeworkdialog") {
+                modal.show()
+            }
+        })
+
+        htmx.on("htmx:beforeSwap", (e) => {
+            // Empty response targeting #dialog => hide the modal
+            if (e.detail.target.id == "homeworkdialog" && !e.detail.xhr.response) {
+                modal.hide()
+                e.detail.shouldSwap = false
+            }
+        })
+
+        // Remove dialog content after hiding
+        htmx.on("hidden.bs.modal", () => {
+            document.getElementById("homeworkdialog").innerHTML = ""
+        })
+    })()
+</script>
+
+
+<script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+        // Animate select box length
+        var searchInput = $(".search-box input");
+        var inputGroup = $(".search-box .input-group");
+        var boxWidth = inputGroup.width();
+        searchInput.focus(function(){
+            inputGroup.animate({
+                width: "300"
+            });
+        }).blur(function(){
+            inputGroup.animate({
+                width: boxWidth
+            });
+        });
+    });
+    </script>
+
+
+
+{% endblock extra_javascript %}

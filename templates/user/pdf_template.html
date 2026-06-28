@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Admission Form - {{ admission.fullName }}</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 1.2cm;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      color: #000;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      width: 100%;
+      padding: 0 18px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1.5px solid #333;
+      padding-bottom: 9px;
+      margin-bottom: 13px;
+    }
+
+    .header .left {
+      flex: 1;
+    }
+
+    .header .title {
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .header .subtitle {
+      font-size: 13px;
+      color: #444;
+    }
+
+    .badge {
+      background-color: #000;
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-size: 10px;
+      display: inline-block;
+      margin-top: 4px;
+    }
+
+    .photo {
+      width: 110px;
+      height: 137px;
+      border: 1px solid #aaa;
+      text-align: center;
+      font-size: 9px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 4px;
+      flex-shrink: 0;
+    }
+
+    .section {
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: bold;
+      border-bottom: 1px solid #ccc;
+      margin-bottom: 4px;
+      padding-bottom: 2px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 8px;
+    }
+
+    td {
+      vertical-align: top;
+      padding: 3px 5px;
+      border: 1px solid #ddd;
+    }
+
+    .label {
+      font-weight: bold;
+      width: 28%;
+      background-color: #f2f2f2;
+    }
+
+    .signature-section {
+      margin-top: 15px;
+      page-break-inside: avoid;
+    }
+
+    .signature {
+      text-align: right;
+    }
+
+    .signature .line {
+      border-top: 1px solid #000;
+      width: 220px;
+      margin-top: 20px;
+      text-align: center;
+      padding-top: 4px;
+      font-size: 11px;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 9px;
+      color: #888;
+      margin-top: 6px;
+      page-break-inside: avoid;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header Section -->
+    <div class="header">
+      <div class="left">
+        <div class="title">{{ institute_name }}</div>
+        <div class="subtitle">Admission Form</div>
+        <div class="badge">Admission 2025</div>
+      </div>
+      <div class="photo">
+        Passport Size Photo<br>
+        <small>(Staple Here)</small>
+      </div>
+    </div>
+
+    <!-- Class Info -->
+    <table>
+      <tr>
+        <td class="label">Class</td>
+        <td>{{ admission.class_sought }}</td>
+        <td class="label">Board Application ID</td>
+        <td>{{ admission.board_application_id|default:"-" }}</td>
+      </tr>
+    </table>
+
+    <!-- Section: Basic Info -->
+    <div class="section">
+      <div class="section-title">Basic Information</div>
+      <table>
+        <tr>
+          <td class="label">Ex-Rajuk Student</td>
+          <td>{% if admission.ex_rajuk_student %}Yes{% else %}No{% endif %}</td>
+          <td class="label">Quota</td>
+          <td>{{ admission.quota }}</td>
+        </tr>
+        <tr>
+          <td class="label">Catchment Area</td>
+          <td colspan="3">{% if admission.catchmentArea %}Yes{% else %}No{% endif %}</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Section: Applicant Info -->
+    <div class="section">
+      <div class="section-title">Applicant Information</div>
+      <table>
+        <tr>
+          <td class="label">Full Name (English)</td>
+          <td>{{ admission.fullName }}</td>
+          <td class="label">Nationality</td>
+          <td>{{ admission.nationality }}</td>
+        </tr>
+        <tr>
+          <td class="label">Nickname</td>
+          <td>{{ admission.nickName }}</td>
+          <td class="label">Date of Birth</td>
+          <td>{{ admission.birthDate }}</td>
+        </tr>
+        <tr>
+          <td class="label">Gender</td>
+          <td>{{ admission.gender }}</td>
+          <td class="label">Religion</td>
+          <td>{{ admission.religion }}</td>
+        </tr>
+        <tr>
+          <td class="label">Birth Certificate No</td>
+          <td>{{ admission.brcn }}</td>
+          <td class="label">Blood Group</td>
+          <td>{{ admission.bloodGroup|default:"-" }}</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Section: Academic Info -->
+    <div class="section">
+      <div class="section-title">Academic Information</div>
+      <table>
+        <tr>
+          <td class="label">Previous Class</td>
+          <td>{{ admission.previous_class }}</td>
+          <td class="label">Exam</td>
+          <td>{{ admission.exam }}</td>
+        </tr>
+        <tr>
+          <td class="label">Board Name</td>
+          <td>{{ admission.boardName }}</td>
+          <td class="label">Board Roll</td>
+          <td>{{ admission.boardRoll }}</td>
+        </tr>
+        <tr>
+          <td class="label">Registration No</td>
+          <td>{{ admission.registrationNo }}</td>
+          <td class="label">GPA</td>
+          <td>{{ admission.gpa }}</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Section: Parent Info -->
+    <div class="section">
+      <div class="section-title">Parent Information</div>
+      <table>
+        <tr>
+          <td class="label">Father's Name</td>
+          <td>{{ admission.fatherName }}</td>
+          <td class="label">Father's Mobile</td>
+          <td>{{ admission.fatherMobile }}</td>
+        </tr>
+        <tr>
+          <td class="label">Father's Occupation</td>
+          <td>{{ admission.fatherOccupation }}</td>
+          <td class="label">Mother's Name</td>
+          <td>{{ admission.motherName }}</td>
+        </tr>
+        <tr>
+          <td class="label">Mother's Mobile</td>
+          <td>{{ admission.motherMobile }}</td>
+          <td class="label">Mother's Occupation</td>
+          <td>{{ admission.motherOccupation }}</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Section: Contact Info -->
+    <div class="section">
+      <div class="section-title">Contact Information</div>
+      <table>
+        <tr>
+          <td class="label">SMS Mobile</td>
+          <td colspan="3">{{ admission.smsAlertNumber }}</td>
+        </tr>
+        <tr>
+          <td class="label">Present Address</td>
+          <td colspan="3">{{ admission.praddress }}</td>
+        </tr>
+        <tr>
+          <td class="label">District</td>
+          <td>{{ admission.prDistrict }}</td>
+          <td class="label">Thana/Upazilla</td>
+          <td>{{ admission.prThana }}</td>
+        </tr>
+        <tr>
+          <td class="label">Mobile</td>
+          <td>{{ admission.prMobile }}</td>
+          <td class="label">Country</td>
+          <td>{{ admission.prCountry }}</td>
+        </tr>
+        <tr>
+          <td class="label">Permanent Address</td>
+          <td colspan="3">{{ admission.paddress }}</td>
+        </tr>
+        <tr>
+          <td class="label">District</td>
+          <td>{{ admission.pDistrict }}</td>
+          <td class="label">Thana/Upazilla</td>
+          <td>{{ admission.pThana }}</td>
+        </tr>
+        <tr>
+          <td class="label">Mobile</td>
+          <td>{{ admission.pMobile }}</td>
+          <td class="label">Country</td>
+          <td>{{ admission.pCountry }}</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="signature-section">
+      <div class="signature">
+        <div class="line">Parent's Signature</div>
+      </div>
+      <div class="footer">
+        Generated on {{ admission.created_at|date:"F d, Y H:i" }} |
+        Rajuk Uttara Model College Admission System
+      </div>
+    </div>
+  </div>
+</body>
+</html>

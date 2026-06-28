@@ -1,0 +1,871 @@
+/* =================================================================
+   BIDYATek – Complete Teal Theme Fix  v2
+   ================================================================= */
+
+/* ----------------------------------------------------------------
+   1. ROOT TOKENS
+   ---------------------------------------------------------------- */
+   :root {
+    --theme:        #568490;
+    --theme-rgb:    86, 132, 144;
+    --theme-dark:   #3f6f79;
+    --theme-darker: #2c525a;
+    --primary:      #568490;
+    --primary-2:    #3f6f79;
+    --brand:        #568490;
+    --brand-dark:   #2c525a;
+    --theme-soft:   rgba(86, 132, 144, .10);
+    --theme-soft-2: rgba(86, 132, 144, .16);
+    --theme-soft-3: rgba(86, 132, 144, .22);
+    --theme-border: rgba(86, 132, 144, .28);
+    --bs-primary:         #568490;
+    --bs-primary-rgb:     86, 132, 144;
+    --bs-link-color:      #568490;
+    --bs-link-hover-color:#3f6f79;
+  }
+  
+  /* ----------------------------------------------------------------
+     2. GLOBAL – only content-area links get teal
+        Never override "a" globally – breaks navbar icons/text
+     ---------------------------------------------------------------- */
+  .text-primary { color: var(--theme) !important; }
+  .content-wrapper a:not(.btn):not(.menu-link):not(.nav-link) {
+    color: var(--theme) !important;
+  }
+  .content-wrapper a:not(.btn):not(.menu-link):not(.nav-link):hover {
+    color: var(--theme-dark) !important;
+  }
+  
+  /* ----------------------------------------------------------------
+     3. SIDEBAR
+     ---------------------------------------------------------------- */
+  aside.logicunite_side_menu,
+  nav.logicunite_side_menu,
+  #layout-menu.logicunite_side_menu,
+  .bg-menu-theme,
+  .layout-menu {
+    background: linear-gradient(180deg, var(--theme-darker) 0%, var(--theme) 100%) !important;
+  }
+  .menu-vertical .menu-item .menu-link,
+  #layout-menu .menu-link {
+    color: rgba(255,255,255,.92) !important;
+    border-radius: 12px;
+    margin: 2px 8px;
+    transition: background .2s ease, transform .15s ease;
+  }
+  .menu-vertical .menu-item .menu-link:hover,
+  #layout-menu .menu-link:hover {
+    background: rgba(255,255,255,.12) !important;
+    color: #fff !important;
+    transform: translateX(2px);
+  }
+  .menu-vertical .menu-item.active > .menu-link,
+  #layout-menu .menu-item.active > .menu-link {
+    background: rgba(255,255,255,.18) !important;
+    color: #fff !important;
+    box-shadow: 0 6px 14px rgba(0,0,0,.18);
+  }
+  .menu-vertical .menu-header-text,
+  #layout-menu .menu-header-text {
+    color: rgba(255,255,255,.65) !important;
+  }
+  .menu-sub .menu-item .menu-link { color: rgba(255,255,255,.80) !important; }
+  .menu-sub .menu-item.active > .menu-link,
+  .menu-sub .menu-item .menu-link:hover {
+    color: #fff !important;
+    background: rgba(255,255,255,.12) !important;
+  }
+  
+  /* ----------------------------------------------------------------
+     4. NAVBAR / TOPBAR
+     IMPORTANT: Do NOT use .navbar_cont__wrapper * { color:#fff }
+     That kills dropdown text. Style only specific elements.
+     ---------------------------------------------------------------- */
+  .navbar_cont__wrapper,
+  .navbar.bg-navbar-theme,
+  .layout-navbar {
+    background: linear-gradient(90deg, var(--theme-darker) 0%, var(--theme) 100%) !important;
+    position: relative !important;
+    z-index: 1050 !important;
+  }
+  
+  /* Only these specific navbar elements get white text */
+  .navbar_cont__wrapper .navbar__left a,
+  .navbar_cont__wrapper small,
+  .layout-navbar .navbar-brand,
+  .layout-navbar .nav-link,
+  .layout-navbar i.bx,
+  .layout-navbar .text-white {
+    color: #fff !important;
+  }
+  
+  /* ----------------------------------------------------------------
+     5. DROPDOWNS – white background, dark text
+     ---------------------------------------------------------------- */
+  .dropdown-menu {
+    z-index: 9999 !important;
+    position: absolute !important;
+    color: #0f172a !important;
+    background: #fff !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,.15) !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(15,23,42,.08) !important;
+  }
+  .dropdown-menu .dropdown-item { color: #0f172a !important; }
+  .dropdown-menu .dropdown-item:hover {
+    background: rgba(var(--theme-rgb), .10) !important;
+    color: var(--theme-darker) !important;
+  }
+  
+  /* Profile / notification / shortcut overlays */
+  .edit_details_overlay,
+  .profile__overlay,
+  .notification__overlay,
+  .shortcut__features {
+    background: #fff !important;
+    z-index: 9999 !important;
+    position: absolute !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,.15) !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(15,23,42,.08) !important;
+  }
+  /* All text inside these overlays must be dark */
+  .edit_details_overlay,
+  .edit_details_overlay *,
+  .profile__overlay,
+  .profile__overlay *,
+  .notification__overlay,
+  .notification__overlay *,
+  .shortcut__features,
+  .shortcut__features * {
+    color: #0f172a !important;
+  }
+  .edit_details_overlay ul li a,
+  .profile__overlay ul li a {
+    color: var(--theme-darker) !important;
+    text-decoration: none !important;
+  }
+  .edit_details_overlay ul li:hover,
+  .profile__overlay ul li:hover {
+    background-color: rgba(var(--theme-rgb), .10) !important;
+  }
+  .notification__overlay ul li:hover {
+    color: var(--theme) !important;
+    background-color: rgba(var(--theme-rgb), .08) !important;
+  }
+  .shortcut__features i,
+  .shortcut__features .text-primary { color: var(--theme) !important; }
+  .shortcut__features .items a {
+    text-decoration: none !important;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+  }
+  .shortcut__features .items a:hover {
+    background: rgba(var(--theme-rgb), .08) !important;
+  }
+  
+  /* ----------------------------------------------------------------
+     6. BUTTONS
+     ---------------------------------------------------------------- */
+  .btn-primary,
+  .btn-primary:hover,
+  .btn-primary:focus,
+  .btn-primary:active,
+  .btn-primary.active {
+    background-color: var(--theme) !important;
+    border-color: var(--theme) !important;
+    color: #fff !important;
+    box-shadow: 0 6px 16px rgba(var(--theme-rgb), .28) !important;
+    background-image: none !important;
+  }
+  .btn-primary:hover { filter: brightness(.96); }
+  .btn-outline-primary {
+    color: var(--theme) !important;
+    border-color: var(--theme) !important;
+    background: transparent !important;
+  }
+  .btn-outline-primary:hover {
+    background: var(--theme) !important;
+    color: #fff !important;
+  }
+  .btn-label-primary {
+    background: var(--theme-soft-2) !important;
+    color: var(--theme-darker) !important;
+    border-color: transparent !important;
+  }
+  .btn-buy-now {
+    background-color: var(--theme) !important;
+    border-color: var(--theme) !important;
+    color: #fff !important;
+  }
+  .table .btn.btn-primary,
+  .table a.btn.btn-primary {
+    background-color: var(--theme) !important;
+    border-color: var(--theme) !important;
+    color: #fff !important;
+  }
+  
+  /* ----------------------------------------------------------------
+     7. BADGES & BACKGROUNDS
+     ---------------------------------------------------------------- */
+  .bg-primary, .badge.bg-primary, .bg-label-primary {
+    background-color: var(--theme) !important;
+    color: #fff !important;
+  }
+  .border-primary { border-color: var(--theme) !important; }
+  
+  /* ----------------------------------------------------------------
+     8. FORMS
+     ---------------------------------------------------------------- */
+  .form-control:focus,
+  .form-select:focus,
+  .form-check-input:focus {
+    border-color: var(--theme) !important;
+    box-shadow: 0 0 0 4px rgba(var(--theme-rgb), .18) !important;
+  }
+  .form-check-input:checked {
+    background-color: var(--theme) !important;
+    border-color: var(--theme) !important;
+  }
+  .input-fields select {
+    background:
+      rgba(86,132,144,.08)
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 384 512'%3E%3Cpath fill='%23568490' d='M192 384c-8.188 0-16.38-3.125-22.62-9.375l-160-160c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L192 306.8l137.4-137.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-160 160C208.4 380.9 200.2 384 192 384z'/%3E%3C/svg%3E")
+      right 1rem center/10px 10px no-repeat !important;
+    color: #0f172a !important;
+  }
+  .input-fields h5 { color: var(--theme-darker) !important; }
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='15' viewBox='0 0 24 24'%3E%3Cpath fill='%23568490' d='M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z'/%3E%3C/svg%3E") !important;
+  }
+  
+  /* ----------------------------------------------------------------
+     9. DASHBOARD SECTION HEADERS
+     ---------------------------------------------------------------- */
+  .heading,
+  .student_details h3.name,
+  .payment-table .table-head,
+  .payment-overview h4 {
+    background-color: var(--theme) !important;
+    color: #fff !important;
+  }
+  .heading h3, .heading h4, .heading h5,
+  .payment-table .table-head th,
+  .payment-overview h4 { color: #fff !important; }
+  
+  /* ----------------------------------------------------------------
+     10. TABLE HEADERS
+     ---------------------------------------------------------------- */
+  .table thead th,
+  .table thead td {
+    background-color: var(--theme) !important;
+    color: #fff !important;
+    border-color: rgba(255,255,255,.20) !important;
+  }
+  .fees-info .table-head,
+  .expense-info .table-head,
+  .fund-info .table-head,
+  .online-payslip .table-head,
+  .invoice__main table thead tr td {
+    background-color: var(--theme) !important;
+    color: #fff !important;
+  }
+  .fees-info .table-head th,
+  .expense-info .table-head th,
+  .fund-info .table-head th,
+  .online-payslip .table-head th { color: #fff !important; }
+  .fees-info .table-content,
+  .payment-table .table-content,
+  .expense-info .table-content,
+  .fund-info .table-content,
+  .online-payslip .table-content {
+    background-color: rgba(var(--theme-rgb), .06) !important;
+  }
+  .fees-info .table-content td,
+  .expense-info .table-content td,
+  .fund-info .table-content td { color: #0f172a !important; }
+  
+  /* ----------------------------------------------------------------
+     11. STUDENT DETAILS CARD
+     ---------------------------------------------------------------- */
+  .student_details .table_wrapper {
+    background-color: rgba(var(--theme-rgb), .07) !important;
+  }
+  .student_details table th { color: var(--theme-darker) !important; }
+  .student_details {
+    position: relative !important;
+    z-index: 10 !important;
+  }
+  
+  /* ----------------------------------------------------------------
+     12. ATTENDANCE CHARTS
+     ---------------------------------------------------------------- */
+  .attendance_info .student_attendance { background-color: rgba(var(--theme-rgb), .10) !important; min-height: 160px !important; }
+  .attendance_info .teacher_attendance { background-color: rgba(var(--theme-rgb), .08) !important; min-height: 160px !important; }
+  .attendance_info .staff_attendance   { background-color: rgba(var(--theme-rgb), .06) !important; min-height: 160px !important; }
+  .attendance_info .attendance .chart_info h6 { color: var(--theme-darker) !important; }
+  
+  /* ----------------------------------------------------------------
+     13. PAYMENT OVERVIEW
+     ---------------------------------------------------------------- */
+  .payment-overview { border-color: rgba(var(--theme-rgb), .28) !important; }
+  .graph-and-table h3 { color: var(--theme-darker) !important; }
+  
+  /* ----------------------------------------------------------------
+     14. MARKS CARDS
+     ---------------------------------------------------------------- */
+  .marks .single-mark h3 { color: var(--theme-darker) !important; }
+  
+  /* ----------------------------------------------------------------
+     15. DATATABLES
+     ---------------------------------------------------------------- */
+  table.dataTable tbody tr:hover {
+    background-color: rgba(var(--theme-rgb), .10) !important;
+  }
+  .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+  .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+    background: var(--theme) !important;
+    border-color: var(--theme) !important;
+    color: #fff !important;
+  }
+  
+  /* ----------------------------------------------------------------
+     16. EVENTS / CALENDAR
+     ---------------------------------------------------------------- */
+  .fc-state-down, .fc-state-active, .fc-state-disabled {
+    background-color: var(--theme) !important;
+    border-color: var(--theme) !important;
+    color: #fff !important;
+  }
+  .fc-event, .fc-event-dot { background-color: var(--theme) !important; }
+  .events, .notice {
+    min-height: 200px !important;
+    overflow: visible !important;
+  }
+  .events .body:empty::before,
+  .notice .body:empty::before {
+    content: "No data available";
+    display: block;
+    padding: 22px;
+    text-align: center;
+    color: rgba(15,23,42,.55);
+    background: rgba(var(--theme-rgb), .06);
+    border-radius: 12px;
+    margin: 14px;
+  }
+  
+  /* ----------------------------------------------------------------
+     17. GTABLE SORT ARROWS
+     ---------------------------------------------------------------- */
+  thead th:hover                  { color: var(--theme) !important; }
+  thead th:hover span.icon-arrow  { border-color: var(--theme) !important; }
+  thead th.active span.icon-arrow { background-color: var(--theme) !important; }
+  thead th.active, tbody td.active { color: var(--theme) !important; }
+  .table-responsive::-webkit-scrollbar-thumb { background-color: var(--theme) !important; }
+  #softdatatable thead th { background-color: rgba(var(--theme-rgb), .14) !important; color: #0f172a !important; }
+  
+  /* ----------------------------------------------------------------
+     18. CLASS ROUTINE
+     ---------------------------------------------------------------- */
+  #period-form button, #save-button, #print-button, #table-collapse-button {
+    background-color: var(--theme) !important;
+    color: #fff !important;
+  }
+  .subject {
+    background-color: var(--theme-dark) !important;
+    border-color: var(--theme) !important;
+    color: #fff !important;
+  }
+  .header, .day-label {
+    background-color: var(--theme) !important;
+    border-color: var(--theme-dark) !important;
+    color: #fff !important;
+  }
+  .period:hover { border-color: var(--theme) !important; }
+  .period.drag-over {
+    border-color: var(--theme) !important;
+    background-color: rgba(var(--theme-rgb), .08) !important;
+  }
+  #schedule::-webkit-scrollbar-thumb { background-color: var(--theme) !important; }
+  #schedule-container .subject {
+    background-color: rgba(var(--theme-rgb), .16) !important;
+    color: #0f172a !important;
+  }
+  #schedule-container .subject p:first-of-type {
+    border-bottom: 1px solid rgba(var(--theme-rgb), .35) !important;
+  }
+  
+  /* ----------------------------------------------------------------
+     19. VIEW-ALL BUTTONS
+     ---------------------------------------------------------------- */
+  .view-all, .viewAll, .btn-view-all, .btn-viewall {
+    background: rgba(var(--theme-rgb), .14) !important;
+    color: var(--theme-darker) !important;
+    border: 1px solid rgba(var(--theme-rgb), .28) !important;
+    border-radius: 999px !important;
+    font-weight: 700 !important;
+  }
+  .view-all:hover, .viewAll:hover, .btn-view-all:hover, .btn-viewall:hover {
+    background: rgba(var(--theme-rgb), .24) !important;
+    color: var(--theme-darker) !important;
+  }
+  
+  /* ----------------------------------------------------------------
+     20. CARDS – overflow VISIBLE so dropdowns escape card bounds
+     ---------------------------------------------------------------- */
+  .card, .shadow, .shadow-effect {
+    border-radius: 16px !important;
+    border: 1px solid rgba(15,23,42,.08) !important;
+    box-shadow: 0 8px 22px rgba(15,23,42,.08) !important;
+    transition: transform .20s ease, box-shadow .20s ease, border-color .20s ease;
+    overflow: visible !important;
+  }
+  .card:hover, .shadow:hover, .shadow-effect:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(15,23,42,.12) !important;
+    border-color: rgba(var(--theme-rgb), .28) !important;
+  }
+  .leave_sms .dots,
+  .attendance_info .attendance .dots {
+    z-index: 100 !important;
+    position: relative !important;
+    cursor: pointer !important;
+  }
+  
+  /* ----------------------------------------------------------------
+     21. LAYOUT – NEVER override layout overflow (breaks sidebar)
+     Dropdowns must use position:fixed or high z-index instead
+     ---------------------------------------------------------------- */
+  /* layout-page, layout-container intentionally NOT touched */
+  
+  /* ----------------------------------------------------------------
+     22. MODALS – high z-index, no body jump
+     ---------------------------------------------------------------- */
+  body.modal-open {
+    overflow: hidden !important;
+    /* padding-right intentionally NOT overridden - Bootstrap manages scrollbar compensation */
+  }
+  .modal { z-index: 10500 !important; }
+  .modal-backdrop { z-index: 10400 !important; }
+  .modal-content {
+    border-radius: 16px !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,.20) !important;
+    overflow: hidden !important;
+  }
+  .modal-header {
+    background: var(--theme) !important;
+    color: #fff !important;
+    border-radius: 16px 16px 0 0 !important;
+  }
+  .modal-header .modal-title { color: #fff !important; }
+  .modal-header .btn-close { filter: invert(1) !important; }
+  .modal-footer .btn-primary {
+    background: var(--theme) !important;
+    border-color: var(--theme) !important;
+    color: #fff !important;
+  }
+  
+  /* ----------------------------------------------------------------
+     23. SCROLLBAR
+     ---------------------------------------------------------------- */
+  .scrollbar::-webkit-scrollbar-thumb,
+  ::-webkit-scrollbar-thumb {
+    background: rgba(var(--theme-rgb), .55) !important;
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: rgba(15,23,42,.06); border-radius: 10px; }
+  
+  /* ----------------------------------------------------------------
+     24. MISC
+     ---------------------------------------------------------------- */
+  .submit-button-orange {
+    background: linear-gradient(90deg, var(--theme-darker), var(--theme)) !important;
+    color: #fff !important;
+  }
+  .online-payslip form input[type="text"]:focus,
+  .class-routine input[type="date"]:focus {
+    border-color: rgba(var(--theme-rgb), .55) !important;
+    box-shadow: 0 0 0 4px rgba(var(--theme-rgb), .16) !important;
+  }
+  .online-payslip form input[type="text"],
+  .class-routine input[type="date"] {
+    background-color: rgba(var(--theme-rgb), .06) !important;
+    color: #0f172a !important;
+  }
+  
+  /* ----------------------------------------------------------------
+     25. MENU SEARCH BAR
+     ---------------------------------------------------------------- */
+  .search-bar {
+    background: rgba(255,255,255,.12) !important;
+    border-radius: 10px;
+  }
+  .search-input {
+    background: transparent !important;
+    color: #fff !important;
+    border: none !important;
+    outline: none !important;
+  }
+  .search-input::placeholder { color: rgba(255,255,255,.60) !important; }
+  .icon-container, #toggleIcon, #showSearchBarButton i {
+    color: rgba(255,255,255,.80) !important;
+  }
+  
+  /* ----------------------------------------------------------------
+     26. FOOTER
+     ---------------------------------------------------------------- */
+  footer, .footer, .content-footer { color: #64748b !important; }
+  
+  /* ----------------------------------------------------------------
+     EXTRA FIX v2.1 – Dashboard dropdown menus dark text
+     The .heading has teal bg, dropdown inside must be white+dark
+     ---------------------------------------------------------------- */
+  
+  /* All dropdown-menu must escape their teal parent */
+  .heading .dropdown-menu,
+  .heading .edit_details_overlay {
+    top: 100% !important;
+    left: auto !important;
+    right: 0 !important;
+    background: #fff !important;
+    color: #0f172a !important;
+    z-index: 9999 !important;
+  }
+  .heading .dropdown-menu *,
+  .heading .edit_details_overlay * {
+    color: #0f172a !important;
+  }
+  .heading .dropdown-menu a,
+  .heading .edit_details_overlay a {
+    color: var(--theme-darker) !important;
+  }
+  
+  /* Fix: attendance cards need overflow visible to show dot menus */
+  .student_teacher_attendance {
+    /* overflow visible removed – use z-index on children instead */
+  }
+  .attendance .dropdown-menu,
+  .attendance .edit_details_overlay {
+    top: 30px !important;
+    right: 0 !important;
+    left: auto !important;
+    background: #fff !important;
+    z-index: 9999 !important;
+  }
+  .attendance .dropdown-menu *,
+  .attendance .edit_details_overlay * {
+    color: #0f172a !important;
+  }
+  
+  /* Fix: top stat cards (Total Student etc) dropdown */
+  .student_teacher_stuff .dropdown-menu,
+  .student_teacher_stuff .edit_details_overlay {
+    top: 30px !important;
+    right: 0 !important;
+    left: auto !important;
+    background: #fff !important;
+    z-index: 9999 !important;
+    min-width: 160px !important;
+  }
+  .student_teacher_stuff .dropdown-menu *,
+  .student_teacher_stuff .edit_details_overlay * {
+    color: #0f172a !important;
+  }
+  .student_teacher_stuff .dropdown-menu li,
+  .student_teacher_stuff .edit_details_overlay li {
+    padding: 8px 16px !important;
+    cursor: pointer !important;
+  }
+  .student_teacher_stuff .dropdown-menu li:hover,
+  .student_teacher_stuff .edit_details_overlay li:hover {
+    background: rgba(86,132,144,.10) !important;
+  }
+  .student_teacher_stuff .dropdown-menu a,
+  .student_teacher_stuff .edit_details_overlay a {
+    color: var(--theme-darker) !important;
+    text-decoration: none !important;
+  }
+  
+  /* Fix: modal title color */
+  .modal-header .modal-title {
+    color: #fff !important;
+  }
+  
+  /* Fix: events section min height so it's not tiny */
+  .col-lg-3 .shadow .notices {
+    min-height: 120px !important;
+    padding: 12px !important;
+  }
+  
+  /* ================================================================
+     CRITICAL FIX v2.2
+     ================================================================ */
+  
+  /* ------------------------------------------------------------------
+     FIX 1: .edit_details_overlay visibility
+     dashboard.css shows it only on .active — Bootstrap uses .show
+     We must support BOTH so all three-dot dropdowns work
+     ------------------------------------------------------------------ */
+  .edit_details_overlay.show,
+  .edit_details_overlay.active,
+  .dropdown.show > .edit_details_overlay,
+  .dropdown-menu.edit_details_overlay.show {
+    display: block !important;
+  }
+  
+  /* Also ensure Bootstrap dropdown-menu show works */
+  .dropdown-menu.show {
+    display: block !important;
+  }
+  
+  /* ------------------------------------------------------------------
+     FIX 2: Navbar action buttons — make them VISIBLE on teal bg
+     btn-light + bg-white + bg-opacity-10 = nearly invisible on teal
+     Replace with semi-transparent white style
+     ------------------------------------------------------------------ */
+  .navbar_cont__wrapper .btn,
+  .navbar_cont__wrapper button {
+    background: rgba(255, 255, 255, 0.18) !important;
+    border: 1px solid rgba(255, 255, 255, 0.30) !important;
+    color: #fff !important;
+    border-radius: 10px !important;
+    padding: 6px 10px !important;
+    transition: background 0.2s ease !important;
+  }
+  .navbar_cont__wrapper .btn:hover,
+  .navbar_cont__wrapper button:hover {
+    background: rgba(255, 255, 255, 0.28) !important;
+  }
+  /* Keep dropdown menus (children of these buttons) normal */
+  .navbar_cont__wrapper .dropdown-menu {
+    background: #fff !important;
+    border: 1px solid rgba(15, 23, 42, 0.10) !important;
+    color: #0f172a !important;
+  }
+  .navbar_cont__wrapper .dropdown-menu * {
+    color: #0f172a !important;
+    background: transparent !important;
+  }
+  .navbar_cont__wrapper .dropdown-item:hover {
+    background: rgba(86, 132, 144, 0.10) !important;
+    color: var(--theme-darker) !important;
+  }
+  /* Icons inside nav buttons should be white */
+  .navbar_cont__wrapper .btn i,
+  .navbar_cont__wrapper button i {
+    color: #fff !important;
+    font-size: 1.25rem !important;
+  }
+  /* Notification red dot */
+  .navbar_cont__wrapper .bg-danger {
+    background-color: #ef4444 !important;
+  }
+  
+  /* v2.3 layout overrides removed – using vendor layout */
+  
+  /* ================================================================
+     SIDEBAR SCROLL FIX v2.4
+     Only fix scrolling inside sidebar - do NOT override
+     position, width, or margin (vendor handles those correctly)
+     ================================================================ */
+  
+  /* Sidebar inner scroll */
+  #layout-menu.layout-menu .menu-inner {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+  
+  /* Ensure no extra margin/padding creates the gap */
+  #layout-menu.layout-menu {
+    margin-right: 0 !important;
+    border-right: none !important;
+    box-shadow: 2px 0 8px rgba(0,0,0,.10) !important;
+  }
+  
+  /* Dropdown show fix - works with both Bootstrap .show and custom .active */
+  .dropdown-menu.show,
+  .edit_details_overlay.show,
+  .edit_details_overlay.active {
+    display: block !important;
+    z-index: 9999 !important;
+  }
+  
+  /* Dropdowns in cards must escape overflow */
+  .student_teacher_stuff .dropdown,
+  .attendance_info .attendance,
+  .leave_sms > .shadow {
+    overflow: visible !important;
+  }
+  
+  /* ================================================================
+     GAP FIX v2.5 – Remove white space between sidebar and content
+     ================================================================ */
+  
+  /* Remove container-fluid LEFT padding only - keep right for scrollbar compensation */
+  .layout-page .container-fluid {
+    padding-left: 0 !important;
+    /* padding-right intentionally kept so Bootstrap modal scroll compensation works */
+  }
+  
+  /* Remove top margin on navbar wrapper */
+  .layout-page .navbar_cont__wrapper {
+    margin-top: 0 !important;
+    border-radius: 0 !important;
+  }
+  
+  /* Sidebar right edge - no shadow that bleeds into content area */
+  #layout-menu.layout-menu {
+    box-shadow: none !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.10) !important;
+  }
+  
+  /* Content area wrapper - no extra left padding */
+  .content-wrapper {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+  }
+  
+  /* The navbar bar itself should stretch full width of content area */
+  .navbar_cont__wrapper {
+    border-radius: 0 0 12px 12px !important;
+  }
+  
+  /* ================================================================
+     MODAL JUMP FIX v2.6
+     The jump happens because:
+     1. body.modal-open gets padding-right (scrollbar width) from Bootstrap
+     2. Our CSS was forcing padding-right:0 → page shifts
+     3. Also .layout-page .container-fluid padding-right:0 conflicts
+     
+     Solution: Let Bootstrap manage scrollbar compensation naturally.
+     Only prevent the layout-page from shifting.
+     ================================================================ */
+  
+  /* Prevent modal backdrop from pushing layout */
+  body.modal-open .layout-page {
+    padding-right: 0 !important;
+  }
+  
+  /* Prevent navbar from shifting when modal opens */
+  body.modal-open .navbar_cont__wrapper,
+  body.modal-open .layout-navbar {
+    padding-right: 0 !important;
+  }
+  
+  /* Lock the sidebar in place - must not move at all */
+  body.modal-open #layout-menu {
+    padding-right: 0 !important;
+    width: auto !important;
+  }
+  
+  /* Modal must be perfectly centered regardless of scrollbar */
+  .modal {
+    padding-right: 0 !important;
+  }
+  
+  /* Overlay covers full screen including scrollbar area */
+  .modal-backdrop {
+    width: 100vw !important;
+    height: 100vh !important;
+  }
+  
+  /* ================================================================
+     FINAL MODAL JUMP FIX v2.7
+     Root cause: Bootstrap's ScrollBarHelper adds padding-right to body
+     when modal opens to compensate for scrollbar disappearing.
+     
+     Fix: scrollbar-gutter:stable keeps space reserved for scrollbar
+     at ALL times, so it never disappears = no compensation needed.
+     ================================================================ */
+  
+  html {
+    scrollbar-gutter: stable !important;
+  }
+  
+  /* Since scrollbar-gutter is stable, scrollbar space is always reserved.
+     Bootstrap's padding-right compensation becomes unnecessary and harmful.
+     Override it back to 0 after Bootstrap sets it. */
+  body {
+    padding-right: 0 !important;
+  }
+  
+  /* Also prevent fixed/sticky elements from shifting */
+  .fixed-top,
+  .fixed-bottom,
+  .sticky-top,
+  .is-fixed,
+  .navbar_cont__wrapper,
+  .layout-navbar {
+    padding-right: 0 !important;
+    margin-right: 0 !important;
+  }
+
+
+/* ================================================================
+   TEAL PATCH v5.0 — Zero [style*] selectors. Zero flicker.
+   thead inline styles removed from templates directly.
+   ================================================================ */
+
+/* thead class applied via template fix */
+thead.teal-thead,
+thead.teal-thead th {
+  background-color: rgba(86, 132, 144, 0.16) !important;
+  color: inherit;
+}
+
+/* btn-primary → teal */
+.btn-primary,
+button.btn-primary,
+a.btn-primary,
+input[type="submit"].btn-primary {
+  background-color: #568490 !important;
+  border-color: #568490 !important;
+  color: #fff !important;
+}
+.btn-primary:hover,
+button.btn-primary:hover {
+  background-color: #3f6f79 !important;
+  border-color: #3f6f79 !important;
+}
+
+/* nav tabs/pills active */
+.nav-tabs .nav-link.active,
+.nav-pills .nav-link.active {
+  background-color: #568490 !important;
+  border-color: #568490 !important;
+  color: #fff !important;
+}
+
+/* ============================================================
+   MODAL BACKDROP BLINK FIX
+   Bootstrap modal-backdrop.fade animates opacity 0→0.5
+   This causes the screen dim/blink effect. Kill it completely.
+   ============================================================ */
+
+/* Kill ALL transitions and animations on backdrop */
+.modal-backdrop,
+.modal-backdrop.fade,
+.modal-backdrop.show,
+.modal-backdrop.fade.show {
+  transition: none !important;
+  animation: none !important;
+  opacity: 0.4 !important;
+}
+
+/* Kill modal dialog slide-in animation */
+.modal.fade .modal-dialog,
+.modal.show .modal-dialog {
+  transition: none !important;
+  animation: none !important;
+  transform: none !important;
+}
+
+/* Prevent body layout shift when modal opens (scrollbar compensation blink) */
+body.modal-open {
+  overflow: hidden !important;
+  padding-right: 0 !important;
+}

@@ -1,0 +1,113 @@
+<div class="my-4">
+  <!-- start: Summary -->
+  <div class="row">
+
+    <div class="card">
+      <div class="card-body">
+
+        <div class="table-responsive">
+          <div class="table-wrapper">
+            <div class="table-title">
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="show-entries">
+                    <a href="" hx-get="{% url 'add_homework' %}" class="action-button shadow animate bprimary"
+                      hx-target="#homeworkdialog">
+                      Add Homework
+                    </a>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <h2 class="text-center">Homework List</h2>
+                </div>
+                <div class="col-md-4">
+                  <div class="search-box">
+                    <div class="input-group">
+                      <span class="input-group-addon"><i class="ri-search-2-line"></i></span>
+                      <input type="text" class="form-control" placeholder="Search&hellip;">
+                    </div>
+                  </div>
+                </div>
+              </div> 
+
+            </div>
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Homework Title</th>
+                  <th>Homework Description</th>
+                  <th>Homework For</th>
+                  <th>Last Submit Date</th>
+                  <th>File Attached</th>
+                  <th>Created At</th>
+                  <th>Submit List</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+                {% for homework in homeworklist %}
+                <tr>
+                 
+                  <td>
+                    {{forloop.counter}}
+                  </td>
+                  <td>
+                    {{homework.homework_title}}
+                  </td>
+                  <td>
+                    {{homework.homework_description}}
+                  </td>
+                  <td>
+                    {{homework.class_id}}
+                  </td>
+                  <td>
+                    {{homework.homework_date}}
+                  </td>
+                  <td>
+                    <a style="text-decoration:none" class="fw-bold text-info" href="{{ homework.file_attachment.url }}" download>Download File</a>
+                  </td>
+                  <td>
+                    {{homework.created_at|date:"Y-m-d"}}
+                  </td>
+                  <td>
+                    <a style="text-decoration:none" class="fw-bold text-danger" href="#">View</a>
+                  </td>
+                  
+                  <td>
+
+                    <a href="#" hx-get="{% url 'edit_homework' pk=homework.pk %}" hx-target="#homeworkdialog" class="edit"
+                      title="Edit" data-toggle="tooltip"><i class="ri-edit-line"></i></a>
+                    <a href="#" hx-delete="{% url 'del_homework' pk=homework.pk %}"
+                      hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}' hx-target="#homeworkadd"
+                      hx-confirm="are you want to delete?" class="delete" title="Delete" data-toggle="tooltip"><i
+                        class="ri-delete-bin-line"></i></a>
+                  </td>
+                </tr>
+
+                {% endfor %}
+
+              </tbody>
+            </table>
+            <div class="clearfix">
+              <div class="hint-text">Showing <b>5</b> out of <b>25</b> entries</div>
+              <ul class="pagination">
+                <li class="page-item disabled"><a href="#">Previous</a></li>
+                <li class="page-item"><a href="#" class="page-link">1</a></li>
+                <li class="page-item"><a href="#" class="page-link">2</a></li>
+                <li class="page-item active"><a href="#" class="page-link">3</a></li>
+                <li class="page-item"><a href="#" class="page-link">4</a></li>
+                <li class="page-item"><a href="#" class="page-link">5</a></li>
+                <li class="page-item"><a href="#" class="page-link">Next</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- end row -->

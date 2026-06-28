@@ -1,0 +1,331 @@
+{% load static %} 
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fee Slip</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+   
+    <style type="text/css">
+      body {
+        margin-top: 20px;
+        background: #eee;
+      }
+
+      /*Invoice*/
+      .invoice .top-left {
+        font-size: 65px;
+        color: #3ba0ff;
+      }
+
+      .invoice .top-right {
+        text-align: right;
+        padding-right: 100px;
+        padding-top: 15px;
+      }
+
+      .invoice .table-row {
+        margin-left: -15px;
+        margin-right: -15px;
+        margin-top: 25px;
+      }
+
+      .invoice .payment-info {
+        font-weight: 500;
+      } 
+
+      .invoice .table-row .table > thead {
+        border-top: 1px solid #ddd;
+      }
+
+      .invoice .table-row .table > thead > tr > th {
+        border-bottom: none;
+      }
+
+      .invoice .table > tbody > tr > td {
+        padding: 8px 20px;
+      }
+
+      .invoice .invoice-total {
+        margin-right: -10px;
+        font-size: 16px;
+      }
+
+      .invoice .last-row {
+        border-bottom: 1px solid #ddd;
+      }
+
+      .invoice-ribbon {
+        width: 85px;
+        height: 88px;
+        overflow: hidden;
+        position: absolute;
+        top: -1px;
+        right: 0px;
+      }
+
+      .ribbon-inner {
+        text-align: center;
+        transform: rotate(45deg);
+        position: relative;
+        padding: 7px 0;
+        left: -5px;
+        top: 11px;
+        width: 120px;
+        background-color: #66c591;
+        font-size: 15px;
+        color: #fff;
+      }
+
+      .ribbon-inner:before,
+      .ribbon-inner:after {
+        content: "";
+        position: absolute;
+      }
+
+      .ribbon-inner:before {
+        left: 0;
+      }
+
+      .ribbon-inner:after {
+        right: 0;
+      }
+
+      @media (max-width: 575px) {
+        .invoice .top-left,
+        .invoice .top-right,
+        .invoice {
+          text-align: center;
+        }
+
+        .adjust {
+          padding-left: 100px;
+        }
+
+        .invoice .from,
+        .invoice .to,
+        .invoice {
+          float: none;
+          width: 100%;
+          text-align: center;
+          margin-bottom: 25px;
+        }
+
+        .invoice p.lead,
+        .invoice .from p.lead,
+        .invoice .to p.lead,
+        .invoice p.lead {
+          font-size: 22px;
+        }
+
+        .invoice .btn {
+          margin-top: 10px;
+        }
+      }
+
+      @media print {
+        .invoice {
+          width: 148mm; /* A5 width */
+          height: 210mm; /* A5 height */
+          margin: 0;
+          padding: 0;
+        }
+
+        body {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+          -moz-print-color-adjust: exact;
+      
+      }
+      }
+
+      #fixed-button {
+        position: fixed;
+        left: 0px;
+        z-index: 1000!important;
+        top: 50%; /* Set top to 50% */
+        transform: translateY(-50%);
+      }
+    
+      #fixed-button button {
+        color: #FCCF14;
+        display: block;
+        height: 50px;
+        position: relative;
+        text-align: center; 
+        line-height: 40px;
+        width: 50px;
+        margin-bottom: 1px;
+        z-index: 1000;
+        border: none;
+      }
+    
+      #fixed-button button:hover {
+        right: 5px;
+        opacity: 1;
+      }
+    
+      .fixed-icon {
+        background-color: #1D1E4E;
+      }
+    </style>
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/boxicons/2.1.0/css/boxicons.min.css"  />
+  </head>
+
+  <body>
+    
+
+    <div class="container card">
+      <div id="fixed-button">
+        <div>
+          <button class="fixed-icon" id="print-invoice">
+            <i class="bx bxs-printer fs-1"></i>
+          </button>
+        </div>
+        <div>
+          <button class="fixed-icon" id="download-invoice">
+            <i class="bx bxs-file-pdf fs-1"></i>
+          </button>
+        </div>
+        <div>
+          <button class="fixed-icon" id="previous">
+            <i class='bx bx-skip-previous fs-1'></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="bootdeys">
+        <div class="row">
+          <div class="col-12">
+            <div class="panel panel-default invoice" id="invoice"> 
+              <div class="panel-body">
+                <div class="invoice-ribbon">
+                  <div class="ribbon-inner">PAID</div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6 top-left">
+                    <img alt="logo" src="{{institute.institute_logo.url}}" height="80px" />
+                  </div>
+                  <div class="col-md-6 top-right adjust">
+                    <h3 class="marginright">{{institute.institute_name}}</h3>
+                    <span class="marginright">Money Receipt</span>
+                  </div>
+                </div>
+                <hr />
+                <div class="row">
+                  <div class="col-6 text-start">
+                    <p class="lead marginbottom payment-info">Student Details</p>
+                    <p>Name : {{fee.student_id}}</p>
+                    <p>Class : {{fee.student_id.class_id}}</p>
+                    <p>Parent : {{fee.student_id.parent_id}}</p>
+                  </div>
+
+                  <div class="col-6 text-end">
+                    <p class="lead marginbottom payment-info">
+                      Payment Details
+                    </p>
+                    <p>INVOICE: {{fee.transaction_no}}</p>
+                    <p>Payment Date: {{fee.created_at|date:"Y-m-d"}}</p>
+                    <p>Collected By: {{fee.created_by}}</p>
+                  </div>
+                </div>
+                <div class="row table-row table-responsive">
+                  <table class="table">
+                    <thead class="teal-thead">
+                      <tr>
+                        <th class="text-start ps-3">Fee Name</th>
+                        <th class="text-center">Description</th>
+                        {% comment %} <th class="text-center">Waiver</th> {% endcomment %}
+                        <th class="text-center">Include</th>
+                        <th class="text-end pe-3">Payable</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="text-start ps-3">{{fee.feetype_id}}</td>
+                        <td class="text-center" >{{fee.description}}</td>
+                        {% comment %} <td class="text-center">1</td> {% endcomment %}
+                        <td class="text-center">{{fee.fee_breakdown}}</td>
+                        <td class="text-end pe-3">{{fee.total_fee}}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="row">
+                  <div class="col-6 margintop text-start">
+                  
+                    <p
+                      style="margin-top: 50px"
+                      class=""
+                    >_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ </p>
+                    <p class="lead marginbottom payment-info">Accountant Signature</p>
+                  </div>
+
+                  <div class="col-6 invoice-total text-end">
+                    <p>Subtotal :{{fee.total_fee}}</p>
+                    <p>Discount: {{ fee.discount_amount }}</p>
+                    <p>Total : {{ fee.total_fee_after_discount }}</p>
+                  </div>
+                </div>
+              </div> 
+            </div>
+          </div>
+        </div>
+      </div> 
+    </div>
+
+    <script src="{% static 'assets/vendor/libs/jquery/jquery.js' %}"></script>
+    <script src="{% static 'assets/vendor/libs/print/html2pdf.bundle.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'assets/vendor/libs/print/jQuery.print.js' %}"></script>
+
+    <script type="text/javascript">
+      $(document).ready(function () {
+        function pdfGenerator() {
+          let pdfsave = $("#invoice").html();
+          var opt = {
+            margin: 0.2,
+            filename: "{{fee.student_id}} {{fee.feetype_id}}.pdf",
+            image: { type: "jpeg", quality: 0.99 },
+            html2canvas: { dpi: 192, letterRendering: true, useCORS: true },
+            jsPDF: { unit: "in", format: "a5", orientation: "landscape" },
+          };
+
+          html2pdf().set(opt).from(pdfsave).save();
+        }
+
+        // Download Invoice button click event
+        $("#download-invoice").on("click", function () {
+          pdfGenerator();
+        });
+
+        $("#print-invoice").on("click", function () {
+          $("#invoice").print({
+            globalStyles: true,
+            mediaPrint: false,
+            stylesheet: null,
+            noPrintSelector: ".no-print",
+            iframe: true,
+            append: null,
+            prepend: null,
+            manuallyCopyFormValues: true,
+            deferred: $.Deferred(),
+            timeout: 750,
+            title: "Invoice",
+            doctype: "<!doctype html>",
+          });
+        });
+
+        $("#previous").on("click", function () {
+          window.history.back();
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Outstanding Receivables</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .total-row {
+            font-weight: bold;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Outstanding Receivables</h1>
+    <p>From: {{ from_date|default:"None" }} | To: {{ to_date|default:"None" }}</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Voucher No</th>
+                <th>Received From</th>
+                <th>Total Amount</th>
+                <th>Date</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for receive in outstanding_receives %}
+            <tr>
+                
+                <td>{{ receive.voucher_no }}</td>
+                <td>{{ receive.received_from.name }}</td>
+                <td>{{ receive.total_amount }}</td>
+                <td>{{ receive.date }}</td>
+                <td>{{ receive.description }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">No outstanding receivables found for the selected period.</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <th colspan="4">Total Outstanding</th>
+                <th>{{ total_outstanding }}</th>
+            </tr>
+        </tbody>
+        </table>
+</body>
+</html>

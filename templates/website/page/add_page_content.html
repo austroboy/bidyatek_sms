@@ -1,0 +1,44 @@
+{% load widget_tweaks %}
+{% block content %}
+<form hx-post="{{ request.path }}" hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}' enctype="multipart/form-data" class="modal-content">
+  <div>
+    <h4 class="modal-header">Edit Content</h4>
+  </div>
+  <div class="modal-body">
+
+    <div class="mb-3">
+      <label for="{{ form.page_id.id_for_label }}">Page ID:</label> 
+      {% render_field form.page_id class="form-control"  %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.heading.id_for_label }}">Heading:</label> 
+      {% render_field form.heading class="form-control" %} 
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.sub_heading.id_for_label }}">Sub Heading:</label>
+      {% render_field form.sub_heading class="form-control" %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.img.id_for_label }}">Picture:</label>
+      {% render_field form.img class="form-control" %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.link.id_for_label }}">Video Link:</label>
+      {% render_field form.link class="form-control" %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.text.id_for_label }}">Body:</label>
+      {% render_field form.text class="form-control" %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.status.id_for_label }}">Status:</label>
+      {% render_field form.status class="form-control" %}
+    </div>
+    
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+    <button type="submit" class="btn btn-primary">Save</button>
+  </div>
+</form>
+{% endblock content %}

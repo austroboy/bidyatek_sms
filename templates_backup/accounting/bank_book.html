@@ -1,0 +1,198 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load template_tags %} 
+{% block extra_css %} 
+<style>
+  .header {
+          font-size: 1.5rem;
+          font-weight: 500;
+        }
+     .filter-section {
+      display: flex;
+      gap: 20px;
+      justify-content: space-between;
+      align-items: end;
+      margin-bottom: 20px;
+    }
+    @media screen and (max-width: 560px) {
+      .filter-section {
+         flex-wrap: wrap;
+      }
+    }
+    .filter-section div{
+      width: 100%;
+    }
+    .filter-section label {
+      font-size: 16px;
+      color: #333333;
+      margin-bottom: 2px;
+    }
+    .filter-section input {
+      padding: 8px;
+      border: 2px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+      width: 100%;
+    }
+    .filter-section input:focus {
+      border: 2px solid #1a237e;
+      outline: none;
+    }
+
+    .filter-section button {
+      padding: 10px 25px;
+      background-color: #1a237e;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .filter-section button:hover {
+      background-color: #283593;
+    }
+    h3 {
+      text-align: center;
+      color: #333333;
+      margin: 35px 0;
+    }
+    .section {
+      margin-bottom: 20px;
+    }
+    .section h3 {
+      text-align: center;
+      background-color: #e3f2fd;
+      color:#333333;
+      margin: 0;
+      padding: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 4px 4px 0 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      color: #333333;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th{
+      background-color: #e3f2fd;
+      font-weight: bold;
+    }
+    
+    th, td {
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
+    }
+    td[colspan="3"] {
+       font-weight: bold;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    .total-row {
+      background-color: #e3f2fd!important;
+      font-weight: bold;
+    }
+</style>
+{% endblock extra_css %} 
+
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+
+  <div class="card">
+      <div class="card-body">
+        <h3 class="header">Bank Book Report</h3>
+        <hr/>
+
+        <!-- Filter Form -->
+        <form method="get">
+          <div class="form-grid">
+              <div class="filter-section">
+                  <div class="space-y-2">
+                      <label for="from_date">From Date</label>
+                      <input class="input" type="date" name="from_date" value="{{ from_date|default:'' }}">
+                  </div>
+                  <div class="space-y-2">
+                      <label for="to_date">To Date</label>
+                      <input class="input" type="date" name="to_date" value="{{ to_date|default:'' }}">
+                  </div>
+                  <div class="flex justify-end align-self-end">
+                      <button type="submit" class="button btn btn-primary">Search</button>
+                  </div>
+              </div>
+          </div>
+        </form>
+
+        <!-- Bank Book Report -->
+        <div class="attendance_sheet section">
+          <h6>Bank Book from {{ from_date }} to {{ to_date }}</h6>
+
+          <div class="summary">
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th class="text-right text-success">Debit</th>
+                        <th class="text-right text-danger">Credit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="bg-light text-bold">
+                        <td colspan="2"><strong>Opening Balance</strong></td>
+                        <td class="text-right text-primary">{{ total_opening_balance|default:0|floatformat:2 }}</td>
+                        <td></td>
+                    </tr>
+
+                    {% for entry in bank_entries %}
+                    <tr>
+                        <td>{{ entry.date }}</td>
+                        <td>{{ entry.description|default:"-" }}</td>
+                        <td class="text-right text-success">
+                            {% if entry.entry_type == "Debit" %}
+                                {{ entry.amount|floatformat:2 }}
+                            {% endif %}
+                        </td>
+                        <td class="text-right text-danger">
+                            {% if entry.entry_type == "Credit" %}
+                                {{ entry.amount|floatformat:2 }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                    <tr class="bg-secondary text-white">
+                        <td colspan="2"><strong>Total Transactions</strong></td>
+                        <td class="text-right text-success">{{ total_debit|floatformat:2 }}</td>
+                        <td class="text-right text-danger">{{ total_credit|floatformat:2 }}</td>
+                    </tr>
+
+                    <tr class="bg-primary text-white">
+                        <td colspan="2"><strong>Closing Balance</strong></td>
+                        <td class="text-right">{{ closing_balance|floatformat:2 }}</td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+  </div>
+</div>
+
+
+<!-- end: Content -->
+
+{% endblock content %} 
+{% block extra_javascript %} 
+
+
+{% endblock extra_javascript%}

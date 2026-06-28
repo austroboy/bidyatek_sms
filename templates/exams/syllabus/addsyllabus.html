@@ -1,0 +1,37 @@
+{% load widget_tweaks %}
+<form hx-post="{{ request.path }}" hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}' enctype="multipart/form-data" class="modal-content">
+  <div>
+    <h1 class="modal-header">Add-Edit Syllabus</h1>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <label for="{{ form.exam_name.id_for_label }}" class="form-label">Exam Name</label>
+      {% render_field form.exam_name class+="form-control" %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.classname.id_for_label }}" class="form-label">Class Name</label>
+      {% render_field form.classname id="id_classname" class+="form-control" %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.subject_id.id_for_label }}" class="form-label">Subject</label>
+      {% render_field form.subject_id class+="form-control" %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.academic_year.id_for_label }}" class="form-label">Admission Year</label>
+      {% render_field form.academic_year class+="form-control" %}
+    </div>
+    <div class="mb-3" id="academic-session-container" style="display: none;">
+      <label for="{{ form.academic_session_year.id_for_label }}" class="form-label">Admission Session Year</label>
+      {% render_field form.academic_session_year id="id_academic_session_year" class+="form-control" %}
+  </div>
+    <div class="mb-3">
+      <label for="{{ form.files.id_for_label }}" class="form-label">Syllabus</label>
+      {% render_field form.files|attr:"type:file" class+="form-control" %}
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+    <button type="submit" class="btn btn-primary">Save</button>
+  </div>
+</form>
+

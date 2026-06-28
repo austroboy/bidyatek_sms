@@ -1,0 +1,1400 @@
+{% load static %} 
+{% load template_tags %} 
+{% with request.resolver_match.url_name as path_name %} 
+{% block sidebar %}
+
+<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme logicunite_side_menu">
+  
+
+  <div class="menu-header-seachbar">
+    <div id="searchBarContainer">
+      <div class="search-bar">
+        <input
+          type="text"
+          placeholder="Search term"
+          class="search-input"
+        />
+        <div class="icon-container">
+          <i id="toggleIcon" class='bx bx-chevron-up'></i>
+        </div>
+      </div>
+    </div>
+    <div id="coverImageContainer">
+      <div id="showSearchBarButton" class="icon-wrapper">
+        <i class='bx bx-chevron-down'></i>
+      </div>
+      <a href="{% url 'dashboard' %}" class="d-flex justify-content-center align-items-center pt-2  mx-auto">
+        {% comment %} <img height="80px" src="{{institute.institute_logo.url}}" alt=""> {% endcomment %}
+        <img src="{% static 'assets/img/bidyatek.png' %}" alt="Logo" style="max-width: 80%; height: auto;">
+      </a> 
+    </div>
+
+    <div class="app-brand demo">
+      {% comment %} <a href="{% url 'dashboard' %}" class="app-brand-link pt-2 mx-auto">
+        <img height="50px" src="{% static 'assets/img/bidyatek.png' %}" alt="Logo">
+      </a> {% endcomment %}
+  
+      {% comment %} <a href="index.html" class="app-brand-link">
+        <span class="app-brand-text demo menu-text fw-bold ms-2"
+          >School</span
+        >
+      </a> {% endcomment %}
+  
+      <a
+        href="javascript:void(0);"
+        class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none"
+      >
+        <i class="bx bx-chevron-left bx-sm align-middle"></i>
+      </a>
+    </div>
+
+  </div>
+
+
+
+  {% comment %} <div class="menu-inner-shadow"></div> {% endcomment %}
+
+  <ul class="menu-inner py-1">
+    <!-- Dashboards -->
+
+    <li
+      class="menu-item {% if '/dashboard/' in request.path %}active{% endif %}"
+    >
+      <a href="{% url 'dashboard' %}" class="menu-link">
+        <i class="menu-icon tf-icons bx bx-home-circle"></i>
+        <div data-i18n="Dashboards">Dashboards</div>
+        <div class="badge bg-danger rounded-pill ms-auto">New</div>
+      </a>
+    </li> 
+    
+    <li
+      class="menu-item {% if '/institute' in request.path %}active{% endif %}"
+    >
+      <a href="{% url 'institute' %}" class="menu-link">
+        <i class="menu-icon tf-icons bx bxs-school"></i>
+        <div data-i18n="Institute">Institute Profile</div>
+      </a>
+    </li>
+
+    <li class="menu-header small text-uppercase">
+      <span class="menu-header-text">Apps &amp; Pages</span>
+    </li>
+
+    <!-- Academic Events -->
+    <li
+      class="menu-item {% if '/academic_event/' in request.path %}active open{% endif %}" data-is-module="true"
+    >
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bx-calendar"></i>
+        <div data-i18n="Academic_Events">Academic Events</div>
+      </a>
+      <ul class="menu-sub">
+        <li
+          class="menu-item {% if '/event/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'event' %}" class="menu-link">
+            <div data-i18n="Events">Events</div>
+          </a>
+        </li>
+        <li
+          class="menu-item {% if '/event_detail/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'event_detail' %}" class="menu-link">
+            <div data-i18n="Event_List">Event List</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+    <!-- Settings -->
+
+    {% if user|is_staff_or_in_group:"" or user|has_role:"Manager"  or user|has_role:"HR" %}
+    <li
+      class="menu-item {% if '/settings/' in request.path %}active open{% endif %}" data-is-module="true"
+    >
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bx-cog"></i>
+        <div data-i18n="Settings">Settings</div>
+      </a>
+      <ul class="menu-sub">
+        <li
+          class="menu-item {% if '/basic_setup/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'basic_setup' %}" class="menu-link">
+            <div data-i18n="Academic_Setup">Academic Setup</div>
+          </a>
+        </li>
+        <li
+          class="menu-item {% if '/list_weekend_config/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'list_weekend_config' %}" class="menu-link">
+            <div data-i18n="list_weekend_config">Academic Time</div>
+          </a>
+        </li>
+
+
+        <li
+          class="menu-item {% if '/list_class_config/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'list_class_config' %}" class="menu-link">
+            <div data-i18n="Class_Config">Class Config</div>
+          </a>
+        </li>
+
+        <li
+          class="menu-item {% if '/period_config/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'period_config' %}" class="menu-link">
+            <div data-i18n="Period_Config">Period Config</div>
+          </a>
+        </li>
+       
+        
+        <li
+          class="menu-item {% if '/create_subject_assign/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'create_subject_assign' %}" class="menu-link">
+            <div data-i18n="Subject Assign">Class Subject Assign</div>
+          </a>
+        </li>
+
+        <li
+          class="menu-item {% if '/create_teacher_assign/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'create_teacher_assign' %}" class="menu-link">
+            <div data-i18n="create_teacher_assign">Teacher Subject Assign</div>
+          </a>
+        </li>
+        
+        <li
+          class="menu-item {% if '/submit_mark_config/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'submit_mark_config' %}" class="menu-link">
+            <div data-i18n="submit_mark_config">Mark Config</div>
+          </a>
+        </li>
+
+        <!-- <li
+          class="menu-item {% if '/list_mark_config/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'list_mark_config' %}" class="menu-link">
+            <div data-i18n="list_mark_config">Mark divide</div>
+          </a>
+        </li> -->
+
+        <li
+          class="menu-item {% if '/choosable_subject/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'choosable_subject' %}" class="menu-link">
+            <div data-i18n="choosable_subject">Choosable Subject</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+    {% endif %}
+
+
+    <!-- Routine -->
+    {% if user|is_staff_or_in_group:"" or user|has_role:"Manager"  or user|has_role:"HR" %}
+    <li
+      class="menu-item {% if '/classroutine/' in request.path %}active open{% endif %}" data-is-module="true"
+    >
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bxs-hourglass"></i>
+        <div data-i18n="Routine">Routine</div> 
+      </a>
+      <ul class="menu-sub">
+        <li
+          class="menu-item {% if '/list_routine/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'list_routine' %}" class="menu-link">
+            <div data-i18n="Routine">Routine</div>
+          </a>
+        </li>
+        <li
+          class="menu-item {% if '/search_teacher/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'search_teacher' %}" class="menu-link">
+            <div data-i18n="Teacher_Schedule">Teacher Routine</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+    {% endif %}
+
+    <!-- Exam -->
+    {% if user|is_staff_or_in_group:"" or user|has_role:"Manager"  or user|has_role:"HR" %}
+    <li
+      class="menu-item {% if '/exam/' in request.path %}active open{% endif %}" data-is-module="true"
+    >
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bx-edit"></i>
+        <div data-i18n="Exam">Exam</div>
+      </a>
+      <ul class="menu-sub">
+        <li
+          class="menu-item {% if '/examname/' in request.path %}active{% endif %}" data-is-sub-menu="true" 
+        >
+          <a href="{% url 'examname' %}" class="menu-link">
+            <div data-i18n="Exam_Name">Exam Name</div>
+          </a>
+        </li>
+        <li
+          class="menu-item {% if '/syllabus/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'syllabus' %}" class="menu-link">
+            <div data-i18n="Syllabus">Exam Syllabus</div>
+          </a>
+        </li>
+        <li
+          class="menu-item {% if '/listschedule/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'listschedule' %}" class="menu-link">
+            <div data-i18n="Schedule">Exam Schedule</div>
+          </a>
+        </li>
+        <li
+          class="menu-item {% if '/exam_schedule/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'exam_schedule' %}" class="menu-link">
+            <div data-i18n="Exam Schedule">Schedule Download</div>
+          </a>
+        </li>
+       
+
+        <li class="menu-item {% if '/admit_card/' in request.path %}active open{% endif %}" data-is-sub-menu="true" >
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div class="text-truncate" data-i18n="Login">Admit Card Downlaod</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item {% if '/admit_card_without_routine/' in request.path %}active {% endif %}">
+              <a href="{% url 'admit_card_without_routine' %}" class="menu-link">
+                <div class="text-truncate" data-i18n="admit_card_without_routine">Simple Admit Card</div>
+              </a>
+            </li>
+            <li class="menu-item {% if '/admit_card_with_routine/' in request.path %}active{% endif %}">
+              <a href="{% url 'admit_card_with_routine' %}" class="menu-link">
+                <div class="text-truncate" data-i18n="admit_card_with_routine">Admit Card With Routine</div>
+              </a>
+            </li>
+           
+          </ul>
+        </li>
+
+        <li
+          class="menu-item {% if '/seatplan/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'seatplan' %}" class="menu-link">
+            <div data-i18n="seatplan">Seat Plan</div>
+          </a>
+        </li>
+        <li
+          class="menu-item {% if '/grade/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'grade' %}" class="menu-link">
+            <div data-i18n="Grade_Rule">Grade Rule</div>
+          </a>
+        </li>
+
+        <li
+          class="menu-item {% if '/mark_blank_sheet/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'mark_blank_sheet' %}" class="menu-link">
+            <div data-i18n="mark_blank_sheet">Mark Blank Sheet</div>
+          </a>
+        </li>
+
+        <!-- <li
+          class="menu-item {% if '/oral_mark_sheet/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'oral_mark_sheet' %}" class="menu-link">
+            <div data-i18n="oral_mark_sheet">Oral Mark Sheet</div>
+          </a>
+        </li> -->
+
+        <li
+          class="menu-item {% if '/exam_signature_sheet/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'exam_signature_sheet' %}" class="menu-link">
+            <div data-i18n="exam_signature_sheet">Exam Signature Sheet</div>
+          </a>
+        </li>
+        
+        <!-- <li
+          class="menu-item {% if '/exam_fee_sheet/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'exam_fee_sheet' %}" class="menu-link">
+            <div data-i18n="exam_fee_sheet">Exam Fee Sheet</div>
+          </a>
+        </li> -->
+       
+      </ul>
+    </li>
+    {% endif %}
+
+    {% if user|in_group:"student, parent, teacher" %}
+        <li
+        class="menu-item {% if '/exam_schedule/' in request.path %}active{% endif %}" data-is-module="true"
+      >
+        <a href="{% url 'exam_schedule' %}" class="menu-link">
+          <i class="menu-icon tf-icons bx bx-timer"></i>
+          <div data-i18n="exam_schedule">Exam Routine</div>
+        </a>
+      </li> 
+    {% endif %}
+
+    <!-- Result -->
+
+    {% if user|is_staff_or_in_group:"" or user|has_role:"Manager"  or user|has_role:"HR" %}
+    <li
+      class="menu-item {% if '/result/' in request.path %}active open{% endif %}" data-is-module="true"
+    >
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bx-math"></i> 
+        <div data-i18n="Exam">Result</div>
+      </a>
+      <ul class="menu-sub">
+        
+        <li
+          class="menu-item {% if '/mark_list/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'mark_list' %}" class="menu-link">
+            <div data-i18n="mark_list">Mark Input</div>
+          </a>
+        </li>
+       
+
+        <li class="menu-item {% if '/tabulation_sheet/' in request.path %}active open{% endif %}" data-is-sub-menu="true" >
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div class="text-truncate" data-i18n="Login">Tabulation Sheet</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item {% if '/wide_tabulation_sheet/' in request.path %}active {% endif %}">
+              <a href="{% url 'wide_tabulation_sheet' %}" class="menu-link">
+                <div class="text-truncate" data-i18n="wide_tabulation_sheet">Tabulation Report</div> 
+                <div class="badge bg-danger rounded-pill ms-auto">1</div>
+              </a>
+            </li>
+            <li class="menu-item {% if '/narrow_tabulation_report/' in request.path %}active{% endif %}">
+              <a href="{% url 'narrow_tabulation_report' %}" class="menu-link">
+                <div class="text-truncate" data-i18n="Date Wise">Tabulation Report</div>
+                <div class="badge bg-danger rounded-pill ms-auto">2</div>
+              </a>
+            </li>
+            
+          </ul>
+        </li>
+
+        <li
+          class="menu-item {% if '/progress_report/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'progress_report' %}" class="menu-link">
+            <div data-i18n="progress_report">Progress Report</div>
+          </a>
+        </li>
+        <li
+          class="menu-item {% if '/merit_list/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'merit_list' %}" class="menu-link">
+            <div data-i18n="merit_list">Merit List</div>
+          </a>
+        </li>
+        <li
+          class="menu-item {% if '/subject_wise_analysis/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'subject_wise_analysis' %}" class="menu-link">
+            <div data-i18n="subject_wise_analysis">Subject Wise Analysis</div>
+          </a>
+        </li>
+        <li
+          class="menu-item {% if '/result_overview/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'result_overview' %}" class="menu-link">
+            <div data-i18n="result_overview">Result Overview</div>
+          </a>
+        </li>
+        <li
+          class="menu-item {% if '/top-last-students/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'top_last_students_report' %}" class="menu-link">
+            <div data-i18n="top-last-students">Top 10 and Last 10</div>
+          </a>
+        </li>
+        <li
+          class="menu-item {% if '/subject-wise-fail/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'subject_wise_fail_report' %}" class="menu-link">
+            <div data-i18n="subject-wise-fail">Subject Wise Fail</div>
+          </a>
+        </li>
+
+        {% comment %} <li
+          class="menu-item {% if '/list_certificate/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'list_certificate' %}" class="menu-link">
+            <div data-i18n="list_certificate">Certificate</div>
+          </a>
+        </li> {% endcomment %}
+
+        {% comment %} <li
+          class="menu-item {% if '/result_summary/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'result_summary' %}" class="menu-link">
+            <div data-i18n="result_summary">Result Summary</div>
+          </a>
+        </li> {% endcomment %}
+        
+      </ul>
+    </li>
+    {% endif %}
+
+
+
+    {% if user|in_group:"teacher" %}
+   
+        <li
+          class="menu-item {% if '/mark_list' in request.path %}active{% endif %}" data-is-module="true"
+        >
+          <a href="{% url 'mark_list' %}" class="menu-link">
+            <i class="menu-icon tf-icons bx bx-list-plus"></i>
+            <div data-i18n="mark_list">Mark Input</div>
+          </a>
+        </li>
+
+    {% endif %}
+
+    {% if user|has_role:"DataEntry" %}
+   
+        <li
+          class="menu-item {% if '/mark_list' in request.path %}active{% endif %}" data-is-module="true"
+        >
+          <a href="{% url 'mark_list' %}" class="menu-link">
+            <i class="menu-icon tf-icons bx bx-list-plus"></i>
+            <div data-i18n="mark_list">Mark Input</div>
+          </a>
+        </li>
+
+    {% endif %}
+
+    <!-- Download -->
+
+    {% if user|is_staff_or_in_group:"teacher" or user|has_role:"Manager"  or user|has_role:"HR" %}
+    <li
+        class="menu-item {% if '/study_material' in request.path %}active{% endif %}" data-is-module="true"
+      >
+        <a href="{% url 'study_material' %}" class="menu-link">
+          <i class="menu-icon tf-icons bx bx-cloud-download"></i>
+          <div data-i18n="study_material">Study Material</div>
+        </a>
+      </li>
+    {% endif %}
+    <!-- Student -->
+    {% if user|is_staff_or_in_group:"" or user|has_role:"Manager"  or user|has_role:"HR" %}
+    
+    <li
+      class="menu-item {% if '/student/' in request.path %}active open{% endif %}" data-is-module="true"
+    >
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bx-book-reader"></i>
+        <div data-i18n="Student">Student Info</div>
+      </a>
+      <ul class="menu-sub">
+        
+        <li
+          class="menu-item {% if '/add_student/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'add_student' %}" class="menu-link">
+            <div data-i18n="Add_Student">Add Student</div>
+          </a>
+        </li>
+        <li
+          class="menu-item {% if '/list_student/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'list_student' %}" class="menu-link">
+            <div data-i18n="List_Student">List Student</div>
+          </a>
+        </li>
+        <li
+          class="menu-item {% if '/list_testmonial/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'list_testmonial' %}" class="menu-link">
+            <div data-i18n="list_testmonial">Student Testimonial</div>
+          </a>
+        </li>
+        <li class="menu-item {% if '/waiver/' in request.path %}active{% endif %}" data-is-sub-menu="true"> 
+          <a href="{% url 'waiver' %}" class="menu-link">
+            <div data-i18n="Fee_Type">Student Waiver</div>
+          </a>
+        </li>
+        <li
+          class="menu-item {% if '/student_id_data/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'student_id_data' %}" class="menu-link">
+            <div data-i18n="student_id_data">Student Id Card</div>
+          </a>
+        </li>
+
+        <li class="menu-item {% if '/rfid_update/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'rfid_update' %}" class="menu-link">
+            <div data-i18n="rfid_update">Rfid Update</div> 
+          </a>
+        </li>
+
+        <li
+          class="menu-item {% if '/list_migrations/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'list_migrations' %}" class="menu-link">
+            <div data-i18n="list_migrations">Student Migration</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+    {% endif %}
+    {% if user|has_role:"Accountant" %}
+    <li
+      class="menu-item {% if '/student/' in request.path %}active open{% endif %}" data-is-sub-menu="true"
+    >
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bx-book-reader"></i>
+        <div data-i18n="Student">Student Info</div>
+      </a>
+      <ul class="menu-sub">
+        
+        <li
+          class="menu-item {% if '/list_student/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'list_student' %}" class="menu-link">
+            <div data-i18n="List_Student">List Student</div>
+          </a>
+        </li>
+       
+        <li class="menu-item {% if '/waiver/' in request.path %}active{% endif %}" data-is-sub-menu="true" >
+          <a href="{% url 'waiver' %}" class="menu-link">
+            <div data-i18n="Fee_Type">Student Waiver</div>
+          </a>
+        </li>
+       
+      </ul>
+    </li>
+    {% endif %}
+    
+    
+    <!-- Staff -->
+    {% if user|is_staff_or_in_group:"" or user|has_role:"Manager"  or user|has_role:"HR" %}
+    <li
+      class="menu-item {% if '/staff/' in request.path %}active open{% endif %}" data-is-module="true"
+    >
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bx-user-circle"></i>
+        <div data-i18n="Teacher">Staff Info</div>
+      </a>
+      <ul class="menu-sub">
+        <li
+          class="menu-item {% if '/add_staff/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'add_staff' %}" class="menu-link">
+            <div data-i18n="Add_Staff">Add Staff</div>
+          </a>
+        </li>
+        <li
+          class="menu-item {% if '/list_staff/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'list_staff' %}" class="menu-link">
+            <div data-i18n="list_staff">List Staff</div>
+          </a>
+        </li>
+        <li
+          class="menu-item {% if '/staff_id_data/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'staff_id_data' %}" class="menu-link">
+            <div data-i18n="staff_id_data">Staff Id Card</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+
+    {% endif %}
+    <!-- Parents -->
+    {% if user|is_staff_or_in_group:"" or user|has_role:"Manager"  or user|has_role:"HR" %}
+    <li
+      class="menu-item {% if '/parent/' in request.path %}active open{% endif %}"  data-is-module="true"
+    >
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bx-group"></i>
+        <div data-i18n="Parents">Parent Info</div>
+      </a>
+      <ul class="menu-sub">
+        <li
+          class="menu-item {% if '/add_parent/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'add_parent' %}" class="menu-link">
+            <div data-i18n="Add_Parents">Add Parents</div>
+          </a>
+        </li>
+        <li
+          class="menu-item {% if '/list_parent/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'list_parent' %}" class="menu-link">
+            <div data-i18n="List_Parents">List Parents</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+
+    {% endif %}
+
+    <!-- Attendance -->
+    {% if user|is_staff_or_in_group:"" or user|has_role:"Manager"  or user|has_role:"HR" %}
+    <li class="menu-item {% if '/attendance/' in request.path %}active open{% endif %}" data-is-module="true">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bx-check-square"></i>
+        <div data-i18n="Attendance">Attendance & Leave</div>
+        {% if leave_request_check %}
+            <span class="badge"><i style="color:#FF3D60 ; font-size: 8px;" class='bx bxs-circle'></i></span> 
+        {% endif %}
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item {% if '/student_attendance/' in request.path %}active{% endif %}" data-is-sub-menu="true" >
+          <a href="{% url 'student_attendance' %}" class="menu-link">
+            <div data-i18n="Student_Attendance">Student Attendance</div>
+          </a>
+        </li>
+        
+        <li class="menu-item {% if '/staff_attendance/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'staff_attendance' %}" class="menu-link">
+            <div data-i18n="Staff_Attendance">Staff Attendance</div>
+          </a>
+        </li>
+
+        <li class="menu-item {% if '/student_hostel_attendance/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'student_hostel_attendance' %}" class="menu-link">
+            <div data-i18n="student_hostel_attendance">Hostel Attendance</div>
+          </a>
+        </li>
+        
+        <li class="menu-item {% if '/leave_quota/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'leave_quota' %}" class="menu-link">
+            <div data-i18n="leave_quota">Leave Quota</div>
+          </a>
+        </li>
+
+        <li class="menu-item {% if '/leave_type/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'leave_type' %}" class="menu-link">
+            <div data-i18n="Leave Type">Leave Type</div>
+          </a>
+        </li>
+
+        <li class="menu-item {% if '/leave_request/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'leave_request' %}" class="menu-link">
+            <div data-i18n="Leave Request">Leave Request</div>
+            {% if leave_request_check %}
+            <span class="badge"><i style="color:#FF3D60 ; font-size: 8px;" class='bx bxs-circle'></i></span> 
+            {% endif %}
+          </a>
+        </li>
+        <li class="menu-item {% if '/holiday/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'holiday' %}" class="menu-link">
+            <div data-i18n="holiday">Holiday</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+    {% endif %}
+
+    {% if user|in_group:"teacher" %}
+   
+    <li
+      class="menu-item {% if '/student_attendance' in request.path %}active{% endif %}" data-is-module="true"
+    >
+      <a href="{% url 'student_attendance' %}" class="menu-link">
+        <i class="menu-icon tf-icons bx bx-check-square"></i>
+        <div data-i18n="student_attendance">Student Attendance</div>
+      </a>
+    </li>
+    {% endif %}
+
+    
+
+    <!-- Fees -->
+    {% if user|is_staff_or_in_group:"" or user|has_role:"Manager"  or user|has_role:"Accountant" %}
+    <li class="menu-item {% if '/fees/' in request.path %}active open{% endif %}" data-is-module="true" >
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bx-dollar-circle"></i>
+        <div data-i18n="Fee">Fees</div>
+      </a>
+      
+      <ul class="menu-sub">
+        
+        
+        <li class="menu-item {% if '/fees_head/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'fees_head' %}" class="menu-link">
+            <div data-i18n="fees_head">Fees Head</div>
+          </a>
+        </li>
+      
+        <li class="menu-item {% if '/feetype/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'feetype' %}" class="menu-link">
+            <div data-i18n="Fee_Type">Fees Type</div>
+          </a>
+        </li>
+        <li class="menu-item {% if '/feepackage/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'feepackage' %}" class="menu-link">
+            <div data-i18n="feepackage">Fees Amount</div>
+          </a>
+        </li>
+        <li class="menu-item {% if '/fees_master/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'fees_master' %}" class="menu-link">
+            <div data-i18n="fees_master">Fees Master</div>
+          </a>
+        </li>
+        <li class="menu-item {% if '/addfee/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'addfee' %}" class="menu-link">
+            <div data-i18n="Add_Fee">Fee Allocation</div>
+          </a>
+        </li>
+        <li class="menu-item {% if '/listfee/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'listfee' %}" class="menu-link">
+            <div data-i18n="Fees_Collection">Fees Collection</div>
+          </a>
+        </li>
+        
+        <li class="menu-item {% if '/student_fee/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'student_fee' %}" class="menu-link">
+            <div data-i18n="Fee_Type">Student Fee</div> 
+          </a>
+        </li>
+
+        
+        {% if user|is_staff_or_in_group:"" %}
+      
+        <li class="menu-item {% if '/put_back_fee/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'put_back_fee' %}" class="menu-link">
+            <div data-i18n="put_back_fee">Put Back Fee</div>  
+          </a>
+        </li>
+        {% endif %}
+
+        {% if user|is_staff_or_in_group:"" %}
+      
+        <li class="menu-item {% if '/del_fee/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'del_fee' %}" class="menu-link">
+            <div data-i18n="del_fee">Delete Fee</div>  
+          </a>
+        </li>
+        {% endif %}
+        
+      </ul>
+    </li> 
+
+    {% endif %}
+   
+    
+    {% if user|in_group:"student, parent" %}
+    <li class="menu-item {% if '/showfee/' in request.path %}active{% endif %}" data-is-module="true">
+      <a href="{% url 'showfee' %}" class="menu-link">
+        <i class="menu-icon tf-icons bx bx-dollar-circle"></i>
+        <div data-i18n="Fee_Type">Student Fee</div>
+      </a>
+    </li>
+
+    {% endif %}
+
+    <!-- Payroll -->
+    {% if user|is_staff_or_in_group:"" or user|has_role:"Manager"  or user|has_role:"Accountant" %}
+   
+    <li
+      class="menu-item {% if '/payroll/' in request.path %}active open{% endif %}"  data-is-module="true"
+    >
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bx-money"></i>
+        <div data-i18n="Payroll">Payroll</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item {% if '/salary_allocation/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'salary_allocation' %}" class="menu-link">
+            <div class=" menu-size" data-i18n="salary_allocation">Salary Allocation</div>
+          </a>
+        </li>
+        <li class="menu-item {% if '/salary_config/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'salary_config' %}" class="menu-link">
+            <div class=" menu-size" data-i18n="Salary Config">Salary Config</div>
+          </a>
+        </li>
+        <li class="menu-item {% if '/salary_increment/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'salary_increment' %}" class="menu-link">
+            <div class=" menu-size" data-i18n="Salary Increment">Salary Increment</div>
+          </a>
+        </li>
+        <li
+          class="menu-item {% if '/addition/' in request.path %}active{% endif %}"
+        >
+        <a href="{% url 'addition' %}" class="menu-link">
+            <div data-i18n="Addition">Addition Type</div>
+          </a>
+        </li>
+        <li
+          class="menu-item {% if '/deduction/' in request.path %}active{% endif %}"
+        >
+          <a href="{% url 'deduction' %}" class="menu-link">
+            <div data-i18n="Deduction">Deduction Type</div>
+          </a> 
+        </li>
+        <li
+          class="menu-item {% if '/salary_process/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'salary_process' %}" class="menu-link">
+            <div data-i18n="Salary Process">Salary Process</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+
+    {% endif %}
+
+    {% if user|is_staff_or_in_group:"" %}
+    <span></span>
+    {% elif user|is_staff_or_in_group:"teacher,staff"  or user|has_role:"HR" or user|has_role:"Manager"  or user|has_role:"Accountant" %}
+    <li
+    class="menu-item {% if '/employee_salary/' in request.path %}active{% endif %}" data-is-module="true"
+    >
+    <a href="{% url 'employee_salary' %}" class="menu-link">
+      <i class="menu-icon tf-icons bx bxs-credit-card"></i>
+      <div data-i18n="employee_salary">Self Salary List</div>
+    </a>
+   </li>
+
+    {% endif %}
+
+
+     <!-- Hostel -->
+     {% if user|is_staff_or_in_group:"" or user|has_role:"Manager"  or user|has_role:"Accountant" %}
+     
+     <li class="menu-item {% if '/service/' in request.path %}active open{% endif %}" data-is-module="true" >
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bx-shape-square"></i> 
+        <div data-i18n="Services">Services</div>
+      </a>
+
+      <ul class="menu-sub">
+
+        <li class="menu-item {% if '/hostel/' in request.path %}active open{% endif %}" data-is-sub-menu="true">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div class="text-truncate" data-i18n="hostel">Hostel</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item {% if '/packagetype/' in request.path %}active {% endif %}">
+              <a href="{% url 'packagetype' %}" class="menu-link">
+                <div class="text-truncate" data-i18n="packagetype">Hostel Package</div>
+              </a>
+            </li>
+            
+            <li class="menu-item {% if '/hostel_package_allocate/' in request.path %}active{% endif %}">
+              <a href="{% url 'hostel_package_allocate' %}" class="menu-link">
+                <div class="text-truncate" data-i18n="Date Wise">Hostel Allocation</div>
+              </a>
+            </li>
+          </ul>
+        </li>
+
+        <li class="menu-item {% if '/tution/' in request.path %}active open{% endif %}" data-is-sub-menu="true">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div class="text-truncate" data-i18n="tution">Coaching</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item {% if '/tution_packagetype/' in request.path %}active {% endif %}">
+              <a href="{% url 'tution_packagetype' %}" class="menu-link">
+                <div class="text-truncate" data-i18n="tution_packagetype">Coaching Package</div>
+              </a>
+            </li>
+            
+            <li class="menu-item {% if '/tution_package_allocate/' in request.path %}active{% endif %}">
+              <a href="{% url 'tution_package_allocate' %}" class="menu-link">
+                <div class="text-truncate" data-i18n="tution_package_allocate">Coaching Allocation</div>
+              </a>
+            </li> 
+          </ul>
+        </li>
+
+        <li class="menu-item {% if '/transport/' in request.path %}active open{% endif %}" data-is-sub-menu="true">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div class="text-truncate" data-i18n="transport">Transport</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item {% if '/transport_packagetype/' in request.path %}active {% endif %}">
+              <a href="{% url 'transport_packagetype' %}" class="menu-link">
+                <div class="text-truncate" data-i18n="transport_packagetype">Transport Package</div>
+              </a>
+            </li>
+            
+            <li class="menu-item {% if '/transport_package_allocate/' in request.path %}active{% endif %}">
+              <a href="{% url 'transport_package_allocate' %}" class="menu-link">
+                <div class="text-truncate" data-i18n="transport_package_allocate">Transport Allocation</div>
+              </a>
+            </li> 
+          </ul>
+        </li>
+
+      </ul>
+    </li>
+     
+     {% endif %}
+
+    <!-- Accounts Management -->
+    {% if user|is_staff_or_in_group:"" or user|has_role:"Manager"  or user|has_role:"Accountant" %}
+    <li
+      class="menu-item {% if '/accounting/' in request.path %}active open{% endif %}" data-is-module="true"
+    >
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bx-wallet-alt"></i>
+        <div data-i18n="Parents">Accounts Management</div>
+      </a>
+      <ul class="menu-sub">
+        <li
+          class="menu-item {% if '/ledger/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'ledger_list' %}" class="menu-link">
+            <div data-i18n="ledger">Ledger Create</div>
+          </a>
+        </li>
+
+       
+        <li
+          class="menu-item {% if '/receive/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'receive_management' %}" class="menu-link">
+            <div data-i18n="receive">Receive Transaction</div>
+          </a>
+        </li>
+
+        <li
+          class="menu-item {% if '/payment/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'payment_management' %}" class="menu-link">
+            <div data-i18n="payment">Payment Transaction</div>
+          </a>
+        </li>
+
+
+        
+        
+      </ul>
+    </li>
+   
+    {% endif %}
+
+    <!-- Comunication -->
+    {% if user|is_staff_or_in_group:"" or user|has_role:"Manager"  or user|has_role:"Accountant" or user|has_role:"HR" %}
+    <li
+      class="menu-item {% if '/comunication/' in request.path %}active open{% endif %}" data-is-module="true"
+    >
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bx-transfer-alt"></i>
+        <div data-i18n="Comunication">Comunication</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item {% if '/sms/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'sms' %}" class="menu-link">
+            <div data-i18n="SMS">General SMS</div>
+          </a>
+        </li>
+        <li class="menu-item {% if '/notification_sms/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'notification_sms' %}" class="menu-link">
+            <div data-i18n="SMS">Notification SMS</div>
+          </a>
+        </li>
+        
+        {% comment %} <li
+          class="menu-item {% if '/notification/' in request.path %}active{% endif %}"
+        >
+          <a href="{% url 'notification' %}" class="menu-link">
+            <div data-i18n="Fees_Collection">Notification</div>
+          </a>
+        </li> {% endcomment %}
+        
+      </ul>
+    </li>
+
+    
+    {% endif %}
+
+    {% if user|is_staff_or_in_group:"" or user|has_role:"Manager"  or user|has_role:"Accountant"  or user|has_role:"HR" %}
+    <li class="menu-header small text-uppercase">
+      <span class="menu-header-text">Reports</span>
+    </li>
+    {% endif %}
+    <!-- Attendance -->
+
+    {% if user|is_staff_or_in_group:"" or user|has_role:"Manager"  or user|has_role:"Accountant" %}
+    <li class="menu-item {% if '/accounting_report/' in request.path %}active open{% endif %}" data-is-module="true">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bxs-bank"></i>
+        <div data-i18n="fees_report">Accounting Report</div>
+      </a>
+
+      <ul class="menu-sub">
+        <li class="menu-item {% if '/cash-summary/' in request.path %}active {% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'cash_summary' %}" class="menu-link">
+            <div data-i18n="cash-summary">Cash Summary</div>
+          </a>
+        </li>
+        <li class="menu-item {% if '/trial-balance/' in request.path %}active {% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'trial_balance' %}" class="menu-link">
+            <div data-i18n="trial_balance">Trial Balance</div>
+          </a>
+        </li>
+        <li class="menu-item {% if '/balance-sheet/' in request.path %}active {% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'balance_sheet' %}" class="menu-link">
+            <div data-i18n="balance_sheet">Balance Sheet</div>
+          </a>
+        </li>
+        <li class="menu-item {% if '/income_statement/' in request.path %}active {% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'income_statement' %}" class="menu-link">
+            <div data-i18n="income_statement">Income Statement</div>
+          </a>
+        </li>
+        <li class="menu-item {% if '/voucher-list/' in request.path %}active {% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'voucher_list' %}" class="menu-link">
+            <div data-i18n="voucher_list">Voucher List</div>
+          </a>
+        </li>
+        <li class="menu-item {% if '/journal-report/' in request.path %}active {% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'journal_report' %}" class="menu-link">
+            <div data-i18n="journal_report">Journal List</div>
+          </a>
+        </li>
+        <li class="menu-item {% if '/funds-flow/' in request.path %}active {% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'funds_flow_report' %}" class="menu-link">
+            <div data-i18n="funds_flow_report">Funds Flow Report</div>
+          </a>
+        </li>
+        <li class="menu-item {% if '/cash-book/' in request.path %}active {% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'cash_book' %}" class="menu-link">
+            <div data-i18n="cash_book">Cash Book</div>
+          </a>
+        </li>
+        <li class="menu-item {% if '/bank-book/' in request.path %}active {% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'bank_book' %}" class="menu-link">
+            <div data-i18n="bank_book">Bank Book</div>
+          </a>
+        </li>
+        <li class="menu-item {% if '/ledger-summary/' in request.path %}active {% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'ledger_summary' %}" class="menu-link">
+            <div data-i18n="ledger_summary">Ledger Summary</div>
+          </a>
+        </li>
+        <li class="menu-item {% if '/category-summary/' in request.path %}active {% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'category_summary' %}" class="menu-link">
+            <div data-i18n="category_summary">Category Summary</div>
+          </a>
+        </li>
+        <li class="menu-item {% if '/outstanding-receivables/' in request.path %}active {% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'outstanding_receivables' %}" class="menu-link">
+            <div data-i18n="outstanding_receivables">Outstanding Receivables</div>
+          </a>
+        </li>
+        <li class="menu-item {% if '/payment-summary/' in request.path %}active {% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'payment_summary' %}" class="menu-link">
+            <div data-i18n="payment_summary">Payment Summary</div>
+          </a>
+        </li>
+        <li class="menu-item {% if '/ledger-book/' in request.path %}active {% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'ledger_book' %}" class="menu-link">
+            <div data-i18n="ledger_book">Ledger Book</div>
+          </a>
+        </li>
+        
+
+        
+      </ul>
+    </li>
+
+    {% endif %}
+
+    {% if user|is_staff_or_in_group:"" or user|has_role:"Manager"  or user|has_role:"Accountant" %}
+    <li class="menu-item {% if '/fees_report/' in request.path %}active open{% endif %}" data-is-module="true">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bxs-dollar-circle"></i> 
+        <div data-i18n="fees_report">Fees Report</div>
+      </a>
+
+      <ul class="menu-sub">
+        <li class="menu-item {% if '/student_date_fee_report/' in request.path %}active {% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'student_date_fee_report' %}" class="menu-link">
+            <div data-i18n="student_date_fee_report">Date wise Piad Fee</div>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item {% if '/student_time_fee_report/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'student_time_fee_report' %}" class="menu-link">
+            <div data-i18n="student_time_fee_report">Student Wise Paid Fee</div>
+          </a>
+        </li>
+
+        <li class="menu-item {% if '/duefee/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'duefee' %}" class="menu-link">
+            <div data-i18n="duefee">Due Fee</div> 
+          </a>
+        </li>
+
+        <li class="menu-item {% if '/fee_type_wise_report/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'fee_type_wise_report' %}" class="menu-link">
+            <div data-i18n="fee_type_wise_report">Monthly wise Total Fee </div> 
+          </a>
+        </li>
+
+        <li class="menu-item {% if '/fee_type_wise_class_report/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'fee_type_wise_class_report' %}" class="menu-link">
+            <div data-i18n="fee_type_wise_class_report">Class wise Total Month Fee </div> 
+          </a>
+        </li>
+        
+      </ul>
+    </li>
+
+    {% endif %}
+  
+
+
+    {% if user|is_staff_or_in_group:"" or user|has_role:"Manager"  or user|has_role:"HR" %}
+    <li class="menu-item {% if '/attendance_report/' in request.path %}active open{% endif %}" data-is-module="true">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bx-check-square"></i>
+        <div data-i18n="Attendance">Attendance Report</div>
+      </a>
+
+      <ul class="menu-sub">
+
+        <li class="menu-item {% if '/stu_report/' in request.path %}active open{% endif %}" data-is-sub-menu="true">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div class="text-truncate" data-i18n="Login">Student Report</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item {% if '/report_student_attendance/' in request.path %}active {% endif %}">
+              <a href="{% url 'report_student_attendance' %}" class="menu-link">
+                <div class="text-truncate" data-i18n="report_student_attendance">Month View Report</div>
+              </a>
+            </li>
+            <li class="menu-item {% if '/report_date_range_student_attendance/' in request.path %}active{% endif %}">
+              <a href="{% url 'report_date_student_attendance' %}" class="menu-link">
+                <div class="text-truncate" data-i18n="Date Wise">Date Wise Report</div>
+              </a>
+            </li>
+            <li class="menu-item {% if '/report_time_student_attendance/' in request.path %}active{% endif %}">
+              <a href="{% url 'report_time_student_attendance' %}" class="menu-link">
+                <div class="text-truncate" data-i18n="Date Wise">Time Wise Report</div>
+              </a>
+            </li>
+          </ul>
+        </li>
+
+        <li class="menu-item {% if '/staff_report/' in request.path %}active open{% endif %}" data-is-sub-menu="true">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div class="text-truncate" data-i18n="Login">Staff Report</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item {% if '/report_staff_attendance/' in request.path %}active {% endif %}">
+              <a href="{% url 'report_staff_attendance' %}" class="menu-link">
+                <div class="text-truncate" data-i18n="report_staff_attendance">Month View Report</div>
+              </a>
+            </li>
+            <li class="menu-item {% if '/report_time_staff_attendance/' in request.path %}active{% endif %}">
+              <a href="{% url 'report_time_staff_attendance' %}" class="menu-link">
+                <div class="text-truncate" data-i18n="Date Wise">Time Wise Report</div>
+              </a>
+            </li>
+          </ul>
+        </li>
+        
+        
+      </ul>
+    </li>
+
+    
+
+    {% elif user|in_group:"staff" %}
+    <li class="menu-item {% if '/report_staff_attendance/' in request.path %}active{% endif %}" data-is-module="true" >
+      
+      <a href="{% url 'report_staff_attendance' %}" class="menu-link">
+        <i class="menu-icon tf-icons bx bxs-user-check"></i>
+        <div data-i18n="Staff_Attendance"> Self Attendance Report</div>
+      </a>
+    </li>
+    
+    {% elif user|in_group:"student, parent" %}
+    <li class="menu-item {% if '/report_student_attendance/' in request.path %}active {% endif %}" data-is-module="true">
+      
+      <a href="{% url 'report_student_attendance' %}" class="menu-link">
+        <i class="menu-icon tf-icons bx bxs-user-check"></i>
+        <div data-i18n="report_student_attendance">Attendance Report</div> 
+      </a>
+    </li>
+{% elif user|in_group:"teacher" %}
+    <li class="menu-item {% if '/report_teacher_attendance/' in request.path %}active{% endif %}" data-is-module="true">
+      <a href="{% url 'report_teacher_attendance' %}" class="menu-link">
+        <i class="menu-icon tf-icons bx bxs-user-check"></i>
+        <div data-i18n="Teacher_Attendance">Self Attendance Report</div>
+      </a>
+    </li>
+{% endif %}
+
+{% if user|is_staff_or_in_group:"" or user|has_role:"Manager"  or user|has_role:"HR" %}
+
+<span></span>
+
+{% else %}
+  <li class="menu-item {% if '/leave_request/' in request.path %}active{% endif %}" data-is-module="true">
+    <a href="{% url 'leave_request' %}" class="menu-link">
+      <i class="menu-icon tf-icons bx bxs-pie-chart-alt"></i>
+      <div data-i18n="leave_request">Leave Request</div>
+    </a>
+  </li>
+
+{% endif %}
+
+
+{% if user|is_staff_or_in_group:"" or user|has_role:"Manager"  or user|has_role:"Accountant" or user|has_role:"HR" %}
+    <li class="menu-item {% if '/sms_report/' in request.path %}active open{% endif %}" data-is-module="true">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bx-envelope"></i> 
+        <div data-i18n="Sms_report">SMS Report</div>
+      </a>
+
+      <ul class="menu-sub">
+        <li class="menu-item {% if '/purchase_history/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'purchase_history' %}" class="menu-link">
+            <div data-i18n="purchase_history">Purchase History</div>
+          </a>
+        </li>
+        
+        <li class="menu-item {% if '/send_summary/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'send_summary' %}" class="menu-link">
+            <div data-i18n="send_summary">Sms Send Summary</div>
+          </a>
+        </li>
+        
+        <li class="menu-item {% if '/sms_delivery/' in request.path %}active{% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'sms_delivery' %}" class="menu-link">
+            <div data-i18n="sms_delivery">Sms Delivery</div>
+          </a>
+        </li>
+        
+      </ul>
+    </li>
+
+    {% endif %}
+
+
+    {% if user|is_staff_or_in_group:"" or user|has_role:"Manager" or user|has_role:"HR" %}
+    <li class="menu-header small text-uppercase"> 
+      <span class="menu-header-text">Site Settings</span>
+    </li>
+    
+    
+    <li class="menu-item {% if '/site_settings/' in request.path %}active open{% endif %}" data-is-module="true">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bx-minus-front"></i>
+        <div data-i18n="Site Settings">Site Settings</div>
+      </a>
+
+      <ul class="menu-sub">
+        <li class="menu-item {% if '/banner/' in request.path %}active {% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'banner' %}" class="menu-link">
+            <div data-i18n="banner">Banner</div>
+          </a>
+        </li>
+
+        <li
+          class="menu-item {% if '/notice/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'notice' %}" class="menu-link">
+            <div data-i18n="Fee_Type">Notice</div>
+          </a>
+        </li>
+
+        <li class="menu-item {% if '/service/' in request.path %}active {% endif %}" data-is-sub-menu="true"> 
+          <a href="{% url 'service' %}" class="menu-link">
+            <div data-i18n="service">School Service</div>
+          </a>
+        </li>
+
+        <li class="menu-item {% if '/page_content/' in request.path %}active {% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'page_content' %}" class="menu-link">
+            <div data-i18n="service">Page Content</div>
+          </a>
+        </li>
+
+        <li class="menu-item {% if '/gallery/' in request.path %}active {% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'gallery' %}" class="menu-link">
+            <div data-i18n="gallery">Picture Gallery</div>
+          </a>
+        </li>
+
+        <li class="menu-item {% if '/vgallery/' in request.path %}active {% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'vgallery' %}" class="menu-link">
+            <div data-i18n="vgallery">Video Gallery</div>
+          </a>
+        </li>
+
+        <li class="menu-item {% if '/testimonial/' in request.path %}active {% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'testimonial' %}" class="menu-link">
+            <div data-i18n="testimonial">Testimonial</div>
+          </a>
+        </li>
+
+        <li class="menu-item {% if '/contact/' in request.path %}active {% endif %}" data-is-sub-menu="true">
+          <a href="{% url 'contact' %}" class="menu-link">
+            <div data-i18n="contact">Contact</div>
+          </a>
+        </li>
+        
+        
+        
+      </ul>
+    </li>
+
+
+
+    {% endif %}
+
+    <a href="{% url 'dashboard' %}" class="app-brand-link pt-2 mx-auto">
+      <img height="100px" width="100px" src="{% static 'assets/img/bidyatek.png' %}" alt="Logo">
+    </a> 
+
+    <div class="position-relative d-flex justify-content-center align-items-center w-100 mt-1">
+
+      <div class="icon-large icon-clock">
+        <div class="clock">
+          <ol>
+            <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+          </ol>
+          <div id="hour"></div>
+          <div id="min"></div>
+          <div id="sec"></div>
+        </div>
+      </div>
+
+    </div>
+    
+    
+
+
+
+
+  </ul>
+  <ul class="menu-searched-inner"></ul>
+  
+</aside>
+
+{% endblock sidebar %} 
+{% endwith %}

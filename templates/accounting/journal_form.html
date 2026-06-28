@@ -1,0 +1,256 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load template_tags %} 
+{% block extra_css %} 
+<style>
+  h3 {
+          font-size: 24px;
+          font-weight: 500;
+          text-align: center;
+          margin-bottom: 16px;
+      }
+      .table-container {
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          margin-bottom: 40px;
+      }
+      table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 14px;
+          color: #4a5568;
+      }
+      thead {
+          background-color: #ebf8ff;
+          border-bottom: 2px solid #e2e8f0;
+      }
+      th, td {
+          padding: 12px;
+          text-align: center;
+      }
+      @media screen and (max-width: 720px) {
+         .container {
+            padding: 12px;
+            padding-bottom: 24px;
+         }
+         td {
+          padding: 5px;
+         }
+      }
+      tbody tr {
+          transition: background-color 0.3s;
+      }
+      tbody tr:hover {
+          background-color: #f7fafc;
+      }
+      select, input[type="text"], input[type="date"] {
+          width: 100%;
+          padding: 8px;
+          border: 1px solid #cbd5e0;
+          border-radius: 4px;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+          transition: border-color 0.2s;
+      }
+      select:focus, input[type="text"]:focus, input[type="date"]:focus {
+          border-color: #3182ce;
+          outline: none;
+          box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+      }
+      button {
+          padding: 8px 16px;
+          border: none;
+          border-radius: 4px;
+          background-color: #007bff;
+          color: white;
+          cursor: pointer;
+          transition: background-color 0.3s, transform 0.3s;
+      }
+      button:hover {
+          background-color: #0056b3;
+          transform: translateY(-2px);
+      }
+     .form-submit {
+         width: 100%;
+      }
+      .form-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+          gap: 16px;
+          align-items: end;
+      }
+</style>
+{% endblock extra_css %} 
+
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+    {% include 'pageinfo.html' %}
+    
+    <div class="card ">
+        
+        <div class="card-body">
+          <h3 class="header">Journal Transaction</h3>
+          <hr/>
+
+          {% if error_message %}
+        <p style="color: red; text-align: center;">{{ error_message }}</p>
+        {% endif %}
+
+        {% if success_message %}
+        <p style="color: green; text-align: center;">{{ success_message }}</p>
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            <div class="table-container">
+                <table id="transaction_table">
+                    <thead>
+                        <tr>
+                            <th>Ledger Name</th>
+                            <th>Debit</th>
+                            <th>Credit</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table_body">
+                        <!-- Example row, repeat as necessary -->
+                        <tr>
+                            <td>
+                                <select name="ledger_name[]" required>
+                                    {% for ledger in ledgers %}
+                                    <option value="{{ ledger.name }}">{{ ledger.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td><input type="number" name="debit_amount[]" step="0.01" min="0" class="debit_input form-control"
+                                oninput="validateRow(this)"></td>
+                        <td><input type="number" name="credit_amount[]" step="0.01" min="0" class="credit_input form-control"
+                                oninput="validateRow(this)"></td>
+                        <td><button type="button" class="add-row-btn" onclick="addRow()">+</button></td>
+                    
+                        </tr>
+                        <!-- Total row -->
+                        
+                    </tbody>
+                </table>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>Total</td>
+                            <td id="total_debit">0</td>
+                            <td id="total_credit">0</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <h3>Journal Transaction Form</h3>
+            <div class="form-grid">
+                <div>
+                    <label>Transaction Date</label>
+                    <input type="date" class="form-control" name="transaction_date" id="transaction_date" required>
+
+                </div>
+                <div>
+                    <label>Voucher No</label>
+                    <input type="text" name="voucher_no" id="voucher_no" required>
+</div>
+                    <div>
+                        <label>Write Note</label>
+                        <textarea class="form-control" name="note" id="note" placeholder="Note"></textarea>
+                    </div>
+
+                <div>
+                    <button type="submit" class="form-submit">Save</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Pre-rendered ledger options template -->
+    <template id="ledger-options-template">
+        {% for ledger in ledgers %}
+        <option value="{{ ledger.name }}">{{ ledger.name }}</option>
+        {% endfor %}
+    </template>
+          
+        </div>
+
+        
+    </div>
+ 
+  
+</div>
+<!-- end: Content -->
+
+{% endblock content %} 
+{% block extra_javascript %} 
+
+<script>
+    function addRow() {
+            const tableBody = document.getElementById('table_body');
+            const row = document.createElement('tr');
+            const ledgerOptions = document.getElementById('ledger-options-template').innerHTML;
+
+            row.innerHTML = `
+                <td>
+                    <select name="ledger_name[]" required>${ledgerOptions}</select>
+                </td>
+                <td><input type="number" name="debit_amount[]" step="0.01" min="0" class="debit_input form-control" oninput="validateRow(this)"></td>
+                <td><input type="number" name="credit_amount[]" step="0.01" min="0" class="credit_input form-control" oninput="validateRow(this)"></td>
+                <td><button type="button" class="add-row-btn" onclick="removeRow(this)">-</button></td>
+            `;
+            tableBody.appendChild(row);
+            calculateSums(); // Recalculate totals
+        }
+
+        // Remove Row Functionality
+        function removeRow(button) {
+            button.closest('tr').remove();
+            calculateSums();
+        }
+
+        // Validate and clear row inputs
+        function validateRow(input) {
+            const row = input.closest('tr');
+            const debitInput = row.querySelector('.debit_input');
+            const creditInput = row.querySelector('.credit_input');
+            
+            // If either debit or credit is filled, clear the opposite field
+            if (input === debitInput && debitInput.value) {
+                creditInput.value = ''; // Clear credit input if debit is filled
+                creditInput.disabled = false; // Enable credit input if needed
+            } else if (input === creditInput && creditInput.value) {
+                debitInput.value = ''; // Clear debit input if credit is filled
+                debitInput.disabled = false; // Enable debit input if needed
+            } 
+        
+            calculateSums(); // Recalculate totals after each input change
+        }
+        
+        
+        
+        function calculateSums() {
+            const debitInputs = document.querySelectorAll('.debit_input');
+            const creditInputs = document.querySelectorAll('.credit_input');
+        
+            let totalDebit = 0;
+            let totalCredit = 0;
+        
+            debitInputs.forEach(input => {
+                totalDebit += parseFloat(input.value) || 0;
+            });
+            creditInputs.forEach(input => {
+                totalCredit += parseFloat(input.value) || 0;
+            });
+        
+            document.getElementById('total_debit').textContent = totalDebit.toFixed(2);
+            document.getElementById('total_credit').textContent = totalCredit.toFixed(2);
+        }
+        
+        // Ensure totals update on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            calculateSums();
+        });
+</script>
+{% endblock extra_javascript%}

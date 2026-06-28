@@ -1,0 +1,417 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% block extra_css %}
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f1f3f5;
+    }
+
+    .header {
+        font-size: 1.8rem;
+        font-weight: 600;
+        text-align: center;
+        color: #333;
+    }
+
+    .form-grid {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    label {
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .input, .select, .textarea {
+        width: 100%;
+        padding: 0.6rem 0.75rem;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        font-size: 0.95rem;
+        background-color: #fff;
+        transition: border-color 0.2s;
+    }
+
+    .input:focus, .select:focus, .textarea:focus {
+        outline: none;
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.1rem rgba(13,110,253,0.25);
+    }
+
+    .entry-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 2fr auto;
+        gap: 1rem;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    .entry-row.header {
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .button {
+        padding: 0.5rem 1rem;
+        background-color: #0d6efd;
+        color: white;
+        border: none;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background-color 0.2s;
+    }
+
+    .button:hover {
+        background-color: #0b5ed7;
+    }
+
+    .button.danger {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .button.danger:hover {
+        background-color: #c82333;
+    }
+
+    .totals {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-top: 1rem;
+    }
+
+    .total-box {
+        padding: 1rem 1.5rem;
+        background-color: #e9ecef;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        font-size: 1rem;
+        color: #212529;
+        text-align: center;
+    }
+
+    .description {
+        margin-top: 1.5rem;
+    }
+
+    .submit-button-container {
+        margin-top: 2rem;
+        text-align: right;
+    }
+
+    .submit-button {
+        padding: 0.7rem 1.5rem;
+        background-color: #198754;
+        color: white;
+        border: none;
+        border-radius: 0.375rem;
+        font-size: 1rem;
+        cursor: pointer;
+    }
+
+    .submit-button:hover {
+        background-color: #157347;
+    }
+
+    .table-container {
+        margin-top: 2rem;
+        overflow-x: auto;
+    }
+
+    table.table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+        background-color: #fff;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    table.table th, table.table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #dee2e6;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    table.table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+    }
+
+    .delete-button {
+        background-color: #dc3545;
+        border: none;
+        color: white;
+        padding: 0.4rem 0.75rem;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        font-size: 0.875rem;
+    }
+
+    .delete-button:hover {
+        background-color: #c82333;
+    }
+
+    ul {
+        padding-left: 1.2rem;
+        margin: 0;
+    }
+
+    ul li {
+        margin-bottom: 0.3rem;
+    }
+    .pagination .button {
+        display: inline-block;
+        margin: 0 5px;
+        padding: 0.5rem 1rem;
+        background-color: #0d6efd;
+        color: white;
+        border: none;
+        border-radius: 0.375rem;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+    
+    .pagination .button:hover {
+        background-color: #0b5ed7;
+    }
+    
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+    <div class="card">
+        <div class="card-body">
+            <h3 class="header">Create Journal Entry</h3>
+            <hr />
+            <form id="journalForm" method="POST">
+                {% csrf_token %}
+                <div class="form-grid">
+                    <div class="space-y-2">
+                        <label for="date">Date *</label>
+                        <input class="input" type="date" id="date" name="date" required>
+                    </div>
+                    <div class="space-y-2">
+                        <label for="voucher_no">Voucher No</label>
+                        <input class="input" type="text" id="voucher_no" name="voucher_no">
+                    </div>
+                </div>
+                
+                <div class="entries-container mt-4">
+                    <div class="entry-row header">
+                        <div>Ledger *</div>
+                        <div>Type *</div>
+                        <div>Amount *</div>
+                        <div>Description</div>
+                    </div>
+                    <div id="entriesList">
+                        <!-- Entries will be added here dynamically -->
+                    </div>
+                    <button type="button" class="button" onclick="addEntryRow()">Add Entry</button>
+                </div>
+
+                <div class="totals">
+                    <div class="total-box">
+                        <span>Total Debit: </span><span id="totalDebit">0.00</span>
+                    </div>
+                    <div class="total-box">
+                        <span>Total Credit: </span><span id="totalCredit">0.00</span>
+                    </div>
+                </div>
+
+                <div class="form-group description">
+                    <label for="description">Description *</label>
+                    <textarea class="textarea" id="description" name="description" required></textarea>
+                </div>
+
+                <div class="submit-button-container">
+                    <button type="submit" class="submit-button">Save Journal</button>
+                </div>
+            </form>
+
+            <h3 class="header text-center mt-7">Journal Entries</h3>
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Voucher No</th>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Entries</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="journalTableBody">
+                        {% for journal in journals %}
+                        <tr id="journal-{{ journal.id }}">
+                            <td>{{ journal.voucher_no }}</td>
+                            <td>{{ journal.date }}</td>
+                            <td>{{ journal.description }}</td>
+                            <td>
+                                <ul>
+                                    {% for entry in journal.entries.all %}
+                                    <li>{{ entry.entry_type }} {{ entry.amount }} to {{ entry.ledger.name }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                            <td>
+                                <button class="delete-button" onclick="deleteJournal({{ journal.id }})">Delete</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="pagination" style="margin-top: 20px; text-align: center;">
+                    <span class="step-links">
+                        {% if journals.has_previous %}
+                            <a class="button" href="?page=1">&laquo; First</a>
+                            <a class="button" href="?page={{ journals.previous_page_number }}">Previous</a>
+                        {% endif %}
+                
+                        <span style="margin: 0 10px;">Page {{ journals.number }} of {{ journals.paginator.num_pages }}</span>
+                
+                        {% if journals.has_next %}
+                            <a class="button" href="?page={{ journals.next_page_number }}">Next</a>
+                            <a class="button" href="?page={{ journals.paginator.num_pages }}">Last &raquo;</a>
+                        {% endif %}
+                    </span>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_javascript %}
+<script>
+    let entryCount = 0;
+    
+    function addEntryRow(ledgerId='', entryType='Debit', amount='', description='') {
+        const entryRow = `
+        <div class="entry-row" id="entry-${entryCount}">
+            <select class="select ledger-select" required>
+                {% for ledger in ledgers %}
+                <option value="{{ ledger.id }}" ${ledgerId === '{{ ledger.id }}' ? 'selected' : ''}>
+                    {{ ledger.name }}
+                </option>
+                {% endfor %}
+            </select>
+            <select class="select type-select" required>
+                <option value="Debit" ${entryType === 'Debit' ? 'selected' : ''}>Debit</option>
+                <option value="Credit" ${entryType === 'Credit' ? 'selected' : ''}>Credit</option>
+            </select>
+            <input class="input amount-input" type="number" step="0.01" 
+                   value="${amount}" required min="0.01">
+            <input class="input" type="text" value="${description}">
+            <button type="button" class="button danger" 
+                    onclick="this.parentElement.remove(); updateTotals()">×</button>
+        </div>`;
+    
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = entryRow;
+        const newRow = tempDiv.firstElementChild;
+    
+        // Add proper event listeners
+        newRow.querySelector('.amount-input').addEventListener('input', updateTotals);
+        newRow.querySelector('.type-select').addEventListener('change', updateTotals);
+    
+        document.getElementById('entriesList').appendChild(newRow);
+        entryCount++;
+        updateTotals();
+    }
+    
+    function updateTotals() {
+        let totalDebit = 0;
+        let totalCredit = 0;
+    
+        document.querySelectorAll('.entry-row:not(.header)').forEach(row => {  // Exclude header
+            const type = row.querySelector('.type-select').value;
+            const amountInput = row.querySelector('.amount-input');
+            // Add null check
+            const amount = amountInput ? parseFloat(amountInput.value) || 0 : 0;
+            
+            if (type === 'Debit') totalDebit += amount;
+            else totalCredit += amount;
+        });
+    
+        document.getElementById('totalDebit').textContent = totalDebit.toFixed(2);
+        document.getElementById('totalCredit').textContent = totalCredit.toFixed(2);
+    }
+    
+    
+    // Update the form submit handler
+document.getElementById('journalForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const entries = [];
+
+    // Validate entries before processing
+    const entryRows = document.querySelectorAll('.entry-row:not(.header)');
+    if (entryRows.length < 2) {
+        alert('Error: At least two entries required');
+        return;
+    }
+
+    entryRows.forEach(row => {
+        const ledger = row.querySelector('.ledger-select');
+        const type = row.querySelector('.type-select');
+        const amount = row.querySelector('.amount-input');
+        const desc = row.querySelector('input[type="text"]');
+
+        // Validate required fields
+        if (!ledger?.value || !type?.value || !amount?.value) {
+            alert('All entry fields are required');
+            return;
+        }
+
+        entries.push({
+            ledger_id: ledger.value,
+            entry_type: type.value,
+            amount: amount.value,
+            description: desc?.value || ''
+        });
+    });
+
+    try {
+        const response = await fetch("{% url 'journal_management' %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams(formData).toString() + '&entries=' + encodeURIComponent(JSON.stringify(entries))
+        });
+
+        // Handle response properly
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Server error');
+
+        // Reset form on success
+        if (data.success) {
+            document.getElementById('journalForm').reset();
+            entryCount = 0;
+            document.getElementById('entriesList').innerHTML = '';
+            addEntryRow();
+            location.reload();  // Refresh to show new entry
+        }
+    } catch (error) {
+        console.error('Submission error:', error);
+        alert(error.message);
+    }
+});
+    
+    
+    // Initial empty row
+    addEntryRow();
+    </script>    
+{% endblock %}

@@ -1,0 +1,266 @@
+thead th span.icon-arrow {
+  display: inline-block;
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 50%;
+  border: 1.4px solid transparent;
+
+  text-align: center;
+  font-size: 1rem;
+
+  margin-left: 0.5rem;
+  transition: 0.2s ease-in-out;
+}
+
+thead th:hover span.icon-arrow {
+  border: 1.4px solid #128a7e;
+}
+
+thead th:hover {
+  color: #128a7e;
+}
+
+thead th.active span.icon-arrow {
+  background-color: #128a7e;
+  color: #fff;
+}
+
+thead th.asc span.icon-arrow {
+  transform: rotate(180deg);
+}
+
+thead th.active,
+tbody td.active {
+  color: #128a7e;
+}
+
+.export__file {
+  position: relative;
+}
+
+.export__file .export__file-btn {
+  display: inline-block;
+  width: 2rem;
+  height: 2rem;
+  background: yellow url("../img/essential/export.png") center / 60% no-repeat;
+  border-radius: 50%;
+  transition: 0.2s ease-in-out;
+}
+
+.export__file .export__file-btn:hover {
+  background-color: #fff;
+  transform: scale(1.15);
+  cursor: pointer;
+}
+
+.export__file input {
+  display: none;
+}
+
+.export__file .export__file-options {
+  position: absolute;
+  right: 2.5rem;
+
+  width: 12rem;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  text-align: center;
+
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.8);
+  transform-origin: top right;
+
+  box-shadow: 0 0.2rem 0.5rem #0004;
+
+  transition: 0.2s;
+}
+
+.export__file input:checked + .export__file-options {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+  z-index: 100;
+}
+
+.export__file .export__file-options label {
+  display: block;
+  width: 100%;
+  padding: 0.6rem 0;
+  background-color: #f2f2f2;
+
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+
+  transition: 0.2s ease-in-out;
+}
+
+.export__file .export__file-options label:first-of-type {
+  padding: 1rem 0;
+  background-color: #86e49d !important;
+}
+
+.export__file .export__file-options label:hover {
+  transform: scale(1.05);
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.export__file .export__file-options img {
+  width: 2rem;
+  height: auto;
+}
+
+/* pagination */
+#pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#pagination button {
+  margin: 0 5px;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #d9dee3;
+  border-radius: 50%;
+  cursor: pointer;
+  background-color: white;
+}
+
+#softdatatable {
+  border: 1px solid #d9dee3;
+}
+
+.table-responsive::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background-color: #ccc;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background-color: #0d9488;
+  border-radius: 20px;
+}
+
+#softdatatable thead th {
+  background-color: #e8f7f4;
+  text-align: center;
+  vertical-align: middle;
+}
+#softdatatable tbody td {  
+  min-width: 150px;
+}
+#softdatatable tbody th,
+#softdatatable tbody td {
+  background-color: #ffffff;
+  text-align: center;
+
+}
+
+#softdatatable th:nth-of-type(-n + 3),
+#softdatatable td:nth-of-type(-n + 2) {
+  position: -webkit-sticky;
+  position: sticky;
+  outline: 1px solid #d9dee3;
+  border: none;
+}
+
+#softdatatable th:nth-of-type(1) {
+  left: 0;
+  
+}
+
+#softdatatable th:nth-of-type(2),
+#softdatatable td:nth-of-type(1) {
+  left: 50px;
+}
+
+#softdatatable th:nth-of-type(3),
+#softdatatable td:nth-of-type(2) {
+  left: 200px;
+}
+
+/* ============================================================================
+   UI-UPGRADE COMPATIBILITY FIX (sticky columns + teal theme)
+   ----------------------------------------------------------------------------
+   1) position:sticky breaks if ANY ancestor has a transform. The global UI
+      upgrade adds a hover-lift transform on .card / .shadow and a page-load
+      animation. We neutralize those ONLY for the card that wraps this sticky
+      table, so the frozen IMAGE/Name/ID columns work again on horizontal
+      scroll. (Other cards keep their hover effect.)
+   2) Header was light-blue (#e3f2fd) — now soft teal to match every other
+      table. Header text set to dark teal for contrast.
+   ============================================================================ */
+
+/* 1) Kill ancestor transforms/animation that would break sticky columns. */
+.card:has(#softdatatable),
+.card:has(#softdatatable):hover,
+.shadow:has(#softdatatable),
+.shadow:has(#softdatatable):hover,
+.content-wrapper > .container-fluid:has(#softdatatable) {
+  transform: none !important;
+  animation: none !important;
+}
+/* The scroll container itself must not create a transform context either. */
+.table-responsive:has(#softdatatable) { transform: none !important; }
+
+/* 2) Teal header + readable text (override matches other tables). */
+#softdatatable thead th {
+  background-color: #e8f7f4 !important;   /* soft teal */
+  color: #0f6f66 !important;               /* dark teal text */
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.74rem;
+  letter-spacing: 0.4px;
+}
+/* Sticky cells need an OPAQUE background or text scrolls through them.
+   Header sticky cells = teal; body sticky cells = white. */
+#softdatatable th:nth-of-type(-n + 3) { background-color: #e8f7f4 !important; }
+#softdatatable td:nth-of-type(-n + 2) { background-color: #ffffff !important; }
+#softdatatable tbody tr:hover td:nth-of-type(-n + 2) { background-color: #f3fbf9 !important; }
+
+/* Sort-arrow hover/active accents → teal (were purple). */
+thead th:hover span.icon-arrow { border-color: #128a7e; }
+thead th:hover { color: #128a7e; }
+thead th.active span.icon-arrow { background-color: #128a7e; }
+thead th.active, tbody td.active { color: #128a7e; }
+
+/* Scrollbar thumb already teal-ish; align to the fresher token. */
+.table-responsive::-webkit-scrollbar-thumb { background-color: #14a89a; }
+
+/* Clean visual separator between the frozen columns and the scrolling area:
+   a subtle shadow on the right edge of the last sticky column. */
+#softdatatable th:nth-of-type(3),
+#softdatatable td:nth-of-type(2) {
+  box-shadow: 6px 0 8px -6px rgba(20, 80, 72, 0.12);
+}
+
+/* ----------------------------------------------------------------------------
+   Sticky should be HORIZONTAL ONLY (frozen left columns). Prevent the sticky
+   cells / header from also clinging to the top on vertical page-scroll, which
+   caused the header to appear "doubled". Forcing top:auto keeps them in normal
+   vertical flow while still sticking on the left during horizontal scroll.
+   ---------------------------------------------------------------------------- */
+#softdatatable th:nth-of-type(-n + 3),
+#softdatatable td:nth-of-type(-n + 2) {
+  top: auto !important;
+  bottom: auto !important;
+}
+/* The header row must scroll away normally with the page (not vertical-sticky). */
+#softdatatable thead,
+#softdatatable thead tr,
+#softdatatable thead th {
+  position: static;
+}
+/* Re-assert horizontal stickiness for the frozen header cells only (the rule
+   above set them static; we want them sticky on the left again, not on top). */
+#softdatatable thead th:nth-of-type(-n + 3) {
+  position: -webkit-sticky;
+  position: sticky;
+  top: auto !important;
+}

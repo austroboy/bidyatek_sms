@@ -1,0 +1,627 @@
+{% extends 'partials/base.html' %} {% load static %} {% block extra_css %}
+
+
+
+<link 
+      rel="stylesheet"
+      href="{% static 'assets/vendor/libs/datatables/datatables.min.css' %}"
+    />
+<link rel="stylesheet" href="{% static 'assets/css/datatable.css' %}" />
+
+<link
+      rel="stylesheet"
+      href="{% static 'assets/css/loading.css' %}"
+    />
+
+<style>
+  /* Define your CSS styles here */
+  
+  .section {
+      margin-bottom: 20px!important;
+  }
+  .section-title {
+      display: inline-block!important;
+      font-size: 18px!important;
+      font-weight: bold!important;
+      margin-bottom: 10px!important;
+      background-color: #696cff!important ;
+      color: white!important;
+      padding: 4px!important;
+      text-transform: capitalize;
+  }
+  .info-table {
+      width: 100%!important;
+      border-collapse: collapse!important;
+  }
+  .info-table th,
+  .info-table td {
+      border: 1px solid #ddd!important;
+      padding:4px 8px !important;;
+      width: 25%!important;
+  }
+  .info-table th {
+      background-color: #f2f2f2!important;
+      text-align: left!important;
+  }
+
+  .info{
+    display: none!important;
+  }
+
+  @media print {
+      
+    @page {
+      size: A4;
+      margin: 20px;
+    }
+    
+
+    .info{
+      display: block!important;
+      display: flex!important;
+
+    }
+    
+    body {
+      -webkit-print-color-adjust: exact;
+    }
+  }
+</style>
+
+{% endblock extra_css %} 
+
+
+
+
+
+
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+  <!-- Hoverable Table rows -->
+  <div class="card p-4">
+    <div id="loading-screen" style="display: none;">
+      <figure>
+          <div class="dot white"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+      </figure>
+    </div>
+    <div class="table-responsive">
+      <table
+        id="datatable"
+        class="table table-md table-striped table-hover compact hover stripe"  width="100%"
+      >
+        <thead style="background-color: rgba(252, 207, 20, 0.2) !important;">
+          <tr class="shadow-sm">
+            
+            <th>#</th>
+            <th>Student ID</th>
+            <th>Image</th>
+            <th>Student Name</th>
+            <th>Student RFID</th>
+            <th>Phone</th>
+            <th>Class</th>
+            <th>Shift</th>
+            <th>Section</th>
+            <th></th>
+          </tr>
+        </thead>
+
+       
+        <tbody class="table-border-bottom-0">
+            {% for student in studentList %}
+    
+            <tr>
+              <td>
+                {{forloop.counter}}
+              </td>
+                
+                <td>
+                    {{student.student_field.user_id}}
+                </td>
+                <td>
+                    
+                    {% if student.student_field.avatar %}
+                    <img class="avatar-xs rounded-circle"
+                      width="32px"
+                      height="32px" 
+                      
+                      src="{{student.student_field.avatar.url}}" 
+                      alt=""
+                    />
+                    {% endif %}
+                </td>
+                <td data-id="{{student.id}}">
+                   <span class="{% if student.student_field.status == "Deactive" %} text-danger {% endif %}" >{{student.student_field.name}} </span> 
+                </td>
+                <td>
+                    {{student.student_field.rfid}}
+                </td>
+                <td>
+                  0{{student.parent_id.phone_number}} 
+                </td>
+                <td>
+                  {{student.class_id.class_shift_id.class_id}}
+                  
+                </td>
+                <td>
+                  {{student.class_id.class_shift_id.shift_id}}
+                </td>
+                <td>
+                  {{student.class_id.section_id.name}}
+                </td>
+
+
+                <td>  
+                  <div class="dropdown">
+                    <button
+                    type="button"
+                    class="btn p-0 dropdown-toggle hide-arrow"
+                    data-bs-toggle="dropdown"
+                    >
+                    <i class="bx bx-dots-vertical-rounded"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                    <a class="dropdown-item" href="{% url 'edit_student' student.student_field.id  %}"
+                        ><i class="bx bx-edit-alt me-1"></i> Edit</a
+                    >
+                    <a class="dropdown-item" href="{% url 'change_status_student' student.student_field.id  %}"
+                        ><i class="bx bx-stats me-1"></i> {% if student.student_field.status == "Deactive" %} Active {% else %} Inactive {% endif %} </a 
+                    >
+                    <button class="dropdown-item myButton" data-id="{{student.id}}"
+                        ><i class="bx bxs-binoculars me-1"></i> View</button
+                    >
+                    </div> 
+                </div>
+                </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+
+        
+        
+      </table>
+    </div>
+  </div>
+  <!--/ Hoverable Table rows -->
+
+  
+</div>
+<!-- end: Content -->
+
+
+
+<div class="modal" id="myModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {% comment %} <div class="insertHere"></div> {% endcomment %}
+        <div id="printProfile" class="">
+            <div class="d-flex flex-column justify-content-center align-items-center gap-2 info">
+              <img
+              width="100px"
+              src="{{ institute.institute_logo.url }}" 
+              alt=""
+              />
+              <h3>{{institute.institute_name }}</h3>
+            </div>
+         
+            <div class="student-info">
+                <div class="section">
+                    <h2 class="section-title" data-id="name"></h2>
+                    <div style="display: flex; justify-content: space-between; align-content: space-between;">
+
+                        <table style="width: 50% !important;" class="info-table">
+                            <tr>
+                                <th>Class</th>
+                                <td data-id="class_id" ></td>
+                            </tr>
+                            <tr>
+                                <th>Shift</th>
+                                <td data-id="shift_id"></td>
+                            </tr>
+                            <tr>
+                                <th>Section</th>
+                                <td data-id="section_id"></td>
+                            </tr>
+                            <tr>
+                                <th>Roll</th>
+                                <td data-id="roll_id"></td>
+                            </tr>
+                            <tr>
+                                <th>Academic Year</th>
+                                <td data-id="academic_year" ></td>
+                            </tr>
+                            <!-- Add more general information fields as needed -->
+                        </table>
+                        <table style="width: 150px!important; height: 150px!important;" class="info-table">
+                            <tr >
+                                <td>
+                                  <img id="avatar" src=" " alt="Avatar" style="max-width: 100%; max-height: 100%;">
+                                </td>
+                            </tr>
+                        </table>
+
+                    </div>
+                    
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">Basic Information</h2>
+                    <table class="info-table">
+                        <tr>
+                            <th >Student ID</th>
+                            <td data-id="student_id"></td>
+                            <th>Name</th>
+                            <td data-id="name"></td>
+                        </tr>
+                        <tr>
+                            <th>Gender</th>
+                            <td data-id="gender"></td>
+                            <th>Religion</th>
+                            <td data-id="religion"></td>
+                            
+                        </tr>
+                        <tr>
+                            <th>Date of Birth</th>
+                            <td data-id="dob"></td>
+                            <th>Mobile</th>
+                            <td data-id="mobile"></td>
+                        </tr>
+                        <tr>
+                            <th>Father's Name </th>
+                            <td data-id="fn"></td>
+                            <th>Morher's Name</th>
+                            <td data-id="mn"></td>
+                        </tr>
+                        <!-- Add more general information fields as needed -->
+                    </table>
+                </div>
+                
+                <div class="section">
+                    <h2 class="section-title">Address Information</h2>
+                    <table class="info-table" style="table-layout: fixed; width: 100%;">
+                        <tr>
+                            <th style="width: 8.5% !important; word-break: break-word;" >Present Address</th>
+                            <td data-id="prea" ></td>
+                        </tr>
+                        <tr>
+                          <th>Permanent Address</th>
+                            <td data-id="pera"></td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="section">
+                    <h2 class="section-title">Guardian Information</h2>
+                    <table class="info-table">
+                        <tr>
+                            <th>Guardian Name</th>
+                            <td data-id="gn"></td>
+                            <th>Mobile</th>
+                            <td data-id="gm"></td>
+                        </tr>
+                        <tr>
+                            <th >Relation</th>
+                            <td data-id="relation"></td>
+                            <th>Occupation</th>
+                            <td data-id="occupation"></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="section">
+                    <h2 class="section-title">Admission Information</h2>
+                    <table class="info-table">
+                        <tr>
+                            <th>Date</th>
+                            <td data-id="adate"></td> 
+                            <th >Year</th>
+                            <td data-id="academic_year"></td>
+                        </tr>
+                        <tr>
+                            <th>Birth Certificate</th>
+                            <td data-id="bc"></td>
+                            <th>Nationality</th>
+                            <td data-id="nationality"></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="section pt-5">
+                    
+                    <table class="table table-borderless">
+                        <tr>
+                            <th class="text-start">________________</th>
+                            <td></td>
+                            <th class="text-center">________________</th>
+                            <td></td>
+                            <th class="text-end">________________</th>
+                        </tr>
+                        <tr>
+                            <th class="text-start">Student Signature</th>
+                            <td></td>
+                            <th class="text-center">Guardian Signature </th>
+                            <td></td>
+                            <th class="text-end">Admin Signature</th>
+                        </tr>
+                    </table>
+                </div>
+                
+                <!-- Add more sections for other types of information -->
+            </div>
+
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="print-profile" >
+          Print
+        </button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+          Close
+        </button>
+        {% comment %} <button type="button" class="btn btn-primary">Save changes</button> {% endcomment %}
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock content %} {% block extra_javascript %}
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="{% static 'assets/vendor/libs/datatables/pdfmake.min.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/datatables/vfs_fonts.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/datatables/datatables.min.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/print/jQuery.print.js' %}"></script>
+
+
+<script>
+  "use strict";
+  pdfMake.fonts = {
+    Roboto: {
+      normal: 'Roboto-Regular.ttf',
+      bold: 'Roboto-Medium.ttf',
+      italics: 'Roboto-Italic.ttf',
+      bolditalics: 'Roboto-MediumItalic.ttf'
+    },
+    nikosh: {
+      normal: "NikoshBAN.ttf",
+      bold: "NikoshBAN.ttf",
+      italics: "NikoshBAN.ttf",
+      bolditalics: "NikoshBAN.ttf"
+    }
+  };
+$(document).ready(function () { 
+
+  
+  $('#datatable thead tr')
+  .clone(true)
+  .addClass('filters')
+  .appendTo('#datatable thead');
+
+// Initialize DataTable with fixed header and filters
+const dtSelector = "#datatable";
+const dt = $(dtSelector).DataTable({
+  orderCellsTop: true,
+  fixedHeader: true,
+  initComplete: function () {
+    var api = this.api();
+    
+    // For each column
+    api
+      .columns(':gt(0):lt(-1)')
+      .eq(0)
+      .each(function (colIdx) {
+        // Set the header cell to contain the input element
+        var cell = $('.filters th').eq($(api.column(colIdx).header()).index());
+        
+        $(cell).html('<input type="text" class="form-control form-control-sm w-75"  />');
+
+        // On every keypress in this input
+        $(
+          'input',
+          $('.filters th').eq($(api.column(colIdx).header()).index())
+        )
+          .off('keyup change')
+          .on('change', function (e) {
+            // Get the search value
+            $(this).attr('title', $(this).val());
+            var regexr = '({search})'; //$(this).parents('th').find('select').val();
+            var cursorPosition = this.selectionStart;
+            // Search the column for that value
+            api
+              .column(colIdx)
+              .search(
+                this.value != ''
+                  ? regexr.replace('{search}', '(((' + this.value + ')))')
+                  : '',
+                this.value != '',
+                this.value == ''
+              )
+              .draw();
+          })
+          .on('keyup', function (e) {
+            e.stopPropagation();
+
+            $(this).trigger('change'); 
+            $(this)
+              .focus()[0]
+              .setSelectionRange(cursorPosition, cursorPosition);
+          });
+      });
+  },
+  {% comment %} "columnDefs": [{
+    
+    // adding a more info button at the end
+    "targets": -1,
+    "data": null, 
+    "defaultContent": "<button type='button' class='btn fs-4 btn-default myButton'><span class='text-danger bx bx-plus-circle' aria-hidden='true'></span></button>"
+  }], {% endcomment %}
+  dom: `<'row'<'col-sm-12 col-md-6'B><'col-sm-12 col-md-6 d-none d-sm-flex justify-content-end'fl>>
+        <'row dt-row'<'col-sm-12'tr>>
+        <'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>`,
+  buttons: {
+    buttons: [
+      {
+        text: "Add new record",
+        attr: {
+          role: "button",
+          class: "btn btn-primary btn-create"
+        },
+        action: function (datatable) {
+          window.location.href = "/student/add_student/";
+        }
+      },
+      {
+        extend: "collection",
+        text: "Export",
+        autoClose: true,
+        buttons: [
+              'excel', 'print',
+              {
+                extend: "pdfHtml5",
+                exportOptions: {
+                  columns: function (idx, data, node) {
+                    return idx !== 0 && idx !== dt.column(':last').index();
+                  },
+                }, 
+                customize: function (doc) {
+                  doc.defaultStyle = {
+                    font: 'nikosh'
+                  };
+                  
+                  // Set the table width to fit page
+                  var colCount = doc.content[1].table.body[0].length;
+                  var colWidths = [];
+                  for (var i = 0; i < colCount; i++) {
+                    colWidths.push('*');
+                  }
+                  doc.content[1].table.widths = colWidths;
+                  
+                  // Set page margins
+                  doc.pageMargins = [10, 10, 10, 10];
+                  
+                  // Center-align the table headers
+                  doc.content[1].table.body[0].forEach(function (header) {
+                    header.alignment = 'center';
+                  });
+                  
+                  // Center-align the table content
+                  doc.content[1].table.body.slice(1).forEach(function (row) {
+                    row.forEach(function (cell) {
+                      cell.alignment = 'center';
+                    });
+                  });
+  
+                  // Set page orientation to landscape if table is too wide
+                  if (colCount > 5) {
+                    doc.pageOrientation = 'landscape';
+                  }
+  
+                  // Auto-size columns based on content
+                  doc.content[1].table.body.forEach(function (row, rowIndex) {
+                    row.forEach(function (cell, cellIndex) {
+                      if (rowIndex === 0) {
+                        cell.fillColor = '#1D1E4E';
+                      }
+                    });
+                  });
+
+                  
+                },
+              },
+            ],
+          },
+        ],
+    },
+  pagingType: "simple_numbers",
+  pageLength: 25
+});
+
+$('#datatable tbody').on('click', '.myButton', function() {
+  
+
+  var dataId = $(this).data('id');
+
+    $.ajax({
+        type: 'POST',
+        url: '/student_data/',
+        data: JSON.stringify({ 'dataId': dataId }),
+        contentType: 'application/json',
+        success: function(response) {
+            console.log(response); // Print the entire response object to the console
+
+            var msg = response.msg; // Access the 'msg' object from the response
+            var classData = msg.class;
+              $('[data-id="name"]').text(msg.name);
+              $('[data-id="class_id"]').text(msg.class_id.name);
+              $('[data-id="shift_id"]').text(msg.shift_id.name);
+              $('[data-id="section_id"]').text(msg.section_id.name);
+              $('[data-id="roll_id"]').text(msg.roll_no.roll); 
+              $('[data-id="academic_year"]').text(msg.admission_year_id.name); 
+              $('[data-id="student_id"]').text(msg.student_id.id); 
+              $('[data-id="gender"]').text(msg.gender.type); 
+              $('[data-id="religion"]').text(msg.religion.type); 
+              $('[data-id="dob"]').text(msg.dob.date); 
+              $('[data-id="mobile"]').text(msg.mobile.no); 
+              $('[data-id="fn"]').text(msg.fn.name); 
+              $('[data-id="mn"]').text(msg.mn.name); 
+              $('[data-id="gn"]').text(msg.gn.name); 
+              $('[data-id="gm"]').text(msg.gm.no); 
+              $('[data-id="relation"]').text(msg.relation.type); 
+              $('[data-id="occupation"]').text(msg.occupation.type); 
+              $('[data-id="prea"]').text(msg.present_address); 
+              $('[data-id="pera"]').text(msg.permanent_address); 
+              $('[data-id="bc"]').text(msg.birth_certificate_no); 
+              $('[data-id="nationality"]').text(msg.nationality); 
+              $('[data-id="adate"]').text(msg.admission_date); 
+              if (msg.avatar_url) {
+                $('#avatar').attr('src', msg.avatar_url);
+              } 
+
+                $('#myModal').modal('show');
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX Error:', error);
+        }
+    });
+
+
+});
+
+$("#print-profile").on("click", function () {
+  $("#printProfile").print({
+    globalStyles: true,
+    mediaPrint: false,
+    stylesheet: null,
+    noPrintSelector: ".no-print",
+    iframe: true,
+    append: null,
+    prepend: null,
+    manuallyCopyFormValues: true,
+    deferred: $.Deferred(),
+    timeout: 750,
+    title: "Invoice",
+    doctype: "<!doctype html>",
+  });
+});
+
+
+});
+
+
+
+</script>
+
+{% endblock extra_javascript%}

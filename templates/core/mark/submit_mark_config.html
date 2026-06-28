@@ -1,0 +1,369 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% load template_tags %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'assets/css/mark-config.css' %}" />
+
+<style>
+    .form-field input, .form-field select{
+        font-size: 13px;
+    }
+
+    .grid-container {
+        display: grid;
+        grid-template-columns: repeat({{ all_subject_count|add:1 }}, 1fr);
+        gap: 10px;
+    }
+    .grid-item {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+    .header {
+        font-weight: bold;
+        background: #f5f5f5;
+    }
+    .empty {
+        background: #fff;
+        border: none;
+    }
+
+    .custom-input {
+        border: 2px solid #ccc !important;
+        padding: 8px;
+        border-radius: 5px;
+        width: 100%;
+        text-align: center;
+        font-size: 14px;
+        transition: border-color 0.2s ease-in-out;
+    }
+
+    .custom-input:focus {
+        border: 2px solid #007bff !important; /* Highlight on focus */
+        outline: none;
+        background-color: #f8f9fa;
+    }
+</style>
+
+
+{% endblock extra_css %} {% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+  <div class="">
+    
+    <!-- Basic Layout -->
+    <div class="card mb-4">
+     
+        <div class="row">
+            <!-- content here -->
+
+            <form id="subject_mark_config_form" method="post">
+                {% csrf_token %}
+                <div class="subject_mark_config_form_inner">
+                    <div id="examRoutine" class="grid-container">
+                    <div class="grid-item header left_item">Classes</div>
+                    <div style="grid-column: 2 / span {{ all_subject_count  }};"
+                        class="grid-item header">
+                        Subject Mark Configuration
+                    </div>
+                    {% for class in all_classes %}
+                    <div class="grid-item single-class header left_item">
+                        {{class}}</div>
+                    {% for subject in class_subjects_map|get_item:class.id %}
+
+                    <div class="grid-item subject_mark">
+                        <h5>{{subject.name}}</h5>
+                        <input type="hidden" name="class_id" value="{{class.id}}">
+                        <input type="hidden" name="subject_id" value="{{subject.id}}">
+                        
+                        {% with subjectConfigs|get_item:class as class_subjects %}
+                        {% if class_subjects %}
+                        {% with class_subjects|get_item:subject.name as subject_config %}
+                        {% if subject_config %}
+                        <div class="row">
+                            <div class="col-6 form-field">
+                                <label>Subject Type</label>
+                                <select name="subject_type" id="subject_type">
+                                    {% for type in subject_types %}
+                                    <option {% if type.1 == subject_config.subject_type %}selected{% endif %}
+                                        value="{{type.1}}">{{type.1}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-6 form-field">
+                                <label>Subject Mark</label>
+                                <input value="{{subject_config.subject_mark}}" type="number" name="subject_mark">
+                            </div>
+
+                            <div class="col-6 form-field">
+                                <label>Subject Serial</label>
+                                <input value="{{subject_config.subject_serial}}" name="subject_serial" type="number">
+                            </div>
+                            <div class="col-6 form-field">
+                                <label>Subject Merge</label>
+                                <input value="{{subject_config.subject_merge}}" type="number" name="subject_merge">
+                            </div>
+                        </div>
+
+                        {% with markConfigs|get_item:class as class_mark_configs %}
+                        {% if class_mark_configs %}
+                        {% with class_mark_configs|get_item:subject_config.subject_conf_id as sub_conf_mark %}
+                        {% if sub_conf_mark %}
+                        <table class="table table-bordered mark_table">
+                            <thead>
+                                <th>Type</th>
+                                <th>Mark</th>
+                                <th>Pass Mark</th>
+                            </thead>
+                            <tbody>
+                                {% for item in mark_types %}
+                                {% with sub_conf_mark|get_item:item.id as mark_item %}
+                                <tr>
+                                    <td>{{item.name}}<input type="hidden" name="mark_type_id" value="{{item.id}}"></td>
+                                    <td><input name="mark_type_mark" type="number" value="{{mark_item.mark_type_mark}}"></td>
+                                    <td><input name="mark_type_pass_mark" value="{{mark_item.mark_type_pass_mark}}" type="number"></td>
+                                </tr>
+                                {% endwith %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                        <table class="table table-bordered mark_table">
+                            <thead>
+                                <th>Type</th>
+                                <th>Mark</th>
+                                <th>Pass Mark</th>
+                            </thead>
+                            <tbody>
+                                {% for item in mark_types %}
+                                <tr>
+                                    <td>{{item.name}}<input type="hidden" name="mark_type_id" value="{{item.id}}"></td>
+                                    <td><input  name="mark_type_mark" type="number"></td>
+                                    <td><input  name="mark_type_pass_mark" type="number"></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% endif %}
+                        {% endwith %}
+                        {% else %}
+                        <table class="table table-bordered mark_table">
+                            <thead>
+                                <th>Type</th>
+                                <th>Mark</th>
+                                <th>Pass Mark</th>
+                            </thead>
+                            <tbody>
+                                {% for item in mark_types %}
+                                <tr>
+                                    <td>{{item.name}}<input  type="hidden" name="mark_type_id" value="{{item.id}}"></td>
+                                    <td><input  name="mark_type_mark" type="number"></td>
+                                    <td><input name="mark_type_pass_mark" type="number"></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% endif %}
+                        {% endwith %}
+
+                        {% else %}
+                        <div class="row">
+                            <div class="col-6 form-field">
+                                <label>Subject Type</label>
+                                <select name="subject_type" id="subject_type">
+                                    {% for type in subject_types %}
+                                    <option
+                                        value="{{type.1}}">{{type.1}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-6 form-field">
+                                <label>Subject Mark</label>
+                                <input value="100" type="number" name="subject_mark">
+                            </div>
+
+                            <div class="col-6 form-field">
+                                <label>Subject Serial</label>
+                                <input name="subject_serial" type="number">
+                            </div>
+                            <div class="col-6 form-field">
+                                <label>Subject Merge</label>
+                                <input type="number" name="subject_merge">
+                            </div>
+                        </div>
+                        <table class="table table-bordered mark_table">
+                            <thead>
+                                <th>Type</th>
+                                <th>Mark</th>
+                                <th>Pass Mark</th>
+                            </thead>
+                            <tbody>
+                                {% for item in mark_types %}
+                                <tr>
+                                    <td>{{item.name}}<input type="hidden" name="mark_type_id" value="{{item.id}}"></td>
+                                    <td><input name="mark_type_mark" type="number"></td>
+                                    <td><input name="mark_type_pass_mark" type="number"></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% endif %}
+                        {% endwith %}
+
+                        {% else %}
+                        <div class="row">
+                            <div class="col-6 form-field">
+                                <label>Subject Type</label>
+                                <select name="subject_type" id="subject_type">
+                                    {% for type in subject_types %}
+                                    <option
+                                        value="{{type.1}}">{{type.1}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-6 form-field">
+                                <label>Subject Mark</label>
+                                <input value="100" type="number" name="subject_mark">
+                            </div>
+
+                            <div class="col-6 form-field">
+                                <label>Subject Serial</label>
+                                <input name="subject_serial" type="number">
+                            </div>
+                            <div class="col-6 form-field">
+                                <label>Subject Merge</label>
+                                <input type="number" name="subject_merge">
+                            </div>
+                        </div>
+                        <table class="table table-bordered mark_table">
+                            <thead>
+                                <th>Type</th>
+                                <th>Mark</th>
+                                <th>Pass Mark</th>
+                            </thead>
+                            <tbody>
+                                {% for item in mark_types %}
+                                <tr>
+                                    <td>{{item.name}}<input type="hidden" name="mark_type_id" value="{{item.id}}"></td>
+                                    <td><input name="mark_type_mark" type="number"></td>
+                                    <td><input name="mark_type_pass_mark" type="number"></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% endif %}
+                        {% endwith %}
+                        
+                    </div>
+                    
+                    {% endfor %}
+                        {% for _ in class_empty_slots|get_item:class.id %}
+                        <div class="grid-item empty"></div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+                </div>
+                
+                <div>
+                    <input type="hidden" name="subject_config_data">
+                    <button type="submit" class="btn btn-primary btn-block m-4">Save</button>
+                </div>
+            </form>
+
+        </div>
+
+    </div>
+
+  </div>
+
+</div>
+<!-- end: Content -->
+
+{% endblock content %}
+
+{% block extra_javascript %}
+<script>
+    const allMarkTableRow = document.querySelectorAll('.mark_table tbody tr');
+    allMarkTableRow.forEach(item => {
+        const totalMark = item.querySelector('input[name="mark_type_mark"]');
+        const passMark = item.querySelector('input[name="mark_type_pass_mark"]');
+        totalMark.addEventListener('change', function(){
+            const totalMarkValue = parseFloat(totalMark.value);
+            passMark.value = parseInt(totalMarkValue / 3);
+        });
+    })
+</script>
+
+<script>
+    const allSubjectMarks = document.querySelectorAll('.subject_mark');
+    allSubjectMarks.forEach(item => {
+        const subject_total_mark = item.querySelector('input[name="subject_mark"]').value;
+
+        const markItems = item.querySelectorAll('table tbody input[name="mark_type_mark"]');
+
+
+        const markItemsMarkSumResult = function markItemsMarkSumCalc() {
+            let markItemsMarkSum = 0;
+            markItems.forEach(item => {
+                markItemsMarkSum += parseInt(item.value || 0)
+            })
+            return markItemsMarkSum;
+        }
+
+        markItems.forEach(markItm => {
+            markItm.addEventListener('change', function () {
+                if (markItemsMarkSumResult() > subject_total_mark) {
+                    alert("Mark Exceeded Subject Total Mark");
+                    this.value = 0;
+                    this.closest('td').nextElementSibling.querySelector('input[name="mark_type_pass_mark"]').value = 0;
+                }
+            })
+        });
+    })
+
+</script>
+
+<script>
+    const subjectMarkConfigForm = document.querySelector("#subject_mark_config_form");
+    const subjectConfigData = document.querySelector("input[name='subject_config_data']");
+    const subjectMarkItems = document.querySelectorAll(".subject_mark");
+    const subjectConfigDataArr = [];
+
+    subjectMarkConfigForm.addEventListener("submit", function (e) {
+        subjectMarkItems.forEach(item => {
+            const subject_id = item.querySelector("input[name='subject_id']").value;
+            const class_id = item.querySelector("input[name='class_id']").value;
+            const subject_Serial = item.querySelector("input[name='subject_serial']").value;
+            const subject_marge = item.querySelector("input[name='subject_merge']").value;
+            const subject_type = item.querySelector("select[name='subject_type']").value;
+            const subject_mark = item.querySelector("input[name='subject_mark']").value;
+
+            
+            const markItems = item.querySelectorAll("table tbody tr");
+            const subjectConfigDataItem = { subject_id, class_id, subject_Serial, subject_marge, subject_type, mark: subject_mark, markConfigData: [] }
+
+            markItems.forEach(item => {
+                const mark_type_id = item.querySelector("input[name='mark_type_id']").value;
+                const mark_type_mark = item.querySelector("input[name='mark_type_mark']").value;
+                const mark_type_pass_mark = item.querySelector("input[name='mark_type_pass_mark']").value;
+            
+                if(mark_type_id && mark_type_mark && mark_type_pass_mark) {
+                    subjectConfigDataItem.markConfigData.push({mark_type_id,mark: mark_type_mark, pass_mark: mark_type_pass_mark})
+                    
+                }
+            })
+
+            
+            if (subject_id && class_id) {
+                subjectConfigDataArr.push(subjectConfigDataItem);
+            }
+            
+        })
+        subjectConfigData.value = JSON.stringify(subjectConfigDataArr);
+    })
+</script>
+
+{% endblock extra_javascript%}

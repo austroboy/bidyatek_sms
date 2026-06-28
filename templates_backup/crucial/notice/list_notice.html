@@ -1,0 +1,88 @@
+<div class="d-flex justify-content-between">
+  <div class="p-2 align-items-center">
+    <button class="btn btn-primary" hx-get="{% url 'add_notice' %}" hx-target="#noticedialog"> 
+      <i class='bx bx-plus-circle me-2'></i>
+      Add
+    </button>
+  </div>
+  <div class="d-none d-md-block">
+    <div class="form-group">
+      <input class="form-control" type="text" id="searchName" ng-model="searchName" placeholder="Type name to search" />
+    </div>
+  </div>
+</div>
+<div class="card-body">
+  <div class="table-responsive text-nowrap">
+    <table class="table">
+      <thead class="teal-thead">
+        <tr class="shadow-sm">
+          <th>#</th>
+          <th>Date</th>
+          <th>Notice Title</th>
+          <th>Notice Description</th>
+          <th>Expire Date</th>
+          <th>File Attached</th>
+          <th>Actions</th>
+        </tr>
+      </thead> 
+      <tbody>
+        {% for notice in noticelist %}
+
+        <tr>
+          <td>
+            {{forloop.counter}}
+          </td>
+          <td>
+            {{notice.date}}
+          </td>
+          <td>
+            {{notice.notice_title}}
+          </td>
+          <td>
+            {{notice.notice_description}}
+          </td>
+          <td>
+            {{notice.expire_date}}
+          </td>
+          <td>
+            {{notice.file_attached}}
+          </td>
+
+          <td>
+            <div class="dropdown">
+              <button
+                type="button"
+                class="btn p-0 dropdown-toggle hide-arrow"
+                data-bs-toggle="dropdown"
+              >
+                <i class="bx bx-dots-vertical-rounded"></i>
+              </button>
+              <div class="dropdown-menu">
+                <a
+                  class="dropdown-item"
+                  href="javascript:void(0);"
+                  hx-get="{% url 'edit_notice' pk=notice.pk %}"
+                  hx-target="#noticedialog"
+                  ><i class="bx bx-edit-alt me-1"></i> Edit</a
+                >
+                <a
+                  class="dropdown-item"
+                  hx-delete="{% url 'del_notice' pk=notice.pk %}"
+                  href="javascript:void(0);"
+                  hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+                  hx-target="#noticeadd"
+                  hx-confirm="are you want to delete?"
+                  ><i class="bx bx-trash me-1"></i> Delete</a
+                >
+              </div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+

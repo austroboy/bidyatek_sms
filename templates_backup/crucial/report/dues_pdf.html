@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: 'Helvetica', sans-serif;
+            font-size: 11px;
+            line-height: 1.6;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header img {
+            height: 80px;
+        }
+        .title {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .footer {
+            text-align: right;
+            margin-top: 20px;
+            font-size: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="{{ logo_url }}" alt="School Logo">
+        <h2>RAJUK UTTARA MODEL COLLEGE</h2>
+        <p class="title">Student-wise Due List</p>
+        <p>{{ date_range }}</p>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>SL</th>
+                <th>Student Name</th>
+                <th>Roll</th>
+                <th>Version</th>
+                <th>Class</th>
+                <th>Section</th>
+                <th>Shift</th>
+                <th>Total Fees</th>
+                <th>Discount</th>
+                <th>Partial Pay</th>
+                <th>Due</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for fee in fees %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ fee.student_id.student_field.name }}</td>
+                    <td>{{ fee.student_id.roll_no }}</td>
+                    <td>{{ fee.student_id.version }}</td>
+                    <td>{{ fee.student_id.class_id }}</td>
+                    <td>{{ fee.student_id.section }}</td>
+                    <td>{{ fee.student_id.shift }}</td>
+                    <td>{{ fee.total_fee_after_discount|floatformat:2 }}</td>
+                    <td>{{ fee.discount_amount|floatformat:2 }}</td>
+                    <td>{{ fee.total_paid_amount|floatformat:2 }}</td>
+                    <td>{{ fee.total_fee_after_partial_payments|floatformat:2 }}</td>
+                    <td>{{ fee.status.upper }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <p>Generated on {{ current_date }}</p>
+    </div>
+</body>
+</html>

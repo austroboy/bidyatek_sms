@@ -1,0 +1,628 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load widget_tweaks %} 
+{% block extra_css %}
+
+
+ 
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta2/css/bootstrap-select.min.css'>
+<link 
+      rel="stylesheet"
+      href="{% static 'assets/vendor/libs/select2/select2.min.css' %}"
+    />
+	
+<link 
+      rel="stylesheet"
+      href="{% static 'assets/vendor/libs/select2/select2-bootstrap-5-theme.min.css' %}"
+    />
+<link rel="stylesheet" href="{% static 'assets/css/loading.css' %}" /> 
+<style>
+
+  .nav-tabs .nav-link.active,
+    .nav-tabs .nav-item.show .nav-link {
+      background-color: #1d1e4e !important;
+      color: white !important;
+    }
+
+  .nav-tabs .nav-item .nav-link:not(.active),
+    .nav-tabs .nav-item.show .nav-link {
+      background-color: #4C4E7A !important;
+      color: white !important;
+    }
+
+
+.status {
+    padding: .4rem 0;
+    border-radius: 2rem;
+    text-align: center;
+}
+
+
+@media (max-width: 1000px) {
+    td:not(:first-of-type) {
+        min-width: 12.1rem;
+    }
+}
+
+
+
+  .dropdown-menu{
+    max-height: 400px !important;
+  }
+  
+</style>
+
+{% endblock extra_css %} {% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+
+  <div class="nav-align-top mb-4">
+    <ul class="nav nav-tabs nav-fill " role="tablist">
+      <li class="nav-item ">
+        <button
+          type="button"
+          class="nav-link active"
+          role="tab"
+          data-bs-toggle="tab"
+          data-bs-target="#navs-justified-home"
+          aria-controls="navs-justified-home"
+          aria-selected="true">
+          <i class="tf-icons bx bx-message-dots me-1"></i><span class="d-none d-sm-block">Send SMS </span>
+        </button>
+      </li>
+      <li class="nav-item">
+        <button
+          type="button"
+          class="nav-link"
+          role="tab"
+          data-bs-toggle="tab"
+          data-bs-target="#navs-justified-profile"
+          aria-controls="navs-justified-profile"
+          aria-selected="false">
+          <i class="tf-icons bx bx-mail-send me-1"></i><span class="d-none d-sm-block">SMS Template</span>
+          <span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-label-danger ms-1">{{template_count}}</span>
+        </button>
+      </li>
+      
+    </ul>
+    <div class="tab-content">
+      <div class="tab-pane fade show active" id="navs-justified-home" role="tabpanel">
+        <div id="loading-screen" style="display: none;">
+          <figure>
+              <div class="dot white"></div>
+              <div class="dot"></div>
+              <div class="dot"></div>
+              <div class="dot"></div>
+              <div class="dot"></div>
+          </figure>
+        </div>
+        <form method="post" id="SmsForm" action="{% url 'sms' %}">
+          {% csrf_token %}
+          <div class="row">
+            <div class="mb-3">
+              <label class="col-form-label">Select Wise</label>
+              <div class="">
+                  <select id="wise" class="form-select" name="wise" required onchange="toggleSections()">
+                      <option selected hidden disabled value=""> Select Wise</option>
+                      <option value="pc">Parent(Class)</option>
+                      <option value="ps">Parent(Section)</option>
+                      <option value="pg">Parent(Group)</option>
+                      <option value="th">Teacher</option>
+                      <option value="sf">Staff</option>
+                      <option value="sp">Selected Parent</option>
+                      <option value="se">Selected Employee</option>
+                      <option value="ins">Institute</option>
+                  </select>
+              </div>
+            </div>
+
+            <div class="mb-3" id="classDropdown" style="display: none;">
+              <label class="col-form-label">Select Class</label>
+              <div class="">
+                  <select id="class_id" class="selectpicker form-control border border-1" name="class_id" multiple>
+                      <option selected hidden disabled> Select Class</option>
+                      {% for class_id in class_list %}
+                      <option value="{{class_id.id}}">{{class_id.name}}</option>
+                      {% endfor %}
+                  </select>
+              </div>
+            </div>
+
+
+            <div class="mb-3" id="sectionDropdown" style="display: none;">
+              <label class="col-form-label">Select Section</label>
+              <div class="">
+                  <select id="section" class="selectpicker form-control border border-1" name="section" multiple>
+                      <option selected hidden disabled> Select Section</option>
+                      {% for section in section_list %}
+                      <option value="{{section.id}}">{{section}}</option>
+                      {% endfor %}
+                  </select>
+              </div>
+            </div>
+
+            <div class="mb-3" id="groupDropdown" style="display: none;">
+              <label class="col-form-label">Select Group</label>
+              <div class="">
+                  <select id="group" class="selectpicker form-control border border-1" name="group" multiple>
+                      <option selected hidden disabled> Select Group</option>
+                      {% for group in group_list %}
+                      <option value="{{group.id}}">{{group}}</option>
+                      {% endfor %}
+                  </select>
+              </div>
+            </div>
+
+            <div class="mb-3" id="select_student" style="display: none;">
+              <label class="col-form-label">Select Sudent</label>
+              <div class="">
+                  <select id="student" class="form-control border border-1" name="student" multiple>
+                      
+                      {% for student in student_list %}
+                      <option value="{{student.id}}">{{student.student_field.name}}</option>
+                      {% endfor %}
+                  </select>
+              </div>
+            </div>
+
+            <div class="mb-3" id="select_employee" style="display: none;">
+              <label class="col-form-label">Select Employee</label>
+              <div class="">
+                  <select id="employee" class="form-control border border-1" name="employee" multiple>
+                      
+                      {% for employee in employee_list %}
+                      <option value="{{employee.id}}">{{employee.staff_field.name}}</option>
+                      {% endfor %}
+                  </select>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="col-form-label">Select Template</label>
+              <div class="">
+                  <select id="template" class="form-select" name="sms_template">
+                      <option selected hidden disabled> Select Template</option>
+                      {% for sms_template in sms_template_list %}
+                      <option value="{{sms_template.id}} " data-body="{{ sms_template.body }}">{{sms_template.title}}</option>
+                      {% endfor %}
+                  </select>
+              </div>
+            </div>
+            <div class="mb-3" id="admission_year">
+              <label class="col-form-label">Select Admission Year</label>
+              <div class="">
+                <select class="form-select" name="admission_year">
+                  <option selected hidden disabled value="">Select Admission Year</option>
+                  {% for admission_year in admission_year_list %}
+                  <option value="{{admission_year.id}}">{{admission_year}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="mb-3" id="academic_session" style="display: none;">
+              <label class="col-form-label">Select Academic Session</label>
+              <div class="">
+                <select class="form-select" name="academic_session">
+                  <option selected hidden disabled value="">Select Academic Session</option>
+                  {% for academic_session in academic_session_list %}
+                  <option value="{{academic_session.id}}">{{academic_session}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            
+
+            <div class="mb-3">
+              <label for="sb" class="form-label">SMS Body</label>
+              <textarea name="body" class="form-control" id="sb" rows="2" required ></textarea>
+            </div>
+
+            <div class="d-flex justify-content-between">
+              <div class="text-danger" id="charCountSet">Character Count:0 </div>
+              <div class="text-danger" id="smsCountResultSet">Number of SMS:0</div>
+            </div>
+
+          </div>
+      
+          <button class="btn btn-danger" id="submit-btn" type="submit"> Submit </button>
+        </form>
+
+
+      </div>
+      
+      <div class="tab-pane fade" id="navs-justified-profile" role="tabpanel">
+        
+        <div class="d-flex border-bottom justify-content-between align-content-center">
+          <div style="line-height:-10px;" class="h5">SMS Template List</div>
+          <div class="pb-3">
+            <a class="btn btn-primary " data-bs-toggle="offcanvas" href="#offcanvasBoth" role="button" aria-controls="offcanvasBoth">
+              Add Template
+            </a>
+          </div>
+
+        </div>
+      
+      
+
+        <div class="table-responsive">
+            <table class="table table-centered table-nowrap mb-0">
+                <thead class="teal-thead">
+                    <tr>
+                        
+                        <th scope="col">ID</th>
+                        <th scope="col">Title</th>
+                        <th scope="col">Template</th>
+                        <th class="text-end" scope="col">Action</th>
+                        
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sms in sms_template_list %}
+                    <tr>
+                        
+                        <td>
+                            {{forloop.counter}}
+                        </td>
+                        
+                        <td>
+                             {{sms.title}} 
+                        </td>
+
+                        <td>
+                          {{sms.body}} 
+                        </td>
+
+
+                        <td class="text-end">
+                            
+                          {% comment %} <a
+                            href="#"
+                            class="btn btn-sm btn-primary btn-edit me-1 px-2"
+                            
+                            >Edit</a
+                          > {% endcomment %}
+                          <a href="{% url 'del_sms' sms.pk %}"
+                            class="btn btn-sm btn-danger btn-delete px-2"
+                            onclick="return confirmDelete();">
+                              Delete
+                          </a>
+                          
+                        </td>
+                        
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+      </div>
+     
+    </div>
+  </div>
+
+
+</div>
+<!-- end: Content -->
+
+
+<div
+    class="offcanvas offcanvas-end w-100"
+    data-bs-scroll="true"
+    tabindex="-1"
+    id="offcanvasBoth"
+    aria-labelledby="offcanvasBothLabel"
+  >
+    <div class="offcanvas-header">
+      <h5 id="offcanvasBothLabel" class="offcanvas-title">
+        Add SMS Template
+      </h5>
+      <button
+        type="button"
+        class="btn-close text-reset"
+        data-bs-dismiss="offcanvas"
+        aria-label="Close"
+      ></button>
+    </div>
+    <div class="text-center">
+      <p>বি: দ্র: ইংরেজিতে ১৬০ Character এ একটি SMS এবং বাংলায় ৭০ Character এ একটি SMS । </p>
+    </div>
+    <div class="offcanvas-body  mx-0 flex-grow-0">
+      
+      <form action="{% url 'sms' %}" method="post">
+         {% csrf_token %} 
+
+         <div class="form-floating mb-4">
+            <textarea class="form-control" placeholder="Leave a Title here" name="title" id="floatingTitle"></textarea>
+            <label class="ms-2" for="floatingTitle">SMS Title</label>
+        </div>
+
+        <div class="form-floating ">
+            <textarea class="form-control" placeholder="Leave a SMS Body here" id="message" name="body" style="height: 100px"></textarea>
+            <label class="ms-2" for="message">SMS Body</label>
+        </div>
+
+        <div class="d-flex justify-content-between">
+          <div class="text-danger" id="charCount">Character Count:0 </div>
+          <div class="text-danger" id="smsCountResult">Number of SMS:0</div>
+        </div>
+        
+        <button class="btn btn-primary  my-4 w-25" type="submit">Submit</button>
+      </form>
+            
+    </div>
+ </div>
+        
+
+
+{% endblock content %} {% block extra_javascript %}
+
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="{% static 'assets/vendor/libs/datatables/pdfmake.min.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/datatables/vfs_fonts.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/datatables/datatables.min.js' %}"></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta2/js/bootstrap-select.min.js'></script>
+<script>
+  document.getElementById("SmsForm").addEventListener("submit", function () {
+      // Show the loading screen
+      document.getElementById("loading-screen").style.display = "block";
+      // Disable the submit button to prevent multiple submissions
+      document.getElementById("submit-btn").disabled = true;
+  });
+</script>
+
+  <script>
+
+
+    document.addEventListener("DOMContentLoaded", function(){
+      const deleteButtons = document.querySelectorAll('.btn-delete');
+      deleteButtons.forEach(function(button) {
+          button.addEventListener('click', function(e) {
+              e.preventDefault(); // Prevent the link from directing immediately
+              const confirmed = confirm('Are you sure you want to delete this?');
+              if (confirmed) {
+                  window.location.href = this.href; // If confirmed, proceed with the deletion
+              }
+          });
+      });
+  });
+
+
+    function toggleSections() {
+      let wiseSelect = document.getElementById("wise");
+      let classDropdown = document.getElementById("classDropdown");
+      let sectionDropdown = document.getElementById("sectionDropdown");
+  
+      if (wiseSelect.value === "pc") {
+        admission_year.style.display = "block";
+        classDropdown.style.display = "block";
+        academic_session.style.display = "none";
+        groupDropdown.style.display = "none";
+        sectionDropdown.style.display = "none";
+        select_student.style.display = "none";
+      }
+      else if (wiseSelect.value === "ps") {
+        admission_year.style.display = "block";
+        academic_session.style.display = "none";
+        classDropdown.style.display = "none";
+        groupDropdown.style.display = "none";
+        sectionDropdown.style.display = "block";
+        select_student.style.display = "none";
+        select_employee.style.display = "none";
+      }
+      else if (wiseSelect.value === "pg") {
+        admission_year.style.display = "block";
+        academic_session.style.display = "block";
+        classDropdown.style.display = "none";
+        groupDropdown.style.display = "block";
+        sectionDropdown.style.display = "none";
+        select_student.style.display = "none";
+        select_employee.style.display = "none";
+      }
+      else if (wiseSelect.value === "sp") {
+        groupDropdown.style.display = "none";
+        academic_session.style.display = "none";
+        admission_year.style.display = "none";
+        classDropdown.style.display = "none";
+        sectionDropdown.style.display = "none";
+        select_employee.style.display = "none";
+        select_student.style.display = "block";
+      }
+      else if (wiseSelect.value === "se") {
+        academic_session.style.display = "none";
+        admission_year.style.display = "none";
+        groupDropdown.style.display = "none";
+        classDropdown.style.display = "none";
+        sectionDropdown.style.display = "none";
+        select_student.style.display = "none";
+        select_employee.style.display = "block";
+      }
+      else if (wiseSelect.value === "th") {
+        academic_session.style.display = "none";
+        admission_year.style.display = "none";
+        groupDropdown.style.display = "none";
+        classDropdown.style.display = "none";
+        sectionDropdown.style.display = "none";
+        select_student.style.display = "none";
+        select_employee.style.display = "none";
+      }
+      else if (wiseSelect.value === "sf") {
+        academic_session.style.display = "none";
+        admission_year.style.display = "none";
+        groupDropdown.style.display = "none";
+        classDropdown.style.display = "none";
+        sectionDropdown.style.display = "none";
+        select_student.style.display = "none";
+        select_employee.style.display = "none";
+      }
+       else {
+        academic_session.style.display = "none";
+        classDropdown.style.display = "none";
+        sectionDropdown.style.display = "none";
+        select_student.style.display = "none";
+        select_employee.style.display = "none";
+        groupDropdown.style.display = "none";
+      }
+    } 
+
+
+    function toggleclsc() {
+      let clscSelect = document.getElementById("clsc");
+      let classDropdown = document.getElementById("classDropdown1");
+      let sectionDropdown = document.getElementById("sectionDropdown1");
+  
+      if (clscSelect.value === "cls") {
+        classDropdown.style.display = "block";
+        sectionDropdown.style.display = "none";
+      }
+
+      else if (clscSelect.value === "sec") {
+        classDropdown.style.display = "none";
+        sectionDropdown.style.display = "block";
+      }
+
+      else if (clscSelect.value === "allp") {
+        classDropdown.style.display = "none";
+        sectionDropdown.style.display = "none";
+      }
+      
+       else {
+        classDropdown.style.display = "none";
+        sectionDropdown.style.display = "none";
+      }
+    }
+
+    document.getElementById('template').addEventListener('change', function() {
+      var selectedOption = this.options[this.selectedIndex];
+      var body = selectedOption.dataset.body;
+      document.getElementById('sb').value = body;
+  });
+
+
+  function activateLastSelectedTab() {
+    // Retrieve the last selected tab from local storage
+    var lastSelectedTab = localStorage.getItem('lastSelectedTab');
+
+    // If a last selected tab is found, activate it
+    if (lastSelectedTab) {
+        var tab = document.querySelector('button[data-bs-target="' + lastSelectedTab + '"]');
+        if (tab) {
+            var tabPane = document.querySelector(lastSelectedTab);
+            if (tabPane) {
+                var tabContent = tabPane.closest('.tab-content');
+                var activeTab = tabContent.querySelector('.tab-pane.fade.show.active');
+                if (activeTab) {
+                    activeTab.classList.remove('active', 'show');
+                }
+                tabPane.classList.add('active', 'show');
+            }
+            tab.click();
+        }
+    }
+}
+
+// Event listener to store the last selected tab in local storage
+document.addEventListener('DOMContentLoaded', function() {
+    var tabs = document.querySelectorAll('.nav-tabs .nav-link');
+    tabs.forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            var tabTarget = this.getAttribute('data-bs-target');
+            localStorage.setItem('lastSelectedTab', tabTarget);
+        });
+    });
+
+    // Activate the last selected tab when the page loads
+    activateLastSelectedTab();
+});
+  </script>
+  
+  <script src="{% static 'assets/vendor/libs/select2/select2.min.js' %}"></script>
+  <script>
+      $('#student').select2({
+          theme: "bootstrap-5",
+          width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+          placeholder: $(this).data('placeholder'),
+          closeOnSelect: false,
+        });
+      $('#employee').select2({
+          theme: "bootstrap-5",
+          width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+          placeholder: $(this).data('placeholder'),
+          closeOnSelect: false,
+        });
+  </script>
+
+  <script>
+    function countSMS(text) {
+      var GSM_7BIT_MAX_CHARS = 160; // Maximum characters in a GSM 7-bit SMS
+      var UNICODE_MAX_CHARS = 70; // Maximum characters in a Unicode SMS
+
+      // Define GSM 7-bit character set
+      var gsm7bitChars = "@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞ\x1bÆæßÉ!\"#¤%&'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà";
+
+      var totalLength = 0;
+      var isUnicode = false;
+      for (var i = 0; i < text.length; i++) {
+        var charCode = text.charCodeAt(i);
+        if (charCode > 127 || charCode < 32 || charCode === 127) {
+          isUnicode = true;
+          break;
+        }
+      }
+
+      totalLength = text.length;
+
+      // Calculate number of SMS
+      if (isUnicode) {
+        return Math.ceil(totalLength / UNICODE_MAX_CHARS);
+      } else {
+        return Math.ceil(totalLength / GSM_7BIT_MAX_CHARS);
+      }
+    }
+
+    var textarea = document.getElementById('message');
+    var charCount = document.getElementById('charCount');
+    var smsCountResult = document.getElementById('smsCountResult');
+    
+    textarea.addEventListener('input', function(event) {
+      var message = event.target.value;
+      charCount.textContent = 'Character Count: ' + message.length;
+      var smsCount = countSMS(message);
+      smsCountResult.textContent = 'Number of SMS: ' + smsCount;
+    });
+
+    
+
+    var textareaSet = document.getElementById('sb');
+    var charCountSet = document.getElementById('charCountSet');
+    var smsCountResultSet = document.getElementById('smsCountResultSet');
+    var templateSelect = document.getElementById('template');
+
+    function updateCounts(message) {
+      charCountSet.textContent = 'Character Count: ' + message.length;
+      var smsCount = countSMS(message);
+      smsCountResultSet.textContent = 'Number of SMS: ' + smsCount;
+    }
+
+     function handleInputEvent(event) {
+      var message = event.target.value;
+      charCountSet.textContent = 'Character Count: ' + message.length;
+      var smsCount = countSMS(message);
+      smsCountResultSet.textContent = 'Number of SMS: ' + smsCount;
+    }
+
+    textareaSet.addEventListener('input', handleInputEvent);
+    textareaSet.addEventListener('click', handleInputEvent);
+    textareaSet.addEventListener('mouseover', handleInputEvent); 
+
+    templateSelect.addEventListener('change', function() {
+      var selectedOption = templateSelect.options[templateSelect.selectedIndex];
+      var body = selectedOption.getAttribute('data-body');
+      textareaSet.value = body;
+      updateCounts(body);
+    });
+
+  </script>
+
+
+{% endblock extra_javascript%}

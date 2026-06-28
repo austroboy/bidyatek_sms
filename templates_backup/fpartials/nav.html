@@ -1,0 +1,182 @@
+{% load static %} 
+{% load template_tags %} 
+{% with request.resolver_match.url_name as path_name %} 
+{% block navbar %}
+  
+<!-- Navbar Start -->
+<header class="container-fluid bg-primary">
+    <div style="height: auto; min-height: 180px" class="row d-flex overflow-x-hidden">
+        <!-- Institute Logo -->
+        <div class="col-12 col-md-2 offset-md-1 d-flex justify-content-center justify-content-md-start align-items-center mb-2 mb-md-0">
+            <div class="d-inline-block p-1 bg-white rounded-circle">
+                <a href="{% url 'fpanel' %}">
+                    <img height="120px" src="{{institute.institute_logo.url}}" class="rounded-circle" alt="Institute Logo"/>
+                </a>
+            </div>
+        </div>
+
+        <!-- Institute Name and Location -->
+        <div class="col-12 col-md-6 d-flex justify-content-center align-items-center mb-2 mb-md-0">
+            <div class="text-white d-flex flex-column text-center">
+                <p class="p-0 m-0 d-none d-md-block display-5">{{institute.institute_name}}</p>
+                <p class="p-0 m-0 d-none d-md-block fw-bold fs-4">{{institute.education_thana_id}}, {{institute.education_district_id}}</p>
+                <p class="p-0 m-0 d-block d-md-none fw-bold fs-5">{{institute.institute_name}}</p>
+                <p class="p-0 m-0 d-block d-md-none fs-5">{{institute.education_thana_id}}, {{institute.education_district_id}}</p>
+            </div>
+        </div>
+
+        <!-- Contact and Social Media Links -->
+        <div class="col-12 col-md-2 d-md-flex d-none flex-column align-items-center align-items-md-end justify-content-center text-md-end pe-md-4">
+            <div class="d-block">
+                <h5 class="m-0 btn-social  align-items-center d-flex">
+                    <span class="text-white"><i class="fa fa-phone-alt me-1 "></i> {{institute.headmaster_mobile}}</span>
+                </h5>
+            </div>
+            <div class="d-block">
+                <div class="d-flex pt-2 align-items-center justify-content-center justify-content-md-end">
+                    <a class="btn btn-outline-light btn-social" href="#"><i class="fab fa-twitter"></i></a>
+                    <a class="btn btn-outline-light btn-social" href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a class="btn btn-outline-light btn-social" href="#"><i class="fab fa-youtube"></i></a>
+                    <a class="btn btn-outline-light btn-social" href="#"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+        </div>
+ 
+</header>
+<div id="smooth-wrapper " class="sticky-top ">
+
+    <!-- Header area -->
+    <header class="">
+        <div style="background-color: #fed86b; color: #fff;" class="menu-area menu-area-two ">
+            <div class="container-fluid">
+                <div class="row align-items-center">
+                    <div class="col-lg-2 hamburger-menu text-primary position-relative">
+                        <h5 class="m-0 d-md-none d-block  lchange">Hotline: {{institute.headmaster_mobile}}</h5>
+                       
+                    </div>
+                    <div class="col-lg-10 ">
+                        <div class="nav-wrap  d-flex justify-content-between align-items-center">
+                            <div class="mainmenu text-right">
+                                <ul>
+                                    <li><a href="{% url 'fpanel' %}">Home</a></li>
+                                    <li class="has-child-menu"><a href="javascript:void(0)">Institute Info</a>
+                                        <ul>
+                                            <li class="has-child-menu"><a href="javascript:void(0)">All List</a>
+                                                <ul>
+                                                    <li><a href="{% url 'fstudent_list' %}">Student List</a></li>
+                                                    <li><a href="{% url 'fteacher_list' %}">Teacher List</a></li>
+                                                    <li><a href="{% url 'fstaff_list' %}">Staff List</a></li>
+                                                </ul>
+                                            </li>
+                                           
+                                            <li><a href="{% url 'institute_details' %}">Institute Details</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="has-child-menu"><a href="javascript:void(0)">Academic Info</a>
+                                        <ul>
+                                            <li class="has-child-menu"><a href="javascript:void(0)">Routine Info</a>
+                                                <ul>
+                                                    <li><a href="{% url 'fclass_routine' %}">Class Routine</a></li>
+                                                    <li><a href="{% url 'fteacher_routine' %}">Teacher Routune</a></li>
+                                                    <li><a href="{% url 'fnot' %}">Exam Routine</a></li>
+                                                </ul>
+                                            </li>
+                                            <li class="has-child-menu"><a href="javascript:void(0)">Attendance</a>
+                                                <ul>
+                                                    <li><a href="{% url 'f_student_attendance' %}">Section Wise</a></li>
+                                                </ul>
+                                            </li>
+                                            <li class="has-child-menu"><a href="javascript:void(0)">Exam</a>
+                                                <ul>
+                                                    <li><a href="{% url 'fnot' %}">Merit List</a></li>
+                                                    <li><a href="{% url 'fnot' %}">Fail List</a></li>
+                                                    <li><a href="{% url 'fnot' %}">Section Wise List</a></li>
+                                                    <li><a href="{% url 'fnot' %}">Individual Result</a></li>
+                                                </ul>
+                                            </li>
+                                           
+                                            <li><a href="{% url 'fnot' %}">Pay Slip</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="has-child-menu"><a href="javascript:void(0)">Gallery</a>
+                                        <ul>
+                                            <li><a href="{% url 'photo_gallery' %}">Photo Gallery</a></li>
+                                            <li><a href="{% url 'video_gallery' %}">Video Gallery</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="has-child-menu"><a href="javascript:void(0)">Download</a>
+                                        <ul>
+                                            <li><a href="{% url 'f_syllabus' %}">Syllabus</a></li>
+                                            <li><a href="{% url 'assignment' %}">Assignment</a></li>
+                                            <li><a href="{% url 'hand_book' %}">Hand Book</a></li>
+                                            <li><a href="{% url 'home_work' %}">Home Work</a></li>
+                                            <li><a href="{% url 'class_notes' %}">Class Notes</a></li>
+                                            <li><a href="{% url 'others_download' %}">Others Download</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="has-child-menu"><a href="javascript:void(0)">More</a>
+                                        <ul>
+                                            <li><a href="{% url 'fnot' %}">All Notice</a></li>
+                                            {% comment %} <li><a href="{% url 'fnot' %}">হৃদয়ে বঙ্গবন্ধু</a></li>
+                                            <li><a href="{% url 'fnot' %}">সুবর্ণ জয়ন্তী কর্ণার</a></li> {% endcomment %}
+                                        </ul>
+                                    </li>
+                                   
+                                    <li><a href="{% url 'fcontact' %}">Contact</a></li>
+                                </ul>
+                                <div class="menu-btn-wrap flex-shrink-0 d-lg-none pb-5">
+                                    <a href="{% url 'dashboard' %}" style="background-color: #06BBCC; color: #fff;" class="btn  py-4 px-lg-5 d-flex">Login Now<i class="fa fa-arrow-right ms-3"></i></a>
+                                </div>
+                            </div>
+                            <div  class="menu-btn-wrap border-start border-3 border-primary flex-shrink-0 d-none d-lg-block">
+                                <a href="{% url 'dashboard' %}" class="btn  d-flex">Login Now<i class="fa fa-arrow-right pt-1 ms-3"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu end -->
+
+    </header>
+    <!-- Header area End -->
+
+    
+</div>
+
+<header class=" d-none d-md-block " >
+    <div style="background-color: #CA0DF9; color: #fff;" class="menu-area menu-area-three">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-lg-1 text-primary position-relative">
+                    <h5 class="m-0 btn btn-warning">Notice:</h5>
+                </div>
+                <div class="col-lg-11">
+                    <div class="horizontal-scrolling-container">
+                        <div class="horizontal-scrolling-items">
+                            
+                                {% if notice_list_view %}
+                                    <div class="horizontal-scrolling-items__item">
+                                        {% for notice in notice_list_view %}
+                                            **** {{ notice.notice_title }} - {{ notice.notice_description }} ****
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <div class="horizontal-scrolling-items__item">
+                                        No active notices available.
+                                    </div>
+                                {% endif %}
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+{% endblock navbar %} 
+{% endwith %}

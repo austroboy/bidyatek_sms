@@ -1,0 +1,424 @@
+{% extends 'partials/base.html' %} {% load static %} 
+{% load mark_tags %}
+{% block extra_css %} 
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta2/css/bootstrap-select.min.css" />
+
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css'>
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-5-theme/1.3.0/select2-bootstrap-5-theme.min.css'>
+<style>
+
+
+.routine-container {
+    margin: 0 auto; 
+    background: white;
+  }
+  
+  
+  
+  .header img {
+    height: 60px;
+    margin-bottom: 10px;
+  }
+  
+  .header h4,
+  .header h6 {
+    margin: 6px;
+  }
+  
+  .routine-table {
+    overflow-x: auto;
+    /* border: 3px solid #aeb4b8; */
+    /* border-radius: 5px; */
+  }
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .schedule-table th,
+  .schedule-table td {
+    border: 1px solid #ddd;
+    font-size: 12px;
+    padding: 6px;
+    text-align: center;
+    vertical-align: middle;
+    min-width: 65px;
+    /* background-color: #f9f9f9; */
+  }
+  
+  .schedule-table th {
+    background-color: rgba(105, 108, 255, 0.16) !important ;
+
+  }
+  
+  .footer {
+    width: 100%;
+    margin-top: 40px;
+    font-size: 0.9em;
+    display: flex;
+    gap: 80px;
+    justify-content: space-between;
+    align-items: end;
+  }
+  
+  .footer ul {
+    padding-left: 20px;
+    text-decoration: underline;
+    list-style: decimal;
+  }
+  
+  .signature {
+    text-align: center;
+    margin-top: 20px;
+  }
+  
+  .signature img {
+    height: 60px;
+    margin-bottom: 10px;
+  }
+  
+  .signature h6 {
+    font-weight: 700;
+    margin: 0px;
+  }
+  
+  .routine-table::-webkit-scrollbar {
+    height: 4px;
+    width: 4px;
+  }
+  
+  .routine-table::-webkit-scrollbar-track {
+    border-radius: 10px;
+  }
+  
+  .routine-table::-webkit-scrollbar-thumb {
+    background: #5f61e6;
+    border-radius: 10px;
+  }
+  
+  .routine-table::-webkit-scrollbar-thumb:hover {
+    background: #5355d1;
+  }
+  .routine-container .header{
+    display: none;
+  }
+  @media print {
+    @page {
+      size: landscape;
+    }
+    .routine-container .header {
+        display: block;
+        text-align: center;
+        padding-bottom: 20px;
+      }
+
+    .routine-container .routine_table_border{
+      border: 1px solid #1d1e4e;
+      padding: 1px;
+    }
+    .routine-table {
+      overflow-x: auto;
+      border: 3px solid #1d1e4e;
+      /* border-radius: 5px; */
+    }
+
+    body {
+      margin: 0;
+      -webkit-print-color-adjust: exact;
+    }
+  
+    /* .routine-container {
+      padding: 0;
+      border: none;
+    } */
+  
+    * {
+      font-size: 10px;
+    }
+  
+    .header {
+      padding-bottom: 10px;
+    }
+  
+    .header img {
+      height: 40px;
+      margin-bottom: 5px;
+    }
+  
+    .header h3,
+    .header h5 {
+      font-size: 14px;
+      margin: 4px;
+    }
+  
+    .header h5 {
+      font-size: 12px;
+    }
+  
+    .schedule-table th,
+    .schedule-table td {
+      min-width: 20px;
+      font-size: 10px;
+      font-weight: 600;
+      text-align: center;
+      vertical-align: middle;
+    }
+  }
+  
+
+#fixed-button {
+    position: fixed;
+    right: 0px;
+    z-index: 1000!important;
+    top: 50%; /* Set top to 50% */
+    transform: translateY(-50%);
+  }
+
+  #fixed-button button {
+    color: #FCCF14;
+    display: block;
+    height: 50px;
+    position: relative;
+    text-align: center; 
+    line-height: 40px;
+    width: 50px;
+    margin-bottom: 1px;
+    z-index: 1000;
+    border: none;
+  }
+
+  #fixed-button button:hover {
+    right: 5px;
+    opacity: 1;
+  }
+
+  .fixed-icon {
+    background-color: #1D1E4E;
+  }
+</style>
+
+{% endblock extra_css %} 
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+
+  <div class="d-none d-md-block" id="fixed-button">
+    <div>
+      <button class="fixed-icon" id="print-schedule">
+        <i class="bx bxs-printer fs-1"></i>
+      </button>
+    </div>
+    <div>
+      <button class="fixed-icon" id="download-schedule">
+        <i class="bx bxs-file-pdf fs-1"></i>
+      </button>
+    </div>
+    <div>
+      <button class="fixed-icon" id="previous">
+        <i class='bx bx-skip-previous fs-1'></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+
+      <div class="row mx-2 py-2">
+                
+        <form method="post">
+          {% csrf_token %}
+          <div class="search_box row mb-3">
+            <div class="col-md-4 d-flex gap-3 flex-grow-1 align-items-center">
+              <label for="item_name" class="form-label text-nowrap pt-1">Select Class</label>
+              <div class="dropdown bootstrap-select show-tick form-control ">
+                <select name="class_input" class="selectpicker form-control border border-1" multiple="" tabindex="null">
+                  {% for class in all_classes %}
+                  <option {% if class in classes %}selected{% endif %} value="{{ class.id }}">{{ class }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="col-md-4 d-flex gap-3 mt-2 mt-md-0 flex-grow-1 align-items-center">
+              <label for="exam_name" class="form-label text-nowrap pt-1">Select Exam</label>
+              <select class="form-control" id="examSelect" name="exam_input" required="">
+
+                <option selected="" disabled="" hidden="" value="">Select Exam</option>
+                {% for exam in all_exams %}
+                  <option {% if exam in exams %}selected{% endif %} value="{{ exam.id }}">{{ exam }}</option>
+                {% endfor %}
+              
+              </select>
+              
+            </div>
+            <div class="col-md-2 mt-2 mt-md-0">
+              <button class="btn btn-primary text-nowrap" type="submit" name="Add">Search</button>
+            </div>
+          </div>
+        </form>
+      </div>
+ 
+      {% if exam_dates and classes %}
+
+      <div id="exam_schedule" class="">
+        <div class="row">
+
+          <!-- content here -->
+          <div class="routine-container" id="routine-container">
+            <header class="header">
+              <div class="logo">
+                <img src="{{institute.institute_logo.url}}"
+                  alt="institute Logo" />
+              </div>
+              <h4>{{institute.institute_name}}</h4>
+              <h6>{{exams.name}}</h6>
+              <h6>{{institute.institute_address}}</h6>
+            </header>
+            <div class="routine_table_border">
+              <div class="routine-table">
+                <table class="schedule-table">
+                  <thead>
+                    <tr>
+                      <th></th>
+                      {% for date in exam_dates %}
+                      <th>DAY {{ date.index }}</th>
+                      {% endfor %}
+
+                    </tr>
+                    <tr>
+                      <th>
+                        <div class="d-flex flex-column align-items-center gap-1 mx-auto">
+                          <span>Date</span>
+                          <div style="width: 35px; height: 1px; background-color: #aeb4b8; transform: rotate(32deg);" class="angle_line"></div>
+                          <span>Class</span>
+                        </div>
+                      </th>
+                      {% for date in exam_dates %}
+                      <th>{{ date.weekday }}<br />{{ date.formatted_date }}</th>
+                      {% endfor %}
+
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for class in classes %}
+                    <tr>
+                      <td>{{ class }}</td>
+                      {% for date in exam_dates %}
+                        {% if exam_config|is_dict %}
+                          {% with exam_config|get_es_item:class as exams_by_class %}
+                            {% if exams_by_class|is_dict %}
+                              {% with exams_by_class|get_es_item:date.formatted_date as exams_on_date %}
+                                {% if exams_on_date %}
+                                  <td>
+                                    {% for exam in exams_on_date %}
+                                      {{ exam.subject_name }}<br />
+                                      {{ exam.start_time }} - {{ exam.end_time }}<br />
+                                    {% endfor %}
+                                  </td>
+                                {% else %}
+                                  <td></td>
+                                {% endif %}
+                              {% endwith %}
+                            {% else %}
+                              <td></td>
+                            {% endif %}
+                          {% endwith %}
+                        {% else %}
+                          <td>No data</td>
+                        {% endif %}
+                      {% endfor %}
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+
+              </div>
+            </div>
+
+
+            <!-- <footer class="footer">
+              <ul>
+                <li>
+                  <strong>N.B. :</strong> Owing to unavoidable
+                  circumstances...
+                </li>
+                <li>
+                  <strong>Founder Principal & Chairperson :</strong> Ms.
+                  Lubna Choudhury
+                </li>
+              </ul>
+              <div class="signature">
+                <hr />
+                <h6>Ms. Lubna Choudhury</h6>
+                <h6>Founder Principal & Chairperson</h6>
+              </div>
+            </footer> -->
+          </div>
+        </div>
+      </div>
+
+      {% endif %}
+    </div>
+  </div>
+</div>
+<!-- end: Content -->
+
+{% endblock content %} 
+{% block extra_javascript %} 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta2/js/bootstrap-select.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<script src="{% static 'assets/vendor/libs/print/html2pdf.bundle.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/print/jQuery.print.js' %}"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+      function pdfGenerator() {
+        let pdfsave = $("#exam_schedule").html();
+        var opt = {
+          margin: 0.2,
+          filename: "{{exam_name}} {{class_name}}.pdf",
+          image: { type: "jpeg", quality: 0.99 },
+          html2canvas: { dpi: 192, letterRendering: true, useCORS: true },
+          jsPDF: { unit: "in", format: "a5", orientation: "landscape" },
+        };
+
+        html2pdf().set(opt).from(pdfsave).save();
+      }
+
+      // Download Invoice button click event
+      $("#download-schedule").on("click", function () {
+        pdfGenerator();
+      });
+
+      $("#print-schedule").on("click", function () {
+        $("#exam_schedule").print({
+          globalStyles: true,
+          mediaPrint: false,
+          stylesheet: null,
+          noPrintSelector: ".no-print",
+          iframe: true,
+          append: null,
+          prepend: null,
+          manuallyCopyFormValues: true,
+          deferred: $.Deferred(),
+          timeout: 750,
+          title: "Invoice",
+          doctype: "<!doctype html>",
+        });
+      });
+
+    });
+  </script>
+
+<script>
+  $('#examSelect').select2({
+      theme: "bootstrap-5",
+      
+    });
+
+</script>
+
+{% endblock extra_javascript %}
+ 

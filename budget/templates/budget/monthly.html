@@ -1,0 +1,164 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'budget_dashboard' %}" style="color:#2D6A73;">Budget</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'budget_detail' budget.pk %}" style="color:#2D6A73;">{{ budget.title }}</a></li>
+      <li class="breadcrumb-item active">Monthly — {{ cat.name }}</li>
+    </ol>
+  </nav>
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="fw-bold mb-0" style="color:#2D6A73;">
+        Monthly Allocations — {{ cat.name }}
+      </h4>
+      <small class="text-muted">
+        {{ cat.category_type }} · {{ cat.distribution_type }} ·
+        Yearly Target: <strong>৳ {{ cat.planned_amount|floatformat:2 }}</strong>
+      </small>
+    </div>
+    <a href="{% url 'budget_detail' budget.pk %}" class="btn btn-outline-secondary btn-sm">
+      <i class='bx bx-arrow-back me-1'></i>Back
+    </a>
+  </div>
+
+  <!-- Running Total Bar -->
+  <div class="card shadow-sm mb-4 border-0">
+    <div class="card-body py-3">
+      <div class="row text-center g-3">
+        <div class="col-md-3">
+          <div class="text-muted small">Yearly Planned</div>
+          <strong>৳ {{ cat.planned_amount|floatformat:2 }}</strong>
+        </div>
+        <div class="col-md-3">
+          <div class="text-muted small">Monthly Total Planned</div>
+          <strong {% if total_planned != cat.planned_amount %}class="text-danger"{% else %}class="text-success"{% endif %}>
+            ৳ {{ total_planned|floatformat:2 }}
+          </strong>
+        </div>
+        <div class="col-md-3">
+          <div class="text-muted small">Actual to Date</div>
+          <strong class="text-primary">৳ {{ total_actual|floatformat:2 }}</strong>
+        </div>
+        <div class="col-md-3">
+          <div class="text-muted small">Remaining (unallocated)</div>
+          <strong {% if remaining < 0 %}class="text-danger"{% elif remaining > 0 %}class="text-warning"{% else %}class="text-success"{% endif %}>
+            ৳ {{ remaining|floatformat:2 }}
+          </strong>
+        </div>
+      </div>
+      {% if total_planned != cat.planned_amount %}
+      <div class="alert alert-warning py-1 mt-2 mb-0 text-center">
+        <small><i class='bx bx-error me-1'></i>Monthly totals don't match the yearly target. Difference: ৳ {{ remaining|floatformat:2 }}</small>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Monthly Table -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-white py-3">
+      <h6 class="mb-0 fw-bold"><i class='bx bx-calendar me-2'></i>Month by Month Breakdown</h6>
+    </div>
+
+    {% if budget.status == 'DRAFT' and cat.distribution_type == 'MANUAL' %}
+    <form method="post">
+      {% csrf_token %}
+    {% endif %}
+
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead style="background:rgba(45,106,115,0.09);">
+          <tr>
+            <th>Month</th>
+            <th>Year</th>
+            <th class="text-end">Planned (৳)</th>
+            <th class="text-end">Actual (৳)</th>
+            <th class="text-end">Variance (৳)</th>
+            <th class="text-center">Progress</th>
+            <th class="text-center">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for alloc in allocations %}
+          <tr {% if alloc.is_locked %}class="text-muted"{% endif %}>
+            <td class="fw-semibold">{{ alloc.get_month_display }}</td>
+            <td>{{ alloc.year }}</td>
+            <td class="text-end">
+              {% if budget.status == 'DRAFT' and cat.distribution_type == 'MANUAL' and not alloc.is_locked %}
+                <input type="number" name="amount_{{ alloc.pk }}"
+                       value="{{ alloc.planned_amount }}"
+                       class="form-control form-control-sm text-end"
+                       style="max-width:120px; margin-left:auto;"
+                       step="0.01" min="0">
+              {% else %}
+                {{ alloc.planned_amount|floatformat:2 }}
+              {% endif %}
+            </td>
+            <td class="text-end {% if alloc.actual_amount > 0 %}text-primary{% else %}text-muted{% endif %}">
+              {% if alloc.actual_amount > 0 %}
+                {{ alloc.actual_amount|floatformat:2 }}
+              {% else %}—{% endif %}
+            </td>
+            <td class="text-end {% if alloc.variance >= 0 %}text-success{% else %}text-danger fw-bold{% endif %}">
+              {% if alloc.actual_amount > 0 %}
+                {{ alloc.variance|floatformat:2 }}
+              {% else %}—{% endif %}
+            </td>
+            <td class="text-center" style="min-width:140px;">
+              {% if alloc.actual_amount > 0 %}
+              <div class="d-flex align-items-center gap-1">
+                <div class="progress flex-grow-1" style="height:8px;">
+                  <div class="progress-bar bg-{{ alloc.status_class }}"
+                       style="width:{% if alloc.usage_percent > 100 %}100{% else %}{{ alloc.usage_percent }}{% endif %}%;"></div>
+                </div>
+                <span class="small fw-bold text-{{ alloc.status_class }}">{{ alloc.usage_percent }}%</span>
+              </div>
+              {% else %}
+              <span class="text-muted small">Upcoming</span>
+              {% endif %}
+            </td>
+            <td class="text-center">
+              {% if alloc.is_locked %}
+                <span class="badge bg-secondary"><i class='bx bx-lock-alt'></i> Locked</span>
+              {% elif alloc.actual_amount > 0 %}
+                <span class="badge bg-{{ alloc.status_class }}">{{ alloc.usage_percent }}%</span>
+              {% else %}
+                <span class="badge bg-light text-muted">Pending</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr class="table-active fw-bold">
+            <td colspan="2">TOTAL</td>
+            <td class="text-end">৳ {{ total_planned|floatformat:2 }}</td>
+            <td class="text-end text-primary">৳ {{ total_actual|floatformat:2 }}</td>
+            <td colspan="3"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    {% if budget.status == 'DRAFT' and cat.distribution_type == 'MANUAL' %}
+    <div class="card-footer bg-white d-flex gap-2">
+      <button type="submit" class="btn btn-primary">
+        <i class='bx bx-save me-1'></i>Save Monthly Amounts
+      </button>
+      <a href="{% url 'budget_detail' budget.pk %}" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+    </form>
+    {% endif %}
+
+  </div>
+
+</div>
+{% endblock %}

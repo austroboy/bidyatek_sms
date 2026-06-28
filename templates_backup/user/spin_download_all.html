@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>সব স্পিন এন্ট্রি ডাউনলোড</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        .download-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        .download-icon {
+            font-size: 80px;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        .stats-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .btn-download {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            border-radius: 50px;
+            transition: transform 0.3s;
+        }
+        .btn-download:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="download-card">
+                    <!-- Download Icon -->
+                    <div class="download-icon">
+                        📊
+                    </div>
+                    
+                    <!-- Title -->
+                    <h2 class="mb-3">সব স্পিন এন্ট্রি ডাউনলোড করুন</h2>
+                    <p class="text-muted mb-4">
+                        নিচের বাটনে ক্লিক করলে ডাটাবেজের <strong>সমস্ত এন্ট্রি</strong> এক্সেল ফাইলে ডাউনলোড হবে
+                    </p>
+                    
+                    <!-- Statistics -->
+                    <div class="stats-box">
+                        <h4>ডাটাবেজ স্ট্যাটাস</h4>
+                        <p class="mb-0">
+                            মোট রেকর্ড: <span class="badge bg-primary fs-6">{{ total_entries }}</span>
+                        </p>
+                        <small class="text-muted">এই মুহূর্তে ডাটাবেজে এতগুলো এন্ট্রি আছে</small>
+                    </div>
+                    
+                    <!-- Warning/Info -->
+                    <div class="alert alert-info mt-4">
+                        <strong>মনে রাখুন:</strong> এই এক্সেল ফাইলে তারিখ অনুযায়ী ফিল্টার করা যাবে না, 
+                        কারণ মডেলে তারিখ ফিল্ড সংরক্ষিত নেই। সব ডেটা একসাথে ডাউনলোড হবে।
+                    </div>
+                    
+                    <!-- Download Form -->
+                    <form method="post" action="{% url 'download_all_spins' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-download mt-3">
+                            <i class="fas fa-download"></i> এক্সেল ফাইল ডাউনলোড করুন
+                        </button>
+                    </form>
+                    
+                    <!-- Alternative Direct Link -->
+                    <div class="mt-4">
+                        <p class="text-muted">
+                            বা সরাসরি লিঙ্ক: 
+                            <a href="{% url 'download_all_spins' %}" class="text-decoration-none">
+                                {{ request.scheme }}://{{ request.get_host }}{% url 'download_all_spins' %}
+                            </a>
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Instructions -->
+                <div class="mt-4 text-white text-center">
+                    <h5>ডেটা কাঠামো (Excel Columns):</h5>
+                    <div class="d-flex flex-wrap justify-content-center gap-2">
+                        <span class="badge bg-light text-dark">ID</span>
+                        <span class="badge bg-light text-dark">নাম</span>
+                        <span class="badge bg-light text-dark">ফোন</span>
+                        <span class="badge bg-light text-dark">ইনস্টিটিউট</span>
+                        <span class="badge bg-light text-dark">শিক্ষার্থী সংখ্যা</span>
+                        <span class="badge bg-light text-dark">ফলাফল</span>
+                        <span class="badge bg-light text-dark">স্পিন হয়েছে?</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Font Awesome for icons -->
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

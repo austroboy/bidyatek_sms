@@ -1,0 +1,962 @@
+{% extends 'fpartials/base.html' %}
+{% load static %}
+{% block extra_css %}
+<link href="{% static 'webpage/css/box.css' %}" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css"  />
+
+<style>
+  .service-item {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    /* Ensures the container takes the full height of the parent */
+  }
+
+  .padding-4 {
+    flex-grow: 1;
+    /* Allows the content to expand and take the available space */
+  }
+
+  .fixed-height-image {
+    height: 300px;
+    /* Set the desired fixed height */
+    object-fit: cover;
+    /* Preserve aspect ratio and cover the container */
+    width: 100%;
+    /* Ensure the image takes up the full width of the container */
+  }
+
+  .testimonial-item {
+    display: flex;
+    flex-direction: column;
+    height: 200px;
+    /* Set a fixed height for all divs */
+  }
+
+  .testimonial-text {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+    /* Hide content overflow */
+  }
+
+  /* Optionally, add styles for better visual appearance */
+  .testimonial-item {
+
+    margin: 10px;
+    border-radius: 8px;
+  }
+
+  .testimonial-item:hover {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .my-card {
+    position: absolute;
+    left: 50%;
+    top: -20px;
+    transform: translateX(-50%); /* Centers the image horizontally */
+    width: 60px; /* Adjust this to match the size of the card shadow */
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+  .my-card img {
+      width: 45px; /* Adjust to match the desired size of the image */
+      height: 45px;
+      border-radius: 50%; /* Makes the image rounded */
+  }
+
+  .my-card:hover {
+    color: white !important;
+    background-color: #ffc107;
+  }
+
+  img.framed {
+    box-shadow:
+      -50px -50px 0 -40px #fed86b,
+      50px 50px 0 -40px #fed86b;
+  }
+
+  img.schoolframed {
+    --s: 10px;
+    /* control the size */
+    padding: var(--s);
+    border: calc(2*var(--s)) solid #0000;
+    outline: 1px solid #000;
+    outline-offset: calc(-1*var(--s));
+    background: conic-gradient(from 90deg at 1px 1px, #0000 25%, #000 0);
+  }
+
+
+  {% comment %} =================================== {% endcomment %}
+
+  .video-gallery {
+    position: relative;
+    margin: 0 auto;
+    max-width: 100%;
+    text-align: center;
+  }
+
+  .video-gallery .gallery-item {
+    position: relative;
+    float: left;
+    overflow: hidden;
+    margin: 10px 1%;
+    min-width: 320px;
+    max-width: 50%;
+    max-height: 360px;
+    width: 48%;
+    background: #000;
+    cursor: pointer;
+  }
+
+  .video-gallery .gallery-item img {
+    position: relative;
+    display: block;
+    opacity: .45;
+    width: 105%;
+    height: 300px;
+    transition: opacity 0.35s, transform 0.35s;
+    transform: translate3d(-23px, 0, 0);
+    backface-visibility: hidden;
+  }
+
+  .video-gallery .gallery-item .gallery-item-caption {
+    padding: 2em;
+    color: #fff;
+    text-transform: uppercase;
+    font-size: 1.25em;
+  }
+
+  .video-gallery .gallery-item .gallery-item-caption,
+  .video-gallery .gallery-item .gallery-item-caption > a {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .video-gallery .gallery-item h2 {
+    font-weight: 300;
+    overflow: hidden;
+    padding: 0.5em 0;
+  }
+
+
+  .video-gallery .gallery-item h2,
+  .video-gallery .gallery-item p {
+    position: relative;
+    margin: 0;
+    z-index: 10;
+  }
+
+  .video-gallery .gallery-item p {
+    letter-spacing: 1px;
+    font-size: 68%;
+
+    padding: 1em 0;
+    opacity: 0;
+    transition: opacity 0.35s, transform 0.35s;
+    transform: translate3d(10%, 0, 0);
+  }
+
+  .video-gallery .gallery-item:hover img {
+    opacity: .3;
+    transform: translate3d(0, 0, 0);
+
+  }
+
+  .video-gallery .gallery-item .gallery-item-caption {
+    text-align: left;
+  }
+
+  .video-gallery .gallery-item h2::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 15%;
+    height: 1px;
+    background: #fff;
+    
+    transition: transform 0.3s;
+    transform: translate3d(-100%, 0, 0);
+  }
+
+  .video-gallery .gallery-item:hover h2::after {
+    transform: translate3d(0, 0, 0);
+  }
+
+  .video-gallery .gallery-item:hover p {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  @media screen and (max-width: 50em) {
+    .video-gallery .gallery-item {
+      display: inline-block;
+      float: none;
+      margin: 10px auto;
+      width: 100%;
+    }
+  }
+
+  .video-play-button {
+    position: relative;
+    display: inline-block;
+    width: 100px; /* Adjust as needed */
+    height: 100px; /* Adjust as needed */
+}
+  
+  .video-play-button:before {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    display: block;
+    width: 80px;
+    height: 80px;
+    background: #ba1f24;
+    border-radius: 50%;
+    animation: pulse-border 1500ms ease-out infinite;
+  }
+  
+  .video-play-button:after {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    display: block;
+    width: 80px;
+    height: 80px;
+    background: #fa183d;
+    border-radius: 50%;
+    transition: all 200ms;
+  }
+  
+  .video-play-button:hover:after {
+    background-color: darken(#fa183d, 10%);
+  }
+  
+  .video-play-button img {
+    position: relative;
+    z-index: 3;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+  }
+  
+  .video-play-button span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: block;
+    width: 0;
+    height: 0;
+    border-left: 25px solid #fff; /* Adjust the size of the triangle */
+    border-top: 11px solid transparent; /* Adjust the size of the triangle */
+    border-bottom: 11px solid transparent; /* Adjust the size of the triangle */
+}
+  
+  @keyframes pulse-border {
+    0% {
+      transform: translateX(-50%) translateY(-50%) translateZ(0) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(-50%) translateY(-50%) translateZ(0) scale(1.5);
+      opacity: 0;
+    }
+  }
+
+
+  .headmaster-speech {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    
+
+  }
+  
+  .left-section,
+  .right-section {
+    flex: 1;
+    min-width: 240px;
+    padding: 10px;
+    position: relative;
+    min-height: 360px;
+  }
+  
+  iframe.youtube-headmaster {
+    width: calc(100% - 60px);
+    height: calc(100% - 20px);
+    border: none;
+    border-radius: 8px;
+    z-index: 100;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  
+  .video-primary-bg {
+    position: absolute;
+    bottom: -30px;
+    right: 2px;
+    width: calc(100% - 45px);
+    height: calc(100% - 45px);
+    border-radius: 8px;
+    background-color: #FDD76B;
+    z-index: 0;
+  }
+  
+  .video-secondary-bg {
+    position: absolute;
+    bottom: 3px;
+    right: 40px;
+    width: calc(100% - 70px);
+    height: calc(100% - 70px);
+    border-radius: 2px;
+    background-color: white;
+    z-index: 0;
+  }
+  
+  .right-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+  }
+  
+  .right-section h1 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 10px;
+    line-height: 20px;
+  }
+  
+  .right-section p {
+    font-size: 1.2rem;
+    color: #666;
+  }
+  
+
+  @media (max-width: 1020px) {
+    .headmaster-speech {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    .left-section,
+    .right-section {
+      width: 100%;
+    }
+  
+    iframe {
+      height: 420px;
+    }
+  }
+  
+  @media (max-width: 580px) {
+    iframe {
+      height: 320px;
+    }
+  }
+  
+  @media (max-width: 320px) {
+    iframe {
+      height: 240px;
+    }
+  }
+
+
+
+
+</style>
+{% endblock extra_css %}
+{% block content %}
+
+<!-- Carousel Start -->
+<div class="container-fluid px-0 overflow-hidden mb-5">
+  <div class="row ">
+    <div class="col-md-12">
+      <div class="owl-carousel header-carousel position-relative ">
+
+        {% for banner in bannerList %}
+
+        <div class="owl-carousel-item position-relative">
+          <img class="img-fluid w-100" src='{{banner.banner_image.url}}' alt="" />
+          <div class="position-absolute top-0  rounded-3 start-0 w-100 h-100 d-flex align-items-center"
+            style="background: rgba(24, 29, 56, 0.1)">
+            <div class="container">
+              <div class="row justify-content-start">
+                <div class="col-sm-10 col-lg-8">
+                  {% if banner.sub_heading %}
+                  <h5 class="text-primary text-uppercase mb-3 animated slideInDown">
+                    {{banner.sub_heading}}
+                  </h5>
+                  {% endif %}
+                  {% if banner.display_heading %}
+                  <h1 class="display-4 text-white animated slideInDown">
+                    {{banner.display_heading}}
+                  </h1>
+                  {% endif %}
+                  {% if banner.banner_text %}
+                  <p class="fs-5 text-white mb-4 pb-2">
+                    {{banner.banner_text}}
+                  </p>
+                  {% endif %}
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        {% endfor %}
+
+      </div>
+
+    </div>
+    
+
+  </div>
+
+</div>
+<!-- Carousel End -->
+
+
+<div style="padding:0px 70px" class="container-fluid pb-5 wow fadeInUp" data-wow-delay="0.1s" >
+  <div class="col-lg-12 wow zoomIn" data-wow-delay="0.7s">
+        
+
+    <div class="vendor-info">
+      <p class="vendor-info-author-title  bg-primary text-white p-1">Education Corner</p>
+      <div class="vendor-info-main" style={display:block!important}>
+        
+          <div class="row g-3  pt-4 pb-1">
+            <div class="col-md-3">
+              <a href="{% url 'f_student_attendance' %}">
+                <div style="border-radius: 20px!important" class="card edu_corner_bg mx-sm-1 p-3 position-relative">
+                  <div class="card shadow text-secondary my-card d-flex justify-content-center align-items-center">
+                    <img src="{% static 'assets/img/icons/unicons/attendance.png' %}" alt="Attendance Icon" class="rounded-circle" style="width: 54px; height: 54px;">
+                  </div>
+                  <div class="text-center mt-3 pt-3">
+                    <h5 style="color: white">Attendance</h5>
+                  </div>
+                </div>
+              </a>
+            </div>
+            <div class="col-md-3">
+              <a href="{% url 'fclass_routine' %}">
+                <div style="border-radius: 20px!important" class="card edu_corner_bg mx-sm-1 p-3 position-relative">
+                  <div class="card shadow text-secondary my-card d-flex justify-content-center align-items-center">
+                    <img src="{% static 'assets/img/icons/unicons/routine.png' %}" alt="Routine Icon" class="rounded-circle" style="width: 54px; height: 54px;">
+                  </div>
+                  <div class="text-center mt-3 pt-3">
+                    <h5 style="color: white">Class Routine</h5>
+                  </div>
+                </div>
+              </a>
+            </div>
+            <div class="col-md-3">
+              <a href="">
+                <div style="border-radius: 20px!important" class="card edu_corner_bg mx-sm-1 p-3 position-relative">
+                  <div class="card shadow text-secondary my-card d-flex justify-content-center align-items-center">
+                    <img src="{% static 'assets/img/icons/unicons/exam.png' %}" alt="Exam Icon" class="rounded-circle" style="width: 54px; height: 54px;">
+                  </div>
+                  <div class="text-center mt-3 pt-3">
+                    <h5 style="color: white">Exam Result</h5>
+                  </div>
+                </div>
+              </a>
+            </div>
+            <div class="col-md-3">
+              <a href="">
+                <div style="border-radius: 20px!important" class="card edu_corner_bg mx-sm-1 p-3 position-relative">
+                  <div class="card shadow text-secondary my-card d-flex justify-content-center align-items-center">
+                    <img src="{% static 'assets/img/icons/unicons/fees.png' %}" alt="Fees Icon" class="rounded-circle" style="width: 54px; height: 54px;">
+                  </div>
+                  <div class="text-center mt-3 pt-3">
+                    <h5 style="color: white">Fees Info</h5>
+                  </div>
+                </div>
+              </a>
+            </div>
+            <div  class="col-md-3 pt-md-2 p-0">
+              <a href="">
+                <div style="border-radius: 20px!important" class="card edu_corner_bg mx-sm-1 p-3 position-relative">
+                  <div class="card shadow text-secondary my-card d-flex justify-content-center align-items-center">
+                    <img src="{% static 'assets/img/icons/unicons/admission.png' %}" alt="Admission Icon" class="rounded-circle" style="width: 54px; height: 54px;">
+                  </div>
+                  <div class="text-center mt-3 pt-3">
+                    <h5 style="color: white">Admission Info</h5>
+                  </div>
+                </div>
+              </a>
+            </div>
+            <div  class="col-md-3 pt-md-2 p-0">
+              <a href="">
+                <div style="border-radius: 20px!important" class="card edu_corner_bg mx-sm-1 p-3 position-relative">
+                  <div class="card shadow text-secondary my-card d-flex justify-content-center align-items-center">
+                    <img src="{% static 'assets/img/icons/unicons/notice.png' %}" alt="Notice Icon" class="rounded-circle" style="width: 54px; height: 54px;">
+                  </div>
+                  <div class="text-center mt-3 pt-3">
+                    <h5 style="color: white">All Notice</h5>
+                  </div>
+                </div>
+              </a>
+            </div>
+            <div  class="col-md-3 pt-md-2 p-0">
+              <a href="">
+                <div style="border-radius: 20px!important" class="card edu_corner_bg mx-sm-1 p-3 position-relative">
+                  <div class="card shadow text-secondary my-card d-flex justify-content-center align-items-center">
+                    <img src="{% static 'assets/img/icons/unicons/apply_now.png' %}" alt="Apply Icon" class="rounded-circle" style="width: 54px; height: 54px;">
+                  </div>
+                  <div class="text-center mt-3 pt-3">
+                    <h5 style="color: white">Apply Now</h5>
+                  </div>
+                </div>
+              </a>
+            </div>
+            <div  class="col-md-3 pt-md-2 p-0">
+              <a href="">
+                <div style="border-radius: 20px!important" class="card edu_corner_bg mx-sm-1 p-3 position-relative">
+                  <div class="card shadow text-secondary my-card d-flex justify-content-center align-items-center">
+                    <img src="{% static 'assets/img/icons/unicons/cashless-payment.png' %}" alt="Payment Icon" class="rounded-circle" style="width: 54px; height: 54px;">
+                  </div>
+                  <div class="text-center mt-3 pt-3">
+                    <h5 style="color: white">Online Payment</h5>
+                  </div>
+                </div>
+              </a>
+            </div>
+            
+          </div>
+        
+      </div>
+    </div>
+  
+  </div>
+</div>
+
+<!-- Service Start -->
+<div class="container-xxl mb-5 pt-0 mt-0">
+  <div class="">
+    <div class="row g-4">
+
+      {% for service in serviceList %}
+
+      <div class="col-lg-6 col-sm-6 wow fadeInUp" data-wow-delay="0.1s">
+        <div class="service-item text-center pt-3">
+          <div class="p-4">
+            <img height="50px" src="{{service.icon.url}}" alt="" />
+            <h5 class="mb-3">{{service.title}}</h5>
+            <p>{{service.service_text}}</p>
+          </div>
+        </div>
+      </div>
+
+      {% endfor %}
+    </div>
+  </div>
+</div>    
+
+<div  style="padding:0px 70px" class="container-fluid  pb-5">
+
+   
+  {% if msg_from_video  %}
+  <div class="headmaster-speech">
+    <div class="left-section ">
+      <!-- Directly embedding the YouTube video -->
+      <iframe
+        src="{{msg_from_video.link}}"
+        title="YouTube Video"
+        class="youtube-headmaster"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+      >
+      </iframe>
+      <div class="video-primary-bg"></div>
+      <div class="video-secondary-bg"></div>
+    </div>
+    <div class="right-section pt-md-0 pt-5">
+      <h1>{{msg_from_video.heading}}</h1>
+      <p>
+        {{msg_from_video.text}}
+      </p>
+      <a class="btn btn-primary w-50 py-3 px-5 mt-2" href="">Read More</a> 
+    </div>
+    
+  </div> 
+
+  {% endif %}
+
+</div>
+
+<!-- Service End -->
+
+<div style="padding:0px 70px" class="container-fluid pb-5 wow fadeInUp" data-wow-delay="0.1s">
+  <div class="">
+    <div class="text-center">
+      <h6 class="section-title bg-white text-center text-primary px-3">
+        Notice
+      </h6>
+      <h1 class="mb-5">School Notice</h1>
+    </div>
+    <div class="owl-carousel testimonial-carousel position-relative">
+
+      {% for notice in noticeList %}
+      <div class="testimonial-item text-center">
+        <h5 class="mb-0">{{ notice.notice_title }}</h5>
+        <p class="text-warning mb-0">Expire: {{ notice.expire_date }} </p>
+        <a class="text-warning pb-1" style="text-decoration: none;" href="/media/{{ notice.file_attached }}"
+          download>Download</a>
+        <div class="testimonial-text bg-light text-center p-4">
+          <p class="mb-0">
+            {{ notice.notice_description|truncatechars:120 }}
+            {% if notice.notice_description|length > 120 %}
+              <a href="#" class="read-more" data-fulltext="{{ notice.notice_description }}">Read More</a>
+            {% endif %}
+          </p>
+        </div>
+      </div>
+      {% endfor %}
+
+    </div>
+  </div>
+</div>
+
+
+  <!-- About Start -->
+  <div style="padding:0px 70px" class="container-fluid  pb-5">
+    <div class="row  g-5">
+      <div class="col-lg-3 wow fadeInUp" data-wow-delay="0.1s" style="min-height: 400px">
+        <div class="position-relative h-75 ">
+          {% if msg_from_head.img %}
+          <img class="img-fluid schoolframed position-absolute w-100 h-100" src="{{msg_from_head.img.url}}" alt=""
+            style="object-fit: cover" />
+            {% else %}
+            <img class="img-fluid framed position-absolute w-100 h-100" src="{% static 'webpage/mockup/avatar.png' %}" alt=""
+              style="object-fit: cover" />
+            {% endif %}
+
+        </div>
+        <div class=" d-flex justify-content-center pt-4 px-1">
+          <a class="btn btn-md-square rounded-1 btn-primary mx-1" href=""><i class="fab fs-4 fa-facebook-f"></i></a>
+          <a class="btn btn-md-square rounded-1 btn-primary mx-1" href=""><i class="fab fs-4 fa-twitter"></i></a>
+          <a class="btn btn-md-square rounded-1 btn-primary mx-1" href=""><i class="fab fs-4 fa-youtube"></i></a>
+        </div>
+      </div>
+      <div class="col-lg-9 wow fadeInUp" data-wow-delay="0.3s">
+        <h6 class="section-title bg-white text-start text-primary pe-3">
+          {{msg_from_head.heading}}
+        </h6>
+        <h1 class="mb-4">{{msg_from_head.sub_heading}}</h1>
+        <p>
+          {{msg_from_head.text}}
+        </p>
+        <a class="btn btn-primary py-3 px-5 mt-2" href="">Read More</a> 
+      </div>
+    </div> 
+  </div> 
+
+{% if msg_from_subhead %}
+
+  <div style="padding:0px 70px" class="container-fluid  pb-5">
+
+    <div class="row  g-5">
+       
+       <div class="col-lg-9 wow fadeInUp" data-wow-delay="0.3s">
+         <h6 class="section-title bg-white text-start text-primary pe-3">
+           {{msg_from_subhead.heading}}
+         </h6>
+         <h1 class="mb-4">{{msg_from_subhead.sub_heading}}</h1>
+         <p>
+           {{msg_from_subhead.text}}
+         </p>
+          <a class="btn btn-primary py-3 px-5 mt-2" href="">Read More</a> 
+       </div>
+       <div class="col-lg-3 wow fadeInUp" data-wow-delay="0.1s" style="min-height: 400px">
+        <div class="position-relative h-75 ">
+          {% if msg_from_subhead.img %}
+          <img class="img-fluid schoolframed position-absolute w-100 h-100" src="{{msg_from_subhead.img.url}}" alt=""
+            style="object-fit: cover" />
+            {% else %}
+            <img class="img-fluid framed position-absolute w-100 h-100" src="{% static 'webpage/mockup/avatar.png' %}" alt=""
+              style="object-fit: cover" />
+            {% endif %}
+
+        </div>
+        <div class=" d-flex justify-content-center pt-4 px-1">
+          <a class="btn btn-md-square rounded-1 btn-primary mx-1" href=""><i class="fab fs-4 fa-facebook-f"></i></a>
+          <a class="btn btn-md-square rounded-1 btn-primary mx-1" href=""><i class="fab fs-4 fa-twitter"></i></a>
+          <a class="btn btn-md-square rounded-1 btn-primary mx-1" href=""><i class="fab fs-4 fa-youtube"></i></a>
+        </div>
+      </div>
+     </div> 
+    </div>
+  {% endif %}
+  <!-- About End -->
+  {% if galleryList %}
+  <!-- Categories Start -->
+  <div style="padding:0px 70px" class="container-fluid py-5 category">
+    <div class="container-fluid">
+      <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+        <h6 class="section-title bg-white text-center text-primary px-3">
+          Galleries
+        </h6>
+        <h1 class="mb-5">Picture Galleries </h1>
+      </div>
+      <div class="row g-3">
+        {% for gallery in galleryList %}
+        <div class="col-lg-6 col-md-12 wow zoomIn" data-wow-delay="0.5s">
+          <a class="position-relative d-block overflow-hidden" href="">
+            <img class="img-fluid fixed-height-image" src="{{ gallery.galary_image.url }}" alt="" />
+            <div class="bg-white text-center position-absolute bottom-0 end-0 py-2 px-3" style="margin: 1px">
+              <h5 class="m-0">{{ gallery.title }}</h5>
+            </div>
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  {% endif %}
+
+  {% if vedioList %}
+
+  <div style="padding:0px 70px" class="container-fluid py-5 category">
+    <div class="container-fluid">
+      <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+        <h6 class="section-title bg-white text-center text-primary px-3">
+          Galleries
+        </h6>
+        <h1 class="mb-5">Video Galleries </h1>
+      </div>
+      <div class="row g-3">
+        <div class="video-gallery mb-5">
+
+          {% for vedio in vedioList %}
+            <div class="gallery-item">
+              {% if vedio.img %}
+              <img src="{{vedio.img.url}}"  />
+              {% endif %}
+              <div class="gallery-item-caption">
+                <div>
+                  <h2 class="text-white fs-3">{{vedio.heading}}</h2>
+                  <p class="text-white ">{{vedio.sub_heading}}</p>
+                </div>
+                <button  class=""></button>
+                <a id="play-video" class="vimeo-popup video-play-button middle-button" href="{{vedio.link}}"><span style="z-index: 100;" class="text-white"></span></a>
+              </div>
+            </div> 
+
+          {% endfor %}
+        
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% endif %}
+
+  {% if testimonialList %}
+
+  <!-- Testimonial Start -->
+  <div style="padding:0px 70px" class="container-fluid py-5 wow fadeInUp" data-wow-delay="0.1s">
+    <div class="container">
+      <div class="text-center">
+        <h6 class="section-title bg-white text-center text-primary px-3">Testimonial</h6>
+        <h1 class="mb-5">Read Testimonial</h1>
+      </div>
+      <div class="owl-carousel testimonial-carousel position-relative">
+
+        {% for testimonial in testimonialList %}
+
+
+        <div class="testimonial-item text-center">
+          <img class="border rounded-circle p-2 mx-auto mb-3" src="{{testimonial.testimonial_image.url}}"
+            style="width: 80px; height: 80px;">
+          <h5 class="mb-0">{{testimonial.name}}</h5>
+          <p>{{testimonial.profession}}</p>
+          <div class="testimonial-text bg-light text-center p-4">
+            <p class="mb-0">{{testimonial.text}}</p>
+          </div>
+        </div>
+
+        {% endfor %}
+
+      </div>
+    </div>
+  </div>
+  <!-- Testimonial End -->
+
+ {% endif %}
+
+  <!-- About Start -->
+  <div style="padding:0px 70px" class="container-fluid  py-5">
+
+    <div class="row px-4 g-5">
+      <div class="col-lg-5 wow fadeInUp" data-wow-delay="0.1s" style="min-height: 400px">
+        <div class="position-relative h-100 ">
+          {% if school_history.img %}
+          <img class="img-fluid framed position-absolute w-100 h-100" src="{{school_history.img.url}}" alt=""
+            style="object-fit: cover" />
+          {% else %}
+          <img class="img-fluid framed position-absolute w-100 h-100" src="{% static 'webpage/mockup/school.png' %}" alt=""
+            style="object-fit: cover" />
+          {% endif %}
+
+        </div>
+
+      </div>
+      <div class="col-lg-7 wow fadeInUp" data-wow-delay="0.3s">
+        <h6 class="section-title bg-white text-start text-primary pe-3">
+          {{school_history.heading}}
+        </h6>
+        <h1 class="mb-4">{{school_history.sub_heading}}</h1>
+        <p> {{school_history.text}} </p>
+       
+      </div>
+    </div>
+
+  </div>
+  <!-- About End -->
+
+  <!-- Categories Start -->
+  <div style="padding:0px 70px" class="container-fluid  py-5 category">
+
+    <div class="row g-3">
+      <div class="col-lg-7 col-md-6">
+        <div class="row g-3">
+          <div class="col-lg-6 col-md-12 wow zoomIn" data-wow-delay="0.3s">
+            <h4 style="background-color: #fed86b; color: #fff;" class=" p-2 mb-3">জাতীয় শুদ্ধাচার কৌশল</h4>
+            <div class="d-flex flex-column ">
+
+              <a class="btn  text-start " href=""><i class="fas pe-2 text-primary fa-caret-right"></i>কর্ম পরিকল্পনা/
+                আদেশ / বিজ্ঞপ্তি</a>
+              <a class="btn  text-start " href=""><i class="fas pe-2 text-primary fa-caret-right"></i>ফোকাল পয়েন্ট
+                কর্মকর্তা ও বিকল্প কর্মকর্তা</a>
+              <a class="btn  text-start " href=""><i
+                  class="fas pe-2 text-primary fa-caret-right"></i>ত্রৈমাসিক/ষাণ্মাসিক পরিবীক্ষণ/মূল্যায়ন
+                প্রতিবেদন</a>
+              <a class="btn  text-start " href=""><i
+                  class="fas pe-2 text-primary fa-caret-right"></i>আইন/বিধি/নীতিমালা/পরিপত্র/নির্দেশিকা/প্রজ্ঞাপন</a>
+
+            </div>
+          </div>
+          <div class="col-lg-6 col-md-12 wow zoomIn" data-wow-delay="0.5s">
+            <h4 style="background-color: #fed86b; color: #fff;" class="p-2 mb-3">বার্ষিক কর্মসম্পাদন চুক্তি</h4>
+            <div class="d-flex flex-column ">
+
+              <a class="btn  text-start " href=""><i class="fas pe-2 text-primary fa-caret-right"></i>এপিএ
+                নির্দেশিকা/পরিপত্র/এপিএ টিম</a>
+              <a class="btn  text-start " href=""><i class="fas pe-2 text-primary fa-caret-right"></i>চুক্তিসমূহ</a>
+              <a class="btn  text-start " href=""><i class="fas pe-2 text-primary fa-caret-right"></i>পরিবীক্ষণ ও
+                মূল্যায়ন প্রতিবেদন</a>
+              <a class="btn  text-start " href=""><i class="fas pe-2 text-primary fa-caret-right"></i>এপিএএমএস
+                সফটওয়্যার লিংক</a>
+
+            </div>
+          </div>
+          <div class="col-lg-6 col-md-12 wow zoomIn" data-wow-delay="0.3s">
+            <h4 style="background-color: #fed86b; color: #fff;" class="p-2 mb-3">অভিযোগ প্রতিকার ব্যবস্থাপনা</h4>
+            <div class="d-flex flex-column ">
+
+              <a class="btn  text-start " href=""><i class="fas pe-2 text-primary fa-caret-right"></i>অনিক ও আপিল
+                কর্মকর্তা</a>
+              <a class="btn  text-start " href=""><i
+                  class="fas pe-2 text-primary fa-caret-right"></i>মাসিক/ত্রৈমাসিক/বার্ষিক/পরিবীক্ষণ/মূল্যায়ন
+                প্রতিবেদন</a>
+              <a class="btn  text-start " href=""><i class="fas pe-2 text-primary fa-caret-right"></i>অভিযোগ দাখিল
+                (অনলাইন আবেদন)</a>
+              <a class="btn  text-start " href=""><i
+                  class="fas pe-2 text-primary fa-caret-right"></i>আইন/বিধি/নীতিমালা/পরিপত্র/নির্দেশিকা/প্রজ্ঞাপন</a>
+
+            </div>
+          </div>
+          <div class="col-lg-6 col-md-12 wow zoomIn" data-wow-delay="0.5s">
+            <h4 style="background-color: #fed86b; color: #fff;" class="p-2 mb-3">তথ্য অধিকার</h4>
+            <div class="d-flex flex-column ">
+
+              <a class="btn  text-start " href=""><i class="fas pe-2 text-primary fa-caret-right"></i>দায়িত্বপ্রাপ্ত
+                কর্মকর্তা ও আপিল কর্তৃপক্ষ</a>
+              <a class="btn  text-start " href=""><i class="fas pe-2 text-primary fa-caret-right"></i>আবেদন ও আপিল
+                ফরম</a>
+              <a class="btn  text-start " href=""><i class="fas pe-2 text-primary fa-caret-right"></i>স্বপ্রণোদিতভাবে
+                প্রকাশযোগ্য তথ্যসমূহ</a>
+              <a class="btn  text-start " href=""><i
+                  class="fas pe-2 text-primary fa-caret-right"></i>আইন/বিধি/নীতিমালা/পরিপত্র/নির্দেশিকা/প্রজ্ঞাপন</a>
+
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-5 col-md-6 wow zoomIn" data-wow-delay="0.7s" style="min-height: 350px;">
+        
+
+        
+          <div class="vendor-info">
+            <p class="vendor-info-author-title  bg-primary text-white p-1">Follow us on Facebook</p>
+            <div class="vendor-info-main">
+              {% if page_name %}
+              <iframe src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2F{{page_name}}&tabs=timeline&width=500&height=150&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId" width="450" height="135" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="col-lg-12 col-md-12 wow zoomIn" data-wow-delay="0.5s">
+            <h4 style="background-color: #fed86b; color: #fff;" class="p-2 mb-3">Important Link</h4>
+            <div class="d-flex flex-column ">
+
+              <a class="btn  text-start " href=""><i
+                class="fas pe-2 text-primary fa-caret-right"></i>মাধ্যমিক ও উচ্চ মাধ্যমিক শিক্ষা বোর্ড, ঢাকা</a>
+              <a class="btn  text-start " href=""><i
+                class="fas pe-2 text-primary fa-caret-right"></i>মাধ্যমিক ও উচ্চ শিক্ষা বিভাগ</a>
+              <a class="btn  text-start " href=""><i
+                class="fas pe-2 text-primary fa-caret-right"></i>জাতীয় ওয়েব পোর্টাল</a>
+              <a class="btn  text-start " href=""><i
+                class="fas pe-2 text-primary fa-caret-right"></i>Ministry of education board BD Bangladesh</a>
+              <a class="btn  text-start " href=""><i
+                class="fas pe-2 text-primary fa-caret-right"></i>Education Board Result</a>
+
+            </div>
+          </div>
+    
+      </div>
+    </div>
+
+  </div>
+  <!-- Categories Start -->
+
+
+  {% endblock content %}
+  {% block extra_javascript %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js" ></script>
+  <script>
+    $(document).ready(function() {
+        $('.video-gallery').magnificPopup({
+        delegate: 'a', 
+        type: 'iframe',
+        gallery:{
+            enabled:true
+        }
+        });
+    });
+</script>
+  {% endblock extra_javascript%}

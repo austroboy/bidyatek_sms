@@ -1,0 +1,148 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Student Head-wise Fees Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header img {
+            max-height: 70px;
+            margin-bottom: 10px;
+        }
+
+        .header h2 {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: #555;
+            margin: 2px 0;
+            line-height: 1.5;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            table-layout: auto; /* Allow dynamic column width */
+        }
+        
+        thead th {
+            background-color: #f8f9fa;
+            padding: 8px;
+            border: 1px solid #dee2e6;
+            font-weight: bold;
+            text-align: center;
+            font-size: 11px;
+            white-space: nowrap;
+        }
+        
+        tbody td {
+            padding: 6px 8px;
+            border: 1px solid #dee2e6;
+            text-align: center;
+            font-size: 11px;
+            vertical-align: middle;
+        }
+        
+        /* Fix name column */
+        table .name-col {
+            text-align: center !important;
+            white-space: nowrap !important;
+    
+            display : block;
+
+        
+            
+            
+            
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tfoot tr {
+            background-color: #f1f1f1;
+            font-weight: bold;
+        }
+
+        tfoot td {
+            padding: 6px 8px;
+            border: 1px solid #dee2e6;
+            font-size: 12px;
+            text-align: right;
+        }
+
+        .footer-note {
+            margin-top: 30px;
+            text-align: right;
+            font-size: 11px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        {% if institute_logo %}
+            <img src="{{ institute_logo }}" alt="Institute Logo">
+        {% endif %}
+        <h2>Student Head-wise Fees Report</h2>
+        <p><strong>Period:</strong> {{ from_date }} to {{ to_date }}</p>
+        <p><strong>Head:</strong> {{ selected_head.name }}</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>SL NO</th>
+                <th>Student</th>
+                <th>Roll No</th>
+                <th>Class</th>
+                <th>Group</th>
+                <th>Section</th>
+                <th>Shift</th>
+                <th>Version</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students_data %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td class="name-col">{{ student.student.student_field.name }}</td>
+                <td>{{ student.roll_no }}</td>
+                <td>{{ student.class }}</td>
+                <td>{{ student.group|default:"-" }}</td>
+                <td>{{ student.section }}</td>
+                <td>{{ student.shift }}</td>
+                <td>{{ student.version }}</td>
+                <td>{{ student.amount|intcomma }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="8" style="text-align: right;">Grand Total</td>
+                <td>{{ grand_total|intcomma }}</td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+</html>

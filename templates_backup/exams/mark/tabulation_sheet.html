@@ -1,0 +1,441 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load mark_tags %} 
+
+{% block extra_css %} 
+<style>
+    
+    .padding {
+      padding: 15px;
+    }
+    .mar-bot {
+      margin-bottom: 0px;
+    }
+    
+    .Box h5,
+    .Box p {
+      margin: 0;
+    }
+    h5 {
+      text-transform: uppercase;
+    }
+    table img {
+      width: 100%;
+      margin: 0 auto;
+    }
+    .table-bordered td,
+    .table-bordered th,
+    .table thead th {
+      border: 1px dotted #ccc !important;
+      padding: -10px 0px;
+    }
+
+    #display_status{
+        display: none !important;
+      }
+
+    #schedule{
+      display: none;
+    }
+
+    @media print {
+      
+      @page {
+        size: A4;
+        margin: 50px;
+      }
+     
+      #display_status{
+        display: block !important;
+      }
+  
+      
+      
+      body {
+        -webkit-print-color-adjust: exact;
+      }
+    }
+
+    
+    #fixed-button {
+      position: fixed;
+      right: 0px;
+      z-index: 1000!important;
+      top: 50%; /* Set top to 50% */
+      transform: translateY(-50%);
+    }
+    
+    #fixed-button button {
+      color: #FCCF14;
+      display: block;
+      height: 50px;
+      position: relative;
+      text-align: center; 
+      line-height: 40px;
+      width: 50px;
+      margin-bottom: 1px;
+      z-index: 1000;
+      border: none;
+    }
+    
+    #fixed-button button:hover {
+      right: 5px;
+      opacity: 1;
+    }
+    
+    .fixed-icon {
+      background-color: #1D1E4E;
+    }
+</style>
+{% endblock extra_css %} 
+
+{% block content %}
+
+<!-- start: Content -->
+{% comment %} <div class="container-fluid flex-grow-1 container-p-y"> 
+  {% include 'pageinfo.html' %}
+
+  <div id="fixed-button">
+      <div>
+        <button class="fixed-icon" id="print-tabulation">
+          <i class="bx bxs-printer fs-1"></i>
+        </button>
+      </div>
+
+      <div> 
+        <button class="fixed-icon" id="previous">
+          <i class="bx bx-skip-previous fs-1"></i>
+        </button>
+      </div>
+  </div>
+  
+  <div class="card ">
+      <div class="card-body">
+
+          <form action="{% url 'wide_tabulation_sheet' %}" method="post">
+              {% csrf_token %}
+              <div class="row">
+
+                  <div class="col-md-3">
+                      <div class="mb-3">
+
+                          <div class="">
+                              <select class="form-select" name="exam_name_id" id="exam_name" required>
+                                  <option disabled selected value="">Select Exam</option>
+                                  {% for examname in exam_list %}
+                                  <option value="{{examname.id}}">{{examname.name}}</option>
+                                  {% endfor %}
+
+                              </select>
+                          </div>
+                      </div>
+                  </div>
+
+                  <div class="col-md-3">
+                      <div class="mb-3">
+                          <div class="">
+                              <select class="form-select" name="class_name_id" id="class_name" required>
+                                  <option disabled selected value="">Select Class</option>
+
+                                  {% for class in class_list %}
+                                  <option value="{{class.id}}">{{class}}</option>
+                                  {%endfor%}
+
+                              </select>
+                          </div>
+                      </div>
+                  </div>
+                  
+
+                  <div class="col-md-6 d-flex justify-content-between gap-2 align-content-center">
+                      <div>
+                          <button class="btn btn-primary " type="submit">Load</button>
+                      </div>
+                      <div  class=" d-flex flex-row  gap-2 align-self-center pb-3">
+                          <input class="form-control form-control" type="text" id="examname" value="{{exam_instance}}"
+                              disabled>
+                          <input class="form-control form-control" type="text" id="classname" value="{{class_instance}}"
+                              disabled>
+                      </div>
+
+
+                  </div>
+              </div>
+
+
+          </form>
+
+          <div  id="printTabulation">
+              <div  class="text-center" id="display_status">
+                  <div class="pt-4" >
+                      <img
+                      width="100px"
+                      src="{{ institute.institute_logo.url }}"  
+                      alt="" 
+                    />
+                  </div>
+                  <div class="">
+                    <div class="fw-bold fs-3">{{ institute.institute_name }}</div>
+                  </div>
+              </div>
+              <div class="table-responsive  pt-4" >
+                  <table class="table table-bordered">
+                    <thead>
+                      <tr>
+                        <th class="" colspan="2">Academic Year</th>
+                        <th class="" colspan="3">Class</th>
+                        <th class="" colspan="2">Exam</th>
+                      </tr>
+                      <tr>
+                        <th class="" colspan="2">{{admission_year}}</th>
+                        <th class="" colspan="3"><span class="fw-bold">{{class_instance}}</span></th>
+                        <th class="" colspan="2"><span class="fw-bold">{{exam_instance}}</span></th>
+                      </tr>
+                      <tr>
+                        <th style="line-height: 70px;" class="py-0 px-2" rowspan="2">Name of Subjects</th>
+                        <th class="py-0 px-2 text-center" colspan="{{unique_mark_type_count}}" >Obtaining Marks</th>
+                        <th style="line-height: 70px;" class="py-0 px-2 text-center" rowspan="2">Total</th>
+                        <th style="line-height: 70px;" class="py-0 px-2 text-center" rowspan="2">Grade</th>
+                        <th style="line-height: 70px;" class="py-0 px-2 text-center" rowspan="2">Letter</th>
+                      </tr>
+                      <tr>
+                          {% for mark_type in unique_mark_type %}
+                              <th class="text-center">{{ mark_type }}</th>
+                          {% endfor %}
+                      </tr>
+                      
+                    </thead>
+                    <tbody>
+                      {% for student, marks in subject_mark_dict.items %}
+                          <tr style="background-color: rgba(252, 207, 20, 0.2) !important;">
+                              <td colspan="7">
+                                  <div class="row">
+                                      <div class="col-4">{{ student.student_field.name }}</div>
+                                      <div class="col-1 text-nowrap">Roll: {{ student.roll_no }}</div>
+                                      <div class="col-2">Merit: {{ merit_dict.student }}</div>
+                                      <div class="col-3 text-nowrap">Total Marks: {{ marks.subject_marks|length }}</div>
+                                      <div class="col-2 text-nowrap">Grade: {{ marks.overall_gpa }} ({{ marks.overall_letter }})</div>
+                                  </div>
+                              </td>
+                          </tr>
+                          {% for subject_name, details in marks.subject_marks.items %}
+                              <tr>
+                                  <td class="py-0 px-2">{{ subject_name }}</td>
+                                  {% for mark_type in unique_mark_type %}
+                                  <td class="py-0 px-2 text-center">
+                                    {% if mark_type in details %}
+                                        {{ details|get_item:mark_type }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                
+                                  {% endfor %}
+                                  <td class="py-0 px-2 text-center">{{ details.total }}</td>
+                                  <td class="py-0 px-2 text-center">{{ details.gpa }}</td>
+                                  <td class="py-0 px-2 text-center">{{ details.letter }}</td>
+                              </tr>
+                          {% endfor %}
+                      {% endfor %}
+                  </tbody>
+                  
+                  
+                  </table>
+              </div>
+          </div>
+          
+                  
+      </div>
+  </div>
+</div> {% endcomment %}
+
+
+<div class="container-fluid flex-grow-1 container-p-y"> 
+  {% include 'pageinfo.html' %}
+
+  <div id="fixed-button">
+      <div>
+        <button class="fixed-icon" id="print-tabulation">
+          <i class="bx bxs-printer fs-1"></i>
+        </button>
+      </div>
+
+      <div> 
+        <button class="fixed-icon" id="previous">
+          <i class="bx bx-skip-previous fs-1"></i>
+        </button>
+      </div>
+  </div>
+  
+  <div class="card ">
+      <div class="card-body">
+
+          <form action="{% url 'wide_tabulation_sheet' %}" method="post">
+              {% csrf_token %}
+              <div class="row">
+
+                  <div class="col-md-3">
+                      <div class="mb-3">
+
+                          <div class="">
+                              <select class="form-select" name="exam_name_id" id="exam_name" required>
+                                  <option disabled selected value="">Select Exam</option>
+                                  {% for examname in exam_list %}
+                                  <option value="{{examname.id}}">{{examname.name}}</option>
+                                  {% endfor %}
+                              </select>
+                          </div>
+                      </div>
+                  </div>
+
+                  <div class="col-md-3">
+                      <div class="mb-3">
+                          <div class="">
+                              <select class="form-select" name="class_name_id" id="class_name" required>
+                                  <option disabled selected value="">Select Class</option>
+                                  {% for class in class_list %}
+                                  <option value="{{class.id}}">{{class}}</option>
+                                  {%endfor%}
+                              </select>
+                          </div>
+                      </div>
+                  </div>
+                  
+                  <div class="col-md-6 d-flex justify-content-between gap-2 align-content-center">
+                      <div>
+                          <button class="btn btn-primary " type="submit">Load</button>
+                      </div>
+                      <div  class=" d-flex flex-row  gap-2 align-self-center pb-3">
+                          <input class="form-control form-control" type="text" id="examname" value="{{exam_instance}}" disabled>
+                          <input class="form-control form-control" type="text" id="classname" value="{{class_instance}}" disabled>
+                      </div>
+                  </div>
+              </div>
+          </form>
+
+          <div id="printTabulation">
+            <div class="text-center" id="display_status">
+                <div class="pt-4">
+                    <img width="100px" src="{{ institute.institute_logo.url }}" alt="" />
+                </div>
+                <div class="">
+                    <div class="fw-bold fs-3">{{ institute.institute_name }}</div>
+                </div>
+            </div>
+        
+            <!-- Academic Year, Class, Exam Info -->
+            <div class="table-responsive pt-4">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th colspan="2">Academic Year</th>
+                            <th colspan="3">Class</th>
+                            <th colspan="2">Exam</th>
+                        </tr>
+                        <tr>
+                            <th colspan="2">{{ admission_year }}</th>
+                            <th colspan="3"><span class="fw-bold">{{ class_instance }}</span></th>
+                            <th colspan="2"><span class="fw-bold">{{ exam_instance }}</span></th>
+                        </tr>
+        
+                        <!-- Column Headers -->
+                        <tr>
+                            <th rowspan="2">Name of Subjects</th>
+                            <th colspan="4" class="text-center">Obtaining Marks</th>
+                            <th rowspan="2">Grade</th>
+                            <th rowspan="2">Letter</th>
+                            <th rowspan="2">Comments</th>
+                        </tr>
+                        <tr>
+                            <th class="text-center">MCQ</th>
+                            <th class="text-center">Practical</th>
+                            <th class="text-center">CQ</th>
+                            <th class="text-center">Total</th>
+                        </tr>
+                    </thead>
+                    
+                    <tbody>
+                      {% for student, marks in subject_mark_dict.items %}
+                          <!-- Student Header Row -->
+                          <tr style="background-color: rgba(252, 207, 20, 0.2) !important;">
+                              <td colspan="8">
+                                  <div class="row">
+                                      <div class="col-4">{{ student.student_field.name }}</div>
+                                      <div class="col-2">Roll: {{ marks.roll_no|default:"N/A" }}</div>
+                                      {% comment %} <div class="col-2">Merit: {{ merit_dict.student }}</div> {% endcomment %}
+                                      <div class="col-2">Total Marks: {{ marks.total_marks|default:0 }}</div>
+                                      <div class="col-2">Grade: {{ marks.overall_gpa }} ({{ marks.overall_letter }})</div>
+                                  </div>
+                              </td>
+                          </tr>
+                  
+                          <!-- Table Headers for Subject Marks -->
+                          <tr>
+                              <th>Subject</th>
+                              <th class="text-center">MCQ</th>
+                              <th class="text-center">Practical</th> <!-- Fixed Practical Column -->
+                              <th class="text-center">Written (CQ)</th>
+                              <th class="text-center">Total</th>
+                              <th class="text-center">GPA</th>
+                              <th class="text-center">Letter</th>
+                          </tr>
+                  
+                          <!-- Subject Rows -->
+                          {% for subject_name, details in marks.subject_marks.items %}
+                              <tr>
+                                  <td class="py-0 px-2">{{ subject_name }}</td>
+                                  <td class="py-0 px-2 text-center">{{ details.MCQ|default:"-" }}</td>
+                                  <td class="py-0 px-2 text-center">{{ details.Practical|default:"-" }}</td> <!-- Practical Marks Fix -->
+                                  <td class="py-0 px-2 text-center">{{ details.Written|default:"-" }}</td>
+                                  <td class="py-0 px-2 text-center">
+                                      {% if details.merged_total %}{{ details.merged_total }}{% else %}{{ details.Total }}{% endif %}
+                                  </td>
+                                  <td class="py-0 px-2 text-center">{{ details.gpa }}</td>
+                                  <td class="py-0 px-2 text-center">{{ details.letter }}</td>
+                              </tr>
+                          {% endfor %}
+                      {% endfor %}
+                  </tbody>
+                  
+                </table>
+            </div>
+        </div>
+        
+      </div>
+  </div>
+</div>
+
+
+<!-- end: Content -->
+
+{% endblock content %} 
+
+{% block extra_javascript %} 
+<script src="{% static 'assets/vendor/libs/print/jQuery.print.js' %}"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+      
+      
+      $("#print-tabulation").on("click", function () {
+        $("#printTabulation").print({
+          globalStyles: true,
+          mediaPrint: false,
+          stylesheet: null,
+          noPrintSelector: ".no-print",
+          iframe: true,
+          append: null,
+          prepend: null,
+          manuallyCopyFormValues: true,
+          deferred: $.Deferred(),
+          timeout: 750,
+          title: "Tabulation Sheet",
+          doctype: "<!doctype html>",
+        });
+      });
+
+      $("#previous").on("click", function () {
+        window.history.back(); 
+      });
+    });
+  </script>
+{% endblock extra_javascript %}

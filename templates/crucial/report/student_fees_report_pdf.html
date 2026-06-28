@@ -1,0 +1,289 @@
+{% load humanize custom_tags %}
+{% load tz %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Force narrow columns */
+        .styled-table td:nth-child(1),  /* SL NO */
+        .styled-table td:nth-child(5),  /* Class */
+        .styled-table td:nth-child(6),  /* Group */
+        .styled-table td:nth-child(7),  /* Section */
+        .styled-table td:nth-child(8),  /* Shift */
+        .styled-table td:nth-child(9) { /* Version */
+            width: 7px;
+            min-width: 7px;
+            max-width: 7px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    
+        .header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 12px;
+            padding: 8px;
+            border-bottom: 2px solid #000;
+        }
+    
+        .header img {
+            max-width: 90px;
+        }
+
+        .header-section {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            z-index: 999;
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 8px 0;
+        }
+
+        .report-title {
+            text-align: center;
+            margin: 4px 0;
+        }
+
+        .report-summary {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+            font-size: 10px;
+            flex-wrap: wrap;
+        }
+
+        .report-summary p {
+            margin: 0 15px;
+            white-space: nowrap;
+        }
+    
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9px;
+            margin: 20px auto;
+            table-layout: fixed;
+        }
+    
+        .styled-table th,
+        .styled-table td {
+            border: 1px dotted #5b5a5a;
+            padding: 2px;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            font-feature-settings: "tnum";
+        }
+    
+        .styled-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    
+        .styled-table td:nth-child(2) {
+            text-align: left;
+        }
+    
+        /* ✅ Vertical 90-degree header styling */
+        .styled-table th {
+            height: 150px;
+            width: 35px;
+            padding: 0;
+            position: relative;
+            vertical-align: middle;
+            text-align: center;
+        }
+        
+        .vertical-header {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%) rotate(-90deg);
+            transform-origin: bottom center;
+            white-space: nowrap;
+            font-weight: bold;
+        }
+        
+        
+        
+        
+    
+        .styled-table th {
+            height: 150px;
+            width: 35px;
+            padding: 0;
+            vertical-align: center;
+            text-align: center;
+        }
+        
+        
+    
+        .table-responsive {
+            overflow-x: auto;
+        }
+    
+        @page {
+            size: legal landscape;
+            margin: 180px 0.5cm 0.5cm;
+        }
+    
+        @media print {
+
+            .header-section {
+                position: fixed;
+                top: -170px; /* Adjust header vertical position */
+            }
+            
+            .styled-table {
+                margin-top: 200px !important;
+            }
+
+            .styled-table {
+                width: 100% !important;
+                page-break-before: auto;
+                page-break-after: auto;
+                page-break-inside: avoid;
+            }
+    
+            .styled-table thead {
+                display: table-header-group !important;
+            }
+    
+            .styled-table tfoot {
+                display: table-footer-group !important;
+            }
+    
+            .styled-table tr,
+            .styled-table td,
+            .styled-table th {
+                page-break-inside: avoid !important;
+                white-space: nowrap;
+            }
+    
+            .page-break {
+                page-break-after: always;
+            }
+        }
+    </style>
+    
+    
+    
+    
+</head>
+
+<body>
+    
+
+    {% if students_data %}
+    {% for chunk in chunks_with_info %}
+    <div class="page-break">
+        <div class="header-section">
+            <div class="report-header" style="display: flex; justify-content: space-between;">
+                <div style="width: 20%;">
+                    <img src="{{institute_logo}}" alt="Logo" style="height: 60px;">
+                </div>
+                <div style="width: 60%; text-align: center;">
+                    <p style="margin: 2px; font-size: 20px; font-weight: bold;">Rajuk Uttara Model College</p>
+                    <p style="margin: 2px; font-size: 12px;">Sector#6, Uttara Model Town, Dhaka-1230</p>
+                    <p style="margin: 2px; font-size: 10px;">EST:1994</p>
+                    <p style="margin: 2px; font-size: 10px;">Education For Humanization</p>
+                    <p style="margin: 2px; font-size: 12px;">WWW.RAJUKCOLLEGE.EDU.BD</p>
+                </div>
+                <div style="width: 20%;"></div>
+            </div>
+            
+    
+            <h4 class="report-title">Student Fees Collection Report</h4>
+    
+            <div class="report-summary">
+                <p>Date Range: {{ from_date }} to {{ to_date }}</p>
+                <p><strong>Payment Mode: SSL</strong></p>
+                <p>Class: {{ selected_class|default:"All" }}</p>
+                <p>Section: {{ selected_section|default:"All" }}</p>
+                <p>Group: {{ selected_group|default:"All" }}</p>
+                <p>Shift: {{ selected_shift|default:"All" }}</p>
+                <p>Version: {{ selected_version|default:"All" }}</p>
+            </div>
+        </div>
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th><div class="vertical-header">SL NO</div></th>
+                    <th colspan ="2"><div class="vertical-header">Student</div></th>
+                    <th><div class="vertical-header">Roll No</div></th>
+                    <th><div class="vertical-header">Class</div></th>
+                    <th><div class="vertical-header">Group</div></th>
+                    <th><div class="vertical-header">Section</div></th>
+                    <th><div class="vertical-header">Shift</div></th>
+                    <th><div class="vertical-header">Version</div></th>
+                    
+                    {% for fh in chunk.fee_head_objects %}
+                        <th><div class="vertical-header">{{ fh.name }}</div></th>
+                    {% endfor %}
+                    {% if forloop.last %}  <!-- Only show on last page -->
+                        <th><div class="vertical-header">Other Fee</div></th>
+                        <th><div class="vertical-header">Total</div></th>
+                    {% endif %}
+                </tr>
+            </thead>
+            
+            <tbody>
+                {% for student_data in chunk.student_payments %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td colspan="2" style="text-align: left;">{{ student_data.student.student_field.name|default:"Undefined Student" }}</td>
+                    <td>{{ student_data.student.roll_no|default:"" }}</td>
+                    <td>{{ student_data.class|default:"-" }}</td>
+                    <td>{{ student_data.group|default:"-" }}</td>
+                    <td>{{ student_data.section|default:"-" }}</td>
+                    <td>{{ student_data.shift|default:"-" }}</td>
+                    <td>{{ student_data.version|default:"-" }}</td>
+                    {% for amount in student_data.payments %}
+                        <td>{{ amount|default:0|intcomma }}</td>
+                    {% endfor %}
+                    {% if forloop.parentloop.last %}  <!-- Only show on last page -->
+                        <td>{{ other_fee_total|default:0|intcomma }}</td>
+                        <td>{{ student_data.total|default:0|intcomma }}</td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="9" style="text-align: center;"><strong>Grand Total</strong></td>
+                        {% for fh in chunk.fee_head_objects %}
+                            <td>{{ chunk.totals|get_item:fh.id|default:0|intcomma }}</td>
+                        {% endfor %}
+                        {% if forloop.last %}  <!-- Only show on last page -->
+                            <td>{{ other_fee_total|default:0|intcomma }}</td>
+                            <td>{{ grand_total|default:0|intcomma }}</td>
+                        {% endif %}
+                    </tr>
+                </tfoot>
+        </table>
+        
+        {% if not forloop.last %}
+        <div style="page-break-after: always;"></div>
+        {% endif %}
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="alert alert-info">No data found for the selected filters</div>
+    {% endif %}
+
+</body>
+</html>

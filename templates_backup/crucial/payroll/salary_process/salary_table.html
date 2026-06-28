@@ -1,0 +1,61 @@
+<tbody>
+    {% for salary_process in salary_process_list %}
+    <tr>
+              
+        <th class="text-end" scope="col">
+          <input type="checkbox" id="select_all">
+        </th>
+        <td>{{ salary_process.employee_salary.employee.staff_field.user_id }}</td>
+        <td>{{ salary_process.employee_salary.employee }}</td>
+        <td>{{ salary_process.salary_month }}</td>
+        <td>{{ salary_process.employee_salary.employee.role }}</td>
+        <td>{{ salary_process.total_salary }}</td>
+        <td>{{ salary_process.paid_amount }}</td>
+        <td id="pending_amount_{{ salary_process.id }}">{{ salary_process.pending_amount }}</td>
+        <td id="unpaid_amount_{{ salary_process.id }}">{{ salary_process.unpaid_amount|floatformat:2 }}</td>
+        <td>
+          <input
+              type="number"
+              name="payment_amount_{{ salary_process.id }}"
+              id="payment_amount_{{ salary_process.id }}"
+              placeholder="Enter Amount"
+              class="form-control"
+              min="0"
+              max="{{ salary_process.pending_amount }}"
+              value="0"
+          />
+          <input
+              type="hidden"
+              name="pending_amount_{{ salary_process.id }}"
+              value="{{ salary_process.pending_amount }}"
+          />
+
+        </td>              
+        <td>
+          <select name="payment_method_{{ salary_process.id }}" class="form-select" required>
+            <option value="cash">Cash</option>
+            <option value="bank">Bank</option>
+            <option value="mfs">MFS</option>
+          </select>
+        </td>
+        <td>
+          <select name="payment_status_{{ salary_process.id }}" class="form-select payment-status" data-salary-id="{{ salary_process.id }}" required>
+            <option value="partial">Partial</option>
+            <option value="full">Full</option>
+          </select>
+        </td>
+        <td>
+          <button
+            type="button"
+            class="btn btn-primary btn-sm pay-individual"
+            data-salary-id="{{ salary_process.id }}"
+          >
+            Pay
+          </button>
+        
+            PaySlip
+          </a>
+        </td>              
+      </tr>
+    {% endfor %}
+  </tbody>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life Preparatory School-LPS - Online Payment Receipt</title>
+    <link rel="stylesheet" href="test.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .receipt-container {
+            background-color: white;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 800px;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid black;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .header img {
+            max-width: 90px;
+        }
+        .header h1 {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .header p {
+            font-size: 0.9em;
+            margin: 2px 0;
+        }
+        .receipt-details {
+            text-align: center;
+            background-color: #A1D6D7;
+            padding: 10px;
+            font-weight: bold;
+            border: 2px dashed black;
+        }
+        .student-info {
+            display: flex;
+            justify-content: space-between;
+            border: 2px dashed black;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        .info-column {
+            width: 48%;
+        }
+        .student-info p {
+            font-size: 0.9em;
+            margin: 6px 0;
+        }
+        .student-info span {
+            font-weight: bold;
+            display: inline-block;
+            min-width: 110px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 2px solid black;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #A1D6D7;
+            font-weight: bold;
+            text-align: center;
+        }
+        .total-amount td {
+            background-color: #A1D6D7;
+            font-weight: bold;
+            text-align: right;
+        }
+        .amount-info {
+            text-align: center;
+            font-weight: bold;
+            border-bottom: 2px solid black;
+            padding: 10px;
+        }
+        footer {
+            margin-top: 15px;
+            border: 2px dashed black;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="receipt-container">
+        <div class="header">
+            <img src="rumc.png" alt="Rajuk Uttara Model College Logo">
+            <h1>RAJUK UTTARA MODEL COLLEGE</h1>
+            <p>রাজউক উত্তরা মডেল কলেজ</p>
+            <p>(শিক্ষা মন্ত্রণালয়ের অধীন স্ব-অর্থায়নে পরিচালিত একটি বিশেষ ধরনের প্রতিষ্ঠান)</p>
+            <p><strong>EST: 1994</strong></p>
+            <p>Education For Humanization | মানুষ হওয়ার জন্য শিক্ষা</p>
+        </div>
+        <div class="receipt-details">Online Payment Receipt</div>
+        <div class="student-info">
+            <div class="info-column">
+                <p><span>Name:</span> {{ name }}</p>
+                <p><span>College ID:</span> {{ student_id }}</p>
+                <p><span>Shift:</span> {{ shift }}</p>
+                <p><span>Version:</span> {{ version }}</p>
+                <p><span>Pay upto:</span> {{ payment_time|date:"m/d/Y" }}</p>
+            </div>
+            <div class="info-column">
+                <p><span>Ref ID:</span> {{ transaction_id }}</p>
+                <p><span>Class:</span> {{ class }}</p>
+                <p><span>Section:</span> {{ section }}</p>
+                <p><span>Group:</span> {{ group }}</p>
+                <p><span>Payment Mode:</span> {{ payment_type }}</p>
+            </div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>SL</th>
+                    <th>Particulars</th>
+                    <th>Amount (BDT)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for head in fee_heads %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ head.name }}</td>
+                    <td>{{ head.amount }}</td>
+                </tr>
+                {% endfor %}
+                <tr class="total-amount">
+                    <td colspan="2">Total Paid Amount:</td>
+                    <td>{{ total }}</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="amount-info">In Words: {{ total_in_words }}</div>
+        <footer>
+            <span>Print On: {{ payment_time|date:"m/d/Y" }} {{ payment_time|time }}</span>
+            <span>Developed by Edtech</span>
+            <span>Page: 1 of 1</span>
+        </footer>
+    </div>
+</body>
+</html>

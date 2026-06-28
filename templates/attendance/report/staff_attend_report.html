@@ -1,0 +1,300 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% block extra_css %}
+<style>
+  /* style.css */
+#calendar {
+  font-family: Arial, sans-serif;
+  
+  margin: 0 auto;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  text-align: center;
+  border: 1px solid #ccc;
+}
+
+th {
+  background-color: #333;
+  color: #fff;
+  padding: 10px;
+}
+
+#display_status{
+  display: none !important;
+}
+
+@media print { 
+      
+ 
+ 
+  #display_status{
+    display: block !important;
+  }
+
+}
+
+#fixed-button {
+  position: fixed;
+  right: 0px;
+  z-index: 1000!important;
+  top: 50%; /* Set top to 50% */
+  transform: translateY(-50%);
+}
+
+#fixed-button button {
+  color: #FCCF14;
+  display: block;
+  height: 50px;
+  position: relative;
+  text-align: center; 
+  line-height: 40px;
+  width: 50px;
+  margin-bottom: 1px;
+  z-index: 1000;
+  border: none;
+}
+
+#fixed-button button:hover {
+  right: 5px;
+  opacity: 1;
+}
+
+.fixed-icon {
+  background-color: #1D1E4E;
+}
+
+</style>
+{% endblock extra_css %} 
+{% block content %}
+
+<!-- start: Content -->
+
+
+  <div class="container-fluid flex-grow-1 container-p-y">
+    {% include 'pageinfo.html' %}
+
+    <div class="d-none d-md-block" id="fixed-button">
+      <div>
+        <button class="fixed-icon" id="print-calendar">
+          <i class="bx bxs-printer fs-1"></i>
+        </button>
+      </div>
+      <div>
+        <button class="fixed-icon" id="download-calendar">
+          <i class="bx bxs-file-pdf fs-1"></i>
+        </button>
+      </div>
+      <div>
+        <button class="fixed-icon" id="previous">
+          <i class='bx bx-skip-previous fs-1'></i>
+        </button>
+      </div>
+    </div>
+  
+    <div class="card">
+      <div class="card-body">
+        <form action="{% url 'report_staff_attendance' %}" method="post">
+          {% csrf_token %}
+          
+          <div class="col-auto d-flex justify-content-between gap-3">
+              <input
+                type="month"
+                class="form-control"
+                id="searchMonth"
+                placeholder="Select Month"
+                value=""
+                name="searchMonth"
+                min="2023-01"
+                max="2030-12"
+                required
+              />
+
+            <button type="submit" class=" btn btn-primary" id="searchButton">Search</button>
+          </form>
+      </div>
+
+      <div id="printCalendar">
+        <div  class="text-center" id="display_status">
+            <div class="pt-4" >
+                <img
+                width="100px"
+                src="{{ institute.institute_logo.url }}" 
+                alt="" 
+              />
+            </div>
+            <div class="">
+              <div class="fw-bold fs-3">{{ institute.institute_name }}</div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+          <div class="pt-4" id="calendar"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div> 
+<!-- end: Content -->
+
+{% endblock content %} 
+{% block extra_javascript %} 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery.print/1.6.0/jQuery.print.js"></script>
+<script src="https://unpkg.com/html2pdf.js@0.10.1/dist/html2pdf.bundle.js"></script>
+
+<script>
+  const requestedUser = "{{ requested_user.username }}";
+  document.addEventListener('DOMContentLoaded', function() {
+    const calendar = document.getElementById('calendar');
+    const searchButton = document.getElementById('searchButton');
+
+    const classname = "{{ class_name}}";
+
+    console.log(classname)
+
+  
+    const employees = {{ attendanceData|safe }};
+    
+    const holidays = {{ holidayData|safe }};
+
+    const weekendDays = {{ weekendDays|safe }};
+
+  
+  
+    function generateCalendar(year, month) {
+      const calendarTable = document.createElement('table');
+      calendarTable.classList.add('calendar-table');
+  
+      const tbody = document.createElement('tbody');
+  
+      // Create a row for "Employee Name" and leave a space for the month and date
+      const employeeNameRow = document.createElement('tr');
+  
+      const employeeNameCell = document.createElement('td');
+      employeeNameCell.textContent = 'Staff Name';
+      employeeNameCell.rowSpan = 2;
+      employeeNameRow.appendChild(employeeNameCell);
+  
+      const monthName = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date(year, month, 1));
+      const yearName = year;
+      const monthYearCell = document.createElement('td');
+      monthYearCell.colSpan = daysInMonth(year, month); 
+      monthYearCell.textContent = `${monthName} ${yearName}` ;
+      employeeNameRow.appendChild(monthYearCell);
+  
+      tbody.appendChild(employeeNameRow);
+  
+      // Create a row for the dates
+      const dateRow = document.createElement('tr');
+  
+      for (let day = 1; day <= daysInMonth(year, month); day++) {
+        const cell = document.createElement('td');
+        cell.textContent = day;
+        dateRow.appendChild(cell);
+      }
+  
+      tbody.appendChild(dateRow);
+  
+      employees.forEach(employee => {
+        const row = document.createElement('tr');
+  
+        // Create a cell for the employee name
+        const nameCell = document.createElement('td');
+        nameCell.textContent = employee.name;
+        row.appendChild(nameCell);
+  
+        // Create cells for attendance or holidays/weekends
+        for (let day = 1; day <= daysInMonth(year, month); day++) {
+          const cell = document.createElement('td');
+  
+          // Check if the day is a holiday, weekend, or display 'P' or 'A'
+          if (holidays.includes(day)) {
+            cell.textContent = 'H';
+          } else if (weekendDays.includes(new Date(year, month, day).getDay())) {
+            cell.textContent = 'W';
+          } else {
+            const attendanceDate = employee.attendance.includes(day) ? day : '';
+            const span = document.createElement('span');
+            span.textContent = attendanceDate ? 'P' : 'A';
+            
+            // Set color based on attendance status
+            span.style.color = attendanceDate ? 'green' : 'red';
+            cell.appendChild(span);
+          }
+  
+          row.appendChild(cell);
+        }
+  
+        tbody.appendChild(row);
+      });
+  
+      calendarTable.appendChild(tbody);
+      calendar.innerHTML = '';
+      calendar.appendChild(calendarTable);
+    }
+  
+    
+    function daysInMonth(year, month) {
+      return new Date(year, month + 1, 0).getDate();
+    }
+  
+    generateCalendar(new Date().getFullYear(), new Date().getMonth());
+  
+    searchButton.addEventListener('click', function() {
+      const searchMonth = document.getElementById('searchMonth').value;
+      const searchYear = parseInt(searchMonth.split('-')[0]);
+      const searchMonthValue = parseInt(searchMonth.split('-')[1]) - 1; // JavaScript months are zero-based
+  
+      generateCalendar(searchYear, searchMonthValue);
+    });
+  });
+
+
+
+    function pdfGenerator() {
+      let pdfsave = $("#printCalendar").html();
+      var opt = {
+        margin: 0.2,
+        filename: "{{search_date}} Staff.pdf",
+        image: { type: "jpeg", quality: 0.99 },
+        html2canvas: { dpi: 192, letterRendering: true, useCORS: true },
+        jsPDF: { unit: "in", format: "a4", orientation: "landscape" },
+      };
+
+      html2pdf().set(opt).from(pdfsave).save();
+    }
+
+    // Download Invoice button click event
+    $("#download-calendar").on("click", function () {
+      pdfGenerator();
+    });
+
+    $("#print-calendar").on("click", function () {
+      $("#printCalendar").print({
+        globalStyles: true,
+        mediaPrint: false,
+        stylesheet: null,
+        noPrintSelector: ".no-print",
+        iframe: true,
+        append: null,
+        prepend: null,
+        manuallyCopyFormValues: true,
+        deferred: $.Deferred(),
+        timeout: 750,
+        title: "Invoice",
+        doctype: "<!doctype html>",
+      });
+    });
+
+    
+  
+</script>
+
+
+{% endblock extra_javascript%}

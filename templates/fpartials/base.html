@@ -1,0 +1,158 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>{{institute.institute_name}}</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="" name="keywords">
+    <meta content="" name="description">
+    {% block css %}
+    
+    <!-- Favicon --> 
+    <link href="{% static 'webpage/img/favicon.ico' %}" rel="icon">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Icon Font Stylesheet -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="{% static 'webpage/lib/animate/animate.min.css' %}" rel="stylesheet">
+    <link href="{% static 'webpage/lib/owlcarousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="{% static 'webpage/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'webpage/css/meanmenu.min.css' %}" rel="stylesheet">
+    <link href="{% static 'webpage/css/menu.css' %}" rel="stylesheet">
+    <link href="{% static 'webpage/css/responsive.css' %}" rel="stylesheet">
+
+
+    <!-- Template Stylesheet -->
+    <link href="{% static 'webpage/css/style.css' %}" rel="stylesheet">
+
+    {% block extra_css %} 
+    {% endblock extra_css %} 
+    {% endblock css %}
+  </head>
+
+  <body>
+        <!-- Spinner Start -->
+        <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+          <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+              <span class="sr-only">Loading...</span>
+          </div>
+      </div>
+      <!-- Spinner End -->
+  
+  
+      <!-- Navbar Start -->
+      {% block navbar %} {% include 'fpartials/nav.html' %} {% endblock navbar %}
+      <!-- Navbar End -->
+            {% block content %}
+
+            <!-- ============================================================== -->
+            <!-- Start right Content here -->
+            <!-- ============================================================== -->
+
+            {% endblock content %} 
+
+            {% block footer %} 
+                {% include 'fpartials/footer.html' %} 
+            {% endblock footer %}
+            
+    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+
+    {% block javascript %} 
+
+    
+    <!-- JavaScript Libraries -->
+    <script src="{% static 'assets/vendor/libs/jquery/jquery.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'webpage/lib/wow/wow.min.js' %}"></script>
+    <script src="{% static 'webpage/lib/easing/easing.min.js' %}"></script>
+    <script src="{% static 'webpage/lib/waypoints/waypoints.min.js' %}"></script> 
+    <script src="{% static 'webpage/lib/owlcarousel/owl.carousel.min.js' %}"></script>
+    <script src="{% static 'webpage/js/jquery.meanmenu.min.js' %}"></script>
+    <script src="{% static 'webpage/js/menu.js' %}"></script>
+    <!-- Template Javascript -->
+    <script src="{% static 'webpage/js/main.js' %}"></script>
+
+    <script>
+      
+        $(document).ready(function () {
+            function updateContainerClass() {
+                if ($(window).width() < 992) {
+                    // Screen width less than 992 pixels (lg breakpoint), use container-fluid
+                    $('.menu-area .container-fluid').removeClass('container-fluid').addClass('container');
+                    
+                } else {
+                    // Screen width 992 pixels or more, use container
+                    $('.menu-area .container').removeClass('container').addClass('container-fluid');
+                }
+            }
+
+            // Initial setup
+            updateContainerClass();
+
+            // Update on window resize
+            $(window).resize(function () {
+                updateContainerClass();
+            });
+
+
+            var originalText = $(".lchange").text();
+  
+            // Change the text when scrolling
+            $(window).scroll(function() {
+                if ($(this).scrollTop() > 150) { // Change the scroll threshold as needed
+                    $(".lchange").text("{{ institute.institute_name }}"); // Change the new text
+                } else {
+                    $(".lchange").text(originalText); // Revert to the original text
+                }
+            });
+        });
+
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const scrollingItems = document.querySelector('.horizontal-scrolling-items');
+            const items = document.querySelectorAll('.horizontal-scrolling-items__item');
+            const container = document.querySelector('.horizontal-scrolling-container');
+            
+            // Ensure layout is fully rendered
+            setTimeout(() => {
+                // Calculate the total width of all items
+                let totalWidth = 0;
+                items.forEach(item => {
+                    totalWidth += item.offsetWidth;
+                });
+        
+                // Get the container width
+                const containerWidth = container.offsetWidth;
+        
+                // Calculate duration based on width and desired speed (e.g., 30 pixels per second)
+                const speed = 100; // Adjust this value to control the speed
+                const duration = (totalWidth + containerWidth) / speed;
+        
+                // Apply calculated duration to the animation
+                scrollingItems.style.animationDuration = `${duration}s`;
+                
+                // Ensure the container is visible and the animation starts
+                container.style.visibility = 'visible';
+            }, 0); // Adjust timeout if needed
+        });
+            
+            
+    
+    </script>
+
+    {% block extra_javascript %} 
+    {% endblock extra_javascript %} 
+    {% endblock javascript %}
+  </body>
+</html>

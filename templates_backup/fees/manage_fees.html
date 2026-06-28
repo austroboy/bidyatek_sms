@@ -1,0 +1,261 @@
+<style>
+    /* General Styles */
+.container {
+    max-width: 1630px;
+    margin: auto;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1, h3 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Form Styles */
+form {
+    background-color: #ffffff;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.form-group label {
+    font-weight: bold;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+}
+
+button {
+    margin-top: 10px;
+}
+
+/* Table Styles */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    margin-top: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.table thead {
+    background-color: #007bff;
+    color: white;
+}
+
+.table thead th {
+    padding: 10px;
+    text-align: left;
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.table tbody tr:hover {
+    background-color: #e9ecef;
+}
+
+.table td, .table th {
+    padding: 10px;
+    border: 1px solid #dee2e6;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* Buttons */
+.btn {
+    padding: 5px 15px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+/* Layout Adjustments */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-top: 20px;
+    align-items: flex-start;
+}
+
+.col-md-6 {
+    flex: 0 0 48%;
+    max-width: 48%;
+    display: flex;
+    flex-direction: column;
+}
+
+.table-container {
+    flex-grow: 1;
+    overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+    .col-md-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+</style>
+
+{% block content %}
+<div class="container">
+    <h1>Manage Students by Fee Type</h1>
+    
+    <!-- Fee Type Selection Form -->
+    <form method="post" class="mb-4">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Select Fee Type:</label>
+            <select name="feetype" class="form-control">
+                {% for ft in fee_types %}
+                    <option value="{{ ft.id }}">{{ ft.fees_title }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" name="feetype_submit" class="btn btn-primary">Show Students</button>
+    </form>
+
+    {% if selected_feetype %}
+        <!-- Unpaid Students Table -->
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Unpaid Students</h3>
+                <form method="post" id="unpaidForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="selected_feetype" value="{{ selected_feetype.id }}">
+                    <div class="mb-2">
+                        <button type="button" class="btn btn-sm btn-secondary" onclick="selectAll('unpaidForm')">Select All</button>
+                        <button type="submit" name="delete_unpaid" class="btn btn-sm btn-danger">Delete Selected</button>
+                    </div>
+                    <table class="table table-bordered">
+                        <thead class="thead-light">
+                            <tr>
+                                <th></th>
+                                <th>Student Name</th>
+                                <th>Roll</th>
+                                <th>Class</th>
+                                <th>Group</th>
+                                <th>Section</th>
+                                <th>Version</th>
+                                <th>Shift</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for fee in unpaid_students %}
+                                <tr>
+                                    <td><input type="checkbox" name="selected_students" value="{{ fee.id }}"></td>
+                                    <td>{{ fee.student_id.student_field.name }}</td>
+                                    <td>{{ fee.student_id.roll_no|default:"-" }}</td>
+                                    <td>{{ fee.student_id.class_id.class_group_id.class_id.name }}</td>
+                                    <td>{{ fee.student_id.class_id.class_group_id.group_id.name|default:"-" }}</td>
+                                    <td>{{ fee.student_id.class_id.section_id.name|default:"-" }}</td>
+                                    <td>{{ fee.student_id.version }}</td>
+                                    <td>{{ fee.student_id.class_id.shift_id.name|default:"-" }}</td>
+                                    <td>{{ fee.amount }}</td>
+                                    <td>{{ fee.status|capfirst }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="10" class="text-center">No unpaid students found</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+
+            <!-- Paid Students Table -->
+            <div class="col-md-6">
+                <h3>Paid Students</h3>
+                <form method="post" id="paidForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="selected_feetype" value="{{ selected_feetype.id }}">
+                    <div class="mb-2">
+                        <button type="button" class="btn btn-sm btn-secondary" onclick="selectAll('paidForm')">Select All</button>
+                        <button type="submit" name="delete_paid" class="btn btn-sm btn-danger">Delete Selected</button>
+                    </div>
+                    <table class="table table-bordered">
+                        <thead class="thead-light">
+                            <tr>
+                                <th></th>
+                                <th>Student Name</th>
+                                <th>Roll</th>
+                                <th>Class</th>
+                                <th>Group</th>
+                                <th>Section</th>
+                                <th>Version</th>
+                                <th>Shift</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for fee in paid_students %}
+                                <tr>
+                                    <td><input type="checkbox" name="selected_students" value="{{ fee.id }}"></td>
+                                    <td>{{ fee.student_id.student_field.name }}</td>
+                                    <td>{{ fee.student_id.roll_no|default:"-" }}</td>
+                                    <td>{{ fee.student_id.class_id.class_group_id.class_id.name }}</td>
+                                    <td>{{ fee.student_id.class_id.class_group_id.group_id.name|default:"-" }}</td>
+                                    <td>{{ fee.student_id.class_id.section_id.name|default:"-" }}</td>
+                                    <td>{{ fee.student_id.version }}</td>
+                                    <td>{{ fee.student_id.class_id.shift_id.name|default:"-" }}</td>
+                                    <td>{{ fee.amount }}</td>
+                                    <td>{{ fee.status|capfirst }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="10" class="text-center">No paid students found</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            function selectAll(formId) {
+                const form = document.getElementById(formId);
+                const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(checkbox => checkbox.checked = true);
+            }
+        </script>
+    {% endif %}
+</div>
+{% endblock %}

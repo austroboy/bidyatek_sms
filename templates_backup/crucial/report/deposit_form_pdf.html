@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fee Deposit Form</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 0.8cm;
+        }
+        body {
+            font-family: "Times New Roman", serif;
+            font-size: 11px;
+            color: #222;
+            margin: 0;
+            padding: 0;
+        }
+        .page-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: stretch;
+            gap: 10px;
+            height: 100%;
+        }
+        .deposit-copy {
+            flex: 1;
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+        .cut-line-vertical {
+            width: 1px;
+            background: repeating-linear-gradient(
+                to bottom,
+                #777,
+                #777 3px,
+                transparent 3px,
+                transparent 6px
+            );
+            position: relative;
+        }
+        .cut-line-vertical:after {
+            content: "✂";
+            position: absolute;
+            top: 50%;
+            left: -5px;
+            transform: translateY(-50%);
+            font-size: 10px;
+            color: #999;
+        }
+        .institute-header {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .institute-logo {
+            max-width: 50px;
+            max-height: 50px;
+            margin-bottom: 4px;
+        }
+        .institute-header h2 {
+            margin: 0;
+            font-size: 13px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+        .student-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 10px;
+        }
+        .student-details p,
+        .date-section p {
+            margin: 2px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 6px;
+            font-size: 10px;
+        }
+        th, td {
+            border: 0.5px solid #444;
+            padding: 3px 5px;
+            text-align: left;
+        }
+        th {
+            background-color: #f9f9f9;
+            font-weight: bold;
+        }
+        .total-row {
+            font-weight: bold;
+            background: #f1f1f1;
+        }
+        .signature-area {
+            margin-top: auto;
+            text-align: right;
+            font-size: 10px;
+        }
+        .signature-area p {
+            margin: 2px 0;
+        }
+        .copy-label {
+            text-align: center;
+            font-size: 9px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            background: #f5f5f5;
+            padding: 2px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+        @media print {
+            .cut-line-vertical:after {
+                background: transparent;
+            }
+            .deposit-copy {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        {% for copy in copies %}
+        <div class="deposit-copy">
+            {% if copies|length > 1 %}
+            <div class="copy-label">Copy {{ forloop.counter }} of {{ copies|length }}</div>
+            {% endif %}
+            
+            <div class="institute-header">
+                {% if institute.institute_logo %}
+                    <img src="{{ institute.institute_logo.url }}" alt="Institute Logo" class="institute-logo">
+                {% endif %}
+                <h2>{{ institute.institute_name }}</h2>
+            </div>
+
+            <div class="student-info">
+                <div class="student-details">
+                    <p><strong>Student Name:</strong> {{ student.student_field.name }}</p>
+                    <p><strong>Student ID:</strong> {{ student.student_field.user_id }}</p>
+                    <p><strong>Roll No:</strong> {{ student.roll_no }}</p>
+                    <p><strong>Class:</strong> {{ student.class_id.class_group_id.class_id.name }}</p>
+                    <p><strong>Section:</strong> {{ student.class_id.section_id.name }}</p>
+                    {% if student.class_id.class_group_id.group_id %}
+                        <p><strong>Group:</strong> {{ student.class_id.class_group_id.group_id.name }}</p>
+                    {% endif %}
+                    <p><strong>Version:</strong> {{ student.version }}</p>
+                </div>
+                <div class="date-section">
+                    <p><strong>Date:</strong> {{ current_date }}</p>
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fee Head</th>
+                        <th>Amount</th>
+                        <th>Discount</th>
+                        <th>Late Fee</th>
+                        <th>Total Due</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fee in due_fees %}
+                    <tr>
+                        <td>{{ fee.feetype_id.fees_title }}</td>
+                        <td>{{ fee.amount }}</td>
+                        <td>{{ fee.discount_amount }}</td>
+                        <td>{{ fee.late_amount }}</td>
+                        <td>{{ fee.total_fee_after_partial_payments }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="total-row">
+                        <td colspan="4" style="text-align: right;">Total Due:</td>
+                        <td>{{ total_due }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="signature-area">
+                <p>_________________________</p>
+                <p>Authorized Signature</p>
+            </div>
+        </div>
+
+        {% if not forloop.last %}
+        <div class="cut-line-vertical"></div>
+        {% endif %}
+        {% endfor %}
+    </div>
+</body>
+</html>

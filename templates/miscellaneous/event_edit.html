@@ -1,0 +1,72 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load widget_tweaks %}
+
+{% block extra_css %} 
+
+{%endblock extra_css %} 
+
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+    {% include 'pageinfo.html' %}
+    
+    <div class="card">
+        <div class=" card-body">
+
+            <form action="" method="post"  >
+
+                {% csrf_token %}
+                
+                
+                  <div class="mb-3">
+                    <label for="{{ form.title.id_for_label }}">Title:</label>
+                    {% render_field form.title class="form-control" %}
+                  </div>
+                  <div class="mb-3">
+                    <label for="{{ form.start.id_for_label }}">Start Time:</label>
+                    {% render_field form.start|attr:"type:datetime-local" class="form-control" %}
+                  </div>
+                  <div class="mb-3">
+                    <label for="{{ form.end.id_for_label }}">End Time:</label>
+                    {% render_field form.end|attr:"type:datetime-local" class="form-control" %}
+                  </div>
+                  <div class="mb-3">
+                    <label for="{{ form.academic_year.id_for_label }}">Academic Year:</label>
+                    {% render_field form.academic_year class="form-control" %}
+                  </div>
+
+                  <button type="submit" class="btn  btn-primary ">Save</button>
+                  
+              
+              {% if form.errors %}
+                                              <div class="alert alert-danger">
+                                                  <strong>Error:</strong> Please correct the following errors.
+                                                  <ul>
+                                                      {% for field in form %}
+                                                          {% if field.errors %}
+                                                              <li>{{ field.label }}: {{ field.errors|join:", " }}</li>
+                                                          {% endif %}
+                                                      {% endfor %}
+                                                  </ul>
+                                              </div>
+                                          {% endif %}
+              
+               
+              </form>
+
+        </div>
+    </div>
+ 
+  
+</div>
+<!-- end: Content -->
+
+{% endblock content %} 
+{% block extra_javascript %} 
+
+
+
+
+{% endblock extra_javascript%}

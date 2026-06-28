@@ -1,0 +1,964 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% block extra_css %}
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css'>
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-5-theme/1.3.0/select2-bootstrap-5-theme.min.css'>
+<link rel="stylesheet" href="{% static 'assets/css/invoices.css' %}" />
+<link 
+      rel="stylesheet"
+      href="{% static 'libs/toast/jquery.toast.min.css' %}"
+    />
+
+<style>
+    .student_details{
+        margin: 0 0px;
+    }
+    .student_fee_table th {
+        vertical-align: middle;
+    }
+    .student_fee_table .action_btn button{
+        white-space: nowrap;
+    }
+</style>
+{% endblock extra_css %} 
+
+{% block content %}
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+    {% include 'pageinfo.html' %}
+    <div class="card">
+        <div class="card-body">
+            <div class="col-md-12 pb-2">
+                <select class="form-select" id="student_id" name="id_no">
+                    {% for student in studentlist %}
+                        <option></option>
+                        <option value="{{ student.id }}">{{ student.student_field.name }} {{ student.student_field.rfid }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="background-color:rgba(105, 108, 255, 0.16) !important ;" class="row student_details my-2 pt-3 px-1 rounded-2">
+                <div class="col-md-3">
+                     <p class="text-start" data-id="name" >Name:</p>
+                </div>
+                <div class="col-md-2">
+                    <p class="text-start" data-id="class" >Class:</p> 
+                </div>
+                <div class="col-md-2">
+                    <p class="text-start" data-id="roll">Roll:</p>
+                </div>
+
+                <div class="col-md-2">
+                    <p class="text-start" data-id="parent">Parent:</p>
+                </div>
+
+                <div class="ms-md-auto col-md-3">
+                    <div style="margin-top: -7px;" class="text-end ">
+                        <span class="badge bg-primary" id="amount_sum"></span>
+                        <button type="button" class="btn btn-icon btn-danger mb-md-0 mb-2" id="generateCollectBtn">
+                            <i class='bx bx-wallet fs-3'></i> 
+                          </button>
+
+                        <button  type="button" class="btn btn-icon btn-warning mb-md-0 mb-2 ms-3" id="generateInvoiceBtn"> 
+                            <i class='bx bx-receipt fs-3'></i>
+                        </button>
+                        
+
+                    </div>
+                    
+                </div>
+            </div>
+            <div class="table-responsive student_fee_table" id="displayfee">
+                <table id="stuFee" class="table table-nowrap mb-0">
+                    <thead style="background-color: rgba(252, 207, 20, 0.2) !important;">
+                        <tr>
+                            <th><input type="checkbox" id="select_all"></th>
+                            <th data-fee="feetype" >FEE TYPE</th>
+                            <th data-fee="waiver" >Waiver (%)</th>
+                            <th data-fee="late_fee" >Lfee</th>
+                            <th data-fee="amount" >AMOUNT</th>
+                            <th data-fee="discount" style="width: 60px;">Discount </th>
+                            <th data-fee="total_fee" >FINAL AMOUNT</th>
+                            <th >ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Table body content goes here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-3">
+      <form action="" id="purchaseForm">
+        {% csrf_token %}
+        <div class="row justify-content-around">
+                  <div  style="  border-right: 1px dotted white; background-color: #ccc;"
+                    class="col-md-6 col-lg-3 flex-grow-1 d-flex flex-column  text-center text-danger fs-5 pt-1">
+                    <label class="control-label">Total Amount</label>
+                    <input disabled style="width: 50%;" type="number" id="totalSum" name="totalSum"
+                      class=" mb-2 align-self-center fw-bold form-control center-placeholder text-center"
+                      placeholder="Total Price" />
+                  </div>
+                  <div  style=" border-right: 1px dotted white; background-color: #ccc;"
+                    class="col-md-6 col-lg-3 flex-grow-1 d-flex flex-column text-center text-danger fs-5 pt-1">
+                    <label class="control-label">Discount</label>
+                    <input disabled style="width: 50%;" type="number" id="discount" name="discount"
+                      class=" mb-2 align-self-center fw-bold form-control center-placeholder text-center"
+                      placeholder="Discount " />
+                  </div>
+                  <div  style=" border-right: 1px dotted white; background-color: #ccc;"
+                    class="col-md-6 col-lg-3 flex-grow-1 d-flex flex-column text-center text-danger fs-5 pt-1">
+                    <label class="control-label">Net Total</label>
+                    <input disabled style="width: 50%;" type="number" id="net_Total" name="net_Total"
+                      class=" mb-2 align-self-center fw-bold form-control center-placeholder text-center"
+                      placeholder="Net Total" />
+                  </div>
+
+                  <div  style=" border-right: 1px dotted white; background-color: #ccc;"
+                    class="col-md-6 col-lg-3 flex-grow-1 d-flex flex-column text-center text-danger  fs-5 pt-1">
+                    <label class="control-label">Due</label>
+                    <input disabled style="width: 50%;" type="number" id="due" name="due"
+                      class=" mb-2  align-self-center fw-bold form-control center-placeholder text-center"
+                      placeholder="Due Amount" />
+                  </div>
+                </div>
+      </form>
+    </div>
+</div>
+<!-- end: Content -->
+
+<div class="modal" id="confirmMarkAsPaidModal" tabindex="-1" aria-labelledby="confirmMarkAsPaidModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirmMarkAsPaidModalLabel">Confirm Mark As Paid</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to mark this fee as paid?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="confirmMarkAsPaidBtn">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="confirmCollectModal" tabindex="-1" aria-labelledby="confirmCollectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirmCollectModalLabel">Confirm Fee Collection</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to collect the selected fees?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="confirmCollectBtn">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+<div
+  id="feesModal"
+  class="modal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="feesModalLabel"
+  aria-hidden="true"
+>
+  <div
+    style="width: 50%"
+    class="modal-dialog modal-dialog-centered modal-fullscreen"
+    role="document"
+  >
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="feesModalLabel">Fees Invoice</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="printClose" data-bs-dismiss="modal">
+          Close
+        </button>
+        <button type="button" class="btn btn-primary" id="printInvoice">
+          Print
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock content %} 
+
+{% block extra_javascript %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery.print/1.6.2/jQuery.print.min.js"></script>
+<script src="{% static 'libs/toast/jquery.toast.min.js' %}"></script>
+<script>
+    var selectedStudentId = null;
+    window.generateFeeReportUrl = window.generateFeeReportUrl || "{% url 'generate_fee_report' 0 %}";
+    function populateTableRows(feeData) {
+        var totalAmount = 0;
+        var totalDiscount = 0;
+        var totalNetTotal = 0;
+        var totalLfee = 0;
+        var tAmount = 0;
+        feeData.forEach(function (fee, i) {
+            var actionButtons;
+            
+            var checkbox = "<td><input type='checkbox' class='fee-checkbox ' data-fee-id='" + fee.id + "'></td>" ;
+                var ediscount = parseFloat(fee.discount_amount) || 0; // Retrieve the discount amount or default to 0
+                // Define discountField based on fee status
+                var discountField = (fee.status === "unpaid" || fee.status === "partial") ?
+                    "<td><input class='form-control form-control-sm discount-input' type='text' value='" + ediscount + "' data-fee-id='" + fee.id + "'></td>" :
+                    "<td>" + (fee.discount_amount || 0) + "</td>";
+
+            // Parse fee.amount and fee.discount_amount as numbers
+            var amount = parseFloat(fee.amount) || 0;
+            var lateFee = parseFloat(fee.late_fee) || 0;
+            var formattedLateFee = lateFee.toFixed(2);
+            var netTotal = parseFloat(fee.total_netTotal);
+            
+            var discountAmount = parseFloat(fee.discount_amount) || 0;
+            var totalFeeAfterPartialPayments = parseFloat(fee.total_fee_after_partial_payments) || 0;
+            var totalPaidAmount = parseFloat(fee.total_paid_amount) || 0;
+            
+            var totalFee = fee.status === "paid" ? parseFloat(fee.total_fee_after_discount) : amount + lateFee - discountAmount;
+
+            // Ensure totalFee is a valid number before applying .toFixed(2)
+            totalFee = parseFloat(totalFee) || 0;
+
+            // Define action buttons based on fee status
+            if (fee.status === "unpaid") {
+                actionButtons = "<td class='action-buttons-cell' style='width:20%'>" +
+                                "<div class='col mb-1 d-flex'>" +
+                                "<button class='btn btn-outline-danger btn-sm collect-fees-btn' type='button' " +
+                                "data-bs-toggle='collapse' data-bs-target='#feeCollapse" + fee.id + "' " +
+                                "aria-expanded='false' aria-controls='feeCollapse'>Collect Fees</button>" +
+                                "</div>" +
+                                "<div class='col'>" +
+                                "<div class='collapse' id='feeCollapse" + fee.id + "'>" +
+                                "<div class='d-flex flex-row'>" +
+                                "<div class='form-check form-check-inline'>" +
+                                "<label class='form-check-label'>" +
+                                "<input class='form-check-input' type='radio' id='" + fee.id + "full' " +
+                                "data-id='" + fee.id + "' name='" + fee.id + "' value='full'>Full" +
+                                "</label>" +
+                                "</div>" +
+                                "<div class='form-check form-check-inline'>" +
+                                "<label class='form-check-label'>" +
+                                "<input class='form-check-input' data-id='" + fee.id + "' type='radio' " +
+                                "id='" + fee.id + "partial' name='" + fee.id + "' value='partial'>Partial" +
+                                "</label>" +
+                                "</div>" +
+                                "</div>" +
+                                "<input type='text' class=' partial-payment-input form-control input-data form-control-sm' " +
+                                "data-id='" + fee.id + "' data-total-fee='" + fee.total_fee + "' name='' " +
+                                "id='intext" + fee.id + "' hidden>" +
+                                "</div>" +
+                                "</div>" +
+                                "</td>";
+            } else if (fee.status === "partial") {
+                actionButtons = "<td class='action-buttons-cell' style='width:20%'>" +
+                                "<div class='col mb-1 d-flex'>" +
+                                "<button class='btn btn-outline-danger btn-sm collect-fees-btn' style='width: 100%;' type='button' " +
+                                "data-bs-toggle='collapse' data-bs-target='#feeCollapse" + fee.id + "' " +
+                                "aria-expanded='false' aria-controls='feeCollapse'>Collect Fees</button>" +
+                                "<a href='" + window.generateFeeReportUrl.replace('0', fee.id) + "' class='btn btn-outline-primary btn-sm ms-1'>PaySlip</a>" +
+                                
+                                "</div>" +
+                                "<div class='col'>" +
+                                "<div class='collapse' id='feeCollapse" + fee.id + "'>" +
+                                "<div class='d-flex flex-row'>" +
+                                "<div class='form-check form-check-inline'>" +
+                                "<label class='form-check-label'>" +
+                                "<input class='form-check-input' type='radio' id='" + fee.id + "full' " +
+                                "data-id='" + fee.id + "' name='" + fee.id + "' value='full' disabled>Full" +
+                                "</label>" +
+                                "</div>" +
+                                "<div class='form-check form-check-inline'>" +
+                                "<label class='form-check-label'>" +
+                                "<input class='form-check-input' data-id='" + fee.id + "' type='radio' " +
+                                "id='" + fee.id + "partial' name='" + fee.id + "' value='partial'>Partial" +
+                                "</label>" +
+                                "</div>" +
+                                "</div>" +
+                                "<input type='text' class='form-control input-data form-control-sm partial-payment-input' " +
+                                "data-id='" + fee.id + "' data-total-fee='" + fee.total_fee_after_partial_payments + "' name='' " +
+                                "id='intext" + fee.id + "' hidden>" +
+                                "</div>" +
+                                "</div>" +
+                                "</td>";
+            } else {
+                actionButtons = "<td class='action-buttons-cell' style='width:20%'>" +
+                                "<a href='" + window.generateFeeReportUrl.replace('0', fee.id) + "' class='btn btn-outline-primary btn-sm'>PaySlip</a>" +
+                                
+                                "</td>";
+            }
+
+            var rowHtml = "<tr id='feeRow" + fee.id + "'>" +
+                checkbox +
+                "<td>" + fee.feetype + "</td>" +
+                "<td>" + (fee.waiver_amount || 0) + "</td>" + 
+                "<td data-late-fee-id='" + fee.id + "'>" + formattedLateFee  + "</td>" +
+                "<td>" + amount.toFixed(2) + "</td>" + // Ensure amount is shown as a fixed decimal number
+                discountField;
+                if (fee.status === "unpaid") {
+                    rowHtml += "<td hidden class='total-fee-after-discount' data-amount-id='" + feeData[i].id + "'>" + feeData[i].amount + "</td>";
+                } else if (fee.status === "partial") {
+                    rowHtml += "<td hidden class='total-fee-after-discount' data-amount-id='" + feeData[i].id + "'>" + totalFeeAfterPartialPayments.toFixed(2) + "</td>";
+                }
+
+                // Add conditional logic for the partial-final td content
+                if (fee.status === "unpaid") {
+                    rowHtml += "<td hidden class='total-fee' data-amount-id='" + fee.id + "'>" + fee.total_fee + "</td>" +
+                            "<td class='final-amount' data-final-id='" + fee.id + "'>" +
+                            "<span >" + totalFee.toFixed(2) + "</span>" +
+                            "</td>";
+                } else if (fee.status === "partial") {
+                    rowHtml += "<td  hidden class=' rvp total-fee ' data-amount-id='" + fee.id + "'>" + fee.total_fee + "</td>" +
+                            "<td class=' position-relative final-amount'  data-final-id='" + fee.id + "'>" +
+                            "<span class='tFPP'>" + totalFeeAfterPartialPayments.toFixed(2) + "</span>" +
+                            "<span class='position-absolute bottom-0' style='font-size: 0.75rem;'>" +
+                            "<i class='bx text-danger bx-arrow-to-bottom'></i>" +
+                            "<span  class='text-success tPP'>" + totalPaidAmount.toFixed(2) + "</span>" +
+                            "</span>" +
+                            "</td>";
+                } else {
+                    rowHtml += "<td>" +
+                            "<span>" + totalFee.toFixed(2) + "</span>" +
+                            "</td>";
+                }
+
+                rowHtml += actionButtons +
+                "</tr>";
+
+            $("#stuFee tbody").append(rowHtml);
+
+            tAmount += amount;
+            totalLfee += lateFee;
+            totalAmount = tAmount + totalLfee;
+            totalNetTotal = netTotal;
+            totalDiscount += discountAmount
+        });
+    
+        return { totalAmount, totalDiscount, totalNetTotal };
+    }
+    
+
+    $(document).on("click", 'input[type="radio"]', function () {
+        var btnid = (this.id);
+        var value = $(this).val();
+        currentDataId = $(this).attr("data-id");
+        currentDiscountAmount = $(".discount-input[data-fee-id='" + currentDataId + "']").val();
+        
+        if (value === "full") {
+            $('#confirmMarkAsPaidModal').modal('show');
+        } else if (value === "partial") {
+            $('#intext' + currentDataId).removeAttr('hidden');
+
+            $('#intext' + currentDataId).keypress(function (e) {
+                var key = e.which;
+                if (key == 13) {
+                    let pvalue = $(this).val();
+                    let partial_data = $(this).attr("data-id");
+                    currentDiscountAmount = $(".discount-input[data-fee-id='" + partial_data + "']").val();
+                    sendToServer(currentDataId, value, currentDiscountAmount, pvalue);
+                    $('#intext' + currentDataId).attr("disabled", true);
+                }
+            });
+        } else {
+            console.log('else');
+        }
+    });
+
+    $('#confirmMarkAsPaidBtn').on('click', function() {
+        
+        sendToServer(currentDataId, 'full', currentDiscountAmount, 0);
+        $('#confirmMarkAsPaidModal').modal('hide');
+    });
+
+
+    
+    function sendToServer(dataId, value, discountAmount, pvalue) {
+        $.ajax({
+            url: "/feestatus/",
+            type: "POST",
+            data: { id: dataId, paymentMethod: value, discount: discountAmount, paymentAmount: pvalue },
+        })
+        .done(function (data) {
+            var studentData = data[0];
+            var feeData = data[0].feesList;
+    
+            if (data.length > 0) {
+                var studentData = data[0];
+                $("[data-id='name']").text("Name: " + studentData.name);
+                $("[data-id='class']").text("Class: " + studentData.class);
+                $("[data-id='roll']").text("Roll: " + studentData.roll);
+                $("[data-id='parent']").text("Parent: " + studentData.parent);
+                $("#stuFee tbody").empty();
+    
+                var {
+                    totalAmount,
+                    totalDiscount,
+                    totalNetTotal
+                } = populateTableRows(feeData);
+    
+                 $(".discount-input").on("input", function () {
+                    var feeId = $(this).data("fee-id");
+                    var discountAmount = parseFloat($(this).val()) || 0;
+                    var totalFeeAfterDiscount =  parseFloat($(".total-fee-after-discount[data-amount-id='" + feeId + "']").text()) || 0;
+                    
+                    
+                    var finalAmount = totalFeeAfterDiscount - discountAmount;
+                    
+                    $(".final-amount[data-final-id='" + feeId + "']").text(finalAmount.toFixed(2));
+                });
+    
+                var totalFee = totalAmount
+                $("#totalSum").val(totalFee.toFixed(2));
+                $("#discount").val(totalDiscount.toFixed(2));
+                $("#net_Total").val(totalNetTotal.toFixed(2));
+    
+                var due = (totalNetTotal + totalDiscount) - totalFee
+                $("#due").val(due.toFixed(2));
+    
+            } else {
+                console.error('No data received from the server');
+            }
+        })
+        .fail(function () {
+            console.log("Error Occurred");
+        });
+    }
+
+    function markAsPaid(feeId) {
+        
+        $('#confirmMarkAsPaidModal').modal('show');
+        $('#confirmMarkAsPaidBtn').data('fee-id', feeId);
+        }
+        $('#confirmMarkAsPaidBtn').on('click', function () {
+            var feeId = $(this).data('fee-id');
+            $('#confirmMarkAsPaidModal').modal('hide');
+
+            var discountValue = $(".discount-input[data-fee-id='" + feeId + "']").val();
+            sendToServer(feeId, discountValue);
+        });
+    
+    $(document).ready(function () {
+        $("#student_id").select2({
+            theme: "bootstrap-5",
+            width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+            placeholder: 'Search',
+            minimumInputLength: 1,
+            language: {
+                inputTooShort: function() {
+                    return 'Please Add More Text';
+                }
+            }
+        });
+    
+        $("#student_id").on('select2:select', function (e) {
+
+            selectedStudentId=e.params.data.id;
+            var studentId = selectedStudentId;
+            
+            $.ajax({
+                url: '{% url 'student_search' %}',
+                method: 'POST',
+                data: { studentId: studentId },
+                dataType: 'json',
+                success: function (data) {
+                    var studentData = data[0];
+                    var feeData = data[0].feesList;
+    
+                    if (data.length > 0) {
+                        var studentData = data[0];
+                        $("[data-id='name']").text("Name: " + studentData.name);
+                        $("[data-id='class']").text("Class: " + studentData.class);
+                        $("[data-id='roll']").text("Roll: " + studentData.roll);
+                        $("[data-id='parent']").text("Parent: " + studentData.parent);
+                        $("#stuFee tbody").empty();
+    
+                        var {
+                            totalAmount,
+                            totalDiscount,
+                            totalNetTotal
+                        } = populateTableRows(feeData);
+    
+                        $(".discount-input").on("input", function () {
+                            var feeId = $(this).data("fee-id");
+                            var discountAmount = parseFloat($(this).val()) || 0;
+                            var totalFeeAfterDiscount =  parseFloat($(".total-fee-after-discount[data-amount-id='" + feeId + "']").text()) || 0;
+                            var lateFee = parseFloat($("td[data-late-fee-id='" + feeId + "']").text()) || 0; // Assuming you have a way to get the late fee value
+                            
+                            var finalAmount = totalFeeAfterDiscount + lateFee - discountAmount;
+                            
+                            var partialAmountElement = $(".position-relative[data-final-id='" + feeId + "'] span.tFPP");
+
+                            if (partialAmountElement.length > 0) {
+                                // Fee is partial
+                                var totalPaidAmount = parseFloat($(".position-relative[data-final-id='" + feeId + "'] span.tPP").text()) || 0;
+                                var remainingAmount = finalAmount - totalPaidAmount;
+                                partialAmountElement.text(remainingAmount.toFixed(2));
+                            } else {
+                                // Fee is unpaid, adjust logic if needed for unpaid fees
+                                // Assuming no paid amount for unpaid fees
+                                var unpaidAmountElement = $(".final-amount[data-final-id='" + feeId + "']");
+                                unpaidAmountElement.text(finalAmount.toFixed(2));
+                            }
+                        });
+    
+                        var totalFee = totalAmount
+                        $("#totalSum").val(totalFee.toFixed(2));
+                        $("#discount").val(totalDiscount.toFixed(2));
+                        $("#net_Total").val(totalNetTotal.toFixed(2));
+    
+                        var due = (totalNetTotal + totalDiscount) - totalFee
+                        $("#due").val(due.toFixed(2));
+    
+                    } else {
+                        console.error('No data received from the server');
+                    }
+                },
+                error: function (error) {
+                    console.error(error);
+                }
+            });
+        });
+
+        function updateTotalSum() {
+            var totalSum = 0;
+            
+            // Iterate over checked checkboxes
+            $('.fee-checkbox:checked').each(function () {
+                var feeId = $(this).data('fee-id');
+                var finalAmount = parseFloat($('.final-amount[data-final-id="' + feeId + '"]').text()) || 0;
+                var discountAmount = parseFloat($('.discount-input[data-fee-id="' + feeId + '"]').val()) || 0;
+                
+                var intextValue = parseFloat($(`#intext${feeId}`).val()) || 0;
+                if (intextValue > 0) {
+                    finalAmount = intextValue;
+                }
+                
+                totalSum += finalAmount;
+            });
+        
+            // Update the total sum in the span
+            $('#amount_sum').text(totalSum.toFixed(2));
+        }
+        
+        // Event listener for checkbox change
+        $(document).on('change', '.fee-checkbox', function () {
+            updateTotalSum();
+        });
+        
+        // Event listener for select_all checkbox change
+        $('#select_all').on('change', function () {
+            $('.fee-checkbox').not(':disabled').prop('checked', $(this).is(':checked'));
+            updateTotalSum(); // Update total sum when select_all checkbox changes
+        });
+        
+        // Event listener for discount input change
+        $(document).on('input', '.discount-input', function () {
+            updateTotalSum(); // Update total sum when discount input changes
+        }); 
+        
+        // Event listener for intext input change
+        $(document).on('input', '.input-data', function () {
+            updateTotalSum(); // Update total sum when intext input changes
+        });
+        
+        // Initial call to update total sum on page load
+        $(document).ready(function () {
+            updateTotalSum();
+        });
+
+    // Select/Deselect all checkboxes
+    $('#select_all').on('change', function () {
+        $('.fee-checkbox').not(':disabled').prop('checked', $(this).is(':checked'));
+    });
+
+    $('#generateCollectBtn, #generateInvoiceBtn').on('click', function () {
+        // Determine the status based on which button was clicked
+        var status = $(this).attr('id') === 'generateInvoiceBtn' ? 'paidfees' : 'collectfees';
+
+        // Initialize arrays to collect selected fee IDs and discount amounts
+        const selectedFeeIds = [];
+        const discountAmounts = [];
+        const inputData = {};
+
+        // Iterate over checked checkboxes to collect fee IDs and corresponding discount amounts
+        $('.fee-checkbox:checked').each(function () {
+            const feeId = $(this).data('fee-id');
+            selectedFeeIds.push(feeId);
+            discountAmounts.push(parseFloat($(this).closest('tr').find('.discount-input').val()) || 0);
+            inputData[feeId] = $(`#intext${feeId}`).val() || '';
+        });
+
+        // Prepare data to send in AJAX request
+        var dataToSend = {
+            studentId: selectedStudentId, // Assuming selectedStudentId is defined elsewhere
+            selectedFeeIds: selectedFeeIds,
+            discountAmounts: discountAmounts,
+            status: status,
+            inputData: inputData,
+            csrfmiddlewaretoken: '{{ csrf_token }}' // Ensure you have the CSRF token available
+        };
+
+        if (status === 'collectfees') {
+            $('#confirmCollectModal').modal('show');
+    
+            $('#confirmCollectBtn').off('click').on('click', function() {
+                sendAjaxRequest(dataToSend);
+                $('#confirmCollectModal').modal('hide');
+            });
+        } else {
+            sendAjaxRequest(dataToSend);
+        }
+
+    });
+
+    function sendAjaxRequest(dataToSend) {
+        $.ajax({
+            url: '/generate_multiple_invoice/',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(dataToSend),
+            success: function(response) {
+                console.log('Data sent successfully:', response);
+                if (response.fees) {
+                    let studentId = response.student_info.id;
+                    console.log(studentId)
+                    $('#student_id').val(studentId);
+
+                    $.ajax({
+                        url: '{% url 'student_search' %}',
+                        method: 'POST',
+                        data: { studentId: studentId },
+                        dataType: 'json',
+                        success: function (data) {
+                            var studentData = data[0];
+                            var feeData = data[0].feesList;
+            
+                            if (data.length > 0) {
+                                var studentData = data[0];
+                                $("[data-id='name']").text("Name: " + studentData.name);
+                                $("[data-id='class']").text("Class: " + studentData.class);
+                                $("[data-id='roll']").text("Roll: " + studentData.roll);
+                                $("[data-id='parent']").text("Parent: " + studentData.parent);
+                                $("#stuFee tbody").empty();
+            
+                                var {
+                                    totalAmount,
+                                    totalDiscount,
+                                    totalNetTotal
+                                } = populateTableRows(feeData);
+            
+                                $(".discount-input").on("input", function () {
+                                    var feeId = $(this).data("fee-id");
+                                    var discountAmount = parseFloat($(this).val()) || 0;
+                                    var totalFeeAfterDiscount =  parseFloat($(".total-fee-after-discount[data-amount-id='" + feeId + "']").text()) || 0;
+                                    var lateFee = parseFloat($("td[data-late-fee-id='" + feeId + "']").text()) || 0; // Assuming you have a way to get the late fee value
+                                    
+                                    var finalAmount = totalFeeAfterDiscount + lateFee - discountAmount;
+                                    
+                                    var partialAmountElement = $(".position-relative[data-final-id='" + feeId + "'] span.tFPP");
+        
+                                    if (partialAmountElement.length > 0) {
+                                        // Fee is partial
+                                        var totalPaidAmount = parseFloat($(".position-relative[data-final-id='" + feeId + "'] span.tPP").text()) || 0;
+                                        var remainingAmount = finalAmount - totalPaidAmount;
+                                        partialAmountElement.text(remainingAmount.toFixed(2));
+                                    } else {
+                                        // Fee is unpaid, adjust logic if needed for unpaid fees
+                                        // Assuming no paid amount for unpaid fees
+                                        var unpaidAmountElement = $(".final-amount[data-final-id='" + feeId + "']");
+                                        unpaidAmountElement.text(finalAmount.toFixed(2));
+                                    }
+                                });
+            
+                                var totalFee = totalAmount
+                                $("#totalSum").val(totalFee.toFixed(2));
+                                $("#discount").val(totalDiscount.toFixed(2));
+                                $("#net_Total").val(totalNetTotal.toFixed(2));
+            
+                                var due = (totalNetTotal + totalDiscount) - totalFee
+                                $("#due").val(due.toFixed(2));
+            
+                            } else {
+                                console.error('No data received from the server');
+                            }
+                        },
+                        error: function (error) {
+                            console.error(error);
+                        }
+                    });
+
+                    openFeesModal(response);
+                   
+                } else {
+                    console.error('No fees data received');
+                }
+            },
+            error: function(error) {
+                console.error('Error sending data:', error);
+            }
+        });
+    }
+
+
+    function openFeesModal(response) {
+        let fees = response.fees;
+        let studentInfo = response.student_info;
+        let modalBody = $('#feesModal .modal-body');
+        modalBody.empty(); // Clear existing content
+
+        let receiptHtml = `
+            <div class="receipt_wrapper">
+                <div class="invoice__wrapper">
+                <div class="invoice">
+                    <!-- Invoice content -->
+                    <div class="invoice__top">
+                        <div class="invoice_data_number">
+                            <p><span class="title text-nowrap">Receipt No.1001001</span></p>
+                            <p><span class="title text-nowrap">Date: ${new Date().toLocaleDateString()}</span></p>
+                        </div>
+                        <div class="school_info">
+                            <div><img src="{{institute.institute_logo.url}}" height="30px" alt="logo"></div>
+                            <div class="pt-2"><p class="fw-bold text-nowrap">Mkg International School</p></div>
+                        </div>
+                        <div class="student_info d-flex flex-column">
+                            <div><div class="border border-dashed rounded px-2 me-6 text-nowrap fw-bold">${studentInfo.name}</div></div>
+                            <div class="d-flex">
+                                <div class="border border-dashed rounded px-2 me-6 text-nowrap">Class: ${studentInfo.class} ${studentInfo.section_id}</div>
+                                <div class="border border-dashed rounded px-2 me-6 text-nowrap">${studentInfo.phone_number}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="invoice__main">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <td>Fees Name</td>
+                                    <td>Fees Amount</td>
+                                    <td>Discount</td>
+                                    <td>Late Fee</td>
+                                    <td>Status</td>
+                                    <td>Total Paid</td>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+        fees.forEach(fee => {
+            let partial_paid_display = fee.partial_paid ? `-${parseFloat(fee.partial_paid).toFixed(0)}` : '';
+            receiptHtml += `
+                <tr>
+                    <td class='text-nowrap' >${fee.fees_name}</td>
+                    <td class="fee_item">&#2547;<span class="amount">${parseFloat(fee.fees_amount).toFixed(0)}</span></td>
+                    <td class="fee_item">&#2547;<span class="amount">${parseFloat(fee.discount_amount).toFixed(0)}</span></td>
+                    <td class="fee_item">&#2547;<span class="amount">${parseFloat(fee.late_amount).toFixed(0)}</span></td>
+                    <td class="fee_item"><span class="amount">${fee.status}</span><span class="partial">${partial_paid_display}</span></td>
+                    <td class="fee_item">&#2547;<span class="amount">${parseFloat(fee.total_fee).toFixed(0)}</span></td>
+                </tr>`;
+        });
+
+        receiptHtml += `
+                        </tbody>
+                            <tfoot>
+                                <tr class="sum">
+                                <td rowspan="4" class="signature_wrapper">
+                                    <!-- invoice footer -->
+                                    <div class="signature">
+                                    <p class="">_ _ _ _ _ _ _ _ _ _ _ _ _</p>
+                                    <p class="lead marginbottom payment-info">Accountant Sign</p>
+
+                                    </div>
+                                </td>
+                                <td class="fee_item">&#2547;<span class="amount">${parseFloat(response.total_fees_amount).toFixed(0)}</span></td>
+                                <td class="fee_item">&#2547;<span class="amount">${parseFloat(response.total_discount_amount).toFixed(0)}</span></td>
+                                <td class="fee_item">&#2547;<span class="amount">${parseFloat(response.total_late_fees).toFixed(0)}</span></td>
+                                <td class="fee_item"><span class="amount"> Subtotal</span></td>
+                                <td class="fee_item"> &#2547;<span class="amount">${parseFloat(response.total_paid_fees_amount).toFixed(0)}</span></td>
+                                </tr>
+                                
+                                <tr class="discount">
+                                <td colspan="5" class="invoice__discount amount_cell">Due &#2547;<span class="amount">${parseFloat(response.due_total).toFixed(0)}</span></td>
+                                </tr>
+                                <tr class="total">
+                                <td colspan="5" class="amount_cell">Total &#2547;<span class="amount"> ${parseFloat(response.total_paid_fees_amount).toFixed(0)}</span></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    </div>
+                </div>
+
+                <div class="border_div">
+        <div class="left_cutter"><i class='bx bx-cut'></i></div>
+        <div class="right_cutter"><i class='bx bx-cut'></i></div>
+      </div>
+
+      <div class="invoice__wrapper">
+                <div class="invoice">
+                    <!-- Invoice content -->
+                    <div class="invoice__top">
+                        <div class="invoice_data_number">
+                            <p><span class="title text-nowrap">Receipt No.1001001</span></p>
+                            <p><span class="title text-nowrap">Date: ${new Date().toLocaleDateString()}</span></p>
+                        </div>
+                        <div class="school_info">
+                            <div><img src="{{institute.institute_logo.url}}" height="30px" alt="logo"></div>
+                            <div class="pt-2"><p class="fw-bold text-nowrap">Mkg International School</p></div>
+                        </div>
+                        <div class="student_info d-flex flex-column">
+                            <div><div class="border border-dashed rounded px-2 me-6 text-nowrap fw-bold">${studentInfo.name}</div></div>
+                            <div class="d-flex">
+                                <div class="border border-dashed rounded px-2 me-6 text-nowrap">Class: ${studentInfo.class} ${studentInfo.section_id}</div>
+                                <div class="border border-dashed rounded px-2 me-6 text-nowrap">${studentInfo.phone_number}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="invoice__main">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <td>Fees Name</td>
+                                    <td>Fees Amount</td>
+                                    <td>Discount</td>
+                                    <td>Late Fee</td>
+                                    <td>Status</td>
+                                    <td>Total Paid</td>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+        fees.forEach(fee => {
+            receiptHtml += `
+                <tr>
+                    <td class='text-nowrap' >${fee.fees_name}</td>
+                    <td class="fee_item">&#2547;<span class="amount">${parseFloat(fee.fees_amount).toFixed(0)}</span></td>
+                    <td class="fee_item">&#2547;<span class="amount">${parseFloat(fee.discount_amount).toFixed(0)}</span></td>
+                    <td class="fee_item">&#2547;<span class="amount">${parseFloat(fee.late_amount).toFixed(0)}</span></td>
+                    <td class="fee_item"><span class="amount">${fee.status}</span><span class="partial">${fee.partial_paid ? `-${parseFloat(fee.partial_paid).toFixed(0)}` : ''}</span></td>
+                    <td class="fee_item">&#2547;<span class="amount">${parseFloat(fee.total_fee).toFixed(0)}</span></td>
+                </tr>`;
+        });
+
+        receiptHtml += `
+                            </tbody>
+                            <tfoot>
+                                <tr class="sum">
+                                <td rowspan="4" class="signature_wrapper">
+                                    <!-- invoice footer -->
+                                    <div class="signature">
+                                    <p class="">_ _ _ _ _ _ _ _ _ _ _ _ _</p>
+                                    <p class="lead marginbottom payment-info">Accountant Sign</p>
+
+                                    </div>
+                                </td>
+                                <td class="fee_item">&#2547;<span class="amount">${parseFloat(response.total_fees_amount).toFixed(0)}</span></td>
+                                <td class="fee_item">&#2547;<span class="amount">${parseFloat(response.total_discount_amount).toFixed(0)}</span></td>
+                                <td class="fee_item">&#2547;<span class="amount">${parseFloat(response.total_late_fees).toFixed(0)}</span></td>
+                                <td class="fee_item"><span class="amount"> Subtotal</span></td>
+                                <td class="fee_item"> &#2547;<span class="amount">${parseFloat(response.total_paid_fees_amount).toFixed(0)}</span></td>
+                                </tr>
+                                
+                                <tr class="discount">
+                                <td colspan="5" class="invoice__discount amount_cell">Due &#2547;<span class="amount">${parseFloat(response.due_total).toFixed(0)}</span></td>
+                                </tr>
+                                <tr class="total">
+                                <td colspan="5" class="amount_cell">Total &#2547;<span class="amount"> ${parseFloat(response.total_paid_fees_amount).toFixed(0)}</span></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    </div>
+                </div>
+
+
+
+
+            </div>`;
+
+        modalBody.html(receiptHtml);
+        $('#feesModal').modal('show');
+    }
+
+
+    
+
+
+});
+
+   
+    
+</script>
+
+<script>
+    function checkPartialPaymentInput(dataId) {
+        let partialPaymentInput = $('#intext' + dataId);
+        let pvalue = parseFloat(partialPaymentInput.val());
+        let totalFee = parseFloat(partialPaymentInput.data('total-fee'));
+        let currentDiscountAmount = parseFloat($(".discount-input[data-fee-id='" + dataId + "']").val());
+        let tTotal = totalFee - currentDiscountAmount;
+    
+        if (pvalue > tTotal) {
+            $.toast({
+                heading: 'Error',
+                text: 'The entered amount exceeds the total fee after discount.',
+                bgColor: '#FF1356',
+                textColor: 'white',
+                position: 'mid-center',
+            });
+            return false;
+        }
+        return true;
+    }
+    
+    // Example usage of the function on keyup event
+    $(document).on('click', 'input[type="radio"]', function() {
+        let btnid = this.id;
+        let value = $(this).val();
+        let currentDataId = $(this).attr("data-id");
+    
+        if (value === "partial") {
+            let inputField = $('#intext' + currentDataId);
+            inputField.removeAttr('hidden');
+    
+            // Ensure keyup event listener is attached
+            inputField.off('keyup').on('keyup', function() {
+                console.log("checking");
+                checkPartialPaymentInput(currentDataId);
+            });
+        }
+    });
+</script>
+  <script>
+    // print
+    $("#printInvoice").on("click", function () {
+      $(".receipt_wrapper").print({
+        title: "Fees Invoice",
+        doctype: "<!doctype html>",
+      });
+    });
+  </script>
+
+
+{% endblock extra_javascript%}

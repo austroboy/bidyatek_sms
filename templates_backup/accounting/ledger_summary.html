@@ -1,0 +1,227 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load template_tags %} 
+{% block extra_css %} 
+<style>
+  .filter-section {
+            display: flex;
+            gap: 20px;
+            justify-content: space-between;
+            align-items: end;
+            margin-bottom: 20px;
+        }
+
+        @media screen and (max-width: 560px) {
+            .filter-section {
+                flex-wrap: wrap;
+            }
+        }
+
+        .filter-section div {
+            width: 100%;
+        }
+
+        .filter-section label {
+            font-size: 16px;
+            color: #333333;
+            margin-bottom: 2px;
+        }
+
+        .filter-section input {
+            padding: 8px;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .filter-section input:focus {
+            border: 2px solid #1a237e;
+            outline: none;
+        }
+        .filter-section select {
+            padding: 8px;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .filter-section select:focus {
+            border: 2px solid #1a237e;
+            outline: none;
+        }
+
+        .filter-section button {
+            padding: 10px 25px;
+            background-color: #1a237e;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .filter-section button:hover {
+            background-color: #283593;
+        }
+
+        h3 {
+            text-align: center;
+            color: #333333;
+            margin: 35px 0;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section h3 {
+            text-align: center;
+            background-color: #e3f2fd;
+            color: #333333;
+            margin: 0;
+            padding: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 4px 4px 0 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #333333;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #e3f2fd;
+            font-weight: bold;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        td[colspan="3"] {
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .total-row {
+            background-color: #e3f2fd !important;
+            font-weight: bold;
+        }
+</style>
+{% endblock extra_css %} 
+
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+    {% include 'pageinfo.html' %}
+  
+    <div class="card">
+        <div class="card-body">
+          <h3 class="header">Ledger Category Summary Report</h3>
+          <hr/>
+  
+          <!-- Filter Form -->
+          <form method="get">
+            <div class="form-grid">
+                <div class="filter-section">
+                    <div class="space-y-2">
+                        <label for="from_date">From Date</label>
+                        <input class="input" type="date" name="from_date" value="{{ from_date|default:'' }}">
+                    </div>
+                    <div class="space-y-2">
+                        <label for="to_date">To Date</label>
+                        <input class="input" type="date" name="to_date" value="{{ to_date|default:'' }}">
+                    </div>
+                    <div class="space-y-2">
+                        <label for="category_id">Ledger Category</label>
+                        <select class="input" name="category_id">
+                            <option value="">Select Category</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}" {% if selected_category == category.id|stringformat:"s" %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="flex justify-end align-self-end">
+                        <button type="submit" class="button btn btn-primary">Search</button>
+                    </div>
+                </div>
+            </div>
+          </form>
+
+          <!-- Add this inside the filter-section div, after the search button -->
+        <div class="flex justify-end align-self-end">
+            <a href="{% url 'ledger_summary_pdf' %}?from_date={{ from_date }}&to_date={{ to_date }}&category_id={{ selected_category }}" 
+            class="button btn btn-primary" style="margin-left: 10px;">
+                Download PDF
+            </a>
+        </div>
+  
+          <!-- Ledger Summary Report -->
+          <div class="attendance_sheet section">
+            <h6>Ledger Summary from {{ from_date }} to {{ to_date }}</h6>
+  
+            <div class="summary">
+              <table class="table table-striped">
+                  <thead class="thead-dark">
+                      <tr>
+                          <th>Category</th>
+                          <th>Ledger Name</th>
+                          <th class="text-right">Opening Balance</th>
+                          <th class="text-right text-success">Total Debit</th>
+                          <th class="text-right text-danger">Total Credit</th>
+                          <th class="text-right">Closing Balance</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      {% for ledger in ledger_data %}
+                      <tr>
+                          <td>{{ ledger.category }}</td>
+                          <td>{{ ledger.name }}</td>
+                          <td class="text-right">{{ ledger.opening_balance|floatformat:2 }}</td>
+                          <td class="text-right text-success">{{ ledger.debit_total|floatformat:2 }}</td>
+                          <td class="text-right text-danger">{{ ledger.credit_total|floatformat:2 }}</td>
+                          <td class="text-right">{{ ledger.closing_balance|floatformat:2 }}</td>
+                      </tr>
+                      {% empty %}
+                      <tr>
+                          <td colspan="6" class="text-center text-muted">No records found</td>
+                      </tr>
+                      {% endfor %}
+                  </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+    </div>
+  </div>
+  
+<!-- end: Content -->
+
+
+
+{% endblock content %} 
+
+{% block extra_javascript %} 
+
+
+{% endblock extra_javascript%}

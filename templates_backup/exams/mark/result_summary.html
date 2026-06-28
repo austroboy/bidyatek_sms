@@ -1,0 +1,389 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load widget_tweaks %} 
+{% block extra_css %}
+
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css'>
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-5-theme/1.3.0/select2-bootstrap-5-theme.min.css'>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs5/jqc-1.12.4/jszip-2.5.0/dt-1.13.1/af-2.5.1/b-2.3.3/b-colvis-2.3.3/b-html5-2.3.3/b-print-2.3.3/cr-1.6.1/date-1.2.0/fc-4.2.1/fh-3.3.1/kt-2.8.0/r-2.4.0/rg-1.3.0/rr-1.3.1/sc-2.0.7/sb-1.4.0/sp-2.1.0/sl-1.5.0/sr-1.2.0/datatables.min.css"/>
+
+<style>
+  *:focus {
+    box-shadow: none !important;
+    outline: none !important;
+  }
+  
+  a {
+    color: #369;
+  }
+  
+  .title-text {
+    margin: 2em 0;
+  }
+  
+  .table > tbody > tr > td:nth-child(1) > i {
+    margin-right: 8px;
+    margin-top: 4px;
+  }
+  
+ 
+  
+  .entries {
+    margin-top: 0;
+  }
+  
+  .pagination {
+    margin-top: 0 !important;
+  }
+  
+  .pagination > li > a {
+    background-color: white;
+    color: #4676d7;
+  }
+  
+  .pagination > li > a:focus,
+  .pagination > li > a:hover,
+  .pagination > li > span:focus,
+  .pagination > li > span:hover {
+    color: #036;
+    background-color: #eee;
+    border-color: #ddd;
+  }
+  
+  .pagination > .active > a {
+    color: white;
+    background-color: #4676d7 !important;
+    border: solid 1px #4676d7 !important;
+  }
+  
+  .pagination > .active > a:hover {
+    background-color: #4676d7 !important;
+    border: solid 1px #4676d7;
+  }
+  
+  .green {
+    color: #4CAF50;
+  }
+  
+  .blue {
+    color: #008CBA;
+  }
+  
+  .red {
+    color: #f44336;
+  }
+  
+  .gray {
+    color: #e7e7e7;
+  }
+  
+  .black {
+    color: #555555;
+  }
+
+
+
+</style>
+
+{% endblock extra_css %} {% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+  <div class="card p-4">
+    <form method="post" action="{% url 'result_summary' %}"> 
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-2">
+          <label for="exam_id" class="form-label">Select Result</label>
+          <select id="exam_id" class="form-select" name="exam_id" required>
+            <option disabled selected hidden value="">Select Result</option> 
+            {% for exam in exam_list %}
+            <option value="{{exam.id}}">{{exam.name}}</option>
+            {% endfor %}
+          </select>
+        </div>
+    
+        <div class="col-md-2">
+          <label for="type_id" class="form-label">Select Type</label>
+          <select id="type_id" class="form-select" name="type_id" onchange="toggleSections()" required>
+            <option selected hidden disabled value=""> Select Type</option>
+            <option value="tc">Class</option>
+            <option value="ts">Section</option>
+            <option value="tss">Subject</option>
+            <option value="ti">Institute</option>
+          </select>
+        </div>
+    
+        <div class="col-md-2" id="classDropdown" style="display: none;">
+          <label class="form-label">Select Class</label>
+          <select id="class_id" class="form-control border border-1" name="class_id">
+            <option selected hidden disabled value=""> Select Class</option>
+            {% for class_id in class_list %}
+            <option value="{{class_id.id}}">{{class_id.name}}</option>
+            {% endfor %}
+          </select>
+        </div>
+    
+        <div class="col-md-2" id="classDropdownSub" style="display: none;">
+          <label class="form-label">Select Class</label>
+          <select id="class_id_sub" class="form-control border border-1" name="class_id_subject">
+            <option selected hidden disabled value=""> Select Class</option>
+            {% for class_id in class_list %}
+            <option value="{{class_id.id}}">{{class_id.name}}</option>
+            {% endfor %}
+          </select>
+        </div>
+    
+        <div class="col-md-2" id="sectionDropdown" style="display: none;">
+          <label class="form-label">Select Section</label>
+          <select id="section" class="form-control border border-1" name="section_id">
+            <option selected hidden disabled value=""> Select Section</option>
+            {% for section_id in section_list %}
+            <option value="{{section_id.id}}">{{section_id.class_shift_id}} {{section_id.section_id}}</option>
+            {% endfor %}
+          </select>
+        </div>
+    
+        <div class="col-md-2" id="subjectDropdown" style="display: none;">
+          <label class="form-label">Select Subject</label>
+          <select id="subject" class="form-control border border-1" name="subject_id">
+          </select>
+        </div>
+    
+        <div class="col-md-2">
+          <label class="form-label">Select Status</label>
+          <select class="form-control border border-1" name="status" required>
+            <option selected hidden disabled value=""> Select Status</option>
+            <option value="passed">Passed</option>
+            <option value="failed">Failed</option>
+          </select>
+        </div>
+    
+        <div class="col-md-1 text-end">
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </div>
+    </form>
+    <hr>
+
+    <table class="table table-striped table-bordered w-100 pt-2" id="dataTable">
+      <thead class="teal-thead">
+        <tr>
+            <th>#</th>
+            <th>Student Id</th>
+            <th>Name</th>
+            <th>Roll</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for student in status_student %}
+        <tr>
+          <th>{{forloop.counter}}</th>
+          <td>{{student.student_field.user_id}}</td>
+          <td>{{student.student_field.name}}</td>
+          <td>{{student.roll_no}}</td>
+          
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+<!-- end: Content -->
+
+{% endblock content %} 
+
+{% block extra_javascript %}
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs5/jqc-1.12.4/jszip-2.5.0/dt-1.13.1/af-2.5.1/b-2.3.3/b-colvis-2.3.3/b-html5-2.3.3/b-print-2.3.3/cr-1.6.1/date-1.2.0/fc-4.2.1/fh-3.3.1/kt-2.8.0/r-2.4.0/rg-1.3.0/rr-1.3.1/sc-2.0.7/sb-1.4.0/sp-2.1.0/sl-1.5.0/sr-1.2.0/datatables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+<script>
+  
+  function toggleSections() {
+    let typeSelect = document.getElementById("type_id");
+    let classDropdown = document.getElementById("classDropdown");
+    let sectionDropdown = document.getElementById("sectionDropdown");
+
+    if (typeSelect.value === "tc") {
+      classDropdown.style.display = "block";
+      sectionDropdown.style.display = "none";
+      subjectDropdown.style.display = "none";
+      classDropdownSub.style.display = "none";
+    }
+    else if (typeSelect.value === "ts") {
+      classDropdown.style.display = "none";
+      sectionDropdown.style.display = "block";
+      subjectDropdown.style.display = "none";
+      classDropdownSub.style.display = "none";
+    }
+    {% comment %} else if (typeSelect.value === "tgs") {
+      classDropdown.style.display = "block";
+      sectionDropdown.style.display = "block";
+      subjectDropdown.style.display = "none";
+      classDropdownSub.style.display = "none";
+    } {% endcomment %}
+    else if (typeSelect.value === "tss") {
+      classDropdown.style.display = "none";
+      classDropdownSub.style.display = "block";
+      sectionDropdown.style.display = "none";
+      subjectDropdown.style.display = "block";
+
+      $('#class_id_sub').change(function () {
+        var classId = $(this).val();
+        const subjectDropdown = $('#subject');
+        subjectDropdown.empty();
+              if (classId) {
+                  $.ajax({
+                      url: '/get_subject_name/',  // Replace with your URL to fetch subjects based on class_id
+                      type: 'GET',
+                      data: { 'class_id': classId },
+                      success: function (data) {
+                          
+                        for (var i = 0; i < data.length; i++) {
+                          $('#subject').append('<option value="' + data[i].id + '">' + data[i].subject_id__name + '</option>');
+                      }
+
+            // Show subject dropdown
+            $('#subjectDropdown').show();
+                      },
+            error: function (error) {
+              console.error('Error fetching subjects:', error);
+            }
+                  });
+              }
+          });
+
+
+
+    }
+     else {
+      classDropdown.style.display = "none";
+      sectionDropdown.style.display = "none";
+      subjectDropdown.style.display = "none";
+      classDropdownSub.style.display = "none";
+    }
+  }
+
+
+
+ // Function to convert a Blob to a Data URL
+ function blobToDataURL(blob, callback) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    callback(e.target.result);
+  };
+  reader.readAsDataURL(blob);
+}
+
+$(document).ready(function() {
+  // Fetch the image data from the URL using Fetch API
+  fetch('{{ institute.institute_logo.url }}')
+    .then(response => response.blob())
+    .then(blob => {
+      // Convert Blob to Data URL
+      blobToDataURL(blob, function(dataURL) {
+        // DataTable initialization
+        let table = new DataTable("#dataTable", {
+          dom: "<'row'<'col-sm-12 col-md-6 mb-3'l><'col-sm-12 col-md-6 mb-3'f>>" +
+            "<'row'<'col-sm-12'tr>>" +
+            "<'row '<'col-sm-12 col-md-5 mt-3'B><'col-sm-12 col-md-7 mt-3'p>>",
+          paging: true,
+          autoWidth: true,
+          buttons: ["copyHtml5", "csvHtml5", "excelHtml5", {
+            extend: 'pdfHtml5',
+            customize: function(doc) {
+              doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+          
+              // Center-align header and body data
+              doc.content[1].table.body[0].forEach(function(cell) {
+                cell.alignment = 'center';
+              });
+              doc.content[1].table.body.forEach(function(row) {
+                row.forEach(function(cell) {
+                  cell.alignment = 'center';
+                });
+              });
+              {% comment %} doc.content.splice(1, 0, {
+                text: 'Your Company Name',
+                margin: [0, 0, 0, 12], // Adjust margin as needed
+                alignment: 'center',
+                fontSize: 16,
+              }); {% endcomment %}
+              doc.content.splice(0, 0, {
+                image: dataURL,
+                width: 70, // Adjust width as needed
+                margin: [0, 0, 0, 0], // Adjust margin as needed
+                alignment: 'center',
+              });
+            }
+          }],
+          responsive: true,
+          destroy: true,
+          deferRender: true,
+
+          /* responsive */
+          responsive: {
+            details: {
+              display: $.fn.dataTable.Responsive.display.modal({
+                header: (row) => {
+                  let data = row.data();
+                  return data[0];
+                }
+              }),
+
+            }
+          },
+          /* end responsive */
+
+          /* columnDefs */
+          columnDefs: [{
+              targets: 0,
+              render: function(data, type, row, meta) {
+                if (type === "display") {
+                  return (
+                    '<i class="fa fa-external-link" aria-hidden="true"></i>' +
+                    $("<a>")
+                    .attr("href", data)
+                    .attr("target", "_blank")
+                    .text(data)
+                    .wrap("<div></div>")
+                    .parent()
+                    .html()
+                  );
+                } else {
+                  return data;
+                }
+              }
+            },
+            {
+              targets: 1,
+              render: function(data, type, row, meta) {
+                if (data === "OK" || data === "Up again") {
+                  return $("<span>")
+                    .attr("class", "green")
+                    .text(data)
+                    .wrap("<div></div>")
+                    .parent()
+                    .html();
+                } else {
+                  return $("<span>")
+                    .attr("class", "red")
+                    .text(data)
+                    .wrap("<div></div>")
+                    .parent()
+                    .html();
+                }
+              }
+            }
+          ]
+          /* end columnDefs */
+        });
+      });
+    });
+});
+</script>
+{% endblock extra_javascript%}

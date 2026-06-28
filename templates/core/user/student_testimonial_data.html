@@ -1,0 +1,218 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load widget_tweaks %}
+{% block extra_css %} 
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
+
+
+{% endblock extra_css %} 
+
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+    {% include 'pageinfo.html' %}
+    
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <h4 class="card-title mb-4">Add Student Data</h4>
+                </div>
+                <div>
+                    <a href="{% url 'list_testmonial' %}" class="btn btn-warning">List Testimonial</a>
+    
+                </div>
+            </div>
+            <form id="my-form" method="post" action="{% url 'testimonial_info_add' pk=student_instance.id %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label" for="student_name">Student Name</label>
+                            <div class="">
+                                <input  type="text"  class="form-control" placeholder="Student Name" id="student_name" value="{{student_instance.student_field.name|default_if_none:'' }}" name="student_name" disabled />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label" for="father_name">Father Name</label>
+                            <div class="">
+                                <input  type="text"  class="form-control" placeholder="Father Name" id="father_name" value="{{student_instance.parent_id.parent_profile.father_name|default_if_none:'' }}" name="father_name" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label" for="mother_name">Mother Name</label>
+                            <div class="">
+                                <input  type="text"  class="form-control" placeholder="Mother Name" id="mother_name" value="{{student_instance.parent_id.parent_profile.mother_name|default_if_none:'' }}" name="mother_name" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label" for="village">Village</label>
+                            <div class="">
+                                <input  type="text"  class="form-control" placeholder="Village Name" value="{{student_instance.village|default_if_none:'' }}" id="village" name="village" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label" for="post_office">Post Office</label>
+                            <div class="">
+                                <input  type="text"  class="form-control" placeholder="Post Office" value="{{student_instance.post_office|default_if_none:'' }}" id="post_office" name="post_office" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label" for="police_station">Police Station / Upazilla</label>
+                            <div class="">
+                                <input  type="text"  class="form-control" placeholder="Police Station / Upazilla" value="{{student_instance.ps_or_upazilla|default_if_none:'' }}" id="police_station" name="police_station" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label" for="district">District</label>
+                            <div class="">
+                                <input  type="text"  class="form-control" placeholder="District" value="{{student_instance.district|default_if_none:'' }}" id="district" name="district" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label" for="exam_name">Exam name</label>
+                            <div class="">
+                                <input  type="text"  class="form-control" placeholder="Exam name" id="exam_name" value="{{testimonial_instance.exam|default_if_none:'' }}" name="exam_name" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label" for="exam_date">Exam Date(mm/dd/yy)</label>
+                            <div class="">
+                                <input type="date" class="form-control" placeholder="Exam Date" id="exam_date" value="{{ testimonial_instance.exam_held_date|date:"Y-m-d"|default_if_none:'' }}" name="exam_held_date" />
+                                
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label" for="exam_center">Exam Center</label>
+                            <div class="">
+                                <input  type="text"  class="form-control" placeholder="Exam Center" id="exam_center" value="{{testimonial_instance.exam_center|default_if_none:'' }}" name="exam_center" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label" for="board_name">Board name</label>
+                            <div class="">
+                                <input disabled  type="text"  class="form-control" placeholder="Board name" id="board_name" value="{{institute.education_board_id.board_name|default_if_none:'' }}"  name="board_name" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label" for="group_name">Group name</label>
+                            <div class="">
+                                <input  type="text"  class="form-control" placeholder="Group name" id="group_name" value="{{testimonial_instance.group_name|default_if_none:'' }}" name="group_name" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label" for="roll_no">Roll No</label>
+                            <div class="">
+                                <input  type="text"  class="form-control" placeholder="Roll No" id="roll_no" value="{{testimonial_instance.e_roll|default_if_none:'' }}" name="roll_no" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label" for="registration_no">Registration No</label>
+                            <div class="">
+                                <input  type="text"  class="form-control" placeholder="Registration No" id="registration_no" value="{{testimonial_instance.r_no|default_if_none:'' }}" name="registration_no" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label" for="session">Session</label>
+                            <div class="">
+                                <input  type="text"  class="form-control" placeholder="Session" id="session" value="{{testimonial_instance.session|default_if_none:'' }}" name="session" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label" for="result">Result</label>
+                            <div class="">
+                                <input  type="text"  class="form-control" placeholder="Result" id="result" value="{{testimonial_instance.result|default_if_none:'' }}" name="result" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label" for="dob">Date Of Birth(mm/dd/yy)</label>
+                            <div class="">
+                                <input  type="date"  class="form-control" placeholder="Date Of Birth" id="dob" value="{{student_instance.student_field.dob|date:"Y-m-d"|default_if_none:'' }}" name="dob" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label" for="issue_date">Issue Date(mm/dd/yy)</label>
+                            <div class="">
+                                <input  type="date"  class="form-control" placeholder="Issue Date" id="issue_date" value="{{testimonial_instance.issue_date|date:"Y-m-d"|default_if_none:'' }}"  name="issue_date" />
+                            </div>
+                        </div>
+                    </div>
+
+                
+    
+                </div>
+                
+    
+                <button id="submit-btn" class="btn btn-primary" type="submit">Submit</button>
+    
+                </div>
+    
+                
+            </form>
+        </div>
+    </div>
+ 
+  
+</div>
+<!-- end: Content -->
+
+{% endblock content %} 
+{% block extra_javascript %} 
+
+
+
+{% endblock extra_javascript%}

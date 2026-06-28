@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 204 324.45">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+      }
+
+      .cls-2 {
+        fill: #a7a9ac;
+      }
+
+      .cls-3 {
+        fill: url(#New_Pattern_64);
+      }
+
+      .cls-4, .cls-5, .cls-6, .cls-7 {
+        isolation: isolate;
+      }
+
+      .cls-5, .cls-6, .cls-7 {
+        font-family: FiraSans-Book, 'Fira Sans';
+        font-size: 11.06px;
+      }
+
+      .cls-6 {
+        letter-spacing: -.03em;
+      }
+
+      .cls-8 {
+        fill: #f5eb12;
+      }
+
+      .cls-9 {
+        fill: #e7e8e8;
+      }
+
+      .cls-7 {
+        letter-spacing: -.02em;
+      }
+
+      .cls-10 {
+        fill: #d2d5d5;
+      }
+
+      .cls-11 {
+        fill: none;
+      }
+
+      .cls-12 {
+        fill: #ec2526;
+      }
+
+      .cls-13 {
+        fill: url(#linear-gradient);
+      }
+    </style>
+    <linearGradient id="linear-gradient" x1="-86.77" y1="35.46" x2="250.41" y2="35.46" gradientTransform="translate(0 78)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset="1" stop-color="#c0c2c0"/>
+    </linearGradient>
+    <pattern id="New_Pattern_64" data-name="New Pattern 64" x="0" y="0" width="12.25" height="12.25" patternTransform="translate(-491.77 16705.11)" patternUnits="userSpaceOnUse" viewBox="0 0 12.25 12.25">
+      <g>
+        <rect class="cls-11" width="12.25" height="12.25"/>
+        <g>
+          <rect class="cls-11" width="12.25" height="12.25"/>
+          <g>
+            <rect class="cls-11" width="12.25" height="12.25"/>
+            <rect class="cls-9" width="12.25" height="12.25"/>
+            <rect class="cls-10" width="6.12" height="6.12"/>
+            <rect class="cls-10" x="6.12" y="6.12" width="6.12" height="6.12"/>
+          </g>
+        </g>
+      </g>
+    </pattern>
+  </defs>
+  <g>
+    <rect class="cls-1" x="0" width="203.99" height="324.28"/>
+    <path class="cls-13" d="m204,109.08v8.34c-11.23-13.26-28.53-21.76-47.94-21.76-69.55,0-101.29,43.93-139.09,43.93-6.3,0-12.14-1.82-16.97-4.96v-8.34c4.82,3.13,10.66,4.96,16.97,4.96,37.8,0,69.54-43.93,139.09-43.93,19.41,0,36.72,8.5,47.94,21.76h0Z"/>
+    <g>
+      <path class="cls-8" d="m204,63.38v45.7c-11.23-13.26-28.53-21.76-47.94-21.76-69.55,0-101.29,43.93-139.09,43.93-6.3,0-12.14-1.82-16.97-4.96v-12.45c6.37,3.84,14.27,5.44,22.26,3.9,37.02-7.15,58.75-56.21,126.87-69.37,20.55-3.97,40.82,2.25,54.87,15.01Z"/>
+      <path class="cls-12" d="m204,15.08v48.3c-14.05-12.76-34.32-18.98-54.87-15.01-68.12,13.17-89.84,62.22-126.87,69.37-7.99,1.54-15.9-.06-22.26-3.9,7.93,3.38,17.22,3.96,26.05.95,40.91-13.97,56.98-73.25,132.24-98.95,15.32-5.22,31.31-5.15,45.7-.77h0Z"/>
+    </g>
+    <g>
+      <g class="cls-4">
+        <text class="cls-7" transform="translate(20.35 209.44) scale(1.05 1)"><tspan x="0" y="0">ID No</tspan></text>
+      </g>
+      <g class="cls-4">
+        <text class="cls-5" transform="translate(80.08 209.44) scale(1.05 1)"><tspan x="0" y="0" xml:space="preserve">   : </tspan></text>
+      </g>
+      <g class="cls-4">
+        <text class="cls-5" transform="translate(20.35 222.71) scale(1.05 1)"><tspan x="0" y="0">DOB</tspan></text>
+      </g>
+      <g class="cls-4">
+        <text class="cls-5" transform="translate(80.08 222.71) scale(1.05 1)"><tspan x="0" y="0" xml:space="preserve">   : </tspan></text>
+      </g>
+      <g class="cls-4">
+        <text class="cls-5" transform="translate(20.35 235.99) scale(1.05 1)"><tspan x="0" y="0">B G</tspan></text>
+      </g>
+      <g class="cls-4">
+        <text class="cls-6" transform="translate(37.79 235.99) scale(1.05 1)"><tspan x="0" y="0">r</tspan></text>
+      </g>
+      <g class="cls-4">
+        <text class="cls-5" transform="translate(41.9 235.99) scale(1.05 1)"><tspan x="0" y="0">oup</tspan></text>
+      </g>
+      <g class="cls-4">
+        <text class="cls-5" transform="translate(80.08 235.99) scale(1.05 1)"><tspan x="0" y="0" xml:space="preserve">   :</tspan></text>
+      </g>
+      <g class="cls-4">
+        <text class="cls-5" transform="translate(20.35 249.26) scale(1.05 1)"><tspan x="0" y="0">Designation</tspan></text>
+      </g>
+      <g class="cls-4">
+        <text class="cls-5" transform="translate(80.08 249.26) scale(1.05 1)"><tspan x="0" y="0" xml:space="preserve">   : </tspan></text>
+      </g>
+      <g class="cls-4">
+        <text class="cls-5" transform="translate(20.35 262.54) scale(1.05 1)"><tspan x="0" y="0">G</tspan></text>
+      </g>
+      <g class="cls-4">
+        <text class="cls-7" transform="translate(30.75 262.54) scale(1.05 1)"><tspan x="0" y="0">P</tspan></text>
+      </g>
+      <g class="cls-4">
+        <text class="cls-5" transform="translate(37.23 262.54) scale(1.05 1)"><tspan x="0" y="0">hone</tspan></text>
+      </g>
+      <g class="cls-4">
+        <text class="cls-5" transform="translate(80.08 262.54) scale(1.05 1)"><tspan x="0" y="0" xml:space="preserve">   : </tspan></text>
+      </g>
+    </g>
+    <rect class="cls-2" x="65.35" y="73.73" width="73.3" height="77.01" rx="8.26" ry="8.26"/>
+    <path class="cls-3" d="m71.13,141.08v-57.68c0-1.98,1.61-3.59,3.59-3.59h54.56c1.98,0,3.59,1.61,3.59,3.59v57.68c0,1.98-1.61,3.59-3.59,3.59h-54.56c-1.98,0-3.59-1.61-3.59-3.59Z"/>
+  </g>
+  <polygon class="cls-8" points="0 324.45 204 324.45 199 309.75 6.53 309.75 0 324.45"/>
+</svg>

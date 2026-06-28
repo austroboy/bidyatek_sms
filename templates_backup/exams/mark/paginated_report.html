@@ -1,0 +1,104 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+   
+    /* Pagination */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        padding-top: 15px;
+    }
+
+    .pagination > li > a {
+        color: #172B4D;
+        border-radius: 5px;
+        padding: 5px 12px;
+    }
+
+    .pagination > .active > a {
+        background-color: #172B4D !important;
+        border-color: #172B4D !important;
+        color: #fff !important;
+    }
+
+   
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+    {% include 'pageinfo.html' %}
+    
+
+    <!-- Form Section -->
+    <div class="card p-4">
+        <h2 class="section-title">Result Sheet</h2>
+        <form method="POST" action="{% url 'paginated_report' %}" id="paginatedReportForm">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-4">
+                    <label class="highlight" for="class_id">Select Class:</label>
+                    <select name="class_id" id="class_id" class="form-control" required>
+                        <option value="" disabled selected>Select Class</option>
+                        {% for class in classes %}
+                        <option value="{{ class.id }}" {% if class.id == class_id %}selected{% endif %}>{{ class }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-4">
+                    <label class="highlight" for="exam_id">Select Exam:</label>
+                    <select name="exam_id" id="exam_id" class="form-control" required>
+                        <option value="" disabled selected>Select Exam</option>
+                        {% for exam in exams %}
+                        <option value="{{ exam.id }}" {% if exam.id == exam_id %}selected{% endif %}>{{ exam.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class=" col-md-4 text-center" style="margin-top: 15px;">
+                    <button type="submit" class="btn btn-primary">Generate Report</button>
+                </div>
+            </div>
+            
+        </form>
+    </div>
+
+    <!-- Report Table -->
+    {% if results %}
+    <div class="card p-4 mt-4">
+        <table class="table table-bordered table-striped table-custom">
+            <thead>
+                <tr>
+                    <th>SN</th>
+                    <th>Student Name</th>
+                    <th>Total Marks</th>
+                    <th>Total GP</th> 
+                    <th>GPA</th> 
+                    <th>Position</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in results %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ result.student.student_field.name }}</td>
+                    <td>{{ result.obtained_marks }}</td>
+                    <td>{{ result.total_gp }}</td> 
+                    <td>{{ result.gpa }}</td>  
+                    <td>{{ result.position }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+
+
+
+
+
+{% endblock content %}

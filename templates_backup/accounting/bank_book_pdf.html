@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            margin: 20px;
+        }
+        h3 {
+            text-align: center;
+            font-size: 18px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f4f4f4;
+            font-weight: bold;
+        }
+        .total-row {
+            font-weight: bold;
+            background-color: #e3f2fd;
+        }
+    </style>
+</head>
+<body>
+    <h3>Bank Book</h3>
+    <p><strong>From:</strong> {{ from_date|date:'Y-m-d' }} <strong>To:</strong> {{ to_date|date:'Y-m-d' }}</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Voucher No</th>
+                <th>Ledger Name</th>
+                <th>Description</th>
+                <th>Debit</th>
+                <th>Credit</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tx in bank_transactions %}
+            <tr>
+                <td>{{ tx.date }}</td>
+                <td>{{ tx.voucher_no }}</td>
+                <td>{{ tx.ledger }}</td>
+                <td>{{ tx.description }}</td>
+                <td>{{ tx.debit }}</td>
+                <td>{{ tx.credit }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="total-row">
+                <td colspan="4">Total</td>
+                <td>{{ total_debit }}</td>
+                <td>{{ total_credit }}</td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

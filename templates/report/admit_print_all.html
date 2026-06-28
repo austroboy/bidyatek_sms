@@ -1,0 +1,132 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+
+{% block extra_css %} 
+<link 
+      rel="stylesheet"
+      href="{% static 'assets/css/loading.css' %}"
+    /> 
+{% endblock extra_css %} 
+
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+    {% include 'pageinfo.html' %}
+
+    <div id="loading-screen" style="display: none;">
+      <figure>
+          <div class="dot white"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+      </figure>
+    </div>
+    <div class="card p-4">
+        
+        <form action="{% url 'admit_card_without_routine' %}" method="post">
+          {% csrf_token %}
+          <div class="row d-flex gap-2 justify-content-between">
+            <div class="col-md-4">
+              <select  class="form-select " name="class_name_id" required>
+                <option disabled hidden selected>Select Class</option>
+                {% for class in classList %}
+  
+                <option value="{{class.id}}">{{class}}</option>
+  
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-4">
+              <select  class="form-select " name="exam_name_id" required>
+                <option disabled hidden selected>Select Exam</option>
+                {% for exam in examList %}
+  
+                <option value="{{exam.id}}">{{exam.name}}</option>
+  
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-3 text-md-end ">
+              <button type="submit" class="btn btn-primary" id="searchButton">
+                View Admit
+              </button>
+            </div>
+            
+          </div>
+        </form>
+        
+      
+    </div>
+ 
+  
+</div>
+<!-- end: Content -->
+
+{% endblock content %} 
+{% block extra_javascript %} 
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+      const form = document.querySelector("form");
+      const loadingScreen = document.getElementById("loading-screen");
+      const searchButton = document.getElementById("searchButton");
+
+      form.addEventListener("submit", async function(event) {
+          event.preventDefault(); // Prevent default form submission
+
+          // Show loading screen
+          loadingScreen.style.display = "flex";
+          searchButton.disabled = true;
+
+          // Get form data
+          let formData = new FormData(form);
+
+          try {
+              // Send request using Fetch API
+              let response = await fetch(form.action, {
+                  method: "POST",
+                  body: formData
+              });
+
+              // Check if response is OK
+              if (!response.ok) {
+                  throw new Error("Network response was not ok");
+              }
+
+              let disposition = response.headers.get("Content-Disposition");
+              let filename = "admit_card.pdf"; // Default filename
+
+              if (disposition && disposition.includes("filename=")) {
+                  let match = disposition.match(/filename\*?=["']?([^"';\n]+)/);
+                  if (match && match[1]) {
+                      filename = decodeURIComponent(match[1].trim()); // Decode filename in case of URL encoding
+                  }
+              }
+
+              // Convert response to a Blob
+              let blob = await response.blob();
+
+              // Create a temporary download link
+              let downloadLink = document.createElement("a");
+              downloadLink.href = window.URL.createObjectURL(blob);
+              downloadLink.download = filename;
+              document.body.appendChild(downloadLink);
+              downloadLink.click();
+              document.body.removeChild(downloadLink);
+
+              // Hide loading screen after successful download
+              loadingScreen.style.display = "none";
+              searchButton.disabled = false;
+          } catch (error) {
+              console.error("Error downloading file:", error);
+              alert("Error downloading file. Please try again.");
+              loadingScreen.style.display = "none";
+              searchButton.disabled = false;
+          }
+      });
+  });
+</script>
+
+{% endblock extra_javascript%}

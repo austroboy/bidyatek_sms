@@ -1,0 +1,171 @@
+{% extends 'partials/base.html' %}
+{% load humanize custom_tags %}
+
+{% block extra_css %}
+<style>
+    .table-container {
+        width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    .table > tbody > tr > td {
+        vertical-align: middle;
+        text-align: center;
+    }
+    .vertical-header {
+        writing-mode: vertical-lr;
+        transform: rotate(180deg);
+        white-space: nowrap;
+        padding: 8px 3px;
+        vertical-align: middle;
+    }
+    .text-right {
+        text-align: right;
+        padding-right: 15px;
+    }
+    .table thead th {
+        background-color: rgba(20, 168, 154, 0.12);
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+    <h4 class="font-weight-bold py-3 mb-4">New Fees Collection Report</h4>
+
+    <form method="GET" class="mb-4">
+        <div class="row">
+            <div class="col-md-3">
+                <label>From Date:</label>
+                <input type="date" name="from_date" class="form-control" 
+                       value="{{ request.GET.from_date }}" required>
+            </div>
+            <div class="col-md-3">
+                <label>To Date:</label>
+                <input type="date" name="to_date" class="form-control" 
+                       value="{{ request.GET.to_date }}" required>
+            </div>
+            <div class="col-md-2">
+                <label>Class:</label>
+                <select name="class" class="form-select">
+                    <option value="">All</option>
+                    {% for class in classes %}
+                    <option value="{{ class.id }}" {% if selected_class == class.id|stringformat:"s" %}selected{% endif %}>
+                        {{ class.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label>Section:</label>
+                <select name="section" class="form-select">
+                    <option value="">All</option>
+                    {% for section in sections %}
+                    <option value="{{ section.id }}" {% if selected_section == section.id|stringformat:"s" %}selected{% endif %}>
+                        {{ section.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label>Group:</label>
+                <select name="group" class="form-select">
+                    <option value="">All</option>
+                    {% for group in groups %}
+                    <option value="{{ group.id }}" {% if selected_group == group.id|stringformat:"s" %}selected{% endif %}>
+                        {{ group.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label>Shift:</label>
+                <select name="shift" class="form-select">
+                    <option value="">All</option>
+                    {% for shift in shifts %}
+                    <option value="{{ shift.id }}" {% if selected_shift == shift.id|stringformat:"s" %}selected{% endif %}>
+                        {{ shift.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label>Version:</label>
+                <select name="version" class="form-select">
+                    <option value="">All</option>
+                    <option value="Bangla" {% if selected_version == "Bangla" %}selected{% endif %}>Bangla</option>
+                    <option value="English" {% if selected_version == "English" %}selected{% endif %}>English</option>
+                </select>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Filter</button>
+    </form>
+
+    <a href="{% url 'new_fees_report_pdf' %}?{{ request.GET.urlencode }}" class="btn btn-danger mb-3">
+        <i class="fas fa-file-pdf"></i> Download PDF
+    </a>
+
+    {% if students_data %}
+    <div class="table-container">
+        <table class="table table-striped table-bordered mt-4">
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Student ID</th>
+                    <th>Version</th>
+                    <th>Class</th>
+                    <th>Section</th>
+                    <th>Shift</th>
+                    <th>Group</th>
+                    {% for fee_head in fee_heads %}
+                    <th class="vertical-header">{{ fee_head.fees_title }}</th>
+                    {% endfor %}
+                    <th>Total Paid</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student_data in students_data %}
+                <tr>
+                    <td>{{ student_data.student.student_field.name }}</td>
+                    <td>{{ student_data.student.student_field.user_id }}</td>
+                    <td>{{ student_data.student.version }}</td>
+                    <td>{{ student_data.student.class_id.class_group_id.class_id.name }}</td>
+                    <td>{{ student_data.student.class_id.section_id.name }}</td>
+                    <td>{{ student_data.student.class_id.shift_id.name }}</td>
+                    <td>{{ student_data.student.class_id.class_group_id.group_id.name }}</td>
+
+                    {% for payment in student_data.payments %}
+                    <td class="text-right">{{ payment|floatformat:"g"|intcomma }}</td>
+                    {% endfor %}
+
+                    <td class="text-right">৳ {{ student_data.total|floatformat:"g"|intcomma }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="table-secondary">
+                    <td colspan="7"><strong>Grand Total</strong></td>
+                    {% for total in column_totals %}
+                    <td class="text-right"><strong>৳ {{ total|floatformat:"g"|intcomma }}</strong></td>
+                    {% endfor %}
+                    <td class="text-right"><strong>৳ {{ grand_total|floatformat:"g"|intcomma }}</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div class="mt-4">
+        <p>Total Amount in Words:</p>
+        <h5>{{ grand_total|intcomma }} ({{ total_in_words }}) Taka Only</h5>
+    </div>
+    {% else %}
+    <div class="alert alert-info mt-4">
+        {% if request.GET.from_date %}
+        No records found for the selected filters
+        {% else %}
+        Select date range and filters to generate report
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock content %}

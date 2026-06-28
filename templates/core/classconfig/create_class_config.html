@@ -1,0 +1,101 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load widget_tweaks %}
+{% block extra_css %} 
+
+{%endblock extra_css %} 
+
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+    {% include 'pageinfo.html' %}
+    
+    <div class="card ">
+        <div class="card-body">
+
+            <div style="background-color:rgba(20, 168, 154, 0.12) !important ; " class="mx-auto mb-3 rounded  ">
+                <div class="pt-3 px-3 d-flex justify-content-between align-items-center text-primary fw-bold">
+                    <p>Class Name:</p> 
+                    <p>{{class_config}}</p> 
+                    <p>
+                        <a href="{% url 'list_class_config' %}" type="button" class="btn btn-warning">List Class Config</a>
+                    </p>
+                    
+                </div>
+                
+            </div>
+
+            <form method="post" action="{% url 'create_class_config' class_id=class_config.id %}" id="class_config_formset">
+                {% csrf_token %}
+                {{ formset.management_form }}
+                <div class="formset" id="formset-container">
+                  {% for form in formset.forms %}
+                  <div class="mb-3 d-flex justify-content-between gap-1">
+                    {{ form.id }}
+                    
+                    <div class="d-flex gap-1 align-items-center col-md-2 ">
+                        <label for="{{ form.section_id.id_for_label }}" class="form-label">Section:</label>
+                        {% render_field form.section_id class+="form-control" %}
+                    </div>
+                    {% comment %} <div class=" d-flex gap-1 align-items-center col-md-2 ">
+                        <label for="{{ form.session_year.id_for_label }}" class="form-label">Session:</label>
+                        {% render_field form.session_year class+="form-control" %}
+                    </div> {% endcomment %}
+                    
+                    <div class="d-flex gap-1 align-items-center col-md-2 align-self-center text-end ">
+                        {% if form.instance.pk %}
+                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModal{{ form.instance.pk }}">
+                                Delete
+                            </button>
+                            <!-- Modal -->
+                            <div class="modal" id="exampleModal{{ form.instance.pk }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel{{ form.instance.pk }}" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="exampleModalLabel{{ form.instance.pk }}">Are You Sure You Want To Delete This?</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <a href="{% url 'del_class_config' form.instance.pk %}" type="button" class="btn btn-primary">Yes, Delete</a>
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <button type="button" class="btn btn-danger" disabled>
+                                Delete
+                            </button>
+                        {% endif %}
+                    </div>
+                    
+                  </div>
+                  
+                  
+                  {% endfor %}
+                </div>
+                
+                <input class="btn btn-primary" type="submit" value="Submit">
+            </form>
+
+        </div>
+
+
+    </div>
+ 
+  
+</div>
+<!-- end: Content -->
+
+{% endblock content %} 
+{% block extra_javascript %} 
+
+<script>
+    
+    
+</script>
+    
+{% endblock extra_javascript%}

@@ -1,0 +1,55 @@
+
+  <div class="col-lg-12">
+    <div class="py-4">
+      <h4 class="teal-thead" class="card-title mb-4">Period List</h4>
+
+      <div class="table-responsive">
+        <table class="table table-centered table-nowrap mb-0">
+          <thead>
+            <tr>
+              
+              <th scope="col">ID</th>
+              <th scope="col">Period Name</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for period in listperiod %}
+            <tr>
+              
+              <td>{{forloop.counter}}</td>
+
+              <td>{{period.name}}</td>
+
+              <td>
+                <a
+                  href="#"
+                  hx-get="{% url 'edit_periodname' pk=period.pk %}"
+                  hx-target="#dialog"
+                  class="btn btn-sm btn-primary btn-edit me-1 px-2  mb-md-0"
+                  title="Edit"
+                  data-toggle="tooltip"
+                  >Edit</a
+                >
+                <a
+                  href="#"
+                  hx-delete="{% url 'del_periodname' pk=period.pk %}"
+                  hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+                  hx-target="#periodadd"
+                  hx-confirm="are you want to delete?"
+                  class="btn btn-sm btn-danger btn-delete px-2"
+                  title="Delete"
+                  data-toggle="tooltip"
+                  >Delete
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- end card -->
+  </div>
+  <!-- end col -->
+

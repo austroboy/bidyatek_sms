@@ -1,0 +1,106 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load widget_tweaks %} 
+{% block extra_css %}
+
+
+{% endblock extra_css %} {% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+
+  <div class="card">
+    <div class="p-4">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        
+        <div><p class="py-2 fw-bold">Personal Information</p></div>
+        <!-- CustomUser fields -->
+
+        <div class="row mt-3">
+          <div class="col-md-12 form-group">
+            <label for="{{ form.avatar.id_for_label }}">Avatar:</label>
+            {{ form.avatar|add_class:"form-control" }}
+          </div>
+        <!-- User Registration Fields -->
+        <div class="row mt-3">
+          
+          <div class="col-md-6 form-group">
+            <label for="{{ form.phone_number.id_for_label }}"
+              >Phone Number:</label
+            >
+            {{ form.phone_number|add_class:"form-control" }}
+          </div>
+
+          <div class="col-md-6 form-group">
+            <label for="{{ form.religion.id_for_label }}">Religion:</label>
+            {{ form.religion|add_class:"form-control" }}
+          </div>
+        </div>
+
+        <div class="row mt-3">
+          <div class="col-md-6 form-group">
+            <label for="{{ form.name.id_for_label }}">Name:</label>
+            {{ form.name|add_class:"form-control" }}
+          </div>
+          <div class="col-md-6 form-group">
+            <label for="{{ form.gender.id_for_label }}">Gender:</label>
+            {{ form.gender|add_class:"form-control" }}
+          </div>
+        </div>
+
+        <div class="row mt-3">
+          <div class="col-md-6 form-group">
+            <label for="{{ form.blood_group.id_for_label }}"
+              >Blood Group:</label
+            >
+            {{ form.blood_group|add_class:"form-control" }}
+          </div>
+          <div class="col-md-6 form-group">
+            <label for="{{ form.email.id_for_label }}">Email:</label>
+            {{ form.email|add_class:"form-control" }}
+          </div>
+        </div>
+
+        <div class="row mt-3">
+          <div class="col-md-6 form-group">
+            <label for="{{ form.nid.id_for_label }}">NID:</label>
+            {{ form.nid|add_class:"form-control" }}
+          </div>
+          <div class="col-md-6 form-group">
+            <label for="{{ form.dob.id_for_label }}">Date of Birth:</label>
+            {{ form.dob|attr:"type:date"|add_class:"form-control" }}
+          </div>
+        </div>
+
+
+        {% if form.errors %}
+        <div class="alert alert-danger">
+          <strong>Error:</strong> Please correct the following errors.
+          <ul>
+            {% for field in form %} {% if field.errors %}
+            <li>{{ field.label }}: {{ field.errors|join:", " }}</li>
+            {% endif %} {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-primary my-4">Submit</button>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- end: Content -->
+
+<!-- Modal -->
+
+
+{% endblock content %} 
+
+{% block extra_javascript %}
+
+
+
+{% endblock extra_javascript%}

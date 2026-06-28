@@ -1,0 +1,28 @@
+<!-- student_list.html -->
+{% extends 'partials/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Matching Students</h2>
+    <p>Found {{ students.count }} students for "{{ search_term }}"</p>
+    
+    <div class="list-group">
+        {% for student in students %}
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <h5>{{ student.student_field.name }}</h5>
+                <p class="mb-0">
+                    Roll: {{ student.roll_no }} | 
+                    Class: {{ student.class_id.class_group_id.class_id.name }} |
+                    Section: {{ student.class_id.section_id.name|default:"-" }}
+                </p>
+            </div>
+            <a href="{% url 'download_student_admit_card' student.id %}?exam={{ exam.id|default:'' }}" 
+               class="btn btn-primary">
+                Download Admit Card
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

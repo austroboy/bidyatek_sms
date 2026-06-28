@@ -1,0 +1,91 @@
+
+<div class="d-flex justify-content-between pb-0">
+  <div class="p-2 align-items-center">
+    <button class="btn btn-primary" hx-get="{% url 'addfeetype' %}" hx-target="#feetypedialog"> 
+      <i class='bx bx-plus-circle me-2'></i>
+      Add
+    </button>
+  </div>
+  <div class="d-flex"> 
+    <div class="form-group d-none d-md-block">
+      <input class="form-control" type="text" id="searchName" ng-model="searchName" placeholder="Type name to search" />
+    </div>
+  </div>
+</div>
+<div class="card-body">
+  <div class="table-responsive text-nowrap">
+    <table class="table">
+      <thead class="teal-thead">
+        <tr class="shadow-sm">
+          <th>#</th>
+          <th>Type Name</th>
+          <th>Late Fee Percentage</th>
+          <th>Schedule Type</th>
+          <th>Version</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for fee in feetypelist %}
+
+        <tr>
+          <td>
+            {{forloop.counter}}
+          </td>
+          <td>
+            {{fee.fee_head.name}}
+          </td>
+          <td>
+            {{fee.late_fee_percentage}}
+          </td>
+          <td>
+            {{fee.fee_Schedule}}
+          </td>
+          <td>
+            {{fee.version}}
+          </td>
+          <td>
+            {{fee.status}}
+          </td>
+          
+          
+
+          <td>
+            <div class="dropdown">
+              <button
+                type="button"
+                class="btn p-0 dropdown-toggle hide-arrow"
+                data-bs-toggle="dropdown"
+              >
+                <i class="bx bx-dots-vertical-rounded"></i>
+              </button>
+              <div class="dropdown-menu">
+                <a
+                  class="dropdown-item"
+                  href="javascript:void(0);"
+                  hx-get="{% url 'editfeetype' pk=fee.pk %}"
+                  hx-target="#feetypedialog"
+                  ><i class="bx bx-edit-alt me-1"></i> Edit</a
+                >
+                <a
+                  class="dropdown-item"
+                  hx-delete="{% url 'delfeetype' pk=fee.pk %}"
+                  href="javascript:void(0);"
+                  hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+                  hx-target="#feetypeadd"
+                  hx-confirm="are you want to delete?"
+                  ><i class="bx bx-trash me-1"></i> Delete</a
+                >
+              </div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+

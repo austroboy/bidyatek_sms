@@ -1,0 +1,219 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load template_tags %} 
+{% block extra_css %} 
+<style>
+  .header {
+            font-size: 1.5rem;
+            font-weight: 500;
+        }
+        .filter-section {
+      display: flex;
+      gap: 20px;
+      justify-content: space-between;
+      align-items: end;
+      margin-bottom: 20px;
+    }
+    @media screen and (max-width: 560px) {
+      .filter-section {
+         flex-wrap: wrap;
+      }
+    }
+    .filter-section div{
+      width: 100%;
+    }
+    .filter-section label {
+      font-size: 16px;
+      color: #333333;
+      margin-bottom: 2px;
+    }
+    .filter-section input {
+      padding: 8px;
+      border: 2px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+      width: 100%;
+    }
+    .filter-section input:focus {
+      border: 2px solid #1a237e;
+      outline: none;
+    }
+
+    .filter-section button {
+      padding: 10px 25px;
+      background-color: #1a237e;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .filter-section button:hover {
+      background-color: #283593;
+    }
+    h3 {
+      text-align: center;
+      color: #333333;
+      margin: 35px 0;
+    }
+    .section {
+      margin-bottom: 20px;
+    }
+    .section h3 {
+      text-align: center;
+      background-color: #e3f2fd;
+      color:#333333;
+      margin: 0;
+      padding: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 4px 4px 0 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      color: #333333;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th{
+      background-color: #e3f2fd;
+      font-weight: bold;
+    }
+    
+    th, td {
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
+    }
+    td[colspan="3"] {
+       font-weight: bold;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    .total-row {
+      background-color: #e3f2fd!important;
+      font-weight: bold;
+    }
+</style>
+{% endblock extra_css %} 
+
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+  
+  <div class="card">
+      <div class="card-body">
+        <h3 class="header">Trial Balance Report</h3>
+        <hr/>
+
+        {% if error %}
+        <div class="alert alert-danger" role="alert">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="get">
+          <div class="form-grid">
+              <div class="filter-section">
+                  <div class="space-y-2">
+                      <label for="from_date">From Date</label>
+                      <input class="input" type="date" name="from_date" value="{{ from_date|default:'' }}">
+                  </div>
+                  <div class="space-y-2">
+                      <label for="to_date">To Date</label>
+                      <input class="input" type="date" name="to_date" value="{{ to_date|default:'' }}">
+                  </div>
+                  <div class="flex justify-end align-self-end">
+                      <button type="submit" class="button btn btn-primary">Search</button>
+                  </div>
+              </div>
+          </div>
+        </form>
+
+        <div class="attendance_sheet section">
+          <h6>Trial Balance from {{ from_date }} to {{ to_date }}</h6>
+          <h6>Status: <span style="color: {% if balance_status == 'Balanced' %}green{% else %}red{% endif %}">{{ balance_status }}</span></h6>
+
+          <div class="summary">
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Ledger Category</th>
+                        <th>Ledger Name</th>
+                        <th>Debit</th>
+                        <th>Credit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% regroup page_obj.object_list by category as grouped_entries %}
+                    {% for group in grouped_entries %}
+                    <tr class="bg-secondary text-white">
+                        <td colspan="4"><strong>{{ group.grouper }}</strong></td>
+                    </tr>
+                    {% for entry in group.list %}
+                    <tr>
+                        <td></td>
+                        <td>{{ entry.ledger }}</td>
+                        <td>{{ entry.debit|floatformat:2 }}</td>
+                        <td>{{ entry.credit|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% endfor %}
+                    <tr class="font-weight-bold">
+                        <td colspan="2">Total</td>
+                        <td>{{ total_debit|floatformat:2 }}</td>
+                        <td>{{ total_credit|floatformat:2 }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- Pagination -->
+            <div class="pagination">
+                <span class="step-links">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1&from_date={{ from_date }}&to_date={{ to_date }}">&laquo; first</a>
+                        <a href="?page={{ page_obj.previous_page_number }}&from_date={{ from_date }}&to_date={{ to_date }}">previous</a>
+                    {% endif %}
+                    <span class="current">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                    </span>
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}&from_date={{ from_date }}&to_date={{ to_date }}">next</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}&from_date={{ from_date }}&to_date={{ to_date }}">last &raquo;</a>
+                    {% endif %}
+                </span>
+            </div>
+
+
+        <form method="get">
+            <input type="hidden" name="from_date" value="{{ from_date }}">
+            <input type="hidden" name="to_date" value="{{ to_date }}">
+            <button type="submit" name="download" value="pdf" class="btn btn-success">Download PDF</button>
+        </form>
+      </div>
+  </div>
+</div>
+
+
+<script>
+  document.getElementById('downloadPdfBtn').addEventListener('click', function (e) {
+    e.preventDefault();
+    const qs = new URLSearchParams({
+      from_date: "{{ from_date }}",
+      to_date: "{{ to_date }}",
+      download: "pdf"
+    });
+    // Load the PDF URL into the hidden iframe. Page won’t navigate.
+    document.getElementById('dlFrame').src = "?" + qs.toString();
+  });
+</script>
+<!-- end: Content -->
+
+{% endblock content %} 
+

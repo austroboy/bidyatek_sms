@@ -1,0 +1,165 @@
+{% load custom_tags humanize %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        .header {
+            display: flex;
+            justify-content: center;
+            place-items: center;
+            text-align: center;
+            margin-bottom: 12px;
+            padding: 8px;
+            border-bottom: 2px solid #000;
+        }
+        .header img {
+            max-width: 90px; 
+        }
+        .est {
+            font-weight: 600;
+        }
+        .header h1 {
+            font-size: 1.3em; 
+            margin: 1px 0;
+            font-weight: 900; 
+        }
+        .header h2 {
+            font-size: 1em; 
+            margin: 1px 0; 
+        }
+        .header p {
+            font-size: .7em; 
+            margin: 1px 0; 
+        }
+    
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 7px;
+            margin: 20px auto;
+        }
+    
+        .styled-table th, 
+        .styled-table td {
+            border: 1px solid #000;
+            padding: 5px; 
+            text-align: right;
+            font-variant-numeric: tabular-nums; 
+            font-feature-sumeric: "tnum"; 
+        }
+    
+        .styled-table th {
+            background-color: #f2f2f2;
+            text-align: center;
+        }
+    
+        .styled-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    
+        .styled-table td:nth-child(2) {
+            text-align: left;
+        }
+    
+        @page {
+            size: legal landscape;  
+            margin: 0.5cm;      
+        }
+    
+        @media print {
+            .styled-table {
+                width: 100% !important;
+                page-break-before: auto;
+                page-break-after: auto;
+                page-break-inside: avoid;
+            }
+        
+            .styled-table tr, 
+            .styled-table td, 
+            .styled-table th {
+                page-break-inside: avoid !important;
+                white-space: nowrap; 
+            }
+        
+            .styled-table thead {
+                display: table-header-group !important;
+            }
+        
+            .styled-table tfoot {
+                display: table-footer-group !important;
+            }
+            .styled-table td {
+                font-variant-numeric: tabular-nums;
+                font-feature-settings: "tnum";
+            }
+            
+            .styled-table td:nth-child(2) {
+                font-variant-numeric: normal;
+                font-feature-settings: normal;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h3>RAJUK UTTARA MODEL COLLEGE</h3>
+        <br> <h4>Fees Collection Report</h4></br>
+        <p>Date Range: {{ from_date }} to {{ to_date }}</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Student Name</th>
+                <th>Student ID</th>
+                <th>Version</th>
+                <th>Class</th>
+                <th>Section</th>
+                <th>Shift</th>
+                <th>Group</th>
+                {% for fee_head in fee_heads %}
+                <th class="vertical-header">{{ fee_head.fees_title }}</th>
+                {% endfor %}
+                <th>Previous Dues</th>
+                <th>Total Paid</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student_data in students_data %}
+            <tr>
+                <td>{{ student_data.student.student_field.name }}</td>
+                <td>{{ student_data.student.student_field.user_id }}</td>
+                <td>{{ student_data.student.version }}</td>
+                <td>{{ student_data.student.class_id.class_group_id.class_id.name }}</td>
+                <td>{{ student_data.student.class_id.section_id.name }}</td>
+                <td>{{ student_data.student.class_id.shift_id.name }}</td>
+                <td>{{ student_data.student.class_id.class_group_id.group_id.name }}</td>
+
+                {% for payment in student_data.payments %}
+                <td class="text-right">{{ payment|floatformat:"g"|intcomma }}</td>
+                {% endfor %}
+
+                <td class="text-right">{{ student_data.previous_due|floatformat:"g"|intcomma }}</td>
+                <td class="text-right">৳ {{ student_data.total|floatformat:"g"|intcomma }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr class="table-footer">
+                <td colspan="7"><strong>Grand Total</strong></td>
+                {% for fee_head in fee_heads %}
+                <td class="text-right"><strong>৳ {{ column_totals|get_item:fee_head.id|floatformat:"g"|intcomma }}</strong></td>
+                {% endfor %}
+                <td class="text-right"><strong>৳ {{ previous_due_total|floatformat:"g"|intcomma }}</strong></td>
+                <td class="text-right"><strong>৳ {{ grand_total|floatformat:"g"|intcomma }}</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="total-in-words">
+        <p>Total Amount in Words: {{ grand_total|intcomma }} ({{ total_in_words }}) Taka Only</p>
+    </div>
+</body>
+</html>

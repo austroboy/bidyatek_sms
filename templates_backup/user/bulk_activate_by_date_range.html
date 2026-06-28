@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulk Activate by Date Range</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .container {
+            max-width: 800px;
+            margin-top: 30px;
+        }
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+            border-radius: 10px;
+        }
+        .btn-activate {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 30px;
+        }
+        .btn-activate:hover {
+            background-color: #218838;
+            color: white;
+        }
+        .student-count {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #28a745;
+        }
+        .filter-section {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .date-section {
+            background-color: #e9ecef;
+            border-radius: 5px;
+            padding: 20px;
+        }
+        .info-box {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .warning-box {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .nav-link.active {
+            background-color: #366092 !important;
+            color: white !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="fas fa-calendar-plus me-2"></i>Bulk Activate by Date Range</h4>
+            </div>
+            <div class="card-body">
+                
+                <!-- Navigation Tabs -->
+                <ul class="nav nav-tabs mb-4">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'manage_student_status' %}">
+                            <i class="fas fa-user-cog me-1"></i> Manage Student Status
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'bulk_activate_by_date_range' %}">
+                            <i class="fas fa-calendar-plus me-1"></i> Activate by Date
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Messages -->
+                {% if messages %}
+                    <div class="messages mb-3">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-triangle{% endif %} me-2"></i>
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Info Box -->
+                <div class="info-box">
+                    <h6><i class="fas fa-info-circle me-2"></i>How this works:</h6>
+                    <p class="mb-0">
+                        This feature allows you to activate students who were deactivated within a specific date range.
+                        <strong>Example:</strong> If you accidentally deactivated 500 students yesterday, you can set the date range from yesterday to today to reactivate only those students.
+                    </p>
+                </div>
+
+                <!-- Filter Section -->
+                <div class="filter-section">
+                    <form method="post" id="activateForm">
+                        {% csrf_token %}
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="class" class="form-label">Class (Optional)</label>
+                                <select name="class" id="class" class="form-select">
+                                    <option value="">All Classes</option>
+                                    {% for class in classes %}
+                                        <option value="{{ class.id }}">{{ class.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="version" class="form-label">Version (Optional)</label>
+                                <select name="version" id="version" class="form-select">
+                                    <option value="">All Versions</option>
+                                    {% for version in versions %}
+                                        <option value="{{ version.0 }}">{{ version.1 }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Date Range Section -->
+                        <div class="date-section mt-3">
+                            <h5 class="mb-3"><i class="fas fa-calendar-alt me-2"></i>Select Date Range</h5>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="from_date" class="form-label">From Date</label>
+                                    <input type="date" 
+                                           name="from_date" 
+                                           id="from_date" 
+                                           class="form-control" 
+                                           value="{{ default_from_date }}"
+                                           required>
+                                    <div class="form-text">Start date for deactivation</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="to_date" class="form-label">To Date</label>
+                                    <input type="date" 
+                                           name="to_date" 
+                                           id="to_date" 
+                                           class="form-control" 
+                                           value="{{ default_to_date }}"
+                                           required>
+                                    <div class="form-text">End date for deactivation</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Student Count Display -->
+                            <div class="text-center mt-3">
+                                <div class="student-count" id="studentCountDisplay">
+                                    <i class="fas fa-users me-2"></i>
+                                    <span id="countText">Checking...</span>
+                                </div>
+                                <small class="text-muted" id="filterInfo"></small>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-activate" id="activateBtn" disabled>
+                                <i class="fas fa-play-circle me-1"></i> Activate Students
+                            </button>
+                            <a href="{% url 'bulk_activate_by_date_range' %}" class="btn btn-outline-secondary ms-2">
+                                <i class="fas fa-redo me-1"></i> Reset
+                            </a>
+                        </div>
+
+                        <!-- Warning Box -->
+                        <div class="warning-box mt-3" id="warningBox" style="display: none;">
+                            <div class="d-flex">
+                                <i class="fas fa-exclamation-triangle text-warning me-2 mt-1"></i>
+                                <div>
+                                    <strong class="text-warning">Warning:</strong>
+                                    <span id="warningText"></span>
+                                    <div class="mt-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="confirmActivate">
+                                            <label class="form-check-label" for="confirmActivate">
+                                                I confirm that I want to activate <span id="countToActivate">0</span> student(s)
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Instructions -->
+                <div class="mt-4">
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-lightbulb me-2"></i>Usage Tips:</h6>
+                        <ol class="mb-0">
+                            <li>Leave Class and Version empty to activate students from all classes/versions</li>
+                            <li>Set the date range to match when the bulk deactivation happened</li>
+                            <li>The system will only activate students who are currently "Deactive" and were updated within the date range</li>
+                            <li>Students who were already deactivated before the date range will not be affected</li>
+                            <li>After activation, students will be able to log in with their existing credentials</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const classSelect = document.getElementById('class');
+            const versionSelect = document.getElementById('version');
+            const fromDate = document.getElementById('from_date');
+            const toDate = document.getElementById('to_date');
+            const activateBtn = document.getElementById('activateBtn');
+            const countText = document.getElementById('countText');
+            const filterInfo = document.getElementById('filterInfo');
+            const warningBox = document.getElementById('warningBox');
+            const warningText = document.getElementById('warningText');
+            const countToActivate = document.getElementById('countToActivate');
+            const confirmActivate = document.getElementById('confirmActivate');
+            const activateForm = document.getElementById('activateForm');
+            
+            let studentCount = 0;
+            
+            // Function to update student count
+            function updateStudentCount() {
+                const classId = classSelect.value;
+                const version = versionSelect.value;
+                const from = fromDate.value;
+                const to = toDate.value;
+                
+                if (!from || !to) {
+                    countText.textContent = 'Please select date range';
+                    activateBtn.disabled = true;
+                    warningBox.style.display = 'none';
+                    return;
+                }
+                
+                // Build query string
+                let queryString = `?from_date=${from}&to_date=${to}`;
+                if (classId) queryString += `&class=${classId}`;
+                if (version) queryString += `&version=${version}`;
+                
+                // Make AJAX request to get count
+                fetch(`{% url 'get_deactivated_count' %}${queryString}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            studentCount = data.count;
+                            countText.textContent = `Found ${studentCount} deactivated student(s) in date range`;
+                            
+                            // Update filter info
+                            let info = `Date Range: ${from} to ${to}`;
+                            if (classId) {
+                                info += ` | Class: ${classSelect.options[classSelect.selectedIndex].text}`;
+                            }
+                            if (version) {
+                                info += ` | Version: ${versionSelect.options[versionSelect.selectedIndex].text}`;
+                            }
+                            filterInfo.textContent = info;
+                            
+                            // Enable/disable button
+                            if (studentCount > 0) {
+                                activateBtn.disabled = false;
+                                showWarning();
+                            } else {
+                                activateBtn.disabled = true;
+                                warningBox.style.display = 'none';
+                            }
+                        } else {
+                            countText.textContent = 'Error loading student count';
+                            activateBtn.disabled = true;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        countText.textContent = 'Error loading student count';
+                        activateBtn.disabled = true;
+                    });
+            }
+            
+            // Function to show warning box
+            function showWarning() {
+                if (studentCount > 0) {
+                    warningBox.style.display = 'block';
+                    countToActivate.textContent = studentCount;
+                    
+                    if (studentCount > 100) {
+                        warningText.textContent = `You are about to activate ${studentCount} students. This action cannot be undone.`;
+                    } else {
+                        warningText.textContent = `You are about to activate ${studentCount} student(s). This action cannot be undone.`;
+                    }
+                }
+            }
+            
+            // Function to validate form before submission
+            function validateForm(e) {
+                if (!confirmActivate.checked) {
+                    e.preventDefault();
+                    alert('Please confirm that you want to activate the students by checking the confirmation box.');
+                    return false;
+                }
+                
+                if (studentCount === 0) {
+                    e.preventDefault();
+                    alert('No students to activate. Please check your filters.');
+                    return false;
+                }
+                
+                const confirmation = confirm(`Are you sure you want to activate ${studentCount} student(s)?\n\nThis will change their status to "Active" and allow them to log in.`);
+                if (!confirmation) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                return true;
+            }
+            
+            // Event listeners
+            classSelect.addEventListener('change', updateStudentCount);
+            versionSelect.addEventListener('change', updateStudentCount);
+            fromDate.addEventListener('change', updateStudentCount);
+            toDate.addEventListener('change', updateStudentCount);
+            confirmActivate.addEventListener('change', function() {
+                activateBtn.disabled = !this.checked;
+            });
+            activateForm.addEventListener('submit', validateForm);
+            
+            // Initial count update
+            updateStudentCount();
+            
+            // Set minimum and maximum dates for date inputs
+            const today = new Date().toISOString().split('T')[0];
+            fromDate.max = today;
+            toDate.max = today;
+            
+            toDate.addEventListener('change', function() {
+                fromDate.max = this.value;
+            });
+            
+            fromDate.addEventListener('change', function() {
+                toDate.min = this.value;
+            });
+        });
+    </script>
+</body>
+</html>

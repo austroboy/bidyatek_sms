@@ -1,0 +1,158 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load template_tags %} 
+{% block extra_css %}
+ 
+
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css'>
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-5-theme/1.3.0/select2-bootstrap-5-theme.min.css'>
+<link 
+      rel="stylesheet"
+      href="{% static 'assets/css/loading.css' %}"
+    />
+{% endblock extra_css %} 
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+ 
+  <div class="card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between">
+            <div>
+                <h4 class="card-title mb-4">Leave Request</h4>
+            </div>
+            <div>
+                <a href="{% url 'leave_request' %}" class="btn btn-warning">List Leave</a>
+
+            </div>
+
+        </div>
+
+
+        <form id="my-form" method="post" action="{% url 'add_leave_request' %}">
+            {% csrf_token %}
+            <div class="row">
+              {% if user|is_staff_or_in_group:"parent"  or user|has_role:"HR" or user|has_role:"Manager" %}
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Select User</label>
+                        <select name="employee" id="user_id" class="form-select userlist">
+                          <option selected hidden disabled value="" >Select User</option>
+                          {% for user in user_list %}
+                            <option value="{{ user.id }}">{{ user.name }}</option>
+                          {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                {% endif %}
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Leave type</label>
+                        <div class="">
+                            <select id="leavetype_id" class="form-select" name="leave_type" required>
+                                <option selected hidden disabled value="" >Select Leave type</option>
+                                {% for leave_type in list_leave_type %}
+                                <option value="{{leave_type.id}}">{{leave_type.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="mb-3">
+                      <label class="form-label" for="session_year">Start date</label>
+                      <div class="">
+                          <input  type="date"  class="form-control" placeholder="Start date"  name="start_date" />
+                      </div>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="mb-3">
+                      <label class="form-label" for="session_year">End date</label>
+                      <div class="">
+                          <input  type="date"  class="form-control" placeholder="End date"  name="end_date" />
+                      </div>
+                  </div>
+                </div>
+                {% if user|is_staff_or_in_group:"teacher, manager"  %}
+                <div class="col-md-6">
+                  <div class="mb-3">
+                      <label class="form-label" for="session_year">Start Hour</label>
+                      <div class="">
+                          <input  type="time"  class="form-control" placeholder="Start Hour"  name="start_hour" />
+                      </div>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="mb-3">
+                      <label class="form-label" for="session_year">End Hour</label>
+                      <div class="">
+                          <input  type="time"  class="form-control" placeholder="End Hour"  name="end_hour" />
+                      </div>
+                  </div>
+                </div>
+                {% endif %}
+                <div class="col-md-6">
+                  <div class="mb-3">
+                      <label class="form-label" for="upload_application">Upload Application</label>
+                      <div class="">
+                          <input  type="file"  class="form-control" name="leave_application" />
+                      </div>
+                  </div>
+                </div>
+
+              </div>
+           
+            <button id="submit-btn" class="btn btn-primary" type="submit">Submit</button>
+
+            
+
+            
+        </form>
+    </div>
+
+
+</div>
+
+<div class="row pt-5">
+    <div class="d-flex flex-wrap gap-2" id="icons-container">
+        {% for fees in feesList %}
+        
+        <div class="border border-dashed border-danger rounded py-2 px-2 me-6 mb-3">
+            <span class="text-warning fw-bolder" >{{fees.class_id}}</span>
+            <p class="icon-name text-capitalize text-warning text-truncate mb-0">{{fees.feetype_id}}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+
+</div>
+<!-- end: Content -->
+
+{% endblock content %} 
+{% block extra_javascript %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+<script>
+
+    $('#user_id').select2({
+        theme: "bootstrap-5",
+        width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+      });
+
+    $('#leavetype_id').select2({
+        theme: "bootstrap-5",
+        width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+      });
+    
+</script>
+
+
+{% endblock extra_javascript%}

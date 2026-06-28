@@ -1,0 +1,28 @@
+{% load widget_tweaks %}
+{% block content %}
+<form hx-post="{{ request.path }}" hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}' class="modal-content">
+  <div>
+    <h4 class="modal-header">Add-Edit Withdraw</h4>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <label for="{{ form.amount.id_for_label }}" class="form-label">Amount</label>
+      {% render_field form.amount class+="form-control"  %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.received_by.id_for_label }}" class="form-label">Received By</label>
+      {% render_field form.received_by class+="form-control"  %}
+    </div>
+    <div class="mb-3">
+      <label for="{{ form.note.id_for_label }}" class="form-label">Note</label>
+      {% render_field form.note class+="form-control"  %}
+    </div>
+   
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+    <button type="submit" class="btn btn-primary ">Save</button>
+  </div>
+</form>
+
+{% endblock content %}

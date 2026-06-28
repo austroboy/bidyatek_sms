@@ -1,0 +1,19 @@
+{% load widget_tweaks %}
+{% block content %}
+<form hx-post="{{ request.path }}" hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}' class="modal-content">
+  <div>
+    <h1 class="modal-header">Add Group</h1>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <label for="{{ form.title.id_for_label }}" class="form-label">Group Name</label>
+      {% render_field form.name class+="form-control" placeholder="name" %}
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+    <button type="submit" class="btn btn-primary">Save</button>
+  </div>
+</form>
+
+{% endblock content %} 

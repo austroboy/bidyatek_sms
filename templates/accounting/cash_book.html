@@ -1,0 +1,220 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% load template_tags %}
+{% block extra_css %}
+<style>
+  .header {
+      font-size: 1.5rem;
+      font-weight: 500;
+  }
+  .filter-section {
+      display: flex;
+      gap: 20px;
+      justify-content: space-between;
+      align-items: end;
+      margin-bottom: 20px;
+  }
+  @media screen and (max-width: 560px) {
+      .filter-section {
+          flex-wrap: wrap;
+      }
+  }
+  .filter-section div {
+      width: 100%;
+  }
+  .filter-section label {
+      font-size: 16px;
+      color: #333333;
+      margin-bottom: 2px;
+  }
+  .filter-section input {
+      padding: 8px;
+      border: 2px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+      width: 100%;
+  }
+  .filter-section input:focus {
+      border: 2px solid #1a237e;
+      outline: none;
+  }
+  .filter-section button {
+      padding: 10px 25px;
+      background-color: #1a237e;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+  }
+  .filter-section button:hover {
+      background-color: #283593;
+  }
+  table {
+      width: 100%;
+      border-collapse: collapse;
+      color: #333333;
+  }
+  table, th, td {
+      border: 1px solid #ddd;
+  }
+  th {
+      background-color: #e3f2fd;
+      font-weight: bold;
+  }
+  th, td {
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
+  }
+  .total-row {
+      background-color: #e3f2fd!important;
+      font-weight: bold;
+  }
+  .pagination {
+      margin-top: 10px;
+      text-align: center;
+  }
+  .pagination-list {
+      list-style: none;
+      padding: 0;
+  }
+  .pagination-list li {
+      display: inline-block;
+      margin: 0 5px;
+  }
+  .pagination-list li a {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      text-decoration: none;
+      color: #333;
+      border-radius: 4px;
+  }
+  .pagination-list li a:hover {
+      background-color: #007bff;
+      color: white;
+  }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+
+<div class="container-fluid flex-grow-1 container-p-y">
+    {% include 'pageinfo.html' %}
+
+    <div class="card">
+        <div class="card-body">
+            <h3 class="header">Cash Book</h3>
+            <hr/>
+            <form method="GET" action="">
+                <div class="filter-section">
+                    <div>
+                        <label for="from_date">From Date:</label>
+                        <input type="date" id="from_date" name="from_date" value="{{ from_date }}" required>
+                    </div>
+                    <div>
+                        <label for="to_date">To Date:</label>
+                        <input type="date" id="to_date" name="to_date" value="{{ to_date }}" required>
+                    </div>
+                    <div>
+                        <button type="submit">Filter</button>
+                    </div>
+                </div>
+            </form>
+
+            {% if transactions %}
+                <h6>From: {{ from_date }} To {{ to_date }}</h6>
+                <table>
+                    <tr>
+                        <th>Type</th>
+                        <th>Ledger Name</th>
+                        <th>Debit</th>
+                        <th>Credit</th>
+                    </tr>
+                    {% for ledger_name, ledger_transactions in paginated_transactions.items %}
+                        <tr>
+                            <td colspan="4" style="font-weight: bold; text-align: left;">{{ ledger_name }}</td>
+                        </tr>
+                        {% for t in ledger_transactions %}
+                        <tr>
+                            <td>{{ t.type }}</td>
+                            <td>{{ t.ledger_name }}</td>
+                            <td>{{ t.debit }}</td>
+                            <td>{{ t.credit }}</td>
+                        </tr>
+                        {% endfor %}
+
+                        <!-- Pagination for each ledger -->
+                        {% if ledger_transactions.has_previous or ledger_transactions.has_next %}
+                        <tr>
+                            <td colspan="4">
+                                <ul class="pagination-list">
+                                    {% if ledger_transactions.has_previous %}
+                                        <li>
+                                            <a href="#" class="pagination-link" 
+                                               data-page="{{ ledger_transactions.previous_page_number }}" 
+                                               data-ledger="{{ ledger_name }}">
+                                                Previous
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    <li>Page {{ ledger_transactions.number }} of {{ ledger_transactions.paginator.num_pages }}</li>
+                                    {% if ledger_transactions.has_next %}
+                                        <li>
+                                            <a href="#" class="pagination-link" 
+                                               data-page="{{ ledger_transactions.next_page_number }}" 
+                                               data-ledger="{{ ledger_name }}">
+                                                Next
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        
+                    {% endfor %}
+                    <tr class="total-row">
+                        <td colspan="2">Grand Total</td>
+                        <td>{{ grand_total_debit }}</td>
+                        <td>{{ grand_total_credit }}</td>
+                    </tr>
+                </table>
+            {% else %}
+                <p style="text-align: center;">No transactions found for the selected date range.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+      document.querySelectorAll(".pagination-link").forEach(link => {
+          link.addEventListener("click", function(event) {
+              event.preventDefault();  
+
+              let page = this.getAttribute("data-page");
+              let ledgerName = this.getAttribute("data-ledger");
+
+              // Ensure we capture the correct date values
+              let fromDate = document.getElementById("from_date").value || '';
+              let toDate = document.getElementById("to_date").value || '';
+
+              if (!fromDate || !toDate) {
+                  alert("Please select valid dates.");
+                  return;
+              }
+
+              let params = new URLSearchParams(window.location.search);
+              params.set("from_date", fromDate);
+              params.set("to_date", toDate);
+              params.set("page_" + ledgerName, page);
+
+              window.location.search = params.toString();
+          });
+      });
+  });
+</script>
+
+{% endblock content %}

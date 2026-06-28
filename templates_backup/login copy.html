@@ -1,0 +1,308 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BIDYATek</title>
+
+  <style>
+    /* General Styling */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", Arial, sans-serif;
+    }
+  
+    body {
+      background: linear-gradient(135deg, #f1f8e9, #a5d6a7);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  
+    /* Container Styling */
+    .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 90%;
+      max-width: 1200px;
+      background: linear-gradient(135deg, #1f4719c1, #1f4719fe);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+  
+    /* Left Section Styling */
+    .left-section {
+      width: 50%;
+      padding: 50px 30px;
+      color: #fff;
+      text-align: left;
+    }
+  
+    .left-section h1 {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+  
+    .left-section .highlight {
+      color: #ffd54f;
+      font-weight: bold;
+    }
+  
+    .left-section .tagline {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+  
+    .contact-info {
+      font-size: 1.2rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+  
+    .contact-info img {
+      width: 60px;
+      height: 60px;
+      border-radius: 5px;
+      /* background: #fff; */
+      padding: 2px;
+    }
+  
+    .contact-info p {
+      margin: 5px 0;
+    }
+  
+    .download-app img {
+      width: 150px;
+      margin-top: 20px;
+    }
+  
+    /* Right Section Styling */
+    .right-section {
+      width: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #f9f9f9;
+      padding: 50px;
+    }
+  
+    .login-box {
+      background-color: #ffffff;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+  
+    .login-box .logo {
+      max-width: 160px;
+      margin-bottom: 20px;
+    }
+  
+    .login-box h2 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+      color: #333;
+    }
+  
+    /* Form Group Styling */
+    .form-group {
+      position: relative;
+      margin-bottom: 20px;
+    }
+  
+    .input-field {
+      width: 100%;
+      padding: 12px 20px;
+      padding-right: 40px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+  
+    .input-field:focus {
+      border-color: #66bb6a;
+      box-shadow: 0 0 5px rgba(102, 187, 106, 0.5);
+      outline: none;
+    }
+  
+    .icon {
+      position: absolute;
+      top: 50%;
+      right: 15px;
+      transform: translateY(-50%);
+      font-size: 1.2rem;
+      color: #777;
+    }
+  
+    .login-button {
+      width: 100%;
+      padding: 12px;
+      background-color: #1f4719ee;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+  
+    .login-button:hover {
+      background-color: #1f4719;
+    }
+  
+    
+  
+    .powered-by {
+      margin: 20px 0;
+      font-size: 0.8rem;
+      color: #888;
+    }
+  
+    /* Social Icons Styling */
+    .social-icons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+  
+    .social-icons .social-link {
+      font-size: 1.5rem;
+      color: #1f4719ee;
+      transition: color 0.3s ease;
+    }
+  
+    .social-icons .social-link:hover {
+      color: #1b5e20;
+    }
+  
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        margin: 25px 0;
+      }
+  
+      .left-section,
+      .right-section {
+        width: 100%;
+        text-align: center;
+      }
+  
+      .left-section {
+        padding: 25px;
+      }
+  
+      .left-section h1 {
+        font-size: 2.4rem;
+        margin-bottom: 10px;
+      }
+  
+      .left-section .tagline {
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+      }
+  
+      .contact-info {
+        font-size: 1rem;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+  </style>
+
+</head>
+
+<body>
+  <div class="container">
+    <div class="left-section">
+      <h1>Welcome to <span class="highlight">BIDYATek</span></h1>
+      <p class="tagline">Big Thinking Made Real.</p>
+      <!-- Call Center Image -->
+      <div class="contact-info">
+        <img src="https://cdn-icons-png.flaticon.com/512/1497/1497751.png" alt="Call Center Icon" />
+        <div>
+          <p>09610-912912</p>
+          <p>01951-901919</p>
+        </div>
+      </div>
+      <div class="download-app">
+        <p>Please download the mobile app</p>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
+          alt="Get it on Google Play" />
+      </div>
+    </div>
+    <div class="right-section">
+      <div class="login-box">
+        <img src="https://www.edutechbdl.com/wp-content/uploads/2024/04/cropped-1.png" alt="BIDYATekLogo" class="logo" />
+        <h2>Log in</h2>
+        <form action="{% url 'login' %}" method="POST">
+          {% csrf_token %}
+          <div class="form-group">
+            <input type="text" name="username" required placeholder="Username" class="input-field" />
+            <i class="icon">🤵</i>
+          </div>
+          <div class="form-group">
+            <input type="password" placeholder="Password" name="password" required class="input-field"
+              id="password-field" />
+            <i class="icon show" id="show-icon">👁‍🗨</i>
+          </div>
+
+          {% for message in messages %} 
+            {% if message.tags == 'error' %} 
+                  <div style="padding-bottom: 10px;" >
+                      <div style="color: tomato">{{message}}</div>
+                  </div>
+            {% endif %} 
+          {% endfor %}
+          <button type="submit" class="login-button">Login</button>
+
+        </form>
+        <p class="powered-by">
+          Powered by BIDYATek | All rights reserved
+        </p>
+        <!-- Font Awesome Social Media Icons -->
+        <div class="social-icons">
+          <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+          <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+          <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Get references to the elements
+    const passwordField = document.getElementById("password-field");
+    const showIcon = document.getElementById("show-icon");
+
+
+
+    // Add an event listener to toggle password visibility
+    showIcon.addEventListener("click", () => {
+      if (passwordField.type === "password") {
+        passwordField.type = "text";
+        showIcon.textContent = "🔒"; // Change icon to hide password
+      } else {
+        passwordField.type = "password";
+        showIcon.textContent = "👁‍🗨"; // Change icon back to show password
+      }
+    });
+  </script>
+</body>
+
+</html>
+

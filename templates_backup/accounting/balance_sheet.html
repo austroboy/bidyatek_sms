@@ -1,0 +1,283 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load template_tags %} 
+{% block extra_css %} 
+<style>
+  .header {
+      font-size: 1.5rem;
+      font-weight: 500;
+  }
+  .filter-section {
+display: flex;
+gap: 20px;
+justify-content: space-between;
+align-items: end;
+margin-bottom: 20px;
+}
+@media screen and (max-width: 560px) {
+.filter-section {
+   flex-wrap: wrap;
+}
+}
+.filter-section div{
+width: 100%;
+}
+.filter-section label {
+font-size: 16px;
+color: #333333;
+margin-bottom: 2px;
+}
+.filter-section input {
+padding: 8px;
+border: 2px solid #ccc;
+border-radius: 4px;
+font-size: 14px;
+width: 100%;
+}
+.filter-section input:focus {
+border: 2px solid #1a237e;
+outline: none;
+}
+
+.filter-section button {
+padding: 10px 25px;
+background-color: #1a237e;
+color: #ffffff;
+border: none;
+border-radius: 4px;
+font-size: 16px;
+cursor: pointer;
+transition: background-color 0.3s ease;
+}
+.filter-section button:hover {
+background-color: #283593;
+}
+h3 {
+text-align: center;
+color: #333333;
+margin: 35px 0;
+}
+.section {
+margin-bottom: 20px;
+}
+.section h3 {
+text-align: center;
+background-color: #e3f2fd;
+color:#333333;
+margin: 0;
+padding: 10px;
+font-size: 16px;
+font-weight: bold;
+border-radius: 4px 4px 0 0;
+}
+table {
+width: 100%;
+border-collapse: collapse;
+color: #333333;
+}
+table, th, td {
+border: 1px solid #ddd;
+}
+th{
+background-color: #e3f2fd;
+font-weight: bold;
+}
+
+th, td {
+padding: 10px;
+text-align: center;
+font-size: 14px;
+}
+td[colspan="3"] {
+ font-weight: bold;
+}
+tr:nth-child(even) {
+background-color: #f9f9f9;
+}
+.total-row {
+background-color: #e3f2fd!important;
+font-weight: bold;
+}
+</style>
+{% endblock extra_css %} 
+
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+  
+  <div class="card">
+      <div class="card-body">
+        <h3 class="header">Balance Sheet Report</h3>
+        <hr/>
+
+        <!-- Filter Form -->
+        <form method="get">
+          <div class="form-grid">
+              <div class="filter-section">
+                  <div class="space-y-2">
+                      <label for="from_date">From Date</label>
+                      <input class="input" type="date" name="from_date" value="{{ from_date|default:'' }}">
+                  </div>
+                  <div class="space-y-2">
+                      <label for="to_date">To Date</label>
+                      <input class="input" type="date" name="to_date" value="{{ to_date|default:'' }}">
+                  </div>
+                  <div class="flex justify-end align-self-end">
+                      <button type="submit" class="button">Search</button>
+                  </div>
+              </div>
+          </div>
+        </form>
+        <!-- Add this near the search button in your existing HTML -->
+        <div class="flex justify-end align-self-end">
+            <a href="{% url 'balance_sheet_pdf' %}?from_date={{ from_date }}&to_date={{ to_date }}" 
+            class="button btn btn-primary" style="margin-left: 10px;">
+                Download PDF
+            </a>
+        </div>
+
+        <!-- Balance Sheet Report -->
+        <div class="balance-sheet section">
+          <h6>Balance Sheet from {{ from_date }} to {{ to_date }}</h6>
+          {% comment %} <h6>Status: <span style="color: {% if balance_status == 'Balanced' %}green{% else %}red{% endif %}">{{ balance_status }}</span></h6> {% endcomment %}
+
+          <div class="summary">
+            <table class="w-full text-textGray text-sm leading-6 sm:leading-8">
+                <thead class="border-b-2 bg-bgBlue">
+                    <tr>
+                        <th class="font-medium border-r-2" colspan="2">Account Name</th>
+                        <th class="font-medium text-right">Balance</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y-2 font-medium">
+                    
+                     <!-- ASSETS SECTION -->
+                     <tr class="bg-light text-bold">
+                        <td colspan="3"><strong>ASSETS</strong></td>
+                    </tr>
+                    {% for asset in page_assets.object_list %}
+                    <tr>
+                        <td colspan="2">{{ asset.name }}</td>
+                        <td class="text-right">{{ asset.balance|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="text-right py-2 bg-gray-200">
+                        <td colspan="2"><strong>Total Assets</strong></td>
+                        <td><strong>{{ total_assets|floatformat:2 }}</strong></td>
+                    </tr>
+                    <!-- Assets Pagination -->
+                    <tr>
+                        <td colspan="3">
+                            <div class="pagination my-3">
+                                <span class="step-links">
+                                    {% if page_assets.has_previous %}
+                                        <a href="?from_date={{ from_date }}&to_date={{ to_date }}&assets_page=1&liabilities_page={{ page_liabilities.number }}&equity_page={{ page_equity.number }}">&laquo; first</a>
+                                        <a href="?from_date={{ from_date }}&to_date={{ to_date }}&assets_page={{ page_assets.previous_page_number }}&liabilities_page={{ page_liabilities.number }}&equity_page={{ page_equity.number }}">previous</a>
+                                    {% endif %}
+                                    <span class="current">
+                                        Page {{ page_assets.number }} of {{ page_assets.paginator.num_pages }}
+                                    </span>
+                                    {% if page_assets.has_next %}
+                                        <a href="?from_date={{ from_date }}&to_date={{ to_date }}&assets_page={{ page_assets.next_page_number }}&liabilities_page={{ page_liabilities.number }}&equity_page={{ page_equity.number }}">next</a>
+                                        <a href="?from_date={{ from_date }}&to_date={{ to_date }}&assets_page={{ page_assets.paginator.num_pages }}&liabilities_page={{ page_liabilities.number }}&equity_page={{ page_equity.number }}">last &raquo;</a>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- LIABILITIES SECTION -->
+                    <tr class="bg-light text-bold">
+                        <td colspan="3"><strong>LIABILITIES</strong></td>
+                    </tr>
+                    {% for liability in page_liabilities.object_list %}
+                    <tr>
+                        <td colspan="2">{{ liability.name }}</td>
+                        <td class="text-right">{{ liability.balance|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="text-right py-2 bg-gray-200">
+                        <td colspan="2"><strong>Total Liabilities</strong></td>
+                        <td><strong>{{ total_liabilities|floatformat:2 }}</strong></td>
+                    </tr>
+                    <!-- Liabilities Pagination -->
+                    <tr>
+                        <td colspan="3">
+                            <div class="pagination my-3">
+                                <span class="step-links">
+                                    {% if page_liabilities.has_previous %}
+                                        <a href="?from_date={{ from_date }}&to_date={{ to_date }}&liabilities_page=1&assets_page={{ page_assets.number }}&equity_page={{ page_equity.number }}">&laquo; first</a>
+                                        <a href="?from_date={{ from_date }}&to_date={{ to_date }}&liabilities_page={{ page_liabilities.previous_page_number }}&assets_page={{ page_assets.number }}&equity_page={{ page_equity.number }}">previous</a>
+                                    {% endif %}
+                                    <span class="current">
+                                        Page {{ page_liabilities.number }} of {{ page_liabilities.paginator.num_pages }}
+                                    </span>
+                                    {% if page_liabilities.has_next %}
+                                        <a href="?from_date={{ from_date }}&to_date={{ to_date }}&liabilities_page={{ page_liabilities.next_page_number }}&assets_page={{ page_assets.number }}&equity_page={{ page_equity.number }}">next</a>
+                                        <a href="?from_date={{ from_date }}&to_date={{ to_date }}&liabilities_page={{ page_liabilities.paginator.num_pages }}&assets_page={{ page_assets.number }}&equity_page={{ page_equity.number }}">last &raquo;</a>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- EQUITY SECTION -->
+                    <tr class="bg-light text-bold">
+                        <td colspan="3"><strong>OWNERS EQUITY</strong></td>
+                    </tr>
+                    {% for eq in page_equity.object_list %}
+                    <tr>
+                        <td colspan="2">{{ eq.name }}</td>
+                        <td class="text-right">{{ eq.balance|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="text-right py-2 bg-gray-200">
+                        <td colspan="2"><strong>Total Owners Equity</strong></td>
+                        <td><strong>{{ total_equity|floatformat:2 }}</strong></td>
+                    </tr>
+                    <!-- Equity Pagination -->
+                    <tr>
+                        <td colspan="3">
+                            <div class="pagination my-3">
+                                <span class="step-links">
+                                    {% if page_equity.has_previous %}
+                                        <a href="?from_date={{ from_date }}&to_date={{ to_date }}&equity_page=1&assets_page={{ page_assets.number }}&liabilities_page={{ page_liabilities.number }}">&laquo; first</a>
+                                        <a href="?from_date={{ from_date }}&to_date={{ to_date }}&equity_page={{ page_equity.previous_page_number }}&assets_page={{ page_assets.number }}&liabilities_page={{ page_liabilities.number }}">previous</a>
+                                    {% endif %}
+                                    <span class="current">
+                                        Page {{ page_equity.number }} of {{ page_equity.paginator.num_pages }}
+                                    </span>
+                                    {% if page_equity.has_next %}
+                                        <a href="?from_date={{ from_date }}&to_date={{ to_date }}&equity_page={{ page_equity.next_page_number }}&assets_page={{ page_assets.number }}&liabilities_page={{ page_liabilities.number }}">next</a>
+                                        <a href="?from_date={{ from_date }}&to_date={{ to_date }}&equity_page={{ page_equity.paginator.num_pages }}&assets_page={{ page_assets.number }}&liabilities_page={{ page_liabilities.number }}">last &raquo;</a>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+        
+        </div>
+
+        {% comment %} <!-- Download Button -->
+        <form method="get">
+            <input type="hidden" name="from_date" value="{{ from_date }}">
+            <input type="hidden" name="to_date" value="{{ to_date }}">
+            <button type="submit" name="download" value="pdf" class="button btn btn-success">Download PDF</button>
+        </form> {% endcomment %}
+      </div>
+  </div>
+</div>
+
+<!-- end: Content -->
+
+{% endblock content %} 
+{% block extra_javascript %} 
+
+
+{% endblock extra_javascript%}

@@ -1,0 +1,153 @@
+{% extends 'partials/base.html' %}
+{% load template_tags %}
+{% load static %}
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap5-toggle@5.1.1/css/bootstrap5-toggle.min.css" rel="stylesheet">
+<style>
+    .table th {
+        background-color: #f8f9fa;
+        font-weight: bold;
+        font-size: 1.2rem;
+        text-align: center;
+    }
+    .table td {
+        vertical-align: middle;
+    }
+    .permission-header {
+        font-weight: bold;
+        font-size: 1.5rem;
+        color: #343a40;
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+    {% include 'pageinfo.html' %}
+
+    <div class="card py-4">
+        <form action="" method="POST" enctype="application/x-www-form-urlencoded">
+            {% csrf_token %}
+            <div class="form-group">
+                <div class="container-fluid">
+                    <div class="row align-items-center">
+                        <!-- Group Selection Dropdown -->
+                        <div class="col-sm-3">
+                            <div class="dropdown">
+                                <button 
+                                    class="btn btn-info dropdown-toggle w-100" 
+                                    type="button" 
+                                    id="groupDropdown" 
+                                    data-bs-toggle="dropdown" 
+                                    aria-expanded="false">
+                                    {{ selected_group.name|default:"Choose The Group" }}
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="groupDropdown">
+                                    {% for group in groups %}
+                                    <li>
+                                        <a 
+                                            class="dropdown-item text-capitalize" 
+                                            href="{% url 'user_permissions' group_id=group.id %}">
+                                            {{ group.name }}
+                                        </a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- More Details Permission Button -->
+                        <div class="col-sm-3">
+                            <a href="{% url 'permissions' %}" class="btn btn-secondary w-100">
+                                More Details Permission
+                            </a>
+                        </div>
+
+                        <div class="col-sm-6 text-end">
+                            <input
+                                type="checkbox"
+                                id="chk_tgl"
+                                checked
+                                data-toggle="toggle"
+                                data-on="Not Ready"
+                                data-off="Ready"
+                                data-onstyle="danger"
+                                data-offstyle="success"
+                                onchange="toggleSubmitButton()"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Permissions Table -->
+                <div class="mt-4">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Application</th>
+                                <th>View Only</th>
+                                <th>Add/Edit/Delete/View</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for app, categories in categorized_permissions.items %}
+                            <tr>
+                                <td class="permission-header">{{ app|title }}</td>
+                                <td>
+                                    <div class="form-check text-center">
+                                        <input 
+                                            class="form-check-input" 
+                                            type="checkbox" 
+                                            value="{{ app }}:view_only" 
+                                            id="{{ app }}_view_only" 
+                                            name="permissions"
+                                            {% if categories.view_only.0 in group_permissions %}
+                                            checked
+                                            {% endif %}>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-check text-center">
+                                        <input 
+                                            class="form-check-input" 
+                                            type="checkbox" 
+                                            value="{{ app }}:all_permissions" 
+                                            id="{{ app }}_all_permissions" 
+                                            name="permissions"
+                                            {% if categories.all_permissions.0 in group_permissions %}
+                                            checked
+                                            {% endif %}>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="float-end mt-3">
+                <button 
+                    type="submit" 
+                    id="btn_tgl" 
+                    class="btn btn-primary" 
+                    disabled 
+                    name="link_a" 
+                    value="{{ selected_group.id|default:'' }}">
+                    Update Current Permissions
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_javascript %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap5-toggle@5.1.1/js/bootstrap5-toggle.ecmas.min.js"></script>
+<script>
+  function toggleSubmitButton() {
+      const isDisabled = document.getElementById("chk_tgl").checked;
+      document.getElementById("btn_tgl").disabled = isDisabled;
+  }
+</script>
+{% endblock extra_javascript %}

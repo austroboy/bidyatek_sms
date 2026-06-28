@@ -1,0 +1,132 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+
+  <!-- Page Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="fw-bold mb-1" style="color:#2D6A73;">
+        <i class='bx bx-bar-chart-alt-2 me-2'></i>Budget Management
+      </h4>
+      <p class="text-muted mb-0">Manage and track your yearly institutional budgets</p>
+    </div>
+    <a href="{% url 'budget_create' %}" class="btn btn-primary">
+      <i class='bx bx-plus-circle me-1'></i> New Budget Year
+    </a>
+  </div>
+
+  <!-- Active Budget Summary -->
+  {% if active_budget %}
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm" style="border-left: 4px solid #2D6A73 !important;">
+        <div class="card-body py-3">
+          <div class="row align-items-center">
+            <div class="col-md-4">
+              <span class="badge bg-success me-2">ACTIVE</span>
+              <strong style="color:#2D6A73;">{{ active_budget.title }}</strong>
+              <div class="text-muted small">{{ active_budget.year_start }} → {{ active_budget.year_end }}</div>
+            </div>
+            <div class="col-md-2 text-center">
+              <div class="small text-muted">Income Budget</div>
+              <strong>৳ {{ active_budget.total_income_budget|floatformat:0 }}</strong>
+            </div>
+            <div class="col-md-2 text-center">
+              <div class="small text-muted">Expense Budget</div>
+              <strong>৳ {{ active_budget.total_expense_budget|floatformat:0 }}</strong>
+            </div>
+            <div class="col-md-2 text-center">
+              <div class="small text-muted">Actual Income</div>
+              <strong class="text-success">৳ {{ active_budget.total_actual_income|floatformat:0 }}</strong>
+            </div>
+            <div class="col-md-2 text-end">
+              <a href="{% url 'budget_detail' active_budget.pk %}" class="btn btn-sm btn-outline-primary">
+                View Details <i class='bx bx-right-arrow-alt'></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- All Budget Years Table -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+      <h6 class="mb-0 fw-bold"><i class='bx bx-calendar me-2'></i>All Budget Years</h6>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead style="background:rgba(45,106,115,0.10);">
+          <tr>
+            <th>#</th>
+            <th>Title</th>
+            <th>Period</th>
+            <th>Status</th>
+            <th class="text-end">Income Budget</th>
+            <th class="text-end">Expense Budget</th>
+            <th class="text-center">Alerts</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for budget in budgets %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+              <a href="{% url 'budget_detail' budget.pk %}" class="fw-semibold text-decoration-none" style="color:#2D6A73;">
+                {{ budget.title }}
+              </a>
+            </td>
+            <td class="text-muted small">{{ budget.year_start }} → {{ budget.year_end }}</td>
+            <td>
+              {% if budget.status == 'ACTIVE' %}
+                <span class="badge bg-success">Active</span>
+              {% elif budget.status == 'DRAFT' %}
+                <span class="badge bg-warning text-dark">Draft</span>
+              {% elif budget.status == 'CLOSED' %}
+                <span class="badge bg-secondary">Closed</span>
+              {% else %}
+                <span class="badge bg-light text-dark">Archived</span>
+              {% endif %}
+            </td>
+            <td class="text-end">৳ {{ budget.total_income_budget|floatformat:0 }}</td>
+            <td class="text-end">৳ {{ budget.total_expense_budget|floatformat:0 }}</td>
+            <td class="text-center">
+              {% with budget.unacknowledged_alerts_count as ac %}
+                {% if ac > 0 %}
+                  <span class="badge bg-danger">{{ ac }}</span>
+                {% else %}
+                  <span class="text-muted">—</span>
+                {% endif %}
+              {% endwith %}
+            </td>
+            <td class="text-center">
+              <a href="{% url 'budget_detail' budget.pk %}" class="btn btn-sm btn-outline-primary me-1">
+                <i class='bx bx-show'></i>
+              </a>
+              {% if budget.status != 'DRAFT' %}
+              <a href="{% url 'budget_report' budget.pk %}" class="btn btn-sm btn-outline-secondary">
+                <i class='bx bx-file'></i>
+              </a>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8" class="text-center text-muted py-5">
+              <i class='bx bx-bar-chart-alt-2' style="font-size:3rem; opacity:0.3;"></i>
+              <p class="mt-2">No budgets created yet. <a href="{% url 'budget_create' %}">Create your first budget</a></p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

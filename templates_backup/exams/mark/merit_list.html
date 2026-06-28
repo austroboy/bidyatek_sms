@@ -1,0 +1,267 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load mark_tags %} 
+
+{% block extra_css %} 
+<style>
+    
+    .padding {
+      padding: 15px;
+    }
+    .mar-bot {
+      margin-bottom: 0px;
+    }
+    
+    .Box h5,
+    .Box p {
+      margin: 0;
+    }
+    h5 {
+      text-transform: uppercase;
+    }
+    table img {
+      width: 100%;
+      margin: 0 auto;
+    }
+    .table-bordered td,
+    .table-bordered th,
+    .table thead th {
+      border: 1px dotted #ccc !important;
+      padding: -10px 0px;
+    }
+
+    #display_status{
+        display: none !important;
+      }
+
+    #schedule{
+      display: none;
+    }
+
+    @media print {
+      
+      @page {
+        size: A4;
+        margin: 50px;
+      }
+
+    .table td,
+    .table tr,
+    .table thead th {
+      border: 1px solid black !important;
+      padding: -10px 0px;
+    }
+     
+      #display_status{
+        display: block !important;
+      }
+  
+      
+      
+      body {
+        -webkit-print-color-adjust: exact;
+      }
+    }
+
+    
+    #fixed-button {
+      position: fixed;
+      right: 0px;
+      z-index: 1000!important;
+      top: 50%; /* Set top to 50% */
+      transform: translateY(-50%);
+    }
+    
+    #fixed-button button {
+      color: #FCCF14;
+      display: block;
+      height: 50px;
+      position: relative;
+      text-align: center; 
+      line-height: 40px;
+      width: 50px;
+      margin-bottom: 1px;
+      z-index: 1000;
+      border: none;
+    }
+    
+    #fixed-button button:hover {
+      right: 5px;
+      opacity: 1;
+    }
+    
+    .fixed-icon {
+      background-color: #1D1E4E;
+    }
+</style>
+{% endblock extra_css %} 
+
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y"> 
+    {% include 'pageinfo.html' %}
+
+    <div id="fixed-button">
+        <div>
+          <button class="fixed-icon" id="print-tabulation">
+            <i class="bx bxs-printer fs-1"></i>
+          </button>
+        </div>
+  
+        <div> 
+          <button class="fixed-icon" id="previous">
+            <i class="bx bx-skip-previous fs-1"></i>
+          </button>
+        </div>
+    </div>
+    
+    <div class="card ">
+        <div class="card-body">
+
+            <form action="{% url 'merit_list' %}" method="post">
+                {% csrf_token %}
+                <div class="row">
+
+                    <div class="col-md-3">
+                        <div class="mb-3">
+
+                            <div class="">
+                                <select class="form-select" name="exam_name_id" id="exam_name" required>
+                                    <option disabled selected value="">Select Exam</option>
+                                    {% for examname in exam_list %}
+                                    <option value="{{examname.id}}">{{examname.name}}</option>
+                                    {% endfor %}
+
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <div class="">
+                                <select class="form-select" name="class_name_id" id="class_name" required>
+                                    <option disabled selected>Select Class</option>
+
+                                    {% for class in class_list %}
+                                    <option value="{{class.id}}">{{class}}</option>
+                                    {%endfor%}
+
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+
+                    
+
+                    
+
+                    <div class="col-md-6 d-flex justify-content-between gap-2 align-content-center">
+                        <div>
+                            <button class="btn btn-primary " type="submit">Load</button>
+                        </div>
+                        <div  class=" d-flex flex-row  gap-2 align-self-center pb-3">
+                            <input class="form-control form-control" type="text" id="examname" value="{{exam_instance}}"
+                                disabled>
+                            <input class="form-control form-control" type="text" id="classname" value="{{class_instance}}"
+                                disabled>
+                        </div>
+
+
+                    </div>
+                </div>
+
+
+            </form>
+
+            <div  id="printTabulation">
+                <div  class="text-center" id="display_status">
+                    <div class="pt-4" >
+                        <img
+                        width="100px"
+                        src="{{ institute.institute_logo.url }}" 
+                        alt="" 
+                      />
+                    </div>
+                    <div class="">
+                      <div class="fw-bold fs-3">{{ institute.institute_name }}</div>
+                    </div>
+                </div>
+                <div class="table-responsive  pt-4" >
+                    <table class="table table-bordered">
+                      <thead style="background-color: rgba(252, 207, 20, 0.2) !important;">
+                        <tr>
+                          <th class="" colspan="2">Academic Year</th>
+                          <th class="" colspan="3">Class</th>
+                          <th class="" colspan="2">Exam</th>
+                        </tr>
+                        <tr>
+                          <th class="" colspan="2">{{admission_year}}</th>
+                          <th class="" colspan="3"><span class="">{{class_instance}}</span></th>
+                          <th class="" colspan="2"><span class="">{{exam_instance}}</span></th>
+                        </tr>
+                        
+                      </thead>
+                      <tbody>
+                        
+                        {% for result_item in result %}
+                        <tr>
+                            <td class="py-2" colspan="7">
+                                <div class="row">
+                                    <div class="col-4 fw-bold">{{ result_item.student_name }}</div>
+                                    <div class="col-1 text-nowrap">Roll: {{result_item.student_roll }}</div>
+                                    <div class="col-2 fw-bold">Merit: {{ result_item.merit_list }}</div>
+                                    <div class="col-3 text-nowrap">Total Marks: {{ result_item.total_marks }}</div>
+                                    <div class="col-2 text-nowrap">Grade: {{ result_item.gpa }} ({{ result_item.gpa|get_grade_name }})</div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                       
+                        
+                        
+                      </tbody>
+                    
+                    </table>
+                </div>
+            </div>
+            
+                    
+        </div>
+    </div>
+</div>
+<!-- end: Content -->
+
+{% endblock content %} 
+
+{% block extra_javascript %} 
+<script src="{% static 'assets/vendor/libs/print/jQuery.print.js' %}"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+      
+      
+      $("#print-tabulation").on("click", function () {
+        $("#printTabulation").print({
+          globalStyles: true,
+          mediaPrint: false,
+          stylesheet: null,
+          noPrintSelector: ".no-print",
+          iframe: true,
+          append: null,
+          prepend: null,
+          manuallyCopyFormValues: true,
+          deferred: $.Deferred(),
+          timeout: 750,
+          title: "Tabulation Sheet",
+          doctype: "<!doctype html>",
+        });
+      });
+
+      $("#previous").on("click", function () {
+        window.history.back(); 
+      });
+    });
+  </script>
+{% endblock extra_javascript %}

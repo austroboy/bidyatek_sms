@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tax Detail</title>
+</head>
+<body>
+    <h1>{{ heading }}</h1>
+    <h2>{{ subheading }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <label for="salary_process_id">Salary Process ID:</label>
+        <input type="text" id="salary_process_id" name="salary_process_id" value="{{ profile.salary_process.id }}">
+        <label for="gender">Gender:</label>
+        <select id="gender" name="gender">
+            <option value="Male" {% if profile.gender == 'Male' %}selected{% endif %}>Male</option>
+            <option value="Female" {% if profile.gender == 'Female' %}selected{% endif %}>Female</option>
+        </select>
+        <label for="is_senior_citizen">Senior Citizen:</label>
+        <input type="checkbox" id="is_senior_citizen" name="is_senior_citizen" {% if profile.is_senior_citizen %}checked{% endif %}>
+        <label for="is_disabled">Disabled:</label>
+        <input type="checkbox" id="is_disabled" name="is_disabled" {% if profile.is_disabled %}checked{% endif %}>
+        <label for="is_freedom_fighter">Freedom Fighter:</label>
+        <input type="checkbox" id="is_freedom_fighter" name="is_freedom_fighter" {% if profile.is_freedom_fighter %}checked{% endif %}>
+        <button type="submit">Update</button>
+    </form>
+</body>
+</html>
+"""

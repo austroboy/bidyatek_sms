@@ -1,0 +1,276 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% block extra_css %}
+
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css'>
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-5-theme/1.3.0/select2-bootstrap-5-theme.min.css'>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs5/jqc-1.12.4/jszip-2.5.0/dt-1.13.1/af-2.5.1/b-2.3.3/b-colvis-2.3.3/b-html5-2.3.3/b-print-2.3.3/cr-1.6.1/date-1.2.0/fc-4.2.1/fh-3.3.1/kt-2.8.0/r-2.4.0/rg-1.3.0/rr-1.3.1/sc-2.0.7/sb-1.4.0/sp-2.1.0/sl-1.5.0/sr-1.2.0/datatables.min.css"/>
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css'>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<style>
+  *:focus {
+    box-shadow: none !important;
+    outline: none !important;
+  }
+  
+  a {
+    color: #369;
+  }
+  
+  .title-text {
+    margin: 2em 0;
+  }
+  
+  .table > tbody > tr > td:nth-child(1) > i {
+    margin-right: 8px;
+    margin-top: 4px;
+  }
+  
+ 
+  
+  .entries {
+    margin-top: 0;
+  }
+  
+  .pagination {
+    margin-top: 0 !important;
+  }
+  
+  .pagination > li > a {
+    background-color: white;
+    color: #4676d7;
+  }
+  
+  .pagination > li > a:focus,
+  .pagination > li > a:hover,
+  .pagination > li > span:focus,
+  .pagination > li > span:hover {
+    color: #036;
+    background-color: #eee;
+    border-color: #ddd;
+  }
+  
+  .pagination > .active > a {
+    color: white;
+    background-color: #4676d7 !important;
+    border: solid 1px #4676d7 !important;
+  }
+  
+  .pagination > .active > a:hover {
+    background-color: #4676d7 !important;
+    border: solid 1px #4676d7;
+  }
+  
+
+</style>
+
+{% endblock extra_css %} {% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+  <div class="card p-4">
+    <form method="post" action="{% url 'date_wise_total_income' %}" >
+        {% csrf_token %}
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <div id="reportrange" name="reportrange" style="background: #fff; cursor: pointer;padding: 5px 10px; border: 1px solid #ccc;border-radius: 6px; width: 100%">
+              <i class='bx bx-calendar'></i>&nbsp;
+              <span></span> <i class="fa fa-caret-down"></i>
+            </div>
+            <input type="hidden" id="start_date" name="start_date">
+            <input type="hidden" id="end_date" name="end_date">
+          </div>
+      
+          <div  class="col-md-1 mt-2 mt-md-0 text-md-end">
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </div>
+
+          <div style="padding: 0px 4px 4px 4px;"  class="mt-2 col-md-3 border rounded-3 d-flex flex-row  justify-content-between align-content-center ms-auto">
+            <span class="fw-bold pt-2">Total Income:</span><span class="pt-1 ps-1"><input class="form-control form-control-sm text-center" type="text"
+                    value="{{total_income}}" disabled></span>
+          </div>
+        </div>
+    </form>
+    <hr>
+
+    <table class="table table-striped table-bordered w-100 pt-2" id="dataTable">
+      <thead style="background-color: rgba(252, 207, 20, 0.2) !important;">
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Amount</th>
+            <th>Income Head</th>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Document</th>
+            <th>Invoice Number</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for income in incomes %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ income.name }}</td>
+            <td>{{ income.amount }}</td>
+            <td>{{ income.incometype_id }}</td>
+            <td>{{ income.income_date }}</td>
+            <td>{{ income.description }}</td>
+            <td>
+              <a class="text-danger" style="text-decoration: none;" href="/media/{{income.attach_doc}}" download>Download</a>
+            </td>
+            <td>{{ income.invoice_number }}</td>
+          
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+<!-- end: Content -->
+
+{% endblock content %} 
+
+{% block extra_javascript %}
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs5/jqc-1.12.4/jszip-2.5.0/dt-1.13.1/af-2.5.1/b-2.3.3/b-colvis-2.3.3/b-html5-2.3.3/b-print-2.3.3/cr-1.6.1/date-1.2.0/fc-4.2.1/fh-3.3.1/kt-2.8.0/r-2.4.0/rg-1.3.0/rr-1.3.1/sc-2.0.7/sb-1.4.0/sp-2.1.0/sl-1.5.0/sr-1.2.0/datatables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
+<script>
+ 
+ // Function to convert a Blob to a Data URL
+ function blobToDataURL(blob, callback) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    callback(e.target.result);
+  };
+  reader.readAsDataURL(blob);
+}
+
+$(document).ready(function() {
+   
+  fetch('{{ institute.institute_logo.url }}')
+    .then(response => response.blob())
+    .then(blob => {
+      // Convert Blob to Data URL
+      blobToDataURL(blob, function(dataURL) {
+        // DataTable initialization
+        let table = new DataTable("#dataTable", {
+          dom: "<'row'<'col-sm-12 col-md-6 mb-3'l><'col-sm-12 col-md-6 mb-3'f>>" +
+            "<'row'<'col-sm-12'tr>>" +
+            "<'row '<'col-sm-12 col-md-5 mt-3'B><'col-sm-12 col-md-7 mt-3'p>>",
+          paging: true,
+          autoWidth: true,
+          buttons: ["copyHtml5", "csvHtml5", "excelHtml5", {
+            extend: 'pdfHtml5',
+            customize: function(doc) {
+              doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+          
+              // Center-align header and body data
+              doc.content[1].table.body[0].forEach(function(cell) {
+                cell.alignment = 'center';
+              });
+              doc.content[1].table.body.forEach(function(row) {
+                row.forEach(function(cell) {
+                  cell.alignment = 'center';
+                });
+              });
+              {% comment %} doc.content.splice(1, 0, {
+                text: 'Your Company Name',
+                margin: [0, 0, 0, 12], // Adjust margin as needed
+                alignment: 'center',
+                fontSize: 16,
+              }); {% endcomment %}
+              doc.content.splice(0, 0, {
+                image: dataURL,
+                width: 70, // Adjust width as needed
+                margin: [0, 0, 0, 0], // Adjust margin as needed
+                alignment: 'center',
+              });
+            }
+          }],
+          responsive: true,
+          destroy: true,
+          deferRender: true,
+
+          /* responsive */
+          responsive: {
+            details: {
+              display: $.fn.dataTable.Responsive.display.modal({
+                header: (row) => {
+                  let data = row.data();
+                  return data[0];
+                }
+              }),
+
+            }
+          },
+          /* end responsive */
+
+          /* columnDefs */
+          columnDefs: [{
+              targets: 0,
+              render: function(data, type, row, meta) {
+                if (type === "display") {
+                  return (
+                    '<i class="fa fa-external-link" aria-hidden="true"></i>' +
+                    $("<a>")
+                    .attr("href", data)
+                    .attr("target", "_blank")
+                    .text(data)
+                    .wrap("<div></div>")
+                    .parent()
+                    .html()
+                  );
+                } else {
+                  return data;
+                }
+              }
+            }
+            
+          ]
+          /* end columnDefs */
+        });
+      });
+    });
+
+
+
+    $(function() {
+
+        var start = moment().subtract(29, 'days');
+        var end = moment();
+    
+        function cb(start, end) {
+            $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+            $('#start_date').val(start.format('YYYY-MM-DD'));
+            $('#end_date').val(end.format('YYYY-MM-DD'));
+
+            console.log('start_date:', start.format('YYYY-MM-DD'));
+            console.log('end_date:', end.format('YYYY-MM-DD'));
+        }
+    
+        $('#reportrange').daterangepicker({
+            startDate: start,
+            endDate: end,
+            ranges: {
+               'Today': [moment(), moment()],
+               'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+               'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+               'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+               'This Month': [moment().startOf('month'), moment().endOf('month')],
+               'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            }
+        }, cb);
+    
+        cb(start, end);
+    
+    });
+
+});
+</script>
+{% endblock extra_javascript%}

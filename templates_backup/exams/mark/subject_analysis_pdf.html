@@ -1,0 +1,71 @@
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subject Wise Analysis Report</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px;
+        }
+        h2 {
+            text-align: center;
+            background-color: #007BFF;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 20px;
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 20px;
+        }
+        th, td { 
+            border: 1px solid #ddd; 
+            padding: 10px; 
+            text-align: center;
+        }
+        th { 
+            background-color: #007BFF; 
+            color: white;
+            font-size: 14px;
+        }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        tr:nth-child(odd) { background-color: #ffffff; }
+        td { 
+            font-size: 14px; 
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Subject Wise Analysis Report</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Subjects</th>
+                <th>Total Students</th>
+                {% for grade in grading_rules %}
+                <th>{{ grade.letter }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+            <tr>
+                <td>{{ result.subject_name }}</td>
+                <td>{{ result.total_students }}</td>
+                {% for grade in grading_rules %}
+                <td>{{ result|get_key:grade.letter }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+</html>

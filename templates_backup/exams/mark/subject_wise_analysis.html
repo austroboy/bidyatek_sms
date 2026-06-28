@@ -1,0 +1,126 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+    {% include 'pageinfo.html' %}
+    <div class="card p-4">
+        <h2 class="text-center">Subject Wise Analysis</h2>
+
+        <!-- Form to Select Class, Section, and Exam -->
+        <form method="POST" action="{% url 'subject_wise_analysis' %}">
+            {% csrf_token %}
+            <div class="row">
+                <!-- Select Class -->
+                <div class="col-md-3">
+                    <label class="highlight" for="class_id">Select Class:</label>
+                    <select name="class_id" id="class_id" class="form-control" required>
+                        <option value="" disabled selected>Select Class</option>
+                        {% for class in classes %}
+                        <option value="{{ class.id }}" {% if class.id == selected_class_id %}selected{% endif %}>
+                            {{ class.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Select Exam -->
+                <div class="col-md-3">
+                    <label class="highlight" for="exam_id">Select Exam:</label>
+                    <select name="exam_id" id="exam_id" class="form-control" required>
+                        <option value="" disabled selected>Select Exam</option>
+                        {% for exam in exams %}
+                        <option value="{{ exam.id }}" {% if exam.id == selected_exam_id %}selected{% endif %}>
+                            {{ exam.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class=" col-md-3 " style="margin-top: 20px;">
+                    <button type="submit" class="btn" style="background-color: #001f3f; color: white;">
+                        Generate Report
+                    </button>
+                </div>
+
+                <div class="col-md-3 " style="margin-top: 20px;">
+                    <a id="download-pdf-btn" class="btn" style="background-color: #001f3f; color: white;">
+                        Download PDF
+                    </a>
+                </div>
+
+            </div>
+
+            
+        </form>
+
+        <!-- Subject-wise Analysis Table -->
+        {% if results %}
+        
+        <div class="mt-4">
+        <table class="table table-bordered mt-4">
+            <thead>
+                <tr>
+                    <th>Subjects</th>
+                    <th>Total Students</th>
+                    {% for grade in grading_rules %}
+                    <th>
+                        {% if grade.letter == "A_plus" %}
+                            A+
+                        {% elif grade.letter == "A_minus" %}
+                            A-
+                        {% else %}
+                            {{ grade.letter }}
+                        {% endif %}
+                    </th>
+                    {% endfor %}
+                </tr>
+            </thead>        
+            <tbody>
+                {% for result in results %}
+                <tr>
+                    <td>{{ result.subject_name }}</td>
+                    <td>{{ result.total_students }}</td>
+                    {% for grade in grading_rules %}
+                    <td>{{ result|get_key:grade.letter }}</td>  <!-- Fixed Accessing Grade Values -->
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% else %}
+        <p class="text-center mt-4">No results found. Please select a class, section, and exam.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let classSelect = document.getElementById("class_id");
+        let examSelect = document.getElementById("exam_id");
+        let downloadBtn = document.getElementById("download-pdf-btn");
+
+        function updateDownloadLink() {
+            let classId = classSelect.value;
+            let examId = examSelect.value;
+            if (classId && examId) {
+                downloadBtn.href = `/subject_analysis/download_pdf/?class_id=${classId}&exam_id=${examId}`;
+                downloadBtn.style.pointerEvents = "auto";
+                downloadBtn.style.opacity = "1";
+            } else {
+                downloadBtn.href = "#"; // Prevent empty link
+                downloadBtn.style.pointerEvents = "none";
+                downloadBtn.style.opacity = "0.5"; // Make it appear disabled
+            }
+        }
+
+        classSelect.addEventListener("change", updateDownloadLink);
+        examSelect.addEventListener("change", updateDownloadLink);
+
+        updateDownloadLink();  // Ensure the button updates on page load
+    });
+</script>
+
+{% endblock content %}

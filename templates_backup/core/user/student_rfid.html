@@ -1,0 +1,277 @@
+{% extends 'partials/base.html' %} {% load static %} {% block extra_css %}
+<link rel="stylesheet" href="{% static 'assets/css/gtable.css' %}" />
+
+<style>
+   .form-control{
+    font-size: 0.7rem;
+    padding: 0.4375rem 0.575rem;
+    width: auto !important;
+  }
+  .form-select{
+    font-size: 0.7rem;
+    background-image: none;
+    padding: 0.4375rem .5rem 0.4375rem 0.875rem;
+    width: auto !important;
+  }
+
+</style>
+
+{% endblock extra_css %} {% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+
+
+  <div class="card p-4">
+    <form action="{% url 'rfid_update' %}" method="post">
+      {% csrf_token %}
+      <div class="row">
+        
+        <div class="col-md-4">
+          <div class="mb-3">
+            <div class="">
+              <select
+                class="form-select"
+                name="class_id"
+                id="class_name"
+                required
+              >
+                <option disabled selected value="">Select Class</option>
+
+                {% for class in classList %}
+                <option value="{{class.id}}">
+                  {{class}}
+                </option>
+                {%endfor%}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-2 mb-2 mb-md-0">
+          <button class="btn btn-primary" type="submit">Load</button>
+        </div>
+
+        <div
+          class="col-md-4 d-flex justify-content-between gap-2 align-content-center"
+        >
+          <div class="d-flex flex-row gap-2 align-self-center pb-3">
+           
+            <input
+              class="form-control form-control"
+              type="text"
+              id="classname"
+              value="{{class_instance}}"
+              disabled
+            />
+          </div>
+        </div>
+
+      </div>
+    </form>
+    <hr />
+    <div class="table-responsive">
+      <table id="softdatatable" class="table table-striped table-bordered table-centered table-nowrap mb-0">
+        <thead>
+          <tr>
+            <th class="align-middle text-center ">
+              Image
+            </th>
+            <th class="align-middle" scope="col">
+              <input type="text" class="form-control" id="idFilter" placeholder="Filter by ID">
+            </th>
+            <th class="align-middle" scope="col">
+              <input type="text" class="form-control" id="nameFilter" placeholder="Filter by Name">
+            </th>
+            
+            <th class="align-middle" ><input type="text" class="form-control" id="rollFilter" placeholder="Filter by Roll"></th>
+            
+            <th>
+              <select class="form-select" name="admission_year_Filter" id="admission_year_Filter">
+                {% for admission_year in admission_year_list %}
+                <option value="{{admission_year}}">{{admission_year}}</option>
+                {% endfor %}
+              </select>
+            </th>
+            
+            <th class="align-middle" ><input type="text" class="form-control" id="rfidFilter" placeholder="Filter by RFID"></th>
+            
+            <th class="align-middle" scope="col">
+              <div class="export__file">
+                <label for="export-file" class="export__file-btn" title="Export File"></i></label>
+                <input type="checkbox" id="export-file">
+                <div class="export__file-options">
+                  <label>Export As &nbsp; ➜</label>
+                  <label for="export-file" id="toPDF">PDF <img src="images/pdf.png" alt=""></label>
+                  <label for="export-file" id="toJSON">JSON <img src="images/json.png" alt=""></label>
+                  <label for="export-file" id="toCSV">CSV <img src="images/csv.png" alt=""></label>
+                  <label for="export-file" id="toEXCEL">EXCEL <img src="images/excel.png" alt=""></label>
+                </div>
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          
+
+
+        </tbody>
+      </table>
+
+      
+    </div>
+    <!-- Pagination Controls -->
+    <div id="pagination"></div>
+  </div>
+</div>
+<!-- end: Content -->
+
+{% endblock content %} {% block extra_javascript %}
+
+<script>
+ 
+  
+let currentPage = 1;
+
+function fetchStudents() {
+  const userid = $('#idFilter').val();
+  const name = $('#nameFilter').val();
+  const roll = $('#rollFilter').val();
+  const admission_yearName = $('#admission_year_Filter').val();
+  const rfid = $('#rfidFilter').val();
+  
+    $.ajax({
+      url: "{% url 'rfid_update' %}",
+      method: "GET",
+      data: {
+        userid: userid,
+        name: name,
+        roll: roll,
+        admission_year: admission_yearName,
+        rfid: rfid,
+        page: currentPage
+      },
+      success: function (response) {
+        $('#tableBody').empty();
+        const students = response.students;
+
+        students.forEach(student => {
+          
+          const row = `<tr>
+                      <th class="text-end">
+                        
+                      </th>
+                      <td>${student.student_userid}</td>
+                      <td>${student.name}</td>
+                      <td>${student.roll}</td>
+                      <td>${student.admission_year}</td>
+                      <td>
+                            <input type="text" 
+                            class="form-control student-rfid-input" 
+                            data-id="${student.student_id}" 
+                            value="${student.student_rfid || ''}" 
+                            placeholder="Enter RFID" />
+
+                      </td>
+                      
+                      <td class="text-center">
+                        
+                      <button class="btn btn-sm btn-primary save-rfid" data-id="${student.student_id}">
+                        Save
+                      </button>
+                          
+                        </td>
+                  </tr>`;
+          $('#tableBody').append(row);
+        });
+
+        
+        updatePagination(response.total_pages, response.current_page);
+      },
+      error: function (xhr) {
+        console.error('AJAX Error:', xhr.statusText);
+      }
+    });
+  }
+
+  function updatePagination(totalPages, currentPage) {
+    $('#pagination').empty();
+    if (totalPages < 11) {
+      for (let i = 1; i <= totalPages; i++) {
+        const button = `<button style="background-color: ${i == currentPage ? '#e3f2fd' : 'white'}; color: ${i == currentPage ? 'inherit' : 'inherit'};" onclick="goToPage(${i})">${i}</button>`;
+        $('#pagination').append(button);
+      }
+    } else {
+      const startPage = Math.max(1, currentPage - 5);
+      const endPage = Math.min(totalPages, currentPage + 5);
+      if (currentPage > 1) {
+        const prevButton = `<button onclick="goToPage(${currentPage - 1})">Prev</button>`;
+        $('#pagination').prepend(prevButton);
+      }
+      for (let i = startPage; i <= endPage; i++) {
+        const button = `<button onclick="goToPage(${i})">${i}</button>`;
+        $('#pagination').append(button);
+      }
+
+      if (currentPage < totalPages) {
+        const nextButton = `<button onclick="goToPage(${currentPage + 1})">Next</button>`;
+        $('#pagination').append(nextButton);
+      }
+      if (currentPage === 1) {
+        $('#pagination').prepend('<button disabled>Prev</button>');
+      }
+      if (currentPage === totalPages) {
+        $('#pagination').append('<button disabled>Next</button>');
+      }
+    }
+
+  }
+
+  function goToPage(page) {
+    currentPage = page;
+    fetchStudents();
+  }
+
+  $(document).ready(function () {
+    $('#idFilter, #rollFilter,#admission_year_Filter,#rfidFilter,#nameFilter').on('input', function () {
+      currentPage = 1;
+      fetchStudents();
+    });
+
+    fetchStudents();  // Initial AJAX call to load data dynamically
+    
+  });
+
+
+  $(document).on('change', '.student-rfid-input', function () {
+  const studentId = $(this).data('id');
+  const newRfid = $(this).val();
+
+  $.ajax({
+    url: "{% url 'update_rfid' %}",
+    type: "POST",
+    data: {
+      student_id: studentId,
+      rfid: newRfid
+    },
+    success: function (response) {
+      if (response.status === 'success') {
+        console.log('RFID updated successfully');
+      } else {
+        console.log('Failed to update RFID: ' + response.message);
+      }
+    },
+    error: function (xhr, status, error) {
+      alert('An error occurred while updating RFID: ' + error);
+    }
+  });
+});
+
+
+</script>
+
+
+
+
+{% endblock extra_javascript%}

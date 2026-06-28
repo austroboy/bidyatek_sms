@@ -1,0 +1,96 @@
+<div class="d-flex justify-content-between pb-0">
+    <div class="p-2 align-items-center">
+      <button class="btn btn-primary" hx-get="{% url 'addsyllabus' %}" hx-target="#syllabusdialog"> 
+        <i class='bx bx-plus-circle me-2'></i>
+        Add
+      </button>
+    </div>
+    <div class="d-flex">
+      <div class="form-group d-none d-md-block">
+        
+        <input class="form-control" type="text" id="searchName" ng-model="searchName" placeholder="Type name to search" />
+      </div>
+    </div>
+  </div>
+  
+  <div class="table-responsive card-body">
+  <table class="table table-nowrap mb-0">
+    <thead class="teal-thead">
+      <tr class="shadow-sm">
+        <th scope="col">ID</th>
+        <th scope="col">Exam name</th>
+        <th scope="col">Class</th>
+        <th scope="col">Subject</th>
+        <th scope="col">Academic Year</th>
+        <th scope="col">Academic Session Year</th>
+        <th scope="col">Attachment File</th>
+        <th scope="col">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% for syllabus in syllabuslist %}
+  
+      <tr>
+        <td>
+            {{forloop.counter}}
+        </td>
+        <td>
+            {{syllabus.exam_name}}
+        </td>
+        <td>
+            {{syllabus.classname}}
+        </td>
+        <td>
+            {{syllabus.subject_id}}
+        </td>
+        <td>
+            {{syllabus.academic_year}}
+        </td>
+        <td>
+            {{syllabus.academic_session_year|default:""}}
+        </td>
+
+        <td>
+          <a 
+          href="{{ syllabus.files.url }}" 
+          download="{{ syllabus.files.name }}" 
+        >
+          Download
+        </a>
+        </td>
+  
+        <td>
+          <div class="dropdown">
+            <button
+              type="button"
+              class="btn p-0 dropdown-toggle hide-arrow"
+              data-bs-toggle="dropdown"
+            >
+              <i class="bx bx-dots-vertical-rounded"></i>
+            </button>
+            <div class="dropdown-menu">
+              <a
+                class="dropdown-item"
+                href="javascript:void(0);"
+                hx-get="{% url 'editsyllabus' pk=syllabus.pk %}"
+                hx-target="#syllabusdialog"
+                ><i class="bx bx-edit-alt me-1"></i> Edit</a
+              >
+              <a
+                class="dropdown-item"
+                hx-delete="{% url 'delsyllabus' pk=syllabus.pk %}"
+                href="javascript:void(0);"
+                hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+                hx-target="#syllabusadd"
+                hx-confirm="are you want to delete?"
+                ><i class="bx bx-trash me-1"></i> Delete</a
+              >
+            </div>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  

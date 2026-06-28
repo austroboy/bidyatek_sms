@@ -1,0 +1,274 @@
+/* =========================================================
+   THEME MASTER FIX (LOAD THIS CSS ABSOLUTELY LAST)
+   Theme Color: #568490
+   Fixes:
+   - leftover blue/purple
+   - button text invisible (because of global <a> color)
+   - improves dashboard Events/Notice look
+   ========================================================= */
+
+   :root{
+    --theme: #568490;
+    --theme-rgb: 86,132,144;
+    --theme-dark: #3f6f79;
+    --theme-darker: #2c525a;
+  
+    --theme-soft: rgba(var(--theme-rgb), .10);
+    --theme-soft-2: rgba(var(--theme-rgb), .16);
+    --theme-soft-3: rgba(var(--theme-rgb), .22);
+    --theme-border: rgba(var(--theme-rgb), .28);
+  
+    /* map tokens */
+    --primary: var(--theme);
+    --primary-2: var(--theme-dark);
+    --brand: var(--theme);
+    --brand-dark: var(--theme-darker);
+  
+    /* bootstrap */
+    --bs-primary: var(--theme) !important;
+    --bs-primary-rgb: var(--theme-rgb) !important;
+    --bs-link-color: var(--theme) !important;
+    --bs-link-hover-color: var(--theme-dark) !important;
+  }
+  
+  /* -----------------------------
+     IMPORTANT FIX: DO NOT force all <a> to theme color
+     (This was breaking button text)
+  ------------------------------ */
+  a{ color: inherit; }
+  a:not(.btn):not(.dropdown-item):not(.nav-link):not(.page-link){
+    color: var(--theme) !important;
+  }
+  a:not(.btn):not(.dropdown-item):not(.nav-link):not(.page-link):hover{
+    color: var(--theme-dark) !important;
+  }
+  
+  /* -----------------------------
+     Primary helpers
+  ------------------------------ */
+  .bg-primary,
+  .badge.bg-primary,
+  .bg-label-primary{
+    background-color: var(--theme) !important;
+  }
+  .text-primary{ color: var(--theme) !important; }
+  .border-primary{ border-color: var(--theme) !important; }
+  
+  /* -----------------------------
+     BUTTONS (full fix)
+  ------------------------------ */
+  .btn-primary,
+  .btn-primary:hover,
+  .btn-primary:focus,
+  .btn-primary:active,
+  .btn-primary.active{
+    background-color: var(--theme) !important;
+    border-color: var(--theme) !important;
+    box-shadow: 0 10px 18px rgba(var(--theme-rgb), .22) !important;
+    background-image: none !important;
+    color: #fff !important;
+  }
+  .btn-primary *{ color: #fff !important; }
+  
+  /* FIX: danger button text (your Delete) */
+  .btn-danger,
+  .btn-danger:hover,
+  .btn-danger:focus,
+  .btn-danger:active{
+    color: #fff !important;
+  }
+  .btn-danger *{ color: #fff !important; }
+  
+  /* outline */
+  .btn-outline-primary{
+    color: var(--theme) !important;
+    border-color: var(--theme) !important;
+  }
+  .btn-outline-primary:hover{
+    background: var(--theme) !important;
+    color: #fff !important;
+  }
+  
+  /* label */
+  .btn-label-primary{
+    background: var(--theme-soft-2) !important;
+    color: var(--theme-darker) !important;
+    border-color: transparent !important;
+  }
+  
+  /* Buttons inside table (extra safety) */
+  .table .btn,
+  .table a.btn{ border-radius: 10px; }
+  .table .btn.btn-primary,
+  .table a.btn.btn-primary{
+    background-color: var(--theme) !important;
+    border-color: var(--theme) !important;
+    color: #fff !important;
+  }
+  
+  /* -----------------------------
+     FORMS focus
+  ------------------------------ */
+  .form-control:focus,
+  .form-select:focus,
+  .form-check-input:focus{
+    border-color: var(--theme) !important;
+    box-shadow: 0 0 0 4px rgba(var(--theme-rgb), .18) !important;
+  }
+  .form-check-input:checked{
+    background-color: var(--theme) !important;
+    border-color: var(--theme) !important;
+  }
+  
+  /* -----------------------------
+     NAVBAR / SIDEBAR gradients
+  ------------------------------ */
+  .navbar_cont__wrapper,
+  .navbar.bg-navbar-theme,
+  .layout-navbar,
+  .navbar{
+    background: linear-gradient(90deg, var(--theme-darker) 0%, var(--theme) 100%) !important;
+  }
+  
+  aside.logicunite_side_menu,
+  nav.logicunite_side_menu,
+  #layout-menu.logicunite_side_menu,
+  .bg-menu-theme,
+  .layout-menu{
+    background: linear-gradient(180deg, var(--theme-darker) 0%, var(--theme) 100%) !important;
+  }
+  
+  /* -----------------------------
+     TABLE HEADERS
+  ------------------------------ */
+  .table thead th,
+  .table thead td{
+    background-color: var(--theme) !important;
+    color: #fff !important;
+    border-color: rgba(255,255,255,.18) !important;
+  }
+  
+  /* -----------------------------
+     DATATABLES paginate + hover
+  ------------------------------ */
+  table.dataTable tbody tr:hover{
+    background-color: rgba(var(--theme-rgb), .10) !important;
+  }
+  .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+  .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover{
+    background: var(--theme) !important;
+    border-color: var(--theme) !important;
+    color: #fff !important;
+  }
+  
+  /* -----------------------------
+     FULLCALENDAR / events.css
+  ------------------------------ */
+  .fc-state-down,
+  .fc-state-active,
+  .fc-state-disabled{
+    background-color: var(--theme) !important;
+    border-color: var(--theme) !important;
+    color: #fff !important;
+  }
+  .fc-event,
+  .fc-event-dot{ background-color: var(--theme) !important; }
+  
+  /* =========================================================
+     PATCH OTHER CSS FILES (hard-coded blues)
+     - mark config, period config, menu search, testimonial etc
+  ========================================================= */
+  
+  /* mark config + period config scrollbar thumbs */
+  .grid-container::-webkit-scrollbar-thumb{
+    background-color: var(--theme) !important;
+    border-radius: 20px !important;
+  }
+  
+  /* mark config header blocks */
+  .grid-item{
+    background-color: rgba(var(--theme-rgb), .12) !important;
+  }
+  .grid-item.subject_mark h5{
+    background-color: rgba(var(--theme-rgb), .16) !important;
+  }
+  
+  /* menu search config (remove #696cff) */
+  .search-bar:focus-within{
+    border-color: var(--theme) !important;
+    box-shadow: 0 0 0 4px rgba(var(--theme-rgb), .18) !important;
+  }
+  .icon-container:hover{
+    background-color: var(--theme) !important;
+    box-shadow: 0 0 0 4px rgba(var(--theme-rgb), .14) !important;
+  }
+  .icon-wrapper:hover{
+    background-color: var(--theme) !important;
+    box-shadow: 0 2px 10px rgba(var(--theme-rgb), .22) !important;
+  }
+  
+  /* testimonial title (remove mediumblue) */
+  .t-header .t-title{
+    background-color: var(--theme) !important;
+  }
+  
+  /* =========================================================
+     DASHBOARD UPGRADE (Events/Notice look + hover)
+     (works if your containers use .events / .notice)
+  ========================================================= */
+  .events, .notice{
+    border-radius: 18px !important;
+    border: 1px solid rgba(15,23,42,.10) !important;
+    box-shadow: 0 12px 28px rgba(15,23,42,.10) !important;
+    overflow: hidden;
+    background: #fff;
+    transition: transform .20s ease, box-shadow .20s ease, border-color .20s ease;
+  }
+  .events:hover, .notice:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 18px 34px rgba(15,23,42,.14) !important;
+    border-color: rgba(var(--theme-rgb), .30) !important;
+  }
+  
+  /* header bar */
+  .events .heading, .notice .heading{
+    background: linear-gradient(90deg, var(--theme-darker) 0%, var(--theme) 100%) !important;
+    color: #fff !important;
+  }
+  .events .heading h4, .events .heading h5, .events .heading h3,
+  .notice .heading h4, .notice .heading h5, .notice .heading h3{
+    color: #fff !important;
+  }
+  
+  /* nicer "View All" */
+  .view-all,
+  .viewAll,
+  .btn-view-all,
+  .btn-viewall{
+    background: rgba(255,255,255,.18) !important;
+    color: #fff !important;
+    border: 1px solid rgba(255,255,255,.26) !important;
+    border-radius: 999px !important;
+    font-weight: 700 !important;
+  }
+  .view-all:hover,
+  .viewAll:hover,
+  .btn-view-all:hover,
+  .btn-viewall:hover{
+    background: rgba(255,255,255,.28) !important;
+  }
+  
+  /* empty state */
+  .events .body:empty::before,
+  .notice .body:empty::before{
+    content: "No data available";
+    display: grid;
+    place-items: center;
+    height: 140px;
+    margin: 14px;
+    border-radius: 14px;
+    color: rgba(15,23,42,.55);
+    background: rgba(var(--theme-rgb), .06);
+    border: 1px dashed rgba(var(--theme-rgb), .28);
+  }
+  

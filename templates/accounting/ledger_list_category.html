@@ -1,0 +1,76 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .header {
+        font-size: 1.5rem;
+        font-weight: 500;
+    }
+
+    .table-container {
+        border: 1px solid #e2e8f0;
+        margin: 1.5rem 0;
+        border-radius: 0.375rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .table {
+        width: 100%;
+        color: #4a5568;
+        font-size: 0.875rem;
+        line-height: 1.5rem;
+    }
+
+    .table th,
+    .table td {
+        padding: 0.75rem;
+        text-align: center;
+    }
+
+    .table thead {
+        border-bottom: 2px solid #e2e8f0;
+        background-color: #ebf8ff;
+    }
+
+    .table tbody tr {
+        border-bottom: 1px solid #e2e8f0;
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+    <h1 class="header">{{ category_name }} Ledgers</h1>
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Ledger Category</th>
+                    <th>Ledger Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in categories %}
+                    <tr>
+                        <td colspan="2"><strong>{{ category.name }}</strong></td>
+                    </tr>
+                    {% for ledger in ledgers %}
+                        {% if ledger.category == category %}
+                            <tr>
+                                <td>{{ category.name }}</td>
+                                <td>
+                                    <a href="{% url 'journal_list_by_ledger' ledger.id %}">
+                                        {{ ledger.name }}
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+            </tbody>            
+        </table>
+    </div>
+</div>
+{% endblock content %}

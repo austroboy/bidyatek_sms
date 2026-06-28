@@ -1,0 +1,308 @@
+{% extends 'partials/base.html' %} {% load static %} {% block extra_css %}
+
+
+<link 
+      rel="stylesheet"
+      href="{% static 'assets/vendor/libs/datatables/datatables.min.css' %}"
+/>
+<link rel="stylesheet" href="{% static 'assets/css/datatable.css' %}" />
+
+{% endblock extra_css %} {% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+  <!-- Hoverable Table rows -->
+  <div class="card p-4">
+    
+    <div class="table-responsive" >
+      <table
+        id="datatable"
+        class="table  table-md table-striped table-hover compact hover stripe" width="100%"
+      >
+        <thead style="background-color:rgba(20, 168, 154, 0.12) !important ;">
+          <tr class="shadow-sm">
+            <th>#</th>
+            <th>Title</th>
+            <th>Type</th>
+            <th>File</th>
+            <th>Class</th>
+            <th>Admission year</th>
+            <th>Academic Session</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody class="table-border-bottom-0">
+          {% for download in downloadList %}
+          <tr>
+            <!-- Only five columns provided in the body -->
+            <td>{{forloop.counter}}</td>
+            <td>{{download.title}}</td>
+            <td>{{download.download_type}}</td>
+            <td>
+              <a class="text-danger" style="text-decoration: none;" href="/media/{{download.files}}" download>Download</a>
+            </td>
+            <td>{{download.class_id}}</td>
+            <td>{{download.academic_year}}</td> 
+            <td>{{download.academic_session_year}}</td>
+            <td>
+
+              {% comment %} <a
+                href=""
+                class="btn btn-sm btn-primary btn-edit me-1 px-2"
+                title="Edit"
+                data-toggle="tooltip"
+                >Edit</a
+              > {% endcomment %}
+              <a
+                href="{% url 'del_download' download.id %}"
+                class="btn btn-sm btn-danger btn-delete px-2"
+                title="Delete"
+                data-toggle="tooltip"
+                >Delete</a
+              >
+              
+            </td>
+            
+          </tr>
+
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <!--/ Hoverable Table rows -->
+
+  
+</div>
+<!-- end: Content -->
+
+<div class="modal" id="backDropModal" data-bs-backdrop="static" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <form class="modal-content" method="post" action="{% url 'study_material' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="modal-header">
+        <h5 class="modal-title" id="backDropModalTitle">Add File</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+
+        <div class="input-group mb-3">
+          <span class="input-group-text w-50" for="tt">Title</span>
+          <input type="text" id="tt" name="title" class="form-control" placeholder="Title">
+        </div>
+
+        <div class="input-group mb-3">
+          <label class="input-group-text w-50" for="dt">Download Type</label>
+          <select class="form-select" name="download_type" id="dt">
+            <option selected hidden disabled> Select Type</option>
+            <option value="Assignment">Assignment</option>
+            <option value="Hand Book">Hand Book</option>
+            <option value="Home Work">Home Work</option>
+            <option value="Class Notes">Class Notes</option>
+            <option value="Others Download">Others Download</option>
+          </select>
+        </div>
+
+        <div class="input-group mb-3">
+          <span class="input-group-text w-50" id="ft">File</span>
+          <input name="files" type="file" class="form-control" placeholder="Title">
+        </div>
+
+        <div class="input-group mb-3">
+          <label class="input-group-text w-50" for="ct">Class</label>
+          <select class="form-select" name="class_id" id="ct">
+            <option selected hidden disabled> Select Type</option>
+            {% for class in stuclass %}
+            <option value="{{class.id}}">{{class}}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="input-group mb-3">
+          <label class="input-group-text w-50" for="ay">Admission Year</label>
+          <select class="form-select" name="admission_year" id="ay">
+            <option selected hidden disabled>Select Admission Year</option>
+            {% for admission_year in admission_year_list %}
+            <option value="{{admission_year.id}}">{{admission_year}}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="input-group mb-3" id="academic-session-container" style="display: none;">
+          <label class="input-group-text w-50" for="as">Academic Session</label>
+          <select class="form-select" name="academic_session_year" id="as">
+            <option selected hidden disabled>Select Academic Session</option>
+            {% for academic_session in academic_session_list %}
+              <option value="{{academic_session.id}}">{{academic_session}}</option>
+            {% endfor %}
+          </select>
+        </div>
+        
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+          Close
+        </button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+{% endblock content %} {% block extra_javascript %}
+
+<script src="{% static 'assets/vendor/libs/datatables/pdfmake.min.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/datatables/vfs_fonts.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/datatables/datatables.min.js' %}"></script>
+
+
+<script>
+  "use strict";
+  pdfMake.fonts = {
+    Roboto: {
+      normal: 'Roboto-Regular.ttf',
+      bold: 'Roboto-Medium.ttf',
+      italics: 'Roboto-Italic.ttf',
+      bolditalics: 'Roboto-MediumItalic.ttf'
+    },
+    nikosh: {
+      normal: "NikoshBAN.ttf",
+      bold: "NikoshBAN.ttf",
+      italics: "NikoshBAN.ttf",
+      bolditalics: "NikoshBAN.ttf"
+    }
+  };
+$(document).ready(function () {
+  const dtSelector = "#datatable";
+  const dt = $(dtSelector).DataTable({
+    fixedHeader: { header: true },
+    //   dom: "<'row'<'col-sm-4'B><'col-sm-8'f>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+    dom: `<'row'<'col-sm-12 col-md-6'B><'col-sm-12 col-md-6 d-none d-sm-flex justify-content-end'fl>>
+            <'row dt-row'<'col-sm-12'tr>>
+            <'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>`,
+    
+    buttons: {
+
+    buttons: [ 
+        {
+            
+            text: "Add new record",
+            attr: {
+                role: "button",
+                class: "btn btn-primary btn-create"
+            },
+            action: function (e, dt, node, config) {
+              $('#backDropModal').modal('show');
+          }
+        },
+
+        {
+            extend: "collection",
+            text: "Export",
+            autoClose: true,
+            buttons: [
+              'excel', 'print',
+              {
+                extend: "pdfHtml5",
+                exportOptions: {
+                  columns: function (idx, data, node) {
+                    return idx !== 0 && idx !== dt.column(':last').index();
+                  },
+                }, 
+                customize: function (doc) {
+                  doc.defaultStyle = {
+                    font: 'nikosh'
+                  };
+                  
+                  // Set the table width to fit page
+                  var colCount = doc.content[1].table.body[0].length;
+                  var colWidths = [];
+                  for (var i = 0; i < colCount; i++) {
+                    colWidths.push('*');
+                  }
+                  doc.content[1].table.widths = colWidths;
+                  
+                  // Set page margins
+                  doc.pageMargins = [10, 10, 10, 10];
+                  
+                  // Center-align the table headers
+                  doc.content[1].table.body[0].forEach(function (header) {
+                    header.alignment = 'center';
+                  });
+                  
+                  // Center-align the table content
+                  doc.content[1].table.body.slice(1).forEach(function (row) {
+                    row.forEach(function (cell) {
+                      cell.alignment = 'center';
+                    });
+                  });
+  
+                  // Set page orientation to landscape if table is too wide
+                  if (colCount > 5) {
+                    doc.pageOrientation = 'landscape';
+                  }
+  
+                  // Auto-size columns based on content
+                  doc.content[1].table.body.forEach(function (row, rowIndex) {
+                    row.forEach(function (cell, cellIndex) {
+                      if (rowIndex === 0) {
+                        cell.fillColor = '#1D1E4E';
+                      }
+                    });
+                  });
+                },
+              },
+            ],
+          },
+        ],
+      },
+    pagingType: "simple_numbers",
+    pageLength: 25,
+    scrollX: true,
+  });
+   
+  
+});
+
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const classField = document.getElementById("ct");
+    const academicSessionContainer = document.getElementById("academic-session-container");
+
+    classField.addEventListener("change", function () {
+      const selectedClass = classField.value;
+
+      if (selectedClass) {
+        // Make an AJAX request to check if the class has a group
+        fetch(`/check-class-group/${selectedClass}/`)
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.has_group) {
+              // Show the academic session field
+              academicSessionContainer.style.display = "flex";
+            } else {
+              // Hide the academic session field
+              academicSessionContainer.style.display = "none";
+            }
+          })
+          .catch((error) => {
+            console.error("Error checking class group:", error);
+          });
+      } else {
+        // Hide the academic session field if no class is selected
+        academicSessionContainer.style.display = "none";
+      }
+    });
+  });
+</script>
+
+
+{% endblock extra_javascript%}

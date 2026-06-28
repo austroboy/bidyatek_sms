@@ -1,0 +1,100 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+
+{% block extra_css %}
+{% endblock extra_css %} 
+
+{% block content %}
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+
+  <div class="card">
+    <div class="card-body">
+      <!-- Transactions for the Month -->
+      <h3 class="mb-4">Transactions for {{ month|date:"F Y" }}</h3>
+      
+      {% comment %} {% if is_feb_2025 %}
+      <div class="alert alert-warning">
+        <strong>Notice:</strong> PDF downloads are temporarily unavailable for February 2025 transactions.
+      </div>
+      {% endif %} {% endcomment %}
+      
+      <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Transaction ID</th>
+                    <th>Amount</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in transactions %}
+                <tr>
+                    <td>{{ transaction.tran_date|date:"d M Y H:i" }}</td>
+                    <td>{{ transaction.tran_id }}</td>
+                    <td>৳{{ transaction.amount }}</td>
+                    <td>
+                        {% if not is_feb_2025 %}
+                        <a href="{% url 'ssl_commerz:payment_receipt' tran_id=transaction.tran_id %}" 
+                           class="btn btn-sm btn-success">
+                            Download PDF
+                        </a>
+                        {% else %}
+                        <button class="btn btn-sm btn-secondary" disabled>
+                            Download Unavailable
+                        </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">No transactions found for this month</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- end: Content -->
+{% endblock content %} 
+
+{% block extra_javascript %}
+<script src="https://unpkg.com/htmx.org@1.8.4"></script>
+
+<script>
+    ; (function () {
+        const modal = new bootstrap.Modal(document.getElementById("incomeheadmodal"))
+
+        htmx.on("htmx:afterSwap", (e) => {
+            if (e.detail.target.id == "incomeheaddialog") {
+                modal.show()
+            }
+        })
+
+        htmx.on("htmx:beforeSwap", (e) => {
+            if (e.detail.target.id == "incomeheaddialog" && !e.detail.xhr.response) {
+                modal.hide()
+                e.detail.shouldSwap = false
+                if (e.detail.xhr.getResponseHeader("HX-Trigger")) {
+                  const hxTriggerHeader = e.detail.xhr.getResponseHeader("HX-Trigger");
+                  if (hxTriggerHeader) {
+                    const hxTriggerData = JSON.parse(hxTriggerHeader);
+                    if (hxTriggerData.messages === "Success") {
+                        htmx.trigger("#pageinfo", "refresh");
+                    }
+                  }
+                }
+            }
+        })
+
+        htmx.on("hidden.bs.modal", () => {
+            document.getElementById("incomeheaddialog").innerHTML = ""
+        })
+    })()
+</script>
+{% endblock extra_javascript %}

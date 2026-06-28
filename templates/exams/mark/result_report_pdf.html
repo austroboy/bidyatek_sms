@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Result Report</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 10px;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10px;
+            color: #333;
+        }
+
+        .container {
+            width: 100%;
+            margin: auto;
+            padding: 10px;
+        }
+
+        .header {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #1D1E4E;
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 6px;
+            text-align: center;
+            font-size: 9px;
+        }
+
+        th {
+            background-color: #2A3F54;
+            color: white;
+            font-size: 10px;
+        }
+
+        .highlight {
+            font-weight: bold;
+            color: #1D1E4E;
+        }
+
+        .summary {
+            font-size: 11px;
+            margin-bottom: 10px;
+        }
+
+        .summary span {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            Result Report
+        </div>
+
+        <!-- Summary -->
+        <div class="summary">
+            <p><span>Total Students:</span> {{ total_students }}</p>
+            <p><span>Passed:</span> {{ passed_students }}</p>
+            <p><span>Failed:</span> {{ failed_students }}</p>
+            <p><span>Absent:</span> {{ absent_students }}</p>
+        </div>
+
+        <!-- GPA Distribution -->
+        <h3 class="section-title">GPA Distribution</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>GPA Category</th>
+                    <th>Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>GPA 4.5 & Above</td><td>{{ gpa_data.4.5_and_above }}</td></tr>
+                <tr><td>GPA 4 & Above</td><td>{{ gpa_data.4_and_above }}</td></tr>
+                <tr><td>GPA 3.5 & Above</td><td>{{ gpa_data.3.5_and_above }}</td></tr>
+                <tr><td>GPA 3 & Above</td><td>{{ gpa_data.3_and_above }}</td></tr>
+                <tr><td>GPA 2.5 & Above</td><td>{{ gpa_data.2.5_and_above }}</td></tr>
+                <tr><td>GPA 2 & Above</td><td>{{ gpa_data.2_and_above }}</td></tr>
+                <tr><td>GPA Below 2</td><td>{{ gpa_data.below_2 }}</td></tr>
+            </tbody>
+        </table>
+
+        <!-- Highest and Lowest Marks -->
+        <h3 class="section-title">Highest and Lowest Marks</h3>
+        <p>Highest Marks: <span class="highlight">{{ highest_marks }}</span></p>
+        <p>Lowest Marks: <span class="highlight">{{ lowest_marks }}</span></p>
+
+        <!-- Subject-wise Failed and Absent -->
+        <h3 class="section-title">Subject-wise Failed and Absent</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Total Failed</th>
+                    <th>Total Absent</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for subject in subject_wise_data %}
+                <tr>
+                    <td>{{ subject.mark_id__subject_conf_id__subject_id__name }}</td>
+                    <td>{{ subject.total_failed }}</td>
+                    <td>{{ subject.total_absent }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>

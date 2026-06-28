@@ -1,0 +1,230 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+  @media print {
+    .no-print { display: none !important; }
+    .card { box-shadow: none !important; border: 1px solid #ddd !important; }
+    body { font-size: 12px; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+
+  <!-- Toolbar -->
+  <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a href="{% url 'budget_dashboard' %}" style="color:#2D6A73;">Budget</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'budget_detail' budget.pk %}" style="color:#2D6A73;">{{ budget.title }}</a></li>
+        <li class="breadcrumb-item active">Annual Report</li>
+      </ol>
+    </nav>
+    <button onclick="window.print()" class="btn btn-outline-primary btn-sm">
+      <i class='bx bx-printer me-1'></i>Print Report
+    </button>
+  </div>
+
+  <!-- Report Header -->
+  <div class="card shadow-sm mb-4" style="border-top: 4px solid #2D6A73;">
+    <div class="card-body text-center py-4">
+      <h3 class="fw-bold mb-1" style="color:#2D6A73;">Annual Budget vs Actual Report</h3>
+      <h5 class="text-muted mb-1">{{ budget.title }}</h5>
+      <p class="text-muted mb-0 small">Period: {{ budget.year_start }} to {{ budget.year_end }} &nbsp;|&nbsp; Status: <strong>{{ budget.status }}</strong></p>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm text-center py-3">
+        <div class="text-muted small">Total Income Planned</div>
+        <h4 class="fw-bold text-success">৳ {{ total_income_planned|floatformat:0 }}</h4>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm text-center py-3">
+        <div class="text-muted small">Total Income Actual</div>
+        <h4 class="fw-bold" style="color:#2D6A73;">৳ {{ total_income_actual|floatformat:0 }}</h4>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm text-center py-3">
+        <div class="text-muted small">Total Expense Planned</div>
+        <h4 class="fw-bold text-danger">৳ {{ total_expense_planned|floatformat:0 }}</h4>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm text-center py-3">
+        <div class="text-muted small">Total Expense Actual</div>
+        <h4 class="fw-bold text-dark">৳ {{ total_expense_actual|floatformat:0 }}</h4>
+      </div>
+    </div>
+  </div>
+
+  <!-- Income Section -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-white fw-bold py-3" style="color:#2E7D32;">
+      <i class='bx bx-trending-up me-2'></i>Income — Budget vs Actual
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead style="background:rgba(46,125,50,0.08);">
+          <tr>
+            <th>Income Head</th>
+            <th class="text-end">Planned (৳)</th>
+            <th class="text-end">Actual (৳)</th>
+            <th class="text-end">Variance (৳)</th>
+            <th class="text-center">% Achieved</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in income_data %}
+          <tr>
+            <td class="fw-semibold">{{ row.name }}</td>
+            <td class="text-end">{{ row.planned|floatformat:2 }}</td>
+            <td class="text-end {% if row.actual > 0 %}text-success{% else %}text-muted{% endif %}">{{ row.actual|floatformat:2 }}</td>
+            <td class="text-end {% if row.variance >= 0 %}text-success{% else %}text-danger{% endif %}">
+              {{ row.variance|floatformat:2 }}
+            </td>
+            <td class="text-center">
+              <span class="badge bg-{{ row.status }}">{{ row.pct }}%</span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot class="fw-bold table-success">
+          <tr>
+            <td>TOTAL INCOME</td>
+            <td class="text-end">৳ {{ total_income_planned|floatformat:2 }}</td>
+            <td class="text-end">৳ {{ total_income_actual|floatformat:2 }}</td>
+            <td class="text-end">৳ {% widthratio total_income_planned 1 1 %}</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- Expense Section -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-white fw-bold py-3 text-danger">
+      <i class='bx bx-trending-down me-2'></i>Expense — Budget vs Actual
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead style="background:rgba(198,40,40,0.06);">
+          <tr>
+            <th>Expense Head</th>
+            <th class="text-end">Planned (৳)</th>
+            <th class="text-end">Actual (৳)</th>
+            <th class="text-end">Variance (৳)</th>
+            <th class="text-center">% Spent</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in expense_data %}
+          <tr {% if row.pct >= 100 %}class="table-danger"{% elif row.pct >= 80 %}class="table-warning"{% endif %}>
+            <td class="fw-semibold">{{ row.name }}</td>
+            <td class="text-end">{{ row.planned|floatformat:2 }}</td>
+            <td class="text-end">{{ row.actual|floatformat:2 }}</td>
+            <td class="text-end {% if row.variance >= 0 %}text-success{% else %}text-danger fw-bold{% endif %}">
+              {{ row.variance|floatformat:2 }}
+            </td>
+            <td class="text-center">
+              <span class="badge bg-{{ row.status }}">{{ row.pct }}%</span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot class="fw-bold table-danger">
+          <tr>
+            <td>TOTAL EXPENSE</td>
+            <td class="text-end">৳ {{ total_expense_planned|floatformat:2 }}</td>
+            <td class="text-end">৳ {{ total_expense_actual|floatformat:2 }}</td>
+            <td colspan="2"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- Monthly Trend -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-white fw-bold py-3" style="color:#2D6A73;">
+      <i class='bx bx-line-chart me-2'></i>Monthly Trend
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead style="background:rgba(45,106,115,0.08);">
+          <tr>
+            <th>Month</th>
+            <th>Year</th>
+            <th class="text-end">Income (৳)</th>
+            <th class="text-end">Expense (৳)</th>
+            <th class="text-end">Net (৳)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in monthly_trend %}
+          <tr>
+            <td>
+              {% with months="January February March April May June July August September October November December" %}
+                {% for mo in months.split %}
+                  {% if forloop.counter == m.month %}{{ mo }}{% endif %}
+                {% endfor %}
+              {% endwith %}
+            </td>
+            <td>{{ m.year }}</td>
+            <td class="text-end text-success">৳ {{ m.income|floatformat:0 }}</td>
+            <td class="text-end text-danger">৳ {{ m.expense|floatformat:0 }}</td>
+            <td class="text-end {% if m.income >= m.expense %}text-success{% else %}text-danger{% endif %}">
+              ৳ {{ m.income|floatformat:0 }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Revision Log -->
+  {% if revisions %}
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-white fw-bold py-3 text-warning">
+      <i class='bx bx-history me-2'></i>Revision Log
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Category</th>
+            <th class="text-end">Old Amount</th>
+            <th class="text-end">New Amount</th>
+            <th>Reason</th>
+            <th>By</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for rev in revisions %}
+          <tr>
+            <td>{{ rev.revised_at|date:"d M Y" }}</td>
+            <td>{{ rev.budget_category.name }}</td>
+            <td class="text-end">৳ {{ rev.old_amount|floatformat:2 }}</td>
+            <td class="text-end">৳ {{ rev.new_amount|floatformat:2 }}</td>
+            <td class="text-muted small">{{ rev.reason|truncatechars:80 }}</td>
+            <td>{{ rev.revised_by|default:"—" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

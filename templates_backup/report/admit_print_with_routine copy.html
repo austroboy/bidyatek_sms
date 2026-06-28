@@ -1,0 +1,536 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+
+{% block extra_css %} 
+<style>
+    /* admit card */
+p {
+    margin-bottom: 0 !important;
+  }
+  .admitCard__wrapper {
+    width: 100%;
+    min-width: 400px;
+    overflow-x: auto;
+    height: 600px;
+    background-color: #1d1e4e;
+    /* background-image: linear-gradient(140deg, #232C79, #048EDD, #232C79, #048EDD, #232C79); */
+    margin-bottom: 30px;
+    padding: 15px;
+  }
+  .admitCard {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+  }
+  .admitCard__top {
+    padding: 15px 10px;
+    background: #d2f2d4;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 1px 4px rgb(0, 0, 8);
+    border-radius: 2px 2px 0 0;
+  }
+  .admitCard__top .img_wrapper {
+    padding: 0 6px;
+    width: 61px;
+    height: auto;
+    object-fit: contain;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .admitCard__top .img_wrapper img {
+    width: 100%;
+    height: 100%;
+  }
+  .admitCard__top .heading_wrapper {
+    text-align: center;
+    width: calc(100% - 100px);
+    padding-right: 20px;
+  }
+  
+  .admitCard__top .heading_wrapper h1 {
+    font-size: 25px;
+    color: #1d1e4e;
+    text-transform: uppercase;
+    line-height: 20px;
+    margin-bottom: 7px;
+    font-weight: bold;
+  }
+  
+  .admitCard__top .heading_wrapper p {
+    color: rgba(0, 0, 0, 0.713);
+    font-size: 13px;
+    margin: 0 !important;
+  }
+  .admitCard__address {
+    background: #e9f9ea;
+    color: rgba(0, 0, 0, 0.713);
+    text-align: center;
+    line-height: 18px;
+    font-weight: 500;
+    padding: 15px;
+  }
+  
+  .admitCard__address p {
+    margin-bottom: 0 !important;
+  }
+  
+  /* admit card main body part */
+  .admitCard__main {
+    position: relative;
+    background: #fff;
+    border-radius: 0 0 2px 2px;
+    height: calc(100% - 127px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .admitCard__main__bg {
+    position: absolute;
+    opacity: 0.1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-size: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    background-image: url('{{ institute.institute_logo.url }}');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 200px;
+    z-index: 10000;
+  }
+  
+  .admitCard__main .heading {
+    text-align: center;
+  }
+  .admitCard__main .heading h2 {
+    display: inline-block;
+    color: #fff;
+    border-radius: 3px;
+    padding: 7px 15px;
+    padding-bottom: 7px;
+    line-height: 14px;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    background: #1d1e4e;
+    margin-top: 21px;
+    font-size: 18px;
+  }
+  
+  .admitCard__main .heading p {
+    color: darkblue;
+    font-weight: bold;
+    line-height: 17px;
+    margin-bottom: 25px !important;
+  }
+  
+  /* admit card form */
+  .admitCard__form {
+    padding-right: 15px;
+    width: 60%;
+  }
+  
+  .admitCard__form .item span {
+    white-space: nowrap;
+  }
+  .admitCard__form .item > .dots {
+    width: 100%;
+    height: 17px;
+    border-bottom: 1px dotted darkblue;
+  }
+  .admitCard__form .subitem {display: flex;}
+  
+  .admitCard__form .subitem .dots {
+    width: 100%;
+    height: 17px;
+    border-bottom: 1px dotted darkblue;
+  }
+  
+  .admitCard__address {
+    display: flex;
+    justify-content: space-between;
+  }
+  .special_info {
+    color: rgb(242, 102, 102);
+    border-radius: 2px;
+    padding: 10px 0;
+  }
+  .sign_wrapper {
+    padding: 0 22px;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 3px;
+    margin-top: auto;
+  }
+  .sign_wrapper .sign {
+    border-top: 1px dotted #1d1e4e;
+  }
+  
+  /* exam routine */
+  .exam_routine {
+    margin-bottom: 5px;
+    width: 40%;
+    border-left: 1px dashed #ccc;
+    padding-left: 15px;
+  }
+  .exam_routine table {
+    width: 100%;
+    text-align: left;
+  }
+  
+  .exam_routine table td,
+  .exam_routine table th {
+    font-size: 14px;
+    font-weight: normal;
+  }
+  
+  .exam_routine table tr:first-of-type th {
+    border-top: none;
+  }
+  .exam_routine table tr:last-of-type td {
+    border-bottom: none;
+  }
+  
+  .exam_routine table tr th:first-of-type,
+  .exam_routine table tr th:last-of-type,
+  .exam_routine table tr td:first-of-type,
+  .exam_routine table tr td:last-of-type {
+    border-left: none;
+    border-right: none;
+  }
+  .exam_routine h3 {
+    text-align: center;
+    font-size: 16px;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  
+  .exam_routine table tr:first-of-type th {
+    font-weight: 500;
+  }
+  .form_routine_wrap {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    margin: 20px 0;
+  }
+  /* ========== printer icon ========= */
+  .printer_icon {
+    position: fixed;
+    right: 0;
+    top: 45%;
+    cursor: pointer;
+    z-index: 100;
+  }
+  .admitCard__address .exam_date {
+    display: flex;
+  }
+  
+  /* print media query */
+  @media print {
+      * {
+          margin: 0;
+          padding: 0;
+        }
+      
+        @page {
+          margin: 20px;
+        }
+  
+    
+    .admitCard__wrapper {
+      margin: 0 auto;
+      width: 100%;
+      max-height: 540px;
+      overflow: hidden;
+      background-color: #000;
+      margin-bottom: 15px;
+    }
+  
+    .admitCard__top {
+      padding: 3px 0;
+    }
+  
+    .admitCard__top .heading_wrapper h1 {
+      margin-bottom: 0;
+      font-size: 20px;
+    }
+  
+    .admitCard__address {
+      padding: 0;
+      padding-bottom: 2px;
+    }
+    .admitCard__main {
+      height: calc(100% - 75px);
+    }
+    .form_routine_wrap{
+      padding: 4px;
+    }
+  
+    .admitCard__main .heading h2 {
+      margin-top: 11px;
+    }
+  
+    .admitCard__main .heading p {
+      margin-bottom: 0 !important;
+    }
+    .admitCard__form .item {
+      margin-bottom: 0;
+    }
+    body {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      -moz-print-color-adjust: exact;
+      margin: 0;
+      padding: 0;
+    }
+  }
+
+  #fixed-button {
+    position: fixed;
+    right: 0px;
+    z-index: 1000!important;
+    top: 50%; /* Set top to 50% */
+    transform: translateY(-50%);
+  }
+
+
+
+  #fixed-button button {
+    color: #FCCF14;
+    display: block;
+    height: 50px;
+    position: relative;
+    text-align: center; 
+    line-height: 40px;
+    width: 50px;
+    margin-bottom: 1px;
+    z-index: 1000;
+    border: none;
+  }
+
+  #fixed-button button:hover {
+    right: 5px;
+    opacity: 1;
+  }
+
+  .fixed-icon {
+    background-color: #1D1E4E;
+  }
+  
+</style>
+{% endblock extra_css %} 
+
+{% block content %}
+
+<!-- start: Content -->
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+    {% include 'pageinfo.html' %}
+
+    <div class="d-none d-md-block" id="fixed-button">
+        <div>
+          <button class="fixed-icon" id="print-admitcard">
+            <i class="bx bxs-printer fs-1"></i>
+          </button>
+        </div>
+  
+        <div>
+          <button class="fixed-icon" id="previous">
+            <i class="bx bx-skip-previous fs-1"></i>
+          </button>
+        </div>
+    </div>
+
+    <div class="card p-4">
+      
+        <form action="{% url 'admit_card_with_routine' %}" method="post">
+          {% csrf_token %}
+          <div class="row d-flex gap-2 justify-content-between">
+            <div class="col-md-4">
+              <select  class="form-select " name="class_name_id" required>
+                <option disabled hidden selected>Select Class</option>
+                {% for class in classList %}
+                
+                <option value="{{class.id}}">{{class}}</option>
+  
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-4">
+              <select  class="form-select " name="exam_name_id" required>
+                <option disabled hidden selected>Select Exam</option>
+                {% for exam in examList %}
+  
+                <option value="{{exam.id}}">{{exam.name}}</option>
+  
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-3 text-md-end ">
+              <button type="submit" class="btn btn-primary" id="searchButton">
+                View Admit
+              </button>
+            </div>
+            
+          </div>
+        </form>
+        
+      <hr>
+
+      <div class="row" id="admitCard">
+        <div class="col-12">
+          <div class="admitCard__items">
+            
+            {% for student in studentlist %}
+            <div class="admitCard__wrapper">
+              <div class="admitCard">
+                <div class="admitCard__top">
+                  <div class="img_wrapper">
+                    <img src="{{ institute.institute_logo.url }}" alt="logo">
+                  </div>
+                  <div class="heading_wrapper">
+                    <h1>{{ institute.institute_name }}</h1>
+                    <p>{{ institute.education_thana_id }}, {{ institute.education_district_id }}</p>
+
+                  </div>
+                  {% if student.student_field.avatar %}
+                  <div class="img_wrapper">
+                    <img src="{{student.student_field.avatar.url}}" alt="pro pic">
+                  </div>
+                  {% endif %}
+                </div>
+                <div class="admitCard__address">
+                  <p>Exam name:{{exam}}</p>
+                  <div class="exam_date">
+                    <span>Examination Date:</span>
+                    <div class="dots">.............................</div>
+                  </div>
+                </div>
+                <div class="admitCard__main">
+                    <div class="admitCard__main__bg">
+                        {% for _ in range_limit %}
+                          <p>{{ institute.institute_name }} &nbsp &nbsp &nbsp &nbsp </p>
+                        {% endfor %}
+                      </div>
+                  <div class="heading">
+                    <h2>Admit Card</h2>
+                  </div>
+                  <div class="form_routine_wrap">
+                    <div class="admitCard__form">
+
+                      <div class="item class_sec_roll">
+                        <div class="class subitem">
+                          <span>Name &nbsp&nbsp&nbsp :</span>
+                          <div> <p class="ps-2 pe-3 text-nowrap">{{student.student_field.name}}</p> </div>
+                        </div>
+                        <div class="class subitem">
+                          <span>Class &nbsp&nbsp&nbsp&nbsp :</span>
+                          <div> <p class="ps-2">{{student.class_id.class_shift_id.class_id}}</p></div>
+                        </div>
+                        <div class="sec subitem">
+                          <span>Section &nbsp:</span>
+                          <div> <p class="ps-2">{{student.class_id.section_id}}</p> </div>
+                        </div>
+                        <div class="roll subitem">
+                          <span>Roll &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp :</span>
+                          <div><p class="ps-2">{{student.roll_no}}</p></div>
+                        </div>
+                      </div>
+
+                      <div class="special_info">
+                        <p>E.B.: Bring this Admit Card to the Exam Hall</p>
+                        <p>E.B.: Every student should be presenrt before 15 minutes of exam</p>
+                        
+                        <p>E.B.: Every student should bring the following necessary stuffs. Such as 
+                          Board, Sharpener, Ruler, Pencil, Pen and Eraser.</p>
+                      </div>
+                    </div>
+                    <!-- exam routine -->
+                    <div class="exam_routine" style="text-align: center;">
+                      <table>
+                        <thead style="background: #e9f9ea;">
+                            <tr class="text-center">
+                              <th>Subject</th>
+                              <th>Date</th>
+                              <th>Start Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for schedule in scheduleList %}
+                          <tr  class="text-center">
+                            <td>{{schedule.subject_id}}</td>
+                            <td>{{schedule.exam_date}}</td>
+                            <td>{{schedule.start_time}}</td>
+                          </tr>
+                        {% endfor %}
+
+                        </tbody>
+
+                      </table>
+                    </div>
+                  </div>
+
+
+
+                  <div class="sign_wrapper">
+                    <div class="sign">
+                      <p>Sign.of Exam-in-Charge</p>
+                    </div>
+                    <div class="sign">
+                      <p>Sign.of Exam-in-Charge</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+            
+          </div>
+        </div>
+      </div>
+    
+    </div>
+
+</div>
+<!-- end: Content -->
+
+{% endblock content %} 
+{% block extra_javascript %} 
+
+<script src="{% static 'assets/vendor/libs/print/html2pdf.bundle.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/print/jQuery.print.js' %}"></script>
+
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $("#print-admitcard").on("click", function () {
+          $("#admitCard").print({
+            globalStyles: true,
+            mediaPrint: false,
+            stylesheet: null,
+            noPrintSelector: ".no-print",
+            iframe: true,
+            append: null,
+            prepend: null,
+            manuallyCopyFormValues: true,
+            deferred: $.Deferred(),
+            timeout: 750,
+            title: "Invoice",
+            doctype: "<!doctype html>",
+          });
+        });
+
+        $("#previous").on("click", function () {
+          window.history.back(); 
+        });
+      });
+    </script>
+
+
+
+{% endblock extra_javascript%}

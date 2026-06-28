@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voucher List</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#from_date, #to_date").datepicker({ dateFormat: 'yy-mm-dd' });
+        });
+    </script>
+    <style>
+      
+    .filter-section {
+      display: flex;
+      gap: 20px;
+      justify-content: space-between;
+      align-items: end;
+      margin-bottom: 20px;
+    }
+    @media screen and (max-width: 720px) {
+      .filter-section {
+         flex-wrap: wrap;
+      }
+    }
+    .filter-section div{
+      width: 100%;
+    }
+    .filter-section label {
+      font-size: 16px;
+      color: #333333;
+      margin-bottom: 2px;
+    }
+    .filter-section input, .filter-section select {
+      padding: 8px;
+      border: 2px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+      width: 100%;
+    }
+    .filter-section input:focus, .filter-section select:focus {
+      border: 2px solid #1a237e;
+      outline: none;
+    }
+
+    .filter-section button {
+      padding: 10px 25px;
+      background-color: #1a237e;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .filter-section button:hover {
+      background-color: #283593;
+    }
+    h3 {
+      text-align: center;
+      color: #333333;
+      margin: 35px 0;
+    }
+    .section {
+      margin-bottom: 20px;
+    }
+    .section h3 {
+      text-align: center;
+      background-color: #e3f2fd;
+      color:#333333;
+      margin: 0;
+      padding: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 4px 4px 0 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      color: #333333;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th{
+      background-color: #e3f2fd;
+      font-weight: bold;
+    }
+    
+    th, td {
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
+    }
+    td[colspan="3"] {
+       font-weight: bold;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    .total-row {
+      background-color: #e3f2fd!important;
+      font-weight: bold;
+    }
+    table #download{
+      background-color: rgb(195, 37, 37);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 2px 5px;
+    }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Filters -->
+         <form method="get">
+            <div class="filter-section">
+                <div>
+                  <label for="from_date">From Date</label>
+                          <input type="text" id="from_date" name="from_date" value="{{ request.GET.from_date }}">
+      
+                </div>
+                <div>
+                  <label for="to_date">To Date</label>
+                          <input type="text" id="to_date" name="to_date" value="{{ request.GET.to_date }}">
+      
+                </div>
+                <div>
+                  <label for="trn_type">Transaction Type:</label>
+                          <select name="trn_type" id="trn_type">
+                              <option value="">Select Transaction Type</option>
+                              {% for trn in trn_types %}
+                              <option value="{{ trn.0 }}" {% if trn.0 == request.GET.trn_type %}selected{% endif %}>{{ trn.1 }}
+                              </option>
+                              {% endfor %}
+                          </select>
+                </div>
+                <button type="submit">Search</button>
+              </div>
+         </form>
+        
+        <!-- Title -->
+        <h3 class="header">Voucher List</h3>
+
+        <!-- Income Section -->
+        <div class="section">
+            
+    {% if vouchers %}
+          <table>
+           <thead>
+              <th>User Name</th>
+              <th>Date</th>
+              <th>Ledger Name</th>
+              <th>Trn Type</th>
+              <th>Amount</th>
+              <th>Voucher ID</th>
+              <th>Voucher Note</th>
+              <th>Voucher No</th>
+              <th>Download</th>
+           </thead>
+            <tbody>
+                {% for voucher in vouchers %}
+                <tr>
+                    <td>
+                        {% if voucher.class_name == 'Receive' %}
+                        {{ voucher.received_from.name }}
+                        {% elif voucher.class_name == 'Payment' %}
+                        {{ voucher.payment_for.name }}
+                        {% elif voucher.class_name == 'ContraTransaction' %}
+                        {{ voucher.credit_ledger.name }} - {{ voucher.debit_ledger.name }}
+                        {% elif voucher.class_name == 'JournalTransaction' %}
+                        {{ voucher.ledger.name }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if voucher.class_name == 'ContraTransaction' %}
+                        {{ voucher.date }}
+                        {% elif voucher.class_name == 'JournalTransaction' %}
+                        {{ voucher.transaction_date }}
+                        {% else %}
+                        {{ voucher.date }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if voucher.class_name == 'Receive' %}
+                        {{ voucher.received_from.name }}
+                        {% elif voucher.class_name == 'Payment' %}
+                        {{ voucher.payment_for.name }}
+                        {% elif voucher.class_name == 'ContraTransaction' %}
+                        {{ voucher.credit_ledger.name }} - {{ voucher.debit_ledger.name }}
+                        {% elif voucher.class_name == 'JournalTransaction' %}
+                        {{ voucher.ledger.name }}
+                        {% endif %}
+                    </td>
+                    <td>{{ voucher.class_name }}</td>
+                    <td>{{ voucher.amount }}</td>
+                    <td>{{ voucher.voucher_no }}</td>
+                    <td>{{ voucher.description }}</td>
+                    <td>{{ voucher.voucher_no }}</td>
+                    <td><button id="download">Download</button></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+    <div class="no-vouchers">No vouchers found</div>
+    {% endif %}
+        </div>
+
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+</body>
+
+</html>

@@ -1,0 +1,292 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load widget_tweaks %}
+{% block extra_css %} 
+<link
+rel="stylesheet"
+href="{% static 'assets/css/routine.css' %}"
+class="template-customizer-core-css"
+/>
+{% endblock extra_css %} 
+
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+    {% include 'pageinfo.html' %}
+    
+    <div class="card ">
+        
+
+        <div class="card-body">
+            <div class="d-flex border-bottom pb-2 justify-content-between">
+                <div class="h4">Class Routine</div>
+                <div class="form-group d-none d-md-block">
+                    <input class="form-control" type="text" id="searchName" ng-model="searchName" placeholder="Type name to search" />
+                </div>
+    
+            </div>
+
+
+            <div class="row">
+                <div id="form-container">
+                  <form id="period-form">
+                    <label for="num-periods">Number of periods per day:</label>
+                    <input
+                      type="number"
+                      id="num-periods"
+                      name="num-periods"
+                      min="1"
+                      max="10"
+                      required
+                    />
+                    <label for="num-periods">Break Period:</label>
+                    <input
+                      type="number"
+                      id="break-period"
+                      name="break-period"
+                      min="2"
+                      max="9"
+                    />
+                    <button type="submit">Create Table</button>
+                  </form>
+                </div>
+
+                <div id="subjects">
+                  <div class="subject" draggable="true">
+                    <p>Math</p>
+                    <p>(Alim)</p>
+                  </div>
+                  <div class="subject" draggable="true">
+                    <p>Science</p>
+                    <p>(Iqbal)</p>
+                  </div>
+                  <div class="subject" draggable="true">
+                    <p>History</p>
+                    <p>(Imam)</p>
+                  </div>
+                  <div class="subject" draggable="true">
+                    <p>Art</p>
+                    <p>(Sumili)</p>
+                  </div>
+                  <div class="subject" draggable="true">
+                    <p>PE</p>
+                    <p>(Zia)</p>
+                  </div>
+                  <div class="subject" draggable="true">
+                    <p>Music</p>
+                    <p>(Kawsar)</p>
+                  </div>
+                  <div class="subject" draggable="true">
+                    <p>Geography</p>
+                    <p>(Osmani)</p>
+                  </div>
+                  <div class="subject" draggable="true">
+                    <p>English</p>
+                    <p>(Harun)</p>
+                  </div>
+                </div>
+
+                <div class="table-collapse">
+                  <button id="table-collapse-button">Collapse Table</button>
+                </div>
+
+                <div id="schedule-container">
+                  <div class="school-info">
+                    <div>
+                      <img
+                        src="https://img.freepik.com/premium-vector/education-logo-design-template-school-organization_731136-111.jpg"
+                        alt=""
+                      />
+                    </div>
+                    <div>
+                      <h3>Class Routine</h3>
+                      <div class="class-info">
+                        <p>Class: 10</p>
+                        <p>Section: A</p>
+                        <p>Shift: Morning</p>
+                      </div>
+                    </div>
+                    <div>
+                      <p>Date: 12th january, 2025</p>
+                    </div>
+                  </div>
+                  <div
+                    id="schedule"
+                    style="grid-template-columns: 100px repeat(7, 1fr)"
+                  >
+                    <div class="header"></div>
+                    <div class="header">
+                      <p>Period 1</p>
+                      <p class="time">(8:00 AM - 9:00 AM)</p>
+                    </div>
+                    <div class="header">
+                      <p>Period 2</p>
+                      <p class="time">(8:00 AM - 9:00 AM)</p>
+                    </div>
+                    <div class="header">
+                      <p>Period 3</p>
+                      <p class="time">(8:00 AM - 9:00 AM)</p>
+                    </div>
+                    <div class="header break">Break</div>
+                    <div class="header">
+                      <p>Period 4</p>
+                      <p class="time">(8:00 AM - 9:00 AM)</p>
+                    </div>
+                    <div class="header">
+                      <p>Period 5</p>
+                      <p class="time">(8:00 AM - 9:00 AM)</p>
+                    </div>
+                    <div class="header">
+                      <p>Period 6</p>
+                      <p class="time">(8:00 AM - 9:00 AM)</p>
+                    </div>
+                    <div class="day-label">
+                      Saturday
+                      <!-- <i class="bx bx-copy"></i><i class="bx bx-paste"></i> -->
+                    </div>
+                    <div class="period" id="sat-p1">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period" id="sat-p2">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period" id="sat-p3">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period break">Break</div>
+                    <div class="period" id="sat-p4">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period" id="sat-p5">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period" id="sat-p6">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="day-label">Sunday</div>
+                    <div class="period" id="sun-p1">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period" id="sun-p2">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period" id="sun-p3">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period break">Break</div>
+                    <div class="period" id="sun-p4">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period" id="sun-p5">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period" id="sun-p6">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="day-label">Monday</div>
+                    <div class="period" id="mon-p1">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period" id="mon-p2">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period" id="mon-p3">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period break">Break</div>
+                    <div class="period" id="mon-p4">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period" id="mon-p5">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period" id="mon-p6">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="day-label">Tuesday</div>
+                    <div class="period" id="tue-p1">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period" id="tue-p2">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period" id="tue-p3">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period break">Break</div>
+                    <div class="period" id="tue-p4">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period" id="tue-p5">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period" id="tue-p6">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="day-label">Wednesday</div>
+                    <div class="period" id="wed-p1">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period" id="wed-p2">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period" id="wed-p3">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period break">Break</div>
+                    <div class="period" id="wed-p4">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period" id="wed-p5">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period" id="wed-p6">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="day-label">Thursday</div>
+                    <div class="period" id="thu-p1">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period" id="thu-p2">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period" id="thu-p3">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period break">Break</div>
+                    <div class="period" id="thu-p4">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period" id="thu-p5">
+                      <button class="delete">X</button>
+                    </div>
+                    <div class="period" id="thu-p6">
+                      <button class="delete">X</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="buttons">
+                  <button id="save-button">Save</button>
+                  <button id="print-button">Print</button>
+                </div>
+              </div>
+            
+            
+    
+        </div>
+
+        
+    </div>
+ 
+  
+</div>
+<!-- end: Content -->
+
+{% endblock content %} 
+{% block extra_javascript %} 
+
+<script src="{% static 'assets/js/routine.js' %}"></script>
+    
+{% endblock extra_javascript%}

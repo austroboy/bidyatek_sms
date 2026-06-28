@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Paid Students Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            font-size: 13px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #444;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin-top: 15px;
+        }
+
+        thead th {
+            background-color: #f8f9fa;
+            padding: 8px;
+            border: 1px solid #dee2e6;
+            font-weight: bold;
+            text-align: center;
+            font-size: 11px;
+        }
+
+        tbody td {
+            padding: 6px 8px;
+            border: 1px solid #dee2e6;
+            text-align: center;
+            word-wrap: break-word;
+            font-size: 11px;
+        }
+
+        .footer {
+            margin-top: 25px;
+            font-size: 12px;
+            color: #6c757d;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title">Paid Students Report</div>
+        <div class="subtitle">
+            <strong>Period:</strong> {{ from_date }} to {{ to_date }}<br>
+            <strong>Class:</strong> {{ class_name }} |
+            <strong>Section:</strong> {{ section }} |
+            <strong>Group:</strong> {{ group }} |
+            <strong>Version:</strong> {{ version }} |
+            <strong>Shift:</strong> {{ shift }}
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Phone Number</th>
+                <th>Roll No</th>
+                <th>Class</th>
+                <th>Section</th>
+                <th>Group</th>
+                <th>Version</th>
+                <th>Shift</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td>{{ student.name }}</td>
+                <td>{{ student.phone_number|default:"N/A" }}</td>
+                <td>{{ student.roll_no|default:"N/A" }}</td>
+                <td>{{ student.class_name }}</td>
+                <td>{{ student.section }}</td>
+                <td>{{ student.group|default:"-" }}</td>
+                <td>{{ student.version }}</td>
+                <td>{{ student.shift }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        Generated on: {{ generated_date|date:"Y-m-d H:i" }} |
+        Total Students: {{ students|length }}
+    </div>
+</body>
+</html>

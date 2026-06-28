@@ -1,0 +1,71 @@
+{% load static %}
+<form hx-post="{% url 'budget_category_add' budget.pk %}"
+      hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+      class="modal-content">
+
+  <div class="modal-header" style="background:linear-gradient(135deg,#2D6A73,#1E4D55);">
+    <h5 class="modal-title text-white">
+      <i class='bx bx-plus-circle me-2'></i>
+      Add {% if cat_type == 'INCOME' %}Income{% else %}Expense{% endif %} Category
+    </h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+  </div>
+
+  <div class="modal-body">
+
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger py-2">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <!-- Hidden category type -->
+    <input type="hidden" name="category_type" value="{{ cat_type|default:'INCOME' }}">
+
+    {% if cat_type == 'INCOME' %}
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Income Head <span class="text-danger">*</span></label>
+      {{ form.income_head }}
+      {% if form.income_head.errors %}
+        <div class="text-danger small">{{ form.income_head.errors }}</div>
+      {% endif %}
+    </div>
+    {% else %}
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Expense Head <span class="text-danger">*</span></label>
+      {{ form.expense_head }}
+      {% if form.expense_head.errors %}
+        <div class="text-danger small">{{ form.expense_head.errors }}</div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Planned Amount (৳) <span class="text-danger">*</span></label>
+      {{ form.planned_amount }}
+      {% if form.planned_amount.errors %}
+        <div class="text-danger small">{{ form.planned_amount.errors }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Monthly Distribution</label>
+      {{ form.distribution_type }}
+      <div class="form-text">
+        <strong>Equal Monthly</strong>: auto-splits yearly amount into 12 equal months.<br>
+        <strong>Manual</strong>: you set each month's amount manually.
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Notes</label>
+      {{ form.notes }}
+    </div>
+
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+    <button type="submit" class="btn btn-primary">
+      <i class='bx bx-save me-1'></i>Save Category
+    </button>
+  </div>
+</form>

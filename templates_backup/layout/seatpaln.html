@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SeatPlan</title>
+    <style>
+        /* admit card */
+
+        .seatplan_single_wrapper {
+            font-family: "Noto Sans", sans-serif;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .seatplan_single_wrapper p {
+            margin-bottom: 0;
+            margin: 5px 0;
+        }
+
+        .seatplan_single {
+            max-width: 500px;
+            width: 100%;
+            padding: 3px;
+            margin: 5px;
+        }
+
+        /* seat plan top heading area */
+        .ss_top {
+            text-align: center;
+            position: relative;
+            padding-bottom: 5px;
+        }
+
+        .profile_picture {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+
+        .school_logo {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 60px;
+            height: 60px;
+            border: 1px solid gainsboro;
+            object-fit: contain;
+        }
+
+        .ss_top h1 {
+            font-size: 15px;
+            margin-bottom: 0;
+            margin-top: 0;
+        }
+
+        .ss_top p {
+            line-height: 18px;
+        }
+
+        .ss_top h2 {
+            font-size: 12px;
+            display: inline-block;
+            width: calc(100% - 170px);
+            padding: 5px 0;
+            background-color: rgb(98, 125, 141);
+            color: #fff;
+            margin-bottom: 0;
+            margin-top: 0;
+        }
+
+        /* seat plan main details */
+        .ss_main {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ssm_details {
+            margin-top: 20px;
+        }
+
+        .ssm_details tr td {
+            height: 16px;
+            padding: 3px 0;
+        }
+
+        .ssm_details tr td:first-child {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+        }
+
+        .ssm_details tr td:first-child h6 {
+            font-size: 13px;
+            width: 100px;
+            margin-bottom: 0;
+            margin-top: 0;
+        }
+
+        .ssm_details tr td:first-child span {
+            font-size: 13px;
+        }
+
+        .ssm_details tr td:last-child {
+            font-size: 13px;
+            padding-left: 30px;
+        }
+
+        /* student roll */
+        .ssm_roll {
+            border: 2px solid rgb(14, 83, 123);
+        }
+
+        .ssm_roll table {
+            border-collapse: collapse;
+        }
+
+        .ssm_roll tr:first-of-type td {
+            border-bottom: 1px solid rgb(14, 83, 123);
+        }
+
+        .ssm_roll tr td {
+            padding: 3px 30px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+
+
+        /* media query */
+        @media screen and (max-width: 860px) and (min-width: 767px) {
+        .ssm_roll tr td {
+            padding: 3px 10px;
+        }
+}
+
+        /* media query for print */
+        @media print {
+            .seatplan_single_wrapper {
+                page-break-after: always;
+            }
+        }
+
+        @media print {
+            @page {
+                size: A4;
+                margin: 20px 0;
+            }
+
+        }
+
+
+
+        .seatplan__main {
+                max-width: 740px;
+                display: grid;
+                grid-gap: 0;
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: repeat(5, 1fr);
+                margin: 0;
+                padding: 0;
+            }
+
+            
+            .seatplan_single_wrapper {
+                border: 1px dashed black;
+                width: 370px;
+                font-family: "Noto Sans", sans-serif;
+                padding: 0;
+                margin-left: 15px;
+            }
+
+            .seatplan_single {
+                width: 350px;
+                height: 188px;
+                overflow: hidden;
+                border: 2px solid black;
+                padding: 3px;
+                margin: 8px 5px;
+            }
+
+            /* seat plan top heading area */
+            .ss_top {
+                text-align: center;
+                position: relative;
+                padding-bottom: 10px;
+            }
+
+            .profile_picture {
+                position: absolute;
+                bottom: 10px;
+                left: 0px;
+                width: 40px;
+                height: 40px;
+                object-fit: contain;
+            }
+
+            .school_logo {
+                position: absolute;
+                bottom: 10px;
+                right: 0px;
+                width: 40px;
+                height: 40px;
+                object-fit: contain;
+            }
+
+            .ss_top h1 {
+                font-size: 15px;
+            }
+
+            .ss_top p {
+                line-height: 18px;
+            }
+
+            .ss_top h2 {
+                font-size: 12px;
+                display: inline-block;
+                background-color: rgb(168, 168, 168);
+                color: #fff;
+                padding: 3px 0;
+            }
+
+            /* seat plan main details */
+            .ss_main {
+                display: flex;
+                align-items: center;
+                justify-content: start;
+            }
+
+            .ssm_details {
+                padding-top: 2px;
+                padding-left: 12px;
+                padding-right: 40px;
+                margin: 0;
+            }
+
+            .ssm_details tr td {
+                height: 16px;
+                padding: 1px 0;
+            }
+
+            .ssm_details tr td:first-child {
+                display: flex;
+                flex-wrap: nowrap;
+                align-items: center;
+            }
+
+            .ssm_details tr td:first-child h6 {
+                font-size: 11px;
+                font-weight: 600;
+                width: 75px;
+            }
+
+            .ssm_details tr td:first-child span {
+                font-size: 11px;
+            }
+
+            .ssm_details tr td:last-child {
+                font-size: 11px;
+                padding-left: 20px;
+            }
+
+            /* student roll */
+            .ssm_roll {
+                border: 2px solid black;
+            }
+
+            .ssm_roll table {
+                border-collapse: collapse;
+            }
+
+            .ssm_roll tr:first-of-type td {
+                border-bottom: 1px solid black;
+            }
+
+            .ssm_roll tr td {
+                padding: 3px 30px;
+                text-align: center;
+                font-weight: bold;
+            }
+
+            .setnone {
+                display: none;
+            }
+
+            .setblock {
+                display: block;
+            }
+    </style>
+</head>
+
+<body style="margin: 0; padding: 0;">
+
+    <div class="seatplan__main" id="SeatPlan">
+        {% for item in items %}
+        <div class="seatplan_single_wrapper">
+            <div class="seatplan_single">
+                <div class="ss_top">
+                    <div class="sst_heading">
+                        <h1>{{item.ins_name}}</h1>
+                        <p>{{item.ins_address}}</p>
+                        <h2>Exam Seat Plan</h2>
+                        <div style="font-weight: bold; font-size: 12px;" class="fw-bold">{{item.student_name}}</div>
+                    </div>
+                    <img class="profile_picture" src="{{ item.image_url }}" alt="">
+                    <img src="{{ item.ins_logo }}" alt="" class="school_logo">
+                </div>
+                <div class="ss_main">
+                    <div class="ssm_details">
+                        <table>
+
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <h6>Student ID</h6>
+                                        <span>:</span>
+                                    </td>
+                                    <td>{{item.student_id}}</td>
+                                </tr>
+
+                                <tr>
+                                    <td>
+                                        <h6>Exam Name</h6>
+                                        <span>:</span>
+                                    </td>
+                                    <td><b>{{item.exam_name}}</b></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <h6>Class</h6>
+                                        <span>:</span>
+                                    </td>
+                                    <td>{{item.class_id}}</td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <h6>Section</h6>
+                                        <span>:</span>
+                                    </td>
+                                    <td>{{item.section_id}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="ssm_roll setblock">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td>Roll</td>
+                                </tr>
+                                <tr>
+                                    <td>{{item.roll_id}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr class="setnone">
+        {% endfor %}
+
+
+    </div>
+    
+</body>
+
+</html>

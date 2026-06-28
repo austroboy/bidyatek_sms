@@ -1,0 +1,79 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+
+{% block extra_css %}
+<style>
+   
+</style>
+{% endblock extra_css %} 
+
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+    {% include 'pageinfo.html' %}
+    <div class="card">
+        <div class="card-body">
+            <a href="{% url 'fhlc_create' %}" class=" btn btn-primary mb-3">Add New Configuration</a>
+            <table class="table" >
+                <thead class="teal-thead">
+                    <tr>
+                        <th>Head</th>
+                        <th>Ledger</th>
+                        <th>Active</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.head.name }}</td>
+                        <td>{{ item.ledger.name }}</td>
+                        <td>{{ item.is_active|yesno:"Yes,No" }}</td>
+                        <td>
+                            <a href="{% url 'fhlc_update' item.id %}" class="btn btn-primary">Edit</a>
+                            <form method="post" action="{% url 'fhlc_delete' item.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button class=" btn btn-danger" type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_javascript %}
+<script>
+    ;(function () {
+        const modal = new bootstrap.Modal(document.getElementById("feetypemodal"));
+
+        htmx.on("htmx:afterSwap", (e) => {
+            if (e.detail.target.id == "feetypedialog") {
+                modal.show();
+            }
+        });
+
+        htmx.on("htmx:beforeSwap", (e) => {
+            if (e.detail.target.id == "feetypedialog" && !e.detail.xhr.response) {
+                modal.hide();
+                e.detail.shouldSwap = false;
+                if (e.detail.xhr.getResponseHeader("HX-Trigger")) {
+                    const hxTriggerHeader = e.detail.xhr.getResponseHeader("HX-Trigger");
+                    if (hxTriggerHeader) {
+                        const hxTriggerData = JSON.parse(hxTriggerHeader);
+                        if (hxTriggerData.messages === "Success") {
+                            htmx.trigger("#pageinfo", "refresh");
+                        }
+                    }
+                }
+            }
+        });
+
+        htmx.on("hidden.bs.modal", () => {
+            document.getElementById("feetypedialog").innerHTML = "";
+        });
+    })();
+</script>
+{% endblock extra_javascript %}

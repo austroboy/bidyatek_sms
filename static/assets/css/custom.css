@@ -1,0 +1,53 @@
+
+/* Owl Carousel dashboard */
+	.shadow-effect {
+		    background: #fff;
+		    padding: 20px;
+		    border-radius: 8px;
+		    text-align: center;
+	        border:1px solid #ECECEC;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.10)
+		    
+		}
+		#customers-testimonials .shadow-effect p {
+		    font-family: inherit;
+		    font-size: 17px;
+		    line-height: 1.5;
+		    margin: 0 0 17px 0;
+		    font-weight: 300;
+		}
+		.testimonial-name {
+		    margin: -17px auto 0;
+		    display: table;
+		    width: auto;
+		    background: #0d9488;
+		    padding: 9px 35px;
+		    border-radius: 12px;
+		    text-align: center;
+		    color: #fff;
+		}
+		#customers-testimonials .item {
+		    text-align: center;
+		    opacity: .99;
+		    -webkit-transform: scale3d(1.0, 1.0, 1);
+		    transform: scale3d(1.0, 1.0, 1);
+		    -webkit-transition: all 0.3s ease-in-out;
+		    -moz-transition: all 0.3s ease-in-out;
+		    transition: all 0.3s ease-in-out;
+		}
+		#customers-testimonials .owl-item.active.center .item {
+		    opacity: 1;
+		    -webkit-transform: scale3d(1.0, 1.0, 1);
+		    transform: scale3d(1.0, 1.0, 1);
+		}
+		
+		aside.logicunite_side_menu{
+			/* background: linear-gradient(322deg, #ba4aff, rgba(186, 74, 255, 0) 70%), linear-gradient(178deg, #008aff, rgba(0, 138, 255, 0) 70%), linear-gradient(24deg, #00ffc6, rgba(0, 255, 198, 0) 35%); */
+			background-color: #0f5650 !important ;
+		}
+
+		nav.logicunite_side_menu{
+			/* background: linear-gradient(322deg, #ba4aff, rgba(186, 74, 255, 0) 70%), linear-gradient(178deg, #008aff, rgba(0, 138, 255, 0) 70%), linear-gradient(24deg, #00ffc6, rgba(0, 255, 198, 0) 35%); */
+			/* background-color: #49c5b6 !important ; */
+			 background-color: #0f5650 !important ; 
+		}

@@ -1,0 +1,178 @@
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load salary_tags %}
+{% block extra_css %}
+<style>
+    .table-responsive::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .table-responsive::-webkit-scrollbar-track {
+      box-shadow: inset 0 0 5px grey;
+      border-radius: 10px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb {
+      background: #5f61e6;
+      border-radius: 10px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb:hover {
+      background: #5355d1;
+    }
+  </style>
+{% endblock extra_css %} 
+{% block content %}
+
+<!-- start: Content -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+
+  <div class="card">
+    <div class="row card-body mt-1">
+        
+        <div class="table-responsive">
+          <table id="salary_table" class="table table-bordered table-centered table-nowrap mb-0">
+            <thead class="teal-thead">
+                <tr>
+                    <th>
+                        Id
+                        <input class="form-control mt-2 column-search" data-column="id" type="text">
+                    </th>
+                    <th>
+                        Name
+                        <input class="form-control mt-2 column-search" data-column="name" type="text">
+                    </th>
+                    <th>Designation</th>
+                    <th data-column="basic_salary">Basic Salary</th>
+                    {% for addition in addition_types %}
+                        <th data-column="addition_{{ addition }}">{{ addition }} (+)</th>
+                    {% endfor %}
+                    {% for deduction in deduction_types %}
+                        <th data-column="deduction_{{ deduction }}">{{ deduction }} (-)</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+              {% for employee in employees %}
+                  <tr data-id="{{ employee.id }}">
+                      <td data-column="id">{{ employee.id }}</td>
+                      <td data-column="name" ><p class="text-nowrap">{{ employee.name }}</p></td>
+                      <td>{{ employee.designation }}</td>
+                      <td data-column="basic_salary">{{ employee.basic_salary }}</td>
+                      {% for addition in addition_types %}
+                        <td data-column="addition_{{ addition }}"
+                            {% if addition in non_monthly_addition_types %} class="text-warning" {% endif %}>
+                            {{ employee.additions|get_item:addition|default:0 }}
+                        </td>
+                      {% endfor %}
+                      {% for deduction in deduction_types %}
+                        <td data-column="deduction_{{ deduction }}"
+                            {% if deduction in non_monthly_deduction_types %} class="text-warning" {% endif %}>
+                            {{ employee.deductions|get_item:deduction|default:0 }}
+                        </td>
+                      {% endfor %}
+                  </tr>
+              {% endfor %}
+          </tbody>
+        </table>
+        
+        </div>
+
+        
+      </div>
+  </div>
+
+</div>
+<!-- end: Content -->
+
+{% endblock content %} 
+
+{% block extra_javascript %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const table = document.getElementById('salary_table');
+
+    // Make table cells editable
+    table.addEventListener('dblclick', function (e) {
+        if (e.target.tagName === 'TD' && e.target.dataset.column) {
+            const cell = e.target;
+            if (!cell.hasAttribute('contenteditable')) {
+                cell.setAttribute('contenteditable', 'true');
+                cell.focus();
+
+                cell.addEventListener('blur', function () {
+                    const newValue = cell.innerText.trim();
+                    const rowId = cell.parentElement.dataset.id; // Get the row ID
+                    const columnName = cell.dataset.column; // Get the column name
+
+                    // Send the updated data to the server
+                    fetch('/update_salary/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ id: rowId, column: columnName, value: newValue }),
+                    })
+                        .then((response) => response.json())
+                        .then((data) => {
+                            if (data.success) {
+                              Swal.fire({
+                                    icon: 'success',
+                                    title: 'Success',
+                                    text: 'Update successful!',
+                                    timer: 2000,
+                                    showConfirmButton: false,
+                                });
+                            } else {
+                              Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: `Update failed: ${data.error}`,
+                                    timer: 3000,
+                                    showConfirmButton: false,
+                                });
+                            }
+                        });
+                });
+            }
+        }
+    });
+
+});
+
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const table = document.getElementById('salary_table');
+
+    // Column-based search functionality
+    document.querySelectorAll('.column-search').forEach(function (input) {
+        input.addEventListener('keyup', function () {
+            const column = input.dataset.column; // The column to search
+            const searchValue = input.value.toLowerCase(); // Search term (case insensitive)
+
+            Array.from(table.querySelectorAll('tbody tr')).forEach(function (row) {
+                const cell = row.querySelector(`[data-column="${column}"]`); // Get the cell in the current column
+                if (cell) {
+                    const cellValue = cell.innerText.toLowerCase(); // Get cell value (case insensitive)
+                    if (cellValue.includes(searchValue)) {
+                        row.style.display = ''; // Show the row
+                    } else {
+                        row.style.display = 'none'; // Hide the row
+                    }
+                } else {
+                    console.warn(`No cell found with data-column="${column}" in this row.`);
+                }
+            });
+        });
+    });
+});
+
+</script>
+
+
+{% endblock extra_javascript%}

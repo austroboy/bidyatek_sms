@@ -1,0 +1,394 @@
+{% extends 'fpartials/base.html' %} 
+{% load static %} 
+{% block extra_css %}
+
+
+
+<style>
+
+    main.table {
+        
+        height: 90vh;
+        background-color: #fff5;
+    
+        backdrop-filter: blur(7px);
+        box-shadow: 0 .4rem .8rem #0005;
+        border-radius: .8rem;
+    
+        overflow: hidden;
+    }
+    
+    .table__header {
+        width: 100%;
+        height: 10%;
+        background-color: #fff4;
+        padding: .8rem 1rem;
+        
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .table__header .css_input-group {
+        width: 35%;
+        height: 100%;
+        background-color: #fff5;
+        padding: 0 .8rem;
+        border-radius: 2rem;
+        
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    
+        transition: .2s;
+    }
+    .css_input-group{
+        border: 1px solid #06BBCC;
+    
+    }
+    
+    .table__header .css_input-group:hover {
+        width: 45%;
+        background-color: #fff8;
+        box-shadow: 0 .1rem .4rem #0002;
+    }
+    
+    .table__header .css_input-group img {
+        width: 1.2rem;
+        height: 1.2rem;
+    }
+    
+    .table__header .css_input-group input {
+        width: 100%;
+        padding: 0 .5rem 0 .3rem;
+        background-color: transparent;
+        border: none;
+        outline: none;
+    }
+    
+    .table__body {
+        width: 95%;
+        max-height: calc(89% - 1.6rem);
+        background-color: #fffb;
+    
+        margin: .8rem auto;
+        border-radius: .6rem;
+    
+        overflow: auto;
+        overflow: overlay;
+    }
+    
+    
+    .table__body::-webkit-scrollbar{
+        width: 0.5rem;
+        height: 0.5rem;
+    }
+    
+    .table__body::-webkit-scrollbar-thumb{
+        border-radius: .5rem;
+        background-color: #0004;
+        visibility: hidden;
+    }
+    
+    .table__body:hover::-webkit-scrollbar-thumb{ 
+        visibility: visible;
+    }
+    
+    
+    table {
+        width: 100%;
+    }
+    
+    td img {
+        width: 36px;
+        height: 36px;
+        margin-right: .5rem;
+        border-radius: 50%;
+    
+        vertical-align: middle;
+    }
+    
+    table, th, td {
+        border-collapse: collapse;
+        padding: 1rem;
+        text-align: left;
+    }
+    
+    thead th {
+        position: sticky;
+        top: 0;
+        left: 0;
+        background-color: #fed86b;
+        cursor: pointer;
+        text-transform: capitalize;
+    }
+    
+    tbody tr:nth-child(even) {
+        background-color: #0000000b;
+    }
+    
+    tbody tr {
+        --delay: .1s;
+        transition: .5s ease-in-out var(--delay), background-color 0s;
+    }
+    
+    tbody tr.hide {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    
+    tbody tr:hover {
+        background-color: #fff6 !important;
+    }
+    
+    tbody tr td,
+    tbody tr td p,
+    tbody tr td img {
+        transition: .2s ease-in-out;
+    }
+    
+    tbody tr.hide td,
+    tbody tr.hide td p {
+        padding: 0;
+        font: 0 / 0 sans-serif;
+        transition: .2s ease-in-out .5s;
+    }
+    
+    tbody tr.hide td img {
+        width: 0;
+        height: 0;
+        transition: .2s ease-in-out .5s;
+    }
+    
+    .status {
+        padding: .4rem 0;
+        border-radius: 2rem;
+        text-align: center;
+    }
+    
+    
+    
+    
+    @media (max-width: 1000px) {
+        td:not(:first-of-type) {
+            min-width: 12.1rem;
+        }
+    }
+    
+    thead th span.icon-arrow {
+        display: inline-block;
+        width: 1.3rem;
+        height: 1.3rem;
+        border-radius: 50%;
+        border: 1.4px solid transparent;
+        
+        text-align: center;
+        font-size: 1rem;
+        
+        margin-left: .5rem;
+        transition: .2s ease-in-out;
+    }
+    
+    thead th:hover span.icon-arrow{
+        border: 1.4px solid #06BBCC;
+    }
+    
+    thead th:hover {
+        color: #06BBCC;
+    }
+    
+    thead th.active span.icon-arrow{
+        background-color: #06BBCC;
+        color: #fff;
+    }
+    
+    thead th.asc span.icon-arrow{
+        transform: rotate(180deg);
+    }
+    
+    thead th.active,tbody td.active {
+        color: #06BBCC;
+    }
+    
+
+</style>
+{% endblock extra_css %} 
+{% block content %}
+
+    <div class="container-xxl pt-5 wow fadeInUp" data-wow-delay="0.1s">
+        <div class=" ">
+            <div class="">
+                
+                    <div class="d-flex gap-2">
+                      <select class="form-select" name="teacher_id" id="teacherSelect" required>
+                        <option disabled hidden selected>Select Teacher</option>
+                        {% for teacher in teacherList %}
+                        <option value="{{ teacher.id }}">{{ teacher.name }}</option>
+                        {% endfor %} 
+                      </select>
+                      
+                    </div>
+                  
+
+            </div>
+        </div>
+    </div>
+    <!--  Start -->
+    <div class="container-xxl py-5 wow fadeInUp" data-wow-delay="0.1s">
+        
+        <main class="table" id="customers_table">
+            <section class="table__header">
+                <h1>Teacher Routine {{class_id__class_id__name}}</h1>
+                <div class="css_input-group d-none d-md-flex">
+                    <input type="search" placeholder="Search Data...">
+                    <img src="images/search.png" alt="">
+                </div>
+                
+            </section>
+            <section class="table__body">
+                <table id="classRoutine">
+                    <thead>
+                        <tr>
+                            <th> Time Slot </th>
+                            <th data-day="Sunday"> Sunday </th>
+                            <th data-day="Monday"> Monday </th>
+                            <th data-day="Tuesday"> Tuesday </th>
+                            <th data-day="Wednesday"> Wednesday </th>
+                            <th data-day="Thursday"> Thursday </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                    </tbody>
+                </table>
+            </section>
+        </main>
+        
+    </div>
+    <!-- 404 End -->
+
+
+{% endblock content %} 
+{% block extra_javascript %} 
+<script>
+    const search = document.querySelector('.css_input-group input'),
+    table_rows = document.querySelectorAll('tbody tr'),
+    table_headings = document.querySelectorAll('thead th');
+
+// 1. Searching for specific data of HTML table
+search.addEventListener('input', searchTable);
+
+function searchTable() {
+    table_rows.forEach((row, i) => {
+        let table_data = row.textContent.toLowerCase(),
+            search_data = search.value.toLowerCase();
+
+        row.classList.toggle('hide', table_data.indexOf(search_data) < 0);
+        row.style.setProperty('--delay', i / 25 + 's');
+    })
+
+    document.querySelectorAll('tbody tr:not(.hide)').forEach((visible_row, i) => {
+        visible_row.style.backgroundColor = (i % 2 == 0) ? 'transparent' : '#0000000b';
+    });
+}
+
+// 2. Sorting | Ordering data of HTML table
+
+table_headings.forEach((head, i) => {
+    let sort_asc = true;
+    head.onclick = () => {
+        table_headings.forEach(head => head.classList.remove('active'));
+        head.classList.add('active');
+
+        document.querySelectorAll('td').forEach(td => td.classList.remove('active'));
+        table_rows.forEach(row => {
+            row.querySelectorAll('td')[i].classList.add('active');
+        })
+
+        head.classList.toggle('asc', sort_asc);
+        sort_asc = head.classList.contains('asc') ? false : true;
+
+        sortTable(i, sort_asc);
+    }
+})
+
+
+function sortTable(column, sort_asc) {
+    [...table_rows].sort((a, b) => {
+        let first_row = a.querySelectorAll('td')[column].textContent.toLowerCase(),
+            second_row = b.querySelectorAll('td')[column].textContent.toLowerCase();
+
+        return sort_asc ? (first_row < second_row ? 1 : -1) : (first_row < second_row ? -1 : 1);
+    })
+        .map(sorted_row => document.querySelector('tbody').appendChild(sorted_row));
+}
+
+
+
+
+
+        $("#teacherSelect").change(function () {
+        var selectedTeacherId = $(this).val();
+
+        // Clear existing table rows
+        $("#classRoutine tbody").empty();
+
+        // Make an AJAX request to fetch the subject list for the selected class
+        $.ajax({
+            type: "GET",
+            url: `{% url 'teacher_routinelist' teacher_id=0 %}`.replace('0', selectedTeacherId),
+            dataType: "json",
+            success: function (data) {
+                console.log(data.teacherRoutineList)
+                data.teacherRoutineList.forEach(function (entry) {
+                    addSubject(entry.day_name, entry.period_id__name, entry.subject_id__name, entry.class_id__class_shift_id__class_id__name, entry.class_id__class_shift_id__shift_id__name, entry.class_id__section_id__name);
+                });
+
+            }, 
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    });
+
+
+    function addSubject(day, timeSlot, subject, className, sectionName) {
+        var table = document.getElementById('classRoutine');
+        var tbody = table.getElementsByTagName('tbody')[0];
+
+        // Check if a row with the given time slot already exists
+        var existingRow = tbody.querySelector('tr[data-time="' + timeSlot + '"]');
+
+        if (!existingRow) {
+            // If the row does not exist, create a new one
+            var newRow = document.createElement('tr');
+            newRow.setAttribute('data-time', timeSlot);
+
+            // Create a cell for the time slot
+            var timeSlotCell = document.createElement('td');
+            timeSlotCell.innerText = timeSlot;
+            newRow.appendChild(timeSlotCell);
+
+            // Create cells for each day
+            for (var i = 0; i < 5; i++) {
+                var dayCell = document.createElement('td');
+                dayCell.setAttribute('data-day', table.rows[0].cells[i + 1].getAttribute('data-day'));
+                newRow.appendChild(dayCell);
+            }
+
+            // Append the new row to the table body
+            tbody.appendChild(newRow);
+            existingRow = newRow;
+        }
+
+        // Find the index of the day column for the specified day
+        var dayIndex = Array.from(existingRow.cells).findIndex(cell => cell.getAttribute('data-day') === day);
+
+        existingRow.cells[dayIndex].innerHTML = `<strong>${subject}</strong><br><em>${className} ${sectionName}</em>`;
+        // Update the cell for the specified day with subject and teacher's name
+       //existingRow.cells[dayIndex].innerText = subject + '\n' +  teacherName ;
+    }
+        
+    
+</script>
+{% endblock extra_javascript%}

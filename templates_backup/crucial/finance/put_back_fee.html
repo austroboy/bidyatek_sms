@@ -1,0 +1,136 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% block extra_css %}
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css'>
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-5-theme/1.3.0/select2-bootstrap-5-theme.min.css'>
+{% endblock extra_css %}
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+  <div class="card">
+    <div class="card-body">
+      <form action="{% url 'put_back_fee' %}" method="post" id="fees-form">
+        {% csrf_token %}
+        <div class="row">
+          <div class="col-md-4">
+            <div class="mb-3">
+              <div class="">
+                <select class="form-select" name="student_id" id="student_id" required>
+                  <option disabled selected hidden value="">Select Student</option>
+                  {% for stu in stulist %}
+                  <option value="{{stu.id}}">{{stu.student_field.name}} - {{stu.class_id}} <span class="">({{stu.roll_no}})</span></option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-1">
+            <div>
+              <button class="btn btn-primary mb-2" type="submit">Load</button>
+            </div>
+          </div>
+          <div style="padding: 0px 4px 4px 4px" class="mb-3 col-md-3 border rounded-3 d-flex flex-row justify-content-between align-content-center ms-auto">
+            <span class="fw-bold pt-2">Name:</span>
+            <span class="pt-1 ps-1">
+              <input class="form-control form-control-sm text-center" type="text"  value="{{ student_instance }}" disabled />
+            </span>
+          </div>
+        </div>
+      </form>
+      <div class="table-responsive">
+        <table class="table">
+          <tr>
+            <th>Fee Name</th>
+            <th>Amount</th>
+            <th style="width: 60px;">Discount </th>
+            <th>Final Amount </th>
+            <th>Status </th>
+            <th>Action</th>
+          </tr>
+          {% for fee in fee_instance %}
+          <tr>
+            <td> {{fee.feetype_id}} </td>
+            <td> {{fee.amount}} </td>
+            <td> {{fee.discount_amount}} </td>
+            <td>
+              {% if fee.status == "paid" %}
+              {{fee.total_netTotal}}
+              {% endif %}
+              {% if fee.status == "partial" %}
+              {{fee.total_netTotal}}
+              {% endif %}
+            </td>
+            <td> {{fee.status}} </td>
+            <td style="width:20%">
+              {% if fee.status == "paid" %}
+              <div>
+                <button type="button" data-id="{{fee.id}}" data-status="fee" id="btnstatus{{fee.id}}"
+                class="btn btn-outline-danger btn-sm mb-1">Mark As
+                Unpaid {% if fee.partial_payments.exists %} Full {% endif %}</button>
+                <button type="button" id="relbtnstatus{{fee.id}}" hidden
+                class="btn btn-outline-danger btn-sm"
+                onClick="window.location.reload(); ">No</button>
+              </div>
+              {% endif %}
+              {% if fee.partial_payments.exists %}
+              {% for partial_payment in fee.partial_payments.all %}
+              <div>
+                <button type="button" data-id="{{ partial_payment.id }}" data-status="partial_payment" id="btnstatus{{ partial_payment.id }}"
+                class="btn btn-outline-danger btn-sm mb-1">Mark As Unpaid <span class="text-warning ms-2">৳{{ partial_payment.amount }}</span> </button>
+                <button type="button" id="relbtnstatus{{ partial_payment.id }}" hidden
+                class="btn btn-outline-danger btn-sm"
+                onClick="window.location.reload();">No</button>
+              </div>
+              {% endfor %}
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block extra_javascript %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#student_id').select2({
+            theme: "bootstrap-5",
+            width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+        });
+        $("button").on('click', function () {
+            var btnid = (this.id);
+            $("#" + btnid).html("Yes!");
+            $('#rel' + btnid).removeAttr('hidden');
+            $("#" + btnid).click(function () {
+                $('#rel' + btnid).attr("hidden", true);
+                var dataId = $(this).attr("data-id");
+                var dataStatus = $(this).attr("data-status");
+                sendToServer(dataId, dataStatus, $(this));
+            });
+        });
+        function sendToServer(id, status, buttonElement) {
+            $.ajax({
+                url: "/fee_put_back/",
+                type: "POST",
+                data: { id: id, status: status },
+            })
+            .done(function (response) {
+                console.log(response);
+                if (status === 'fee') {
+                    buttonElement.closest('tr').remove(); // Remove the entire row
+                } else if (status === 'partial_payment') {
+                    buttonElement.closest('div').remove(); // Remove the specific partial payment div
+                }
+            })
+            .fail(function () {
+                console.log("Error Occurred");
+            });
+        }
+    });
+</script>
+
+{% endblock extra_javascript%}
