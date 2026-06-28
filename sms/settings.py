@@ -88,6 +88,7 @@ TENANT_APPS= [
     'exam',
     'miscellaneous',
     'attendance',
+    'device',
     'webpage',
     'accounting',
     'ssl_commerz',

@@ -344,7 +344,12 @@ nav.logicunite_side_menu,
   border: 1px solid var(--et-border);
   background: var(--et-card-bg);
   box-shadow: var(--et-shadow-xs);
-  overflow: hidden;
+  /* IMPORTANT: must NOT be `overflow: hidden` — that disables horizontal
+     scrolling AND breaks position:sticky frozen columns (e.g. Student List).
+     Bootstrap sets overflow-x:auto here; we keep that so sticky works. The
+     rounded corners are clipped by the parent card instead. */
+  overflow-x: auto;
+  overflow-y: visible;
 }
 .table-responsive > .table { margin-bottom: 0; }
 
@@ -576,6 +581,16 @@ html { scroll-behavior: smooth; }
 .bg-white.shadow:hover {
   transform: translateY(-3px);
   box-shadow: 0 12px 30px rgba(var(--et-primary-rgb), 0.12) !important;
+}
+/* Never lift a card that contains a sticky/frozen-column table — a transform
+   on the ancestor breaks position:sticky (columns detach on horizontal scroll).
+   #softdatatable is the project's sortable/sticky table. */
+.card:has(#softdatatable),
+.card:has(#softdatatable):hover,
+.shadow.bg-white:has(#softdatatable),
+.shadow.bg-white:has(#softdatatable):hover {
+  transform: none !important;
+  animation: none !important;
 }
 
 /* --- Top stat tiles (Total Student/Staffs/Parents): lift + the round icon

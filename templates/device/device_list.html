@@ -1,0 +1,73 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+
+  <div class="card">
+    <div class="card-body">
+      <div class="d-flex border-bottom pb-2 justify-content-between">
+        <div class="h4 pt-2">Biometric Devices (ZKTeco)</div>
+        <a href="{% url 'device_add' %}" class="btn btn-primary btn-sm">+ Add Device</a>
+      </div>
+
+      <div class="table-responsive mt-3">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>IP : Port</th>
+              <th>Type</th>
+              <th>Active</th>
+              <th>Last Sync</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in devices %}
+            <tr>
+              <td>{{ d.name }}</td>
+              <td>{{ d.ip_address }}:{{ d.port }}</td>
+              <td>{% if d.is_exit_device %}Exit Gate{% else %}Entry Gate{% endif %}</td>
+              <td>{% if d.is_active %}<span class="badge bg-success">Active</span>{% else %}<span class="badge bg-secondary">Inactive</span>{% endif %}</td>
+              <td>{{ d.last_sync|default:"—" }}</td>
+              <td>
+                <button class="btn btn-sm btn-info test-btn" data-id="{{ d.id }}">Test</button>
+                <a href="{% url 'device_trigger_sync' d.id %}" class="btn btn-sm btn-warning">Sync Now</a>
+                <a href="{% url 'device_edit' d.id %}" class="btn btn-sm btn-secondary">Edit</a>
+                <a href="{% url 'device_delete' d.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Delete?')">Del</a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="text-center">No device has been added.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div id="result" class="mt-2"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.test-btn').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var id = this.dataset.id;
+    var box = document.getElementById('result');
+    box.innerHTML = 'Connecting...';
+    fetch('/device/' + id + '/test/')
+      .then(r => r.json())
+      .then(d => {
+        if (d.status === 'ok') {
+          box.innerHTML = '<div class="alert alert-success">Connected ✔ Firmware: ' +
+            d.info.firmware + ' | Users: ' + d.info.users + '</div>';
+        } else {
+          box.innerHTML = '<div class="alert alert-danger">Error: ' + d.error + '</div>';
+        }
+      })
+      .catch(e => { box.innerHTML = '<div class="alert alert-danger">' + e + '</div>'; });
+  });
+});
+</script>
+{% endblock content %}

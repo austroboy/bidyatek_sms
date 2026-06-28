@@ -13,15 +13,15 @@ thead th span.icon-arrow {
 }
 
 thead th:hover span.icon-arrow {
-  border: 1.4px solid #6c00bd;
+  border: 1.4px solid #128a7e;
 }
 
 thead th:hover {
-  color: #6c00bd;
+  color: #128a7e;
 }
 
 thead th.active span.icon-arrow {
-  background-color: #6c00bd;
+  background-color: #128a7e;
   color: #fff;
 }
 
@@ -31,7 +31,7 @@ thead th.asc span.icon-arrow {
 
 thead th.active,
 tbody td.active {
-  color: #6c00bd;
+  color: #128a7e;
 }
 
 .export__file {
@@ -148,7 +148,7 @@ tbody td.active {
 }
 
 #softdatatable thead th {
-  background-color: #e3f2fd;
+  background-color: #e8f7f4;
   text-align: center;
   vertical-align: middle;
 }
@@ -183,4 +183,84 @@ tbody td.active {
 #softdatatable th:nth-of-type(3),
 #softdatatable td:nth-of-type(2) {
   left: 200px;
+}
+
+/* ============================================================================
+   UI-UPGRADE COMPATIBILITY FIX (sticky columns + teal theme)
+   ----------------------------------------------------------------------------
+   1) position:sticky breaks if ANY ancestor has a transform. The global UI
+      upgrade adds a hover-lift transform on .card / .shadow and a page-load
+      animation. We neutralize those ONLY for the card that wraps this sticky
+      table, so the frozen IMAGE/Name/ID columns work again on horizontal
+      scroll. (Other cards keep their hover effect.)
+   2) Header was light-blue (#e3f2fd) — now soft teal to match every other
+      table. Header text set to dark teal for contrast.
+   ============================================================================ */
+
+/* 1) Kill ancestor transforms/animation that would break sticky columns. */
+.card:has(#softdatatable),
+.card:has(#softdatatable):hover,
+.shadow:has(#softdatatable),
+.shadow:has(#softdatatable):hover,
+.content-wrapper > .container-fluid:has(#softdatatable) {
+  transform: none !important;
+  animation: none !important;
+}
+/* The scroll container itself must not create a transform context either. */
+.table-responsive:has(#softdatatable) { transform: none !important; }
+
+/* 2) Teal header + readable text (override matches other tables). */
+#softdatatable thead th {
+  background-color: #e8f7f4 !important;   /* soft teal */
+  color: #0f6f66 !important;               /* dark teal text */
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.74rem;
+  letter-spacing: 0.4px;
+}
+/* Sticky cells need an OPAQUE background or text scrolls through them.
+   Header sticky cells = teal; body sticky cells = white. */
+#softdatatable th:nth-of-type(-n + 3) { background-color: #e8f7f4 !important; }
+#softdatatable td:nth-of-type(-n + 2) { background-color: #ffffff !important; }
+#softdatatable tbody tr:hover td:nth-of-type(-n + 2) { background-color: #f3fbf9 !important; }
+
+/* Sort-arrow hover/active accents → teal (were purple). */
+thead th:hover span.icon-arrow { border-color: #128a7e; }
+thead th:hover { color: #128a7e; }
+thead th.active span.icon-arrow { background-color: #128a7e; }
+thead th.active, tbody td.active { color: #128a7e; }
+
+/* Scrollbar thumb already teal-ish; align to the fresher token. */
+.table-responsive::-webkit-scrollbar-thumb { background-color: #14a89a; }
+
+/* Clean visual separator between the frozen columns and the scrolling area:
+   a subtle shadow on the right edge of the last sticky column. */
+#softdatatable th:nth-of-type(3),
+#softdatatable td:nth-of-type(2) {
+  box-shadow: 6px 0 8px -6px rgba(20, 80, 72, 0.12);
+}
+
+/* ----------------------------------------------------------------------------
+   Sticky should be HORIZONTAL ONLY (frozen left columns). Prevent the sticky
+   cells / header from also clinging to the top on vertical page-scroll, which
+   caused the header to appear "doubled". Forcing top:auto keeps them in normal
+   vertical flow while still sticking on the left during horizontal scroll.
+   ---------------------------------------------------------------------------- */
+#softdatatable th:nth-of-type(-n + 3),
+#softdatatable td:nth-of-type(-n + 2) {
+  top: auto !important;
+  bottom: auto !important;
+}
+/* The header row must scroll away normally with the page (not vertical-sticky). */
+#softdatatable thead,
+#softdatatable thead tr,
+#softdatatable thead th {
+  position: static;
+}
+/* Re-assert horizontal stickiness for the frozen header cells only (the rule
+   above set them static; we want them sticky on the left again, not on top). */
+#softdatatable thead th:nth-of-type(-n + 3) {
+  position: -webkit-sticky;
+  position: sticky;
+  top: auto !important;
 }
