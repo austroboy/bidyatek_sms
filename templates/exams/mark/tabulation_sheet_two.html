@@ -1,50 +1,52 @@
 {% extends "partials/base.html" %}
+{% load mark_tags %}
 {% block content %}
 <div class="container-fluid flex-grow-1 container-p-y">
   {% include 'pageinfo.html' %}
   <div class="card p-4">
-  <h2 class="text-center">Tabulation Sheet</h2>
+    <h2 class="text-center">Tabulation Sheet</h2>
 
-  <form method="POST" action="{% url 'tabulation_sheet_two' %}" id="tabulationForm">
-    {% csrf_token %}
-    <div class="row">
-      <div class="col-md-4">
-        <label for="class_id">Select Class:</label>
-        <select name="class_id" id="class_id" class="form-control" required>
-          <option value="" disabled selected>Select Class</option>
-          {% for class in classes %}
-          <option value="{{ class.id }}" {% if class.id == selected_class_id %}selected{% endif %}>{{ class }}</option>
-          {% endfor %}
-        </select>
-      </div>
-     
-      <div class="col-md-4">
-        <label for="exam_id">Select Exam:</label>
-        <select name="exam_id" id="exam_id" class="form-control" required>
-          <option value="" disabled selected>Select Exam</option>
-          {% for exam in exams %}
-          <option value="{{ exam.id }}" {% if exam.id == selected_exam_id %}selected{% endif %}>{{ exam.name }}</option>
-          {% endfor %}
-        </select>
-      </div>
+    <form method="POST" action="{% url 'tabulation_sheet_two' %}" id="tabulationForm">
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-5">
+          <label for="class_id">Select Class:</label>
+          <select name="class_id" id="class_id" class="form-control" required>
+            <option value="" disabled {% if not selected_class_id %}selected{% endif %}>Select Class</option>
+            {% for class in classes %}
+            <option value="{{ class.id }}" {% if class.id|stringformat:'s' == selected_class_id %}selected{% endif %}>{{ class }}</option>
+            {% endfor %}
+          </select>
+        </div>
 
-      <div style="margin-top: 20px;" class="col-md-4">
-        <button type="submit" class="btn btn-primary" id="generateBtn">Generate Tabulation Sheet</button>
-      </div>
+        <div class="col-md-5">
+          <label for="exam_id">Select Exam:</label>
+          <select name="exam_id" id="exam_id" class="form-control" required>
+            <option value="" disabled {% if not selected_exam_id %}selected{% endif %}>Select Exam</option>
+            {% for exam in exams %}
+            <option value="{{ exam.id }}" {% if exam.id|stringformat:'s' == selected_exam_id %}selected{% endif %}>{{ exam.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
 
+        <div style="margin-top: 28px;" class="col-md-2">
+          <button type="submit" class="btn btn-primary w-100" id="generateBtn">Generate</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  {% if selected_class_id and selected_exam_id %}
+    <div class="text-center my-3">
+      <a href="{% url 'tabulation_pdf' %}?class_id={{ selected_class_id }}&exam_id={{ selected_exam_id }}"
+         target="_blank" class="btn btn-success" id="downloadBtn">
+        <i class="bx bx-download"></i> Download / View PDF
+      </a>
     </div>
-    
-  </form>
-  </div>
-
-  <!-- Download Button (Initially Hidden) -->
-  <div class="text-center my-3">
-    <a href="{% if selected_class_id and selected_exam_id %}{% url 'tabulation_pdf' %}?class_id={{ selected_class_id }}&exam_id={{ selected_exam_id }}{% endif %}"
-       class="btn btn-primary" id="downloadBtn" style="display: none;">Download PDF</a>
-  </div>
+  {% endif %}
 
   {% if tabulation_data %}
-  <div class="mt-4">
+  <div class="mt-2 table-responsive">
     <table class="table table-bordered table-striped">
       <thead>
         <tr>
@@ -52,10 +54,11 @@
           <th>Name</th>
           <th>Stream</th>
           <th>Section</th>
-          {% for subject in tabulation_data.0.subjects.keys %}
+          {% for subject in subject_list %}
           <th>{{ subject }}</th>
           {% endfor %}
-          <th>Total Marks</th>
+          <th>Total</th>
+          <th>GPA</th>
           <th>Status</th>
         </tr>
       </thead>
@@ -66,46 +69,35 @@
           <td>{{ student.name }}</td>
           <td>{{ student.stream }}</td>
           <td>{{ student.section }}</td>
-          {% for subject, details in student.subjects.items %}
-          <td>
-            {% for mark_type, marks in details.marks.items %}
-            {{ mark_type|upper }}: {{ marks }}<br>
-            {% endfor %}
-            <strong>TOTAL:</strong> {{ details.total }}
-          </td>
+          {% for subject in subject_list %}
+            {% with details=student.subjects|get_item:subject %}
+            <td>
+              {% if details %}
+                {% for mark_type, marks in details.marks.items %}
+                  {{ mark_type }}: {{ marks|floatformat:2 }}<br>
+                {% endfor %}
+                <strong>Total:</strong> {{ details.total|floatformat:2 }}
+                ({{ details.grade }})
+              {% else %}-{% endif %}
+            </td>
+            {% endwith %}
           {% endfor %}
-          <td>{{ student.total_marks }}</td>
-          <td>{{ student.status }}</td>
+          <td><strong>{{ student.total_marks|floatformat:2 }}</strong></td>
+          <td>{{ student.total_gpa|floatformat:2 }}</td>
+          <td>
+            {% if student.status == "Fail" %}
+              <span class="text-danger fw-bold">Fail</span>
+            {% else %}
+              <span class="text-success fw-bold">Pass</span>
+            {% endif %}
+          </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
-
-  <!-- JavaScript to Automatically Click Download Button -->
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        let downloadBtn = document.getElementById("downloadBtn");
-        if (downloadBtn) {
-            downloadBtn.style.display = "block";  // Show the button
-            setTimeout(function() {
-                downloadBtn.click();  // Automatically trigger click
-            }, 1000); // Delay to ensure data loads before download
-        }
-    });
-  </script>
-
-  {% else %}
-  <p class="text-center mt-4">No data found. Please select the class, section, and exam.</p>
+  {% elif selected_class_id %}
+  <p class="text-center mt-4">No data found for this class & exam. Please check marks are entered.</p>
   {% endif %}
 </div>
-
-<!-- JavaScript to Show Download Button After Form Submission -->
-<script>
-  document.getElementById("tabulationForm").addEventListener("submit", function() {
-      setTimeout(function() {
-          document.getElementById("downloadBtn").style.display = "block";
-      }, 2000);  // Delay before showing download button
-  });
-</script>
 {% endblock %}

@@ -1,138 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Result Report</title>
-    <style>
-        @page {
-            size: A4 portrait;
-            margin: 10px;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 10px;
-            color: #333;
-        }
-
-        .container {
-            width: 100%;
-            margin: auto;
-            padding: 10px;
-        }
-
-        .header {
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .section-title {
-            font-size: 14px;
-            font-weight: bold;
-            color: #1D1E4E;
-            margin-top: 10px;
-            margin-bottom: 5px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 5px;
-        }
-
-        th, td {
-            border: 1px solid #ccc;
-            padding: 6px;
-            text-align: center;
-            font-size: 9px;
-        }
-
-        th {
-            background-color: #2A3F54;
-            color: white;
-            font-size: 10px;
-        }
-
-        .highlight {
-            font-weight: bold;
-            color: #1D1E4E;
-        }
-
-        .summary {
-            font-size: 11px;
-            margin-bottom: 10px;
-        }
-
-        .summary span {
-            font-weight: bold;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Result Report</title>
+<style>
+  :root{--teal:#0d6b5f;--teal-dark:#0a4f46;--light:#e7f3f1;}
+  *{box-sizing:border-box;}
+  body{font-family:Arial,"Noto Sans Bengali",sans-serif;color:#1a1a1a;margin:0;font-size:11px;}
+  .head{text-align:center;border-bottom:2.5px solid var(--teal);padding-bottom:8px;position:relative;min-height:58px;}
+  .logo{position:absolute;left:4px;top:50%;transform:translateY(-50%);width:56px;height:56px;object-fit:contain;}
+  .iname{font-size:21px;font-weight:bold;color:var(--teal-dark);}
+  .iaddr{font-size:10px;color:#444;}
+  .iweb{font-size:9.5px;color:var(--teal);}
+  .title{display:inline-block;margin-top:6px;background:var(--teal);color:#fff;font-size:13px;font-weight:bold;padding:3px 24px;border-radius:3px;}
+  h3{text-align:center;color:var(--teal-dark);margin:16px 0 6px;font-size:13px;}
+  table{width:100%;border-collapse:collapse;margin-top:4px;}
+  th,td{border:0.7px solid #8aa;padding:6px 8px;text-align:center;}
+  thead th{background:var(--teal);color:#fff;}
+  td.lbl{text-align:left;font-weight:600;}
+  tbody tr:nth-child(even){background:#f5faf9;}
+  .summary td{font-weight:bold;}
+  .hl{color:var(--teal-dark);font-weight:bold;}
+</style>
 </head>
 <body>
+  <div class="head">
+    {% if institute.institute_logo %}<img class="logo" src="{{ institute.institute_logo.url }}">{% endif %}
+    <div class="iname">{{ institute.institute_name|default:"Institute Name" }}</div>
+    {% if institute.institute_address %}<div class="iaddr">{{ institute.institute_address }}</div>{% endif %}
+    {% if institute.institute_web %}<div class="iweb">{{ institute.institute_web }}</div>{% endif %}
+    <div class="title">Result Overview{% if exam_name %} — {{ exam_name }}{% endif %}</div>
+  </div>
 
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            Result Report
-        </div>
+  <table class="summary" style="margin-top:14px;">
+    <tr><td class="lbl">Total Students</td><td>{{ total_students }}</td>
+        <td class="lbl">Passed</td><td>{{ passed_students }}</td></tr>
+    <tr><td class="lbl">Failed</td><td>{{ failed_students }}</td>
+        <td class="lbl">Absent</td><td>{{ absent_students }}</td></tr>
+  </table>
 
-        <!-- Summary -->
-        <div class="summary">
-            <p><span>Total Students:</span> {{ total_students }}</p>
-            <p><span>Passed:</span> {{ passed_students }}</p>
-            <p><span>Failed:</span> {{ failed_students }}</p>
-            <p><span>Absent:</span> {{ absent_students }}</p>
-        </div>
+  <h3>GPA Distribution</h3>
+  <table>
+    <thead><tr><th>GPA Category</th><th>Count</th></tr></thead>
+    <tbody>
+      <tr><td class="lbl">GPA 5.00 (A+)</td><td>{{ gpa_data.gpa_5 }}</td></tr>
+      <tr><td class="lbl">GPA 4.00 - 4.99 (A)</td><td>{{ gpa_data.gpa_4_to_4_99 }}</td></tr>
+      <tr><td class="lbl">GPA 3.50 - 3.99 (A-)</td><td>{{ gpa_data.gpa_3_5_to_3_99 }}</td></tr>
+      <tr><td class="lbl">GPA 3.00 - 3.49 (B)</td><td>{{ gpa_data.gpa_3_to_3_49 }}</td></tr>
+      <tr><td class="lbl">GPA 2.00 - 2.99 (C)</td><td>{{ gpa_data.gpa_2_to_2_99 }}</td></tr>
+      <tr><td class="lbl">GPA 1.00 - 1.99 (D)</td><td>{{ gpa_data.gpa_1_to_1_99 }}</td></tr>
+      <tr><td class="lbl">GPA Below 1.00 (F)</td><td>{{ gpa_data.gpa_below_1 }}</td></tr>
+    </tbody>
+  </table>
 
-        <!-- GPA Distribution -->
-        <h3 class="section-title">GPA Distribution</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>GPA Category</th>
-                    <th>Count</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr><td>GPA 4.5 & Above</td><td>{{ gpa_data.4.5_and_above }}</td></tr>
-                <tr><td>GPA 4 & Above</td><td>{{ gpa_data.4_and_above }}</td></tr>
-                <tr><td>GPA 3.5 & Above</td><td>{{ gpa_data.3.5_and_above }}</td></tr>
-                <tr><td>GPA 3 & Above</td><td>{{ gpa_data.3_and_above }}</td></tr>
-                <tr><td>GPA 2.5 & Above</td><td>{{ gpa_data.2.5_and_above }}</td></tr>
-                <tr><td>GPA 2 & Above</td><td>{{ gpa_data.2_and_above }}</td></tr>
-                <tr><td>GPA Below 2</td><td>{{ gpa_data.below_2 }}</td></tr>
-            </tbody>
-        </table>
+  <h3>Highest and Lowest Marks</h3>
+  <table>
+    <thead><tr><th>Highest Marks</th><th>Lowest Marks</th></tr></thead>
+    <tbody><tr><td class="hl">{{ highest_marks|floatformat:2 }}</td><td class="hl">{{ lowest_marks|floatformat:2 }}</td></tr></tbody>
+  </table>
 
-        <!-- Highest and Lowest Marks -->
-        <h3 class="section-title">Highest and Lowest Marks</h3>
-        <p>Highest Marks: <span class="highlight">{{ highest_marks }}</span></p>
-        <p>Lowest Marks: <span class="highlight">{{ lowest_marks }}</span></p>
-
-        <!-- Subject-wise Failed and Absent -->
-        <h3 class="section-title">Subject-wise Failed and Absent</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Subject</th>
-                    <th>Total Failed</th>
-                    <th>Total Absent</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for subject in subject_wise_data %}
-                <tr>
-                    <td>{{ subject.mark_id__subject_conf_id__subject_id__name }}</td>
-                    <td>{{ subject.total_failed }}</td>
-                    <td>{{ subject.total_absent }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
+  <h3>Subject-wise Failed</h3>
+  <table>
+    <thead><tr><th>Subject</th><th>Total Failed</th></tr></thead>
+    <tbody>
+      {% for subject, failed_count in subject_wise_data.items %}
+      <tr><td class="lbl">{{ subject }}</td><td>{{ failed_count }}</td></tr>
+      {% empty %}
+      <tr><td colspan="2">No data</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </body>
 </html>

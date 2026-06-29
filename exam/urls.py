@@ -52,6 +52,7 @@ urlpatterns = [
     path('result/tabulation_sheet/narrow_tabulation_report/',narrow_tabulation_report,name='narrow_tabulation_report' ),
     path('result/merit_list/',merit_list,name='merit_list' ),
     path('result/progress_report/',progress_report,name='progress_report' ),
+    path('result/progress-report-pdf/', progress_report_pdf, name='progress_report_pdf'),
     path('result/result_summary/',result_sms,name='result_summary' ),
     path('result/list_certificate/', list_certificate, name='list_certificate'),
     path('generate_certificate_report/<int:student_id>/', generate_certificate_report, name='generate_certificate_report'),
@@ -63,7 +64,9 @@ urlpatterns = [
     path('result/subject_wise_analysis/', subject_wise_analysis, name='subject_wise_analysis'),
     path('subject_analysis/download_pdf/', download_subject_analysis_pdf, name='download_subject_analysis_pdf'),
     path('result/top-last-students/', top_last_students_report, name='top_last_students_report'),
+    path('result/top-last-students/download-pdf/', download_top_last_pdf, name='download_top_last_pdf'),
     path('result/subject-wise-fail/', subject_wise_fail_report, name='subject_wise_fail_report'),
+    path('result/subject-wise-fail/download-pdf/', download_subject_fail_pdf, name='download_subject_fail_pdf'),
     path('tabulation-sheet-two/', tabulation_sheet_two, name='tabulation_sheet_two'),
     path('tabulation-pdf/', tabulation_pdf, name='tabulation_pdf'),
     

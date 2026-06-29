@@ -1,57 +1,54 @@
 {% extends 'partials/base.html' %}
-
 {% block content %}
 <div class="container-fluid flex-grow-1 container-p-y">
   {% include 'pageinfo.html' %}
-  <!-- Filter Form -->
+
   <div class="card p-4">
-    <h2 class="text-center text-primary">Subject-Wise Fail Report</h2>
+    <h2 class="text-center" style="color:#0d6b5f;">Subject-Wise Fail Report</h2>
     <form method="get" action="">
-      <div class="row">
-        <!-- Class Selection -->
-        <div class="col-md-4">
+      <div class="row align-items-end">
+        <div class="col-md-3">
           <label class="font-weight-bold" for="class_id">Select Class:</label>
           <select id="class_id" name="class_id" class="form-control" required>
             <option value="">Select Class</option>
             {% for class in class_list %}
-            <option value="{{ class.id }}" {% if class.id|stringformat:"s" == selected_class_id %}selected{% endif %}>
-              {{ class }}
-            </option>
+            <option value="{{ class.id }}" {% if class.id|stringformat:'s' == selected_class_id %}selected{% endif %}>{{ class }}</option>
             {% endfor %}
           </select>
         </div>
-
-
-        <!-- Exam Selection -->
-        <div class="col-md-4">
+        <div class="col-md-3">
           <label class="font-weight-bold" for="exam_id">Select Exam:</label>
           <select id="exam_id" name="exam_id" class="form-control" required>
             <option selected disabled value="">Select Exam</option>
             {% for exam in exam_list %}
-            <option value="{{ exam.id }}" {% if exam.id|stringformat:"s" == selected_exam_id %}selected{% endif %}>
-              {{ exam.name }}
-            </option>
+            <option value="{{ exam.id }}" {% if exam.id|stringformat:'s' == selected_exam_id %}selected{% endif %}>{{ exam.name }}</option>
             {% endfor %}
           </select>
         </div>
-        <div class="col-md-4 mt-4">
-          <button type="submit" class="btn btn-primary px-4">Generate Report</button>
+        <div class="col-md-3 mt-2">
+          <button type="submit" class="btn" style="background-color:#0d6b5f;color:#fff;">Generate Report</button>
+        </div>
+        <div class="col-md-3 mt-2">
+          {% if results %}
+          <a class="btn" target="_blank"
+             href="{% url 'download_subject_fail_pdf' %}?class_id={{ selected_class_id }}&exam_id={{ selected_exam_id }}"
+             style="background-color:#0d6b5f;color:#fff;">Download PDF</a>
+          {% endif %}
         </div>
       </div>
-      
     </form>
   </div>
 
-  <!-- Report Table -->
   {% if results %}
   <div class="card mt-4 p-4">
-    <h2 class="text-center text-danger">Failed Students List</h2>
+    <h2 class="text-center" style="color:#0d6b5f;">Failed Students List</h2>
     <table class="table table-bordered table-hover">
-      <thead class="thead-dark">
+      <thead style="background:#0d6b5f;color:#fff;">
         <tr>
           <th class="text-center">#</th>
           <th>Student Name</th>
           <th>Roll</th>
+          <th>Failed Count</th>
           <th>Subjects Failed</th>
         </tr>
       </thead>
@@ -61,14 +58,15 @@
           <td class="text-center">{{ result.sn }}</td>
           <td>{{ result.student_name }}</td>
           <td>{{ result.roll_no }}</td>
+          <td class="text-center">{{ result.fail_count }}</td>
           <td>{{ result.subjects }}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
-  {% else %}
-  <p class="text-center text-danger mt-5">No failed students found for the selected criteria.</p>
+  {% elif selected_class_id %}
+  <p class="text-center mt-5" style="color:#0d6b5f;">No failed students found for the selected criteria.</p>
   {% endif %}
 </div>
 {% endblock %}

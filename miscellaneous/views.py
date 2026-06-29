@@ -185,48 +185,71 @@ def del_event(request,id):
 
 @login_required(login_url='login')
 @user_passes_test(lambda user: is_staff_or_has_role(user, roles=['Manager', 'HR']))
-def generate_testimonial_report(request): 
-    if request.method == 'GET':
-        student_id = request.GET.get('student_id')
-        try:
-            student_instance = get_object_or_404(StudentProfile, id=student_id)
-            testimonial_instance = get_object_or_404(Testimonial, student_id=student_instance)
-            parent_instance = student_instance.parent_id.parent_profile
-            institute = Institute.objects.latest('id')
-            data = {
-                'student_name': student_instance.student_field.name or '',
-                'father_name': parent_instance.father_name or '',
-                'mother_name': parent_instance.mother_name or '',
-                'village_name': student_instance.village or '',
-                'post_office': student_instance.post_office or '',
-                'police_station_upazilla': student_instance.ps_or_upazilla or '',
-                'district': student_instance.district or '',
-                'exam_name': testimonial_instance.exam or '',
-                'exam_center': testimonial_instance.exam_center or '',
-                'exam_held_date': testimonial_instance.exam_held_date or '',
-                'board_name': institute.education_board_id.board_name or '',
-                'group_name': testimonial_instance.group_name or '',
-                'roll_no': testimonial_instance.e_roll or '',
-                'registration_no': testimonial_instance.r_no or '',
-                'session': testimonial_instance.session or '',
-                'result': testimonial_instance.result or '',
-                'date_of_birth': student_instance.student_field.dob or '',
-                'issue_date': testimonial_instance.issue_date or '',
-                'serial': testimonial_instance.serial or '',
-            }
-            return JsonResponse(data, status=200)
-        except StudentProfile.DoesNotExist:
-            return JsonResponse({'error': 'Student not found'}, status=404)
-    else:
+def generate_testimonial_report(request):
+    if request.method != 'GET':
         return JsonResponse({'error': 'Invalid request'}, status=400)
+
+    student_id = request.GET.get('student_id')
+    student_instance = get_object_or_404(StudentProfile, id=student_id)
+
+    # Testimonial data thakle nei, na thakle clear message
+    testimonial_instance = Testimonial.objects.filter(student_id=student_instance).first()
+    if not testimonial_instance:
+        return JsonResponse(
+            {'error': 'No testimonial data found for this student. Please add data first using the "Data" button.'},
+            status=404
+        )
+
+    # Parent safe access
+    parent_instance = None
+    try:
+        if student_instance.parent_id:
+            parent_instance = student_instance.parent_id.parent_profile
+    except Exception:
+        parent_instance = None
+
+    # Institute / board safe access
+    institute = Institute.objects.latest('id')
+    board_name = ''
+    try:
+        if institute.education_board_id:
+            board_name = institute.education_board_id.board_name or ''
+    except Exception:
+        board_name = ''
+
+    data = {
+        'student_name': student_instance.student_field.name or '',
+        'father_name': getattr(parent_instance, 'father_name', '') or '',
+        'mother_name': getattr(parent_instance, 'mother_name', '') or '',
+        'village_name': student_instance.village or '',
+        'post_office': student_instance.post_office or '',
+        'police_station_upazilla': student_instance.ps_or_upazilla or '',
+        'district': student_instance.district or '',
+        'exam_name': testimonial_instance.exam or '',
+        'exam_center': testimonial_instance.exam_center or '',
+        'exam_held_date': str(testimonial_instance.exam_held_date or ''),
+        'board_name': board_name,
+        'group_name': testimonial_instance.group_name or '',
+        'roll_no': testimonial_instance.e_roll or '',
+        'registration_no': testimonial_instance.r_no or '',
+        'session': testimonial_instance.session or '',
+        'result': testimonial_instance.result or '',
+        'date_of_birth': str(student_instance.student_field.dob or ''),
+        'issue_date': str(testimonial_instance.issue_date or ''),
+        'serial': testimonial_instance.serial or '',
+    }
+    return JsonResponse(data, status=200)
 
 
 @login_required(login_url='login')
 @user_passes_test(lambda user: is_staff_or_has_role(user, roles=['Manager','HR']))
 def list_testmonial(request):
-    institute=Institute.objects.latest('id')
-    current_year = str(datetime.now().year)
-    admission_year = Admission_Year.objects.get(name=current_year)
+    institute = Institute.objects.latest('id')
+
+    # current year hardcode korle, oi year er admission na thakle crash hoy.
+    # Tai latest admission year nei (nirapod).
+    admission_year = Admission_Year.objects.latest('updated_at')
+
     classList = StudentClass.objects.all()
     try:
         testmonial_settings = TestmonialSettings.objects.latest('id')
@@ -239,10 +262,10 @@ def list_testmonial(request):
         class_instance = get_object_or_404(StudentClass, pk=class_id)
         studentlist = StudentProfile.objects.filter(
             Q(class_id__class_group_id__class_id=class_instance) &
-            Q(admission_year_id=admission_year) & 
+            Q(admission_year_id=admission_year) &
             Q(student_field__status="Active")
         )
-    
+
     if request.method == 'POST' and 'settings_form' in request.POST:
         settings = TestmonialSettings.objects.first() or TestmonialSettings()
         form = TestmonialSettingsForm(request.POST, request.FILES, instance=settings)
@@ -250,8 +273,6 @@ def list_testmonial(request):
             form.save()
             messages.success(request, 'Settings saved successfully!')
             return redirect('list_testmonial')
-        
-        
     else:
         settings = TestmonialSettings.objects.first() or TestmonialSettings()
         form = TestmonialSettingsForm(instance=settings)
@@ -260,12 +281,11 @@ def list_testmonial(request):
         'classList': classList,
         'studentlist': studentlist,
         'testmonial_settings': testmonial_settings,
-        'institute':institute,
+        'institute': institute,
         'heading': 'Student',
         'subheading': 'Testmonial',
-        'form': form
+        'form': form,
     }
-
     return render(request, 'report/student_testimonial.html', context)
 
 @login_required(login_url='login')

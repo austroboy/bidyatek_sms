@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load mark_tags %}
+<head>
+<meta charset="UTF-8">
+<title>Academic Transcript</title>
+<style>
+  :root { --teal:#0d6b5f; --teal-dark:#0a4f46; --ink:#1a1a1a; }
+  * { box-sizing:border-box; }
+  body { font-family:"Times New Roman",Georgia,"Noto Sans Bengali",serif; color:var(--ink); margin:0; font-size:10.5px; }
+  .page { page-break-after:always; padding:6px 4px; }
+  .page:last-child { page-break-after:auto; }
+
+  /* Header */
+  .head { display:flex; align-items:center; gap:12px; border-bottom:2px solid var(--ink); padding-bottom:6px; }
+  .head img { width:70px; height:70px; object-fit:contain; }
+  .head .center { flex:1; text-align:center; }
+  .iname { font-size:21px; font-weight:bold; color:var(--teal-dark); letter-spacing:.3px; }
+  .iaddr { font-size:10px; }
+  .iweb { font-size:9.5px; color:var(--teal); }
+  .ttl { font-size:16px; font-weight:bold; color:var(--teal-dark); margin-top:3px; font-style:italic; }
+
+  .yearbar { display:flex; justify-content:space-between; font-size:10px; margin:5px 0; }
+
+  /* Student info + grade key side by side */
+  .info-row { display:flex; gap:10px; margin-bottom:8px; }
+  .stu-info { width:55%; }
+  .stu-info table { width:100%; }
+  .stu-info td { padding:3px 2px; vertical-align:top; }
+  .stu-info td.lbl { width:42%; }
+  .gkey { width:45%; }
+  .gkey table { width:100%; border-collapse:collapse; font-size:9px; }
+  .gkey th, .gkey td { border:0.5px solid #777; padding:2px 4px; text-align:left; }
+  .gkey th { background:#eee; }
+
+  .section-label { font-style:italic; text-decoration:underline; margin:6px 0 3px; font-size:10.5px; }
+
+  /* Main marks table */
+  table.marks { width:100%; border-collapse:collapse; }
+  table.marks th, table.marks td { border:0.6px solid #555; padding:2px 3px; text-align:center; }
+  table.marks thead th { background:#f0f0f0; font-weight:bold; }
+  table.marks td.subj { text-align:left; padding-left:4px; }
+  .vmid { vertical-align:middle; }
+  .totmark-cell { vertical-align:middle; font-weight:bold; }
+
+  /* Attendance + comments */
+  .att-table, .cmt-table { width:100%; border-collapse:collapse; margin-top:4px; font-size:10px; }
+  .att-table td, .cmt-table td { border:0.6px solid #555; padding:3px 5px; }
+  .cmt-table td.k { width:30%; background:#fafafa; }
+
+  /* Signatures */
+  .signs { display:flex; justify-content:space-around; margin-top:40px; font-size:11px; }
+  .sign { width:180px; text-align:center; border-top:1px solid #000; padding-top:3px; }
+</style>
+</head>
+<body>
+  {% for s in results %}
+  <div class="page">
+
+    <!-- HEADER -->
+    <div class="head">
+      {% if institute.institute_logo %}<img src="{{ institute.institute_logo.url }}">{% else %}<div style="width:70px;"></div>{% endif %}
+      <div class="center">
+        <div class="iname">{{ institute.institute_name|default:"Institute Name" }}</div>
+        {% if institute.institute_address %}<div class="iaddr">{{ institute.institute_address }}</div>{% endif %}
+        {% if institute.institute_web %}<div class="iweb">{{ institute.institute_web }}</div>{% endif %}
+        <div class="ttl">Academic Transcript</div>
+      </div>
+      <div style="width:70px;"></div>
+    </div>
+
+    <div class="yearbar">
+      <div>Academic Year: <b>{{ academic_year }}</b></div>
+      <div>Shift: <b>{{ s.shift }}</b></div>
+    </div>
+
+    <!-- STUDENT INFO + GRADE KEY -->
+    <div class="info-row">
+      <div class="stu-info">
+        <table>
+          <tr><td class="lbl">Name Of Examination:</td><td>{{ exam_instance.name }}</td></tr>
+          <tr><td class="lbl">Name of Student:</td><td>{{ s.name }}</td></tr>
+          <tr><td class="lbl">Class:</td><td>{{ class_name }}{% if group_name %} {{ group_name }}{% endif %}</td></tr>
+          <tr><td class="lbl">Roll No:</td><td>{{ s.roll_no }}</td></tr>
+          <tr><td class="lbl">Section:</td><td>{{ s.section }}</td></tr>
+          <tr><td class="lbl">Shift:</td><td>{{ s.shift }}</td></tr>
+          <tr><td class="lbl">Version:</td><td>{{ s.version }}</td></tr>
+        </table>
+      </div>
+      <div class="gkey">
+        <table>
+          <tr><th>Letter</th><th>Percentage</th><th>Description</th></tr>
+          <tr><td>A+</td><td>80% - 100%</td><td>Very Good</td></tr>
+          <tr><td>A</td><td>70% - 79%</td><td>Good / Satisfactory</td></tr>
+          <tr><td>A-</td><td>60% - 69%</td><td>Study Seriously</td></tr>
+          <tr><td>B</td><td>50% - 59%</td><td>Study Seriously</td></tr>
+          <tr><td>C</td><td>40% - 49%</td><td>Study Seriously</td></tr>
+          <tr><td>D</td><td>33% - 39%</td><td>Study Seriously</td></tr>
+          <tr><td>F</td><td>0% - 32%</td><td>Poor Result</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="section-label">Intellectual &amp; Psychosomatic Evaluation:</div>
+
+    <!-- MARKS TABLE -->
+    <table class="marks">
+      <thead>
+        <tr>
+          <th rowspan="2" class="vmid">Subjects</th>
+          <th colspan="{{ mark_type_list|length }}">Obtained Marks</th>
+          <th rowspan="2" class="vmid">Total</th>
+          <th rowspan="2" class="vmid">Full<br>Marks</th>
+          <th rowspan="2" class="vmid">GP</th>
+          <th rowspan="2" class="vmid">LG</th>
+          <th rowspan="2" class="vmid">Highest<br>Mark</th>
+          <th rowspan="2" class="vmid">Total<br>Mark</th>
+          <th rowspan="2" class="vmid">GPA</th>
+        </tr>
+        <tr>
+          {% for mt in mark_type_list %}<th>{{ mt }}</th>{% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for sub in s.subjects %}
+        <tr>
+          <td class="subj">{{ sub.name }}{% if sub.is_optional %} (4th){% endif %}</td>
+          {% for mt in mark_type_list %}
+          <td>{% with v=sub.marks|get_item:mt %}{% if v != None %}{{ v|floatformat:2 }}{% else %}-{% endif %}{% endwith %}</td>
+          {% endfor %}
+          <td><b>{{ sub.total|floatformat:2 }}</b></td>
+          <td>{{ sub.full_marks }}</td>
+          <td>{{ sub.gp }}</td>
+          <td>{{ sub.lg }}</td>
+          <td>{{ sub.highest|floatformat:2 }}</td>
+          {% if forloop.first %}
+          <td class="totmark-cell" rowspan="{{ s.subjects|length }}">{{ s.total_marks|floatformat:2 }}</td>
+          <td class="totmark-cell" rowspan="{{ s.subjects|length }}">{{ s.gpa|floatformat:2 }}</td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+        <tr>
+          <td colspan="{{ mark_type_list|length|add:5 }}" style="text-align:right;font-weight:bold;">
+            Total Mark: {{ s.total_marks|floatformat:2 }} &nbsp;&nbsp; Grade: {{ s.grade }} &nbsp;&nbsp; Position In Class: {{ s.position }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ATTENDANCE -->
+    <div class="section-label">Attendance Report</div>
+    <table class="att-table">
+      <tr>
+        <td style="width:34%;">Attendance Report</td>
+        <td>Working Days: -</td>
+        <td>Present: -</td>
+        <td>Absent: -</td>
+      </tr>
+    </table>
+
+    <!-- COMMENTS -->
+    <div class="section-label" style="text-decoration:none;font-style:normal;">Comments</div>
+    <table class="cmt-table">
+      <tr><td class="k">Punctuality</td><td></td></tr>
+      <tr><td class="k">Discipline</td><td></td></tr>
+      <tr><td class="k">Cleanliness</td><td></td></tr>
+      <tr><td class="k">Class Teacher's Comment</td><td></td></tr>
+      <tr><td class="k">Principal's Comment</td><td></td></tr>
+    </table>
+
+    <!-- SIGNATURES -->
+    <div class="signs">
+      <div class="sign">Class Teacher</div>
+      <div class="sign">Controller of Exam</div>
+      <div class="sign">Principal</div>
+    </div>
+
+  </div>
+  {% empty %}
+  <p style="text-align:center;">No data found.</p>
+  {% endfor %}
+</body>
+</html>

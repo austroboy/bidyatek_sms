@@ -1,68 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
+{% load mark_tags %}
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tabulation Sheet</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 9px;
-            padding: 10px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        th, td {
-            border: 1px solid #ccc;
-            padding: 4px;
-            text-align: center;
-            font-size: 8px;
-        }
-        th {
-            background-color: #2A3F54;
-            color: white;
-            font-size: 9px;
-        }
-        .header {
-            text-align: center;
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-        .total {
-            font-weight: bold;
-            background-color: #f2f2f2;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Tabulation Sheet</title>
+<style>
+    :root { --teal: #0d6b5f; --teal-dark: #0a4f46; --teal-light: #e7f3f1; }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { font-family: Arial, "Noto Sans Bengali", sans-serif; color: #1a1a1a; margin: 0;
+           display: flex; flex-direction: column; min-height: 100%; }
 
+    .inst-header { text-align: center; border-bottom: 2.5px solid var(--teal); padding-bottom: 5px; margin-bottom: 5px; position: relative; min-height: 52px; }
+    .inst-logo { position: absolute; left: 6px; top: 50%; transform: translateY(-50%); width: 50px; height: 50px; object-fit: contain; }
+    .inst-name { font-size: 16px; font-weight: bold; color: var(--teal-dark); letter-spacing: .2px; }
+    .inst-addr { font-size: 10px; color: #444; margin-top: 1px; }
+    .inst-web  { font-size: 9px; color: var(--teal); }
+    .sheet-title { display: inline-block; margin-top: 4px; background: var(--teal); color: #fff; font-size: 11px; font-weight: bold; padding: 2px 20px; border-radius: 3px; }
+
+    .meta-bar { display: flex; flex-wrap: wrap; justify-content: space-between; font-size: 10px; margin: 4px 2px 6px; padding: 4px 8px; background: var(--teal-light); border-radius: 3px; }
+    .meta-bar span { font-weight: bold; color: var(--teal-dark); }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 0.6px solid #8aa; text-align: center; vertical-align: middle; white-space: nowrap; }
+    thead th { background: var(--teal); color: #fff; font-weight: bold; white-space: normal; }
+    thead tr.sub-head th { background: var(--teal-dark); }
+    tbody tr:nth-child(even) { background: #f5faf9; }
+    .name-col { text-align: left; padding-left: 4px !important; white-space: nowrap; }
+    .subject-total { font-weight: bold; background: #eef6f5; }
+    .grand-total { font-weight: bold; background: var(--teal-light); }
+    .fail { color: #c00; font-weight: bold; }
+    .pass { color: var(--teal-dark); font-weight: bold; }
+
+    .footer-sign { margin-top: auto; display: flex; justify-content: space-around; padding-top: 40px; padding-bottom: 6px; font-size: 11px; }
+    .sign-box { border-top: 1px solid #555; padding-top: 3px; width: 180px; text-align: center; }
+</style>
+</head>
 <body>
 
-    <div class="header">
-        <h2>Tabulation Sheet</h2>
+    <div class="inst-header">
+        {% if institute.institute_logo %}
+        <img class="inst-logo" src="{{ institute.institute_logo.url }}" alt="logo">
+        {% endif %}
+        <div class="inst-name">{{ institute.institute_name|default:"Institute Name" }}</div>
+        {% if institute.institute_address %}<div class="inst-addr">{{ institute.institute_address }}</div>{% endif %}
+        {% if institute.institute_eiin_no %}<div class="inst-addr">EIIN: {{ institute.institute_eiin_no }}</div>{% endif %}
+        {% if institute.institute_web %}<div class="inst-web">{{ institute.institute_web }}</div>{% endif %}
+        <div class="sheet-title">Tabulation Sheet</div>
     </div>
 
+    <div class="meta-bar">
+        <div>Exam: <span>{{ exam_name }}</span></div>
+        <div>Class: <span>{{ class_meta.class_name }}{% if class_meta.group %} ({{ class_meta.group }}){% endif %}</span></div>
+        {% if class_meta.section %}<div>Section: <span>{{ class_meta.section }}</span></div>{% endif %}
+        {% if class_meta.shift %}<div>Shift: <span>{{ class_meta.shift }}</span></div>{% endif %}
+        <div>Total Students: <span>{{ tabulation_data|length }}</span></div>
+    </div>
+
+    {% if tabulation_data %}
     <table>
         <thead>
             <tr>
-                <th rowspan="2">Roll</th>
-                <th rowspan="2">Name</th>
-                <th rowspan="2">Stream</th>
-                <th rowspan="2">Section</th>
-                {% for subject in tabulation_data.0.subjects.keys %}
-                <th colspan="3">{{ subject }}</th>
+                <th rowspan="2" style="width:30px;">Roll</th>
+                <th rowspan="2" style="width:110px;">Name</th>
+                {% for subject in subject_list %}
+                <th colspan="{{ mark_type_list|length|add:2 }}">{{ subject }}</th>
                 {% endfor %}
-                <th rowspan="2">Total</th>
-                <th rowspan="2">GPA</th>
-                <th rowspan="2">Status</th>
+                <th rowspan="2" style="width:42px;">Total<br>Marks</th>
+                <th rowspan="2" style="width:34px;">GPA</th>
+                <th rowspan="2" style="width:38px;">Grade</th>
+                <th rowspan="2" style="width:34px;">Status</th>
             </tr>
-            <tr>
-                {% for subject in tabulation_data.0.subjects.keys %}
-                <th>MCQ</th>
-                <th>CQ</th>
-                <th>Total</th>
+            <tr class="sub-head">
+                {% for subject in subject_list %}
+                    {% for mt in mark_type_list %}<th>{{ mt }}</th>{% endfor %}
+                    <th>Total</th>
+                    <th>Grade</th>
                 {% endfor %}
             </tr>
         </thead>
@@ -70,22 +83,35 @@
             {% for student in tabulation_data %}
             <tr>
                 <td>{{ student.roll }}</td>
-                <td>{{ student.name }}</td>
-                <td>{{ student.stream }}</td>
-                <td>{{ student.section }}</td>
-                {% for subject, details in student.subjects.items %}
-                <td>{{ details.marks.MCQ|default:"-" }}</td>
-                <td>{{ details.marks.CQ|default:"-" }}</td>
-                <td class="total">{{ details.total }}</td>
+                <td class="name-col">{{ student.name }}</td>
+                {% for subject in subject_list %}
+                    {% with details=student.subjects|get_item:subject %}
+                        {% for mt in mark_type_list %}
+                        {% with mval=details.marks|get_item:mt %}
+                        <td>{% if mval != None %}{{ mval|floatformat:2 }}{% else %}-{% endif %}</td>
+                        {% endwith %}
+                        {% endfor %}
+                        <td class="subject-total">{{ details.total|floatformat:2|default:"-" }}</td>
+                        <td>{{ details.grade|default:"-" }}</td>
+                    {% endwith %}
                 {% endfor %}
-                <td class="total">{{ student.total_marks }}</td>
-                <td class="total">{{ student.total_gpa }}</td>
-                <td>{{ student.status }}</td>
+                <td class="grand-total">{{ student.total_marks|floatformat:2 }}</td>
+                <td class="grand-total">{{ student.total_gpa|floatformat:2 }}</td>
+                <td class="grand-total">{{ student.final_grade }}</td>
+                <td class="{% if student.status == 'Fail' %}fail{% else %}pass{% endif %}">{{ student.status }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+    {% else %}
+    <p style="text-align:center;margin-top:40px;">No data found for this class &amp; exam.</p>
+    {% endif %}
+
+    <div class="footer-sign">
+        <div class="sign-box">Prepared By</div>
+        <div class="sign-box">Class Teacher</div>
+        <div class="sign-box">Head of Institute</div>
+    </div>
 
 </body>
-
 </html>

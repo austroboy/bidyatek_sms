@@ -1,101 +1,83 @@
 {% extends 'partials/base.html' %}
 {% load static %}
-
 {% block content %}
 <div class="container-fluid flex-grow-1 container-p-y">
   {% include 'pageinfo.html' %}
 
-  <!-- Form to Select Class and Exam -->
-  <div class="card p-4">
-    <h2 class="text-center">Top 10 and Last 10 Students Report</h2>
-    <form method="get" action="">
-      <div class="row">
-        <div class="col-md-4">
-          <label class="highlight" for="class_id">Select Class:</label>
-          <select name="class_id" id="class_id" class="form-control" required>
-            <option value="" disabled>Select Class</option>
-            {% for class in classes %}
-            <option value="{{ class.id }}" {% if class.id|stringformat:"s" == selected_class_id %}selected{% endif %}>
-              {{ class.name }}
-            </option>
-            {% endfor %}
-          </select>
+  <div class="card mb-3">
+    <div class="card-body">
+      <h4 class="text-center mb-3">Top & Last Students Report</h4>
+      <form method="GET" action="{% url 'top_last_students_report' %}">
+        <div class="row align-items-end">
+          <div class="col-md-3">
+            <label for="class_id">Select Class:</label>
+            <select name="class_id" id="class_id" class="form-control" required>
+              <option value="" disabled {% if not selected_class_id %}selected{% endif %}>Select Class</option>
+              {% for class in classes %}
+              <option value="{{ class.id }}" {% if class.id|stringformat:'s' == selected_class_id %}selected{% endif %}>{{ class.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label for="exam_id">Select Exam:</label>
+            <select name="exam_id" id="exam_id" class="form-control" required>
+              <option value="" disabled {% if not selected_exam_id %}selected{% endif %}>Select Exam</option>
+              {% for exam in exams %}
+              <option value="{{ exam.id }}" {% if exam.id|stringformat:'s' == selected_exam_id %}selected{% endif %}>{{ exam.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-3 mt-2">
+            <button type="submit" class="btn" style="background-color:#0d6b5f;color:#fff;">Generate Report</button>
+          </div>
+          <div class="col-md-3 mt-2">
+            {% if top_10_students %}
+            <a class="btn" target="_blank"
+               href="{% url 'download_top_last_pdf' %}?class_id={{ selected_class_id }}&exam_id={{ selected_exam_id }}"
+               style="background-color:#0d6b5f;color:#fff;">Download PDF</a>
+            {% endif %}
+          </div>
         </div>
-
-        <div class="col-md-4">
-          <label class="highlight" for="exam_id">Select Exam:</label>
-          <select name="exam_id" id="exam_id" class="form-control" required>
-            <option value="" disabled>Select Exam</option>
-            {% for exam in exams %}
-            <option value="{{ exam.id }}" {% if exam.id|stringformat:"s" == selected_exam_id %}selected{% endif %}>
-              {{ exam.name }}
-            </option>
-            {% endfor %}
-          </select>
-        </div>
-
-        <div class="col-md-4" style="margin-top: 20px;" >
-          <button type="submit" class="btn btn-primary">Generate Report</button>
-        </div>
-      </div>
-      
-    </form>
+      </form>
+    </div>
   </div>
 
-  {% if top_10_students or last_10_students %}
-  <div class="card p-4 mt-4">
-    <h2 class="text-center">Top 10 Students</h2>
-    <table class="table table-bordered table-striped">
-      <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Student Name</th>
-          <th>College ID</th>
-          <th>Total Marks</th>
-          <th>GPA</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for student in top_10_students %}
-        <tr>
-          <td>{{ forloop.counter }}</td>
-          <td>{{ student.student.student_field.name }}</td>
-          <td>{{ student.student.student_field.college_id }}</td>
-          <td>{{ student.obtained_marks }}</td>
-          <td>{{ student.gpa }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  {% if top_10_students %}
+  <div class="card mb-3">
+    <div class="card-body">
+      <h4 class="text-center">Top Students</h4>
+      <table class="table table-bordered mt-2">
+        <thead style="background:#0d6b5f;color:#fff;">
+          <tr><th>Rank</th><th>Student Name</th><th>College ID</th><th>Total Marks</th><th>GPA</th></tr>
+        </thead>
+        <tbody>
+          {% for s in top_10_students %}
+          <tr><td>{{ s.rank }}</td><td>{{ s.name }}</td><td>{{ s.college_id }}</td>
+              <td>{{ s.total_marks|floatformat:2 }}</td><td>{{ s.gpa|floatformat:2 }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
 
-  <div class="card p-4 mt-4">
-    <h2 class="text-center">Last 10 Students</h2>
-    <table class="table table-bordered table-striped">
-      <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Student Name</th>
-          <th>College ID</th>
-          <th>Total Marks</th>
-          <th>GPA</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for student in last_10_students %}
-        <tr>
-          <td>{{ forloop.counter }}</td>
-          <td>{{ student.student.student_field.name }}</td>
-          <td>{{ student.student.student_field.college_id }}</td>
-          <td>{{ student.obtained_marks }}</td>
-          <td>{{ student.gpa }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  <div class="card mb-3">
+    <div class="card-body">
+      <h4 class="text-center">Last Students</h4>
+      <table class="table table-bordered mt-2">
+        <thead style="background:#0d6b5f;color:#fff;">
+          <tr><th>Rank</th><th>Student Name</th><th>College ID</th><th>Total Marks</th><th>GPA</th></tr>
+        </thead>
+        <tbody>
+          {% for s in last_10_students %}
+          <tr><td>{{ s.rank }}</td><td>{{ s.name }}</td><td>{{ s.college_id }}</td>
+              <td>{{ s.total_marks|floatformat:2 }}</td><td>{{ s.gpa|floatformat:2 }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
-  {% else %}
-  <p class="text-center text-danger mt-5">No data found for the selected criteria.</p>
+  {% elif selected_class_id %}
+  <p class="text-center mt-4">No results found for this class & exam.</p>
   {% endif %}
 </div>
 {% endblock content %}

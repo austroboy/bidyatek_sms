@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Subject-Wise Fail Report</title>
+<style>
+  :root{--teal:#0d6b5f;--teal-dark:#0a4f46;}
+  *{box-sizing:border-box;}
+  body{font-family:Arial,"Noto Sans Bengali",sans-serif;color:#1a1a1a;margin:0;font-size:11px;}
+  .head{text-align:center;border-bottom:2.5px solid var(--teal);padding-bottom:8px;position:relative;min-height:56px;}
+  .logo{position:absolute;left:4px;top:50%;transform:translateY(-50%);width:56px;height:56px;object-fit:contain;}
+  .iname{font-size:21px;font-weight:bold;color:var(--teal-dark);}
+  .iaddr{font-size:10px;color:#444;}
+  .iweb{font-size:9.5px;color:var(--teal);}
+  .title{display:inline-block;margin-top:6px;background:var(--teal);color:#fff;font-size:13px;font-weight:bold;padding:3px 24px;border-radius:3px;}
+  .meta{display:flex;justify-content:center;gap:26px;margin:10px 0 6px;font-size:11px;}
+  .meta b{color:var(--teal-dark);}
+  table{width:100%;border-collapse:collapse;margin-top:6px;}
+  th,td{border:0.7px solid #8aa;padding:6px 8px;text-align:center;}
+  thead th{background:var(--teal);color:#fff;}
+  td.l{text-align:left;padding-left:8px;}
+  tbody tr:nth-child(even){background:#f5faf9;}
+  .none{text-align:center;margin-top:30px;color:var(--teal-dark);font-weight:bold;}
+</style>
+</head>
+<body>
+  <div class="head">
+    {% if institute.institute_logo %}<img class="logo" src="{{ institute.institute_logo.url }}">{% endif %}
+    <div class="iname">{{ institute.institute_name|default:"Institute Name" }}</div>
+    {% if institute.institute_address %}<div class="iaddr">{{ institute.institute_address }}</div>{% endif %}
+    {% if institute.institute_web %}<div class="iweb">{{ institute.institute_web }}</div>{% endif %}
+    <div class="title">Subject-Wise Fail Report</div>
+  </div>
+
+  <div class="meta">
+    <div>Class: <b>{{ class_name }}</b></div>
+    <div>Exam: <b>{{ exam_name }}</b></div>
+    <div>Total Failed Students: <b>{{ results|length }}</b></div>
+  </div>
+
+  {% if results %}
+  <table>
+    <thead>
+      <tr><th style="width:34px;">#</th><th>Student Name</th><th>Roll</th><th>Failed Count</th><th>Subjects Failed</th></tr>
+    </thead>
+    <tbody>
+      {% for r in results %}
+      <tr>
+        <td>{{ r.sn }}</td>
+        <td class="l">{{ r.student_name }}</td>
+        <td>{{ r.roll_no }}</td>
+        <td>{{ r.fail_count }}</td>
+        <td class="l">{{ r.subjects }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="none">No failed students found for the selected criteria.</p>
+  {% endif %}
+</body>
+</html>

@@ -505,99 +505,78 @@
 
 <script>
   $(document).ready(function() {
+    // Settings ke escapejs diye nirapode JS variable e ana hocche,
+    // newline/backtick/quote thakleo script bhangbe na.
+    var settings = {
+      body:    "{{ testmonial_settings.body|escapejs }}",
+      subbody: "{{ testmonial_settings.subbody|escapejs }}",
+      footer:  "{{ testmonial_settings.footer|escapejs }}"
+    };
+
     $('#testimonial').on('show.bs.modal', function(event) {
-        var button = $(event.relatedTarget);  // Button that triggered the modal
-        var studentId = button.data('student-id');  // Extract student ID from data attribute
+      var button = $(event.relatedTarget);  // Button that triggered the modal
+      var studentId = button.data('student-id');  // Extract student ID from data attribute
 
-        // AJAX request to fetch student data
-        $.ajax({
-            type: 'GET',
-            url: '/generate_testimonial_report/',
-            data: {
-                'student_id': studentId
-            },
-            success: function(data) {
-                // Update modal content with fetched data
-                var modal = $('#testimonial');  // Updated to correctly reference the modal
-                modal.find('.modal-title').text('Print Testimonial');  // Update modal title
+      // AJAX request to fetch student data
+      $.ajax({
+        type: 'GET',
+        url: "{% url 'generate_testimonial_report' %}",
+        data: {
+          'student_id': studentId
+        },
+        success: function(data) {
+          // Update modal content with fetched data
+          var modal = $('#testimonial');
+          modal.find('.modal-title').text('Print Testimonial');
 
-                var testimonialBody = `{{ testmonial_settings.body|safe }}`;  // Template body text with placeholders
-                var testimonialSubbody = `{{ testmonial_settings.subbody|safe }}`;  // Template subbody text with placeholders
-                var testimonialFooter = `{{ testmonial_settings.footer|safe }}`;  // Template footer text with placeholders
+          function fill(t) {
+            if (!t) return "";
+            return t
+              .replace(/\{name\}/g, data.student_name || "")
+              .replace(/\{father_name\}/g, data.father_name || "")
+              .replace(/\{mother_name\}/g, data.mother_name || "")
+              .replace(/\{village\}/g, data.village_name || "")
+              .replace(/\{post_office\}/g, data.post_office || "")
+              .replace(/\{police_station_upazilla\}/g, data.police_station_upazilla || "")
+              .replace(/\{district\}/g, data.district || "")
+              .replace(/\{exam_name\}/g, data.exam_name || "")
+              .replace(/\{exam_center\}/g, data.exam_center || "")
+              .replace(/\{exam_held_date\}/g, data.exam_held_date || "")
+              .replace(/\{board_name\}/g, data.board_name || "")
+              .replace(/\{group_name\}/g, data.group_name || "")
+              .replace(/\{roll_no\}/g, data.roll_no || "")
+              .replace(/\{registration_no\}/g, data.registration_no || "")
+              .replace(/\{session\}/g, data.session || "")
+              .replace(/\{result\}/g, data.result || "")
+              .replace(/\{date_of_birth\}/g, data.date_of_birth || "");
+          }
 
-                // Replace placeholders with actual data in the body
-                testimonialBody = testimonialBody.replace(/\{name\}/g, data.student_name);
-                testimonialBody = testimonialBody.replace(/\{father_name\}/g, data.father_name);
-                testimonialBody = testimonialBody.replace(/\{mother_name\}/g, data.mother_name);
-                testimonialBody = testimonialBody.replace(/\{village\}/g, data.village_name);
-                testimonialBody = testimonialBody.replace(/\{post_office\}/g, data.post_office);
-                testimonialBody = testimonialBody.replace(/\{police_station_upazilla\}/g, data.police_station_upazilla);
-                testimonialBody = testimonialBody.replace(/\{district\}/g, data.district);
-                testimonialBody = testimonialBody.replace(/\{exam_name\}/g, data.exam_name);
-                testimonialBody = testimonialBody.replace(/\{exam_center\}/g, data.exam_center);
-                testimonialBody = testimonialBody.replace(/\{exam_held_date\}/g, data.exam_held_date);
-                testimonialBody = testimonialBody.replace(/\{board_name\}/g, data.board_name);
-                testimonialBody = testimonialBody.replace(/\{group_name\}/g, data.group_name);
-                testimonialBody = testimonialBody.replace(/\{roll_no\}/g, data.roll_no);
-                testimonialBody = testimonialBody.replace(/\{registration_no\}/g, data.registration_no);
-                testimonialBody = testimonialBody.replace(/\{session\}/g, data.session);
-                testimonialBody = testimonialBody.replace(/\{result\}/g, data.result);
-                testimonialBody = testimonialBody.replace(/\{date_of_birth\}/g, data.date_of_birth);
+          var bodyHtml    = fill(settings.body);
+          var subbodyHtml = fill(settings.subbody);
+          var footerHtml  = fill(settings.footer);
 
-                // Replace placeholders with actual data in the subbody
-                testimonialSubbody = testimonialSubbody.replace(/\{name\}/g, data.student_name);
-                testimonialSubbody = testimonialSubbody.replace(/\{father_name\}/g, data.father_name);
-                testimonialSubbody = testimonialSubbody.replace(/\{mother_name\}/g, data.mother_name);
-                testimonialSubbody = testimonialSubbody.replace(/\{village\}/g, data.village_name);
-                testimonialSubbody = testimonialSubbody.replace(/\{post_office\}/g, data.post_office);
-                testimonialSubbody = testimonialSubbody.replace(/\{police_station_upazilla\}/g, data.police_station_upazilla);
-                testimonialSubbody = testimonialSubbody.replace(/\{district\}/g, data.district);
-                testimonialSubbody = testimonialSubbody.replace(/\{exam_name\}/g, data.exam_name);
-                testimonialSubbody = testimonialSubbody.replace(/\{exam_center\}/g, data.exam_center);
-                testimonialSubbody = testimonialSubbody.replace(/\{exam_held_date\}/g, data.exam_held_date);
-                testimonialSubbody = testimonialSubbody.replace(/\{board_name\}/g, data.board_name);
-                testimonialSubbody = testimonialSubbody.replace(/\{group_name\}/g, data.group_name);
-                testimonialSubbody = testimonialSubbody.replace(/\{roll_no\}/g, data.roll_no);
-                testimonialSubbody = testimonialSubbody.replace(/\{registration_no\}/g, data.registration_no);
-                testimonialSubbody = testimonialSubbody.replace(/\{session\}/g, data.session);
-                testimonialSubbody = testimonialSubbody.replace(/\{result\}/g, data.result);
-                testimonialSubbody = testimonialSubbody.replace(/\{date_of_birth\}/g, data.date_of_birth);
+          if (!bodyHtml && !subbodyHtml && !footerHtml) {
+            bodyHtml = "<span style='color:red'>No testimonial template found. Please set Body text in Settings.</span>";
+          }
 
-                // Replace placeholders with actual data in the footer
-                testimonialFooter = testimonialFooter.replace(/\{name\}/g, data.student_name);
-                testimonialFooter = testimonialFooter.replace(/\{father_name\}/g, data.father_name);
-                testimonialFooter = testimonialFooter.replace(/\{mother_name\}/g, data.mother_name);
-                testimonialFooter = testimonialFooter.replace(/\{village\}/g, data.village_name);
-                testimonialFooter = testimonialFooter.replace(/\{post_office\}/g, data.post_office);
-                testimonialFooter = testimonialFooter.replace(/\{police_station_upazilla\}/g, data.police_station_upazilla);
-                testimonialFooter = testimonialFooter.replace(/\{district\}/g, data.district);
-                testimonialFooter = testimonialFooter.replace(/\{exam_name\}/g, data.exam_name);
-                testimonialFooter = testimonialFooter.replace(/\{exam_center\}/g, data.exam_center);
-                testimonialFooter = testimonialFooter.replace(/\{exam_held_date\}/g, data.exam_held_date);
-                testimonialFooter = testimonialFooter.replace(/\{board_name\}/g, data.board_name);
-                testimonialFooter = testimonialFooter.replace(/\{group_name\}/g, data.group_name);
-                testimonialFooter = testimonialFooter.replace(/\{roll_no\}/g, data.roll_no);
-                testimonialFooter = testimonialFooter.replace(/\{registration_no\}/g, data.registration_no);
-                testimonialFooter = testimonialFooter.replace(/\{session\}/g, data.session);
-                testimonialFooter = testimonialFooter.replace(/\{result\}/g, data.result);
-                testimonialFooter = testimonialFooter.replace(/\{date_of_birth\}/g, data.date_of_birth);
-
-                modal.find('.modal-body .testimonial-content .details').html(`
-                    <h6 class="mt-5">${testimonialBody}</h6>
-                    <h6 class="mt-3">${testimonialSubbody}</h6>
-                    <h6 class="mt-3">${testimonialFooter}</h6>
-                `);
-                modal.find('#sl').text('SL: ' + data.serial);
-                modal.find('#isd').text('Issue Date: ' + data.issue_date);
-
-            },
-            error: function(xhr, status, error) {
-                console.error('Error fetching student data:', error);
-                // Handle error gracefully
-            }
-        });
+          modal.find('.modal-body .testimonial-content .details').html(
+            '<h6 class="mt-5">' + bodyHtml + '</h6>' +
+            '<h6 class="mt-3">' + subbodyHtml + '</h6>' +
+            '<h6 class="mt-3">' + footerHtml + '</h6>'
+          );
+          modal.find('#sl').text('SL: ' + (data.serial || ''));
+          modal.find('#isd').text('Issue Date: ' + (data.issue_date || ''));
+        },
+        error: function(xhr, status, error) {
+          var msg = "Error loading testimonial.";
+          try { msg = JSON.parse(xhr.responseText).error || msg; } catch(e) {}
+          $('#testimonial .modal-body .testimonial-content .details')
+            .html("<span style='color:red'>" + msg + "</span>");
+          console.error('Testimonial error:', status, error, xhr.responseText);
+        }
+      });
     });
-});
+  });
 </script>
 
 <script>

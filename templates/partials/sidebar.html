@@ -368,19 +368,11 @@
             <div class="text-truncate" data-i18n="Login">Tabulation Sheet</div>
           </a>
           <ul class="menu-sub">
-            <li class="menu-item {% if '/wide_tabulation_sheet/' in request.path %}active {% endif %}">
-              <a href="{% url 'wide_tabulation_sheet' %}" class="menu-link">
-                <div class="text-truncate" data-i18n="wide_tabulation_sheet">Tabulation Report</div> 
-                <div class="badge bg-danger rounded-pill ms-auto">1</div>
+            <li class="menu-item {% if '/tabulation-sheet-two/' in request.path %}active {% endif %}">
+              <a href="{% url 'tabulation_sheet_two' %}" class="menu-link">
+                <div class="text-truncate" data-i18n="tabulation_sheet_two">Tabulation Report</div>
               </a>
             </li>
-            <li class="menu-item {% if '/narrow_tabulation_report/' in request.path %}active{% endif %}">
-              <a href="{% url 'narrow_tabulation_report' %}" class="menu-link">
-                <div class="text-truncate" data-i18n="Date Wise">Tabulation Report</div>
-                <div class="badge bg-danger rounded-pill ms-auto">2</div>
-              </a>
-            </li>
-            
           </ul>
         </li>
 
@@ -389,13 +381,6 @@
         >
           <a href="{% url 'progress_report' %}" class="menu-link">
             <div data-i18n="progress_report">Progress Report</div>
-          </a>
-        </li>
-        <li
-          class="menu-item {% if '/merit_list/' in request.path %}active{% endif %}" data-is-sub-menu="true"
-        >
-          <a href="{% url 'merit_list' %}" class="menu-link">
-            <div data-i18n="merit_list">Merit List</div>
           </a>
         </li>
         <li

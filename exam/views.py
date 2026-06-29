@@ -1147,15 +1147,166 @@ def narrow_tabulation_report(request):
 
     return render(request, "exams/mark/tabulation_sheet_narrow.html", context)
 
-@login_required(login_url='login')
-@user_passes_test(lambda user: is_staff_or_has_role(user, roles=['Manager','HR']))
+"""
+==========================================================================
+ REPLACEMENT for progress_report (exam/views.py)
+ + NEW: progress_report_pdf
+==========================================================================
+ Purono `progress_report` function REPLACE korun ei version diye.
+ progress_report_pdf NOTUN function — niche add korun.
+
+ KI UPGRADE HOLO (reference transcript er moto):
+  - Institute header (dynamic: name/address/eiin/logo) — Institute model theke
+  - Protita subject e mark-type breakdown (Subjective/Objective/etc),
+    subject total, full marks, GP, LG (letter) — sob ekoshathe
+  - Total marks, final GPA, letter grade, Position in class
+  - Roll/Name/Section/Shift/Version header grid
+  - Ekhono optional (4th subject) GPA logic thik ache
+  - UI te ja dekhbe PDF teo tai (ek shared builder)
+  - Position auto-calculate (total marks onujayi rank)
+
+ NOTE: get_grade niche-i define kora ache (independent), tai onno
+ get_grade er sathe conflict nei.
+==========================================================================
+"""
+
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from weasyprint import HTML, CSS
+
+
+def _pr_get_grade(value, mode="marks"):
+    if mode == "gpa":
+        rules = [
+            (5.00, 5.00, None, "A+"), (4.00, 4.99, None, "A"),
+            (3.50, 3.99, None, "A-"), (3.00, 3.49, None, "B"),
+            (2.00, 2.99, None, "C"), (1.00, 1.99, None, "D"),
+            (0.00, 0.99, None, "F"),
+        ]
+    else:
+        rules = [
+            (80, 100, 5, "A+"), (70, 79, 4, "A"), (60, 69, 3.5, "A-"),
+            (50, 59, 3, "B"), (40, 49, 2, "C"), (33, 39, 1, "D"),
+            (0, 32, 0, "F"),
+        ]
+    for lo, hi, gp, lg in rules:
+        if lo <= value <= hi:
+            return (gp if gp is not None else 0), lg
+    return 0, "F"
+
+
+def _build_progress(exam_instance, class_instance, admission_year):
+    """
+    UI ar PDF — duitoই ei builder use kore.
+    Returns: (results, mark_type_list)
+    results = list of student dict with full breakdown.
+    """
+    class_group_instance = class_instance.class_group_id
+    students = StudentProfile.objects.filter(
+        Q(class_id=class_instance.id)
+        & Q(admission_year_id=admission_year)
+        & Q(student_field__status="Active")
+    ).select_related('student_field', 'class_id', 'class_id__section_id',
+                     'class_id__shift_id').order_by("roll_no")
+
+    mark_type_list = []   # global order of mark types (CQ/MCQ/etc)
+    results = []
+
+    for student in students:
+        compulsory = SubjectConfig.objects.filter(
+            class_id=class_group_instance, subject_type='COMPULSARY'
+        ).select_related('subject_id').order_by('subject_Serial')
+        optional_qs = Forth_Sub.objects.filter(student_id=student, forth_type="OPTIONAL")
+        optional_conf_ids = set(optional_qs.values_list('sub_conf_id', flat=True))
+        all_subjects = list(compulsory) + [o.sub_conf_id for o in optional_qs]
+
+        subjects_data = []
+        total_marks = 0
+        total_gpa_without_optional = 0
+        compulsory_count = 0
+        optional_gpa = 0
+
+        for subject in all_subjects:
+            is_optional = subject.id in optional_conf_ids
+
+            sm = Subject_mark.objects.filter(
+                student_id=student, examname_id=exam_instance,
+                mark_id__subject_conf_id=subject
+            ).select_related('mark_id__mark_type_id')
+
+            marks_by_type = {}
+            subj_total = 0
+            for m in sm:
+                if not m.mark_id:
+                    continue
+                mt = m.mark_id.mark_type_id.name.upper()
+                if mt not in mark_type_list:
+                    mark_type_list.append(mt)
+                val = round(m.mark or 0, 2)
+                marks_by_type[mt] = val
+                subj_total += val
+
+            subj_total = round(subj_total, 2)
+            full_marks = subject.mark if subject.mark is not None else 100
+            percentage = (subj_total / full_marks) * 100 if full_marks > 0 else 0
+            gp, lg = _pr_get_grade(percentage)
+
+            subjects_data.append({
+                "name": subject.subject_id.name if subject.subject_id else "Unknown",
+                "marks": marks_by_type,
+                "total": subj_total,
+                "full_marks": full_marks,
+                "gp": gp,
+                "lg": lg,
+                "is_optional": is_optional,
+            })
+
+            total_marks += subj_total
+            if is_optional:
+                optional_gpa = max(optional_gpa, gp)
+            else:
+                total_gpa_without_optional += gp
+                compulsory_count += 1
+
+        total_with_optional = total_gpa_without_optional + max(0, optional_gpa - 2)
+        final_gpa = round(total_with_optional / compulsory_count, 2) if compulsory_count else 0
+        final_letter = _pr_get_grade(final_gpa, mode="gpa")[1]
+
+        results.append({
+            "student": student,
+            "name": student.student_field.name,
+            "roll_no": student.roll_no if student.roll_no is not None else "-",
+            "section": student.class_id.section_id.name if student.class_id.section_id else "",
+            "shift": student.class_id.shift_id.name if student.class_id.shift_id else "",
+            "version": student.version,
+            "subjects": subjects_data,
+            "total_marks": round(total_marks, 2),
+            "gpa": final_gpa,
+            "grade": final_letter,
+            "position": None,   # niche fill kora hobe
+        })
+
+    # Position (class rank) — total marks onujayi
+    ranked = sorted(results, key=lambda r: r["total_marks"], reverse=True)
+    for idx, r in enumerate(ranked, start=1):
+        r["position"] = idx
+
+    # Highest mark per subject (whole class) — reference er moto
+    highest = {}
+    for r in results:
+        for sub in r["subjects"]:
+            nm = sub["name"]
+            if nm not in highest or sub["total"] > highest[nm]:
+                highest[nm] = sub["total"]
+    for r in results:
+        for sub in r["subjects"]:
+            sub["highest"] = highest.get(sub["name"], sub["total"])
+
+    return results, mark_type_list
 
 
 def progress_report(request):
-    # Fetch the latest admission year
     admission_year = Admission_Year.objects.latest('updated_at')
-
-    # Get available exams and classes
     exam_list = Examname.objects.filter(academic_year=admission_year)
     class_list = ClassConfig.objects.all()
 
@@ -1163,133 +1314,63 @@ def progress_report(request):
         'exam_list': exam_list,
         'class_list': class_list,
         'heading': 'Result',
-        'subheading': 'Progress Report'
+        'subheading': 'Progress Report',
     }
 
-    # Function to determine grades and GPA
-    def get_grade(value, mode="marks"):
-        grading_rules = [
-            {"min_mark": 80, "max_mark": 100, "gpa": 5, "letter": "A+"},
-            {"min_mark": 70, "max_mark": 79, "gpa": 4, "letter": "A"},
-            {"min_mark": 60, "max_mark": 69, "gpa": 3.5, "letter": "A-"},
-            {"min_mark": 50, "max_mark": 59, "gpa": 3, "letter": "B"},
-            {"min_mark": 40, "max_mark": 49, "gpa": 2, "letter": "C"},
-            {"min_mark": 33, "max_mark": 39, "gpa": 1, "letter": "D"},
-            {"min_mark": 0, "max_mark": 32, "gpa": 0, "letter": "F"},
-        ]
-
-        if mode == "gpa":
-            grading_rules = [
-                {"min_mark": 5.00, "max_mark": 5.00, "letter": "A+"},
-                {"min_mark": 4.00, "max_mark": 4.99, "letter": "A"},
-                {"min_mark": 3.50, "max_mark": 3.99, "letter": "A-"},
-                {"min_mark": 3.00, "max_mark": 3.49, "letter": "B"},
-                {"min_mark": 2.00, "max_mark": 2.99, "letter": "C"},
-                {"min_mark": 1.00, "max_mark": 1.99, "letter": "D"},
-                {"min_mark": 0.00, "max_mark": 0.99, "letter": "F"},
-            ]
-
-        for rule in grading_rules:
-            if rule["min_mark"] <= value <= rule["max_mark"]:
-                return rule.get("gpa", 0), rule.get("letter", "F")  # ✅ Fixed KeyError
-
-        return 0, "F"
-
-    # Handle form submission
     if request.method == "POST":
         exam_id = request.POST.get('exam_name_id')
         class_id = request.POST.get('class_name_id')
-
-        # Retrieve selected exam and class
         exam_instance = get_object_or_404(Examname, pk=exam_id)
         class_instance = get_object_or_404(ClassConfig, pk=class_id)
-        class_group_instance = class_instance.class_group_id
 
-        # Get all active students in the selected class
-        students = StudentProfile.objects.filter(
-            Q(class_id=class_id) & Q(admission_year_id=admission_year) & Q(student_field__status="Active")
-        ).order_by("roll_no")
-
-        results = []
-        subject_mark_dict = {}
-
-        for student in students:
-            # Get all compulsory and optional subjects
-            compulsory_subjects = SubjectConfig.objects.filter(class_id=class_group_instance, subject_type='COMPULSARY')
-            optional_subjects = Forth_Sub.objects.filter(student_id=student, forth_type="OPTIONAL")
-
-            all_subjects = list(compulsory_subjects) + [opt.sub_conf_id for opt in optional_subjects]
-
-            total_gpa_without_optional = 0
-            compulsory_subject_count = 0
-            optional_gpa = 0
-            optional_found = False
-            total_marks = 0
-            choosable_subjects = {}
-
-            # Store subject marks for this student
-            subject_mark_dict[student.roll_no] = {}
-
-            for subject in all_subjects:
-                # Fetch subject marks
-                subject_marks = Subject_mark.objects.filter(
-                    student_id=student, examname_id=exam_instance, mark_id__subject_conf_id=subject
-                )
-
-                total_subject_marks = sum(mark.mark for mark in subject_marks)
-                full_marks = subject.mark if subject.mark is not None else 100
-                percentage = (total_subject_marks / full_marks) * 100 if full_marks > 0 else 0
-                gpa, letter = get_grade(percentage)
-
-                # Check if it's an optional subject
-                is_optional = optional_subjects.filter(sub_conf_id=subject).exists()
-
-                if is_optional:
-                    optional_found = True
-                    optional_gpa = max(optional_gpa, gpa)
-                    choosable_subjects[subject.subject_id.name] = {
-                        "Letter": letter,
-                        "GPA": gpa,
-                        "GPA_if_counted": max(0, gpa - 2)
-                    }
-                else:
-                    total_gpa_without_optional += gpa
-                    compulsory_subject_count += 1
-
-                total_marks += total_subject_marks
-
-                subject_mark_dict[student.roll_no][subject.subject_id.name] = {
-                    "Letter": letter,
-                    "GPA": gpa,
-                    "Total Marks": total_subject_marks
-                }
-
-            # Calculate GPA
-            gpa_without_optional = round(total_gpa_without_optional / compulsory_subject_count, 2) if compulsory_subject_count else 0
-            total_gpa_with_optional = total_gpa_without_optional + (max(0, optional_gpa - 2))
-            final_gpa = round(total_gpa_with_optional / compulsory_subject_count, 2)
-            final_letter = get_grade(final_gpa, mode="gpa")[1]
-
-            # Store student result
-            results.append({
-                'student_name': student.student_field.name,
-                'roll_no': student.roll_no,
-                'gpa_without_optional': gpa_without_optional,
-                'gpa_with_optional': final_gpa,
-                'grade': final_letter,
-                'choosable_subjects': choosable_subjects
-            })
-
-        # Update context with results
+        results, mark_type_list = _build_progress(
+            exam_instance, class_instance, admission_year
+        )
         context.update({
             'exam_instance': exam_instance,
             'class_instance': class_instance,
+            'institute': Institute.objects.first(),
             'results': results,
-            'subject_mark_dict': subject_mark_dict
+            'mark_type_list': mark_type_list,
+            'selected_exam_id': exam_id,
+            'selected_class_id': class_id,
         })
 
     return render(request, 'exams/mark/progress_report.html', context)
 
+
+def progress_report_pdf(request):
+    """Reference-style PDF — ek student per page."""
+    admission_year = Admission_Year.objects.latest('updated_at')
+    exam_id = request.GET.get('exam_id')
+    class_id = request.GET.get('class_id')
+    exam_instance = get_object_or_404(Examname, pk=exam_id)
+    class_instance = get_object_or_404(ClassConfig, pk=class_id)
+
+    results, mark_type_list = _build_progress(
+        exam_instance, class_instance, admission_year
+    )
+
+    cg = class_instance.class_group_id
+    context = {
+        'institute': Institute.objects.first(),
+        'exam_instance': exam_instance,
+        'class_instance': class_instance,
+        'class_name': cg.class_id.name if cg and cg.class_id else "",
+        'group_name': cg.group_id.name if cg and cg.group_id else "",
+        'academic_year': admission_year.name if admission_year else "",
+        'results': results,
+        'mark_type_list': mark_type_list,
+    }
+
+    html_string = render_to_string('exams/mark/progress_report_pdf.html', context)
+    pdf_file = HTML(
+        string=html_string, base_url=request.build_absolute_uri('/')
+    ).write_pdf(stylesheets=[CSS(string="@page { size: A4 portrait; margin: 10mm; }")])
+
+    response = HttpResponse(pdf_file, content_type="application/pdf")
+    response["Content-Disposition"] = "inline; filename=progress_report.pdf"
+    return response
 
 @login_required(login_url='login')
 @user_passes_test(lambda user: is_staff_or_has_role(user, roles=['Manager', 'HR']))
@@ -2017,20 +2098,34 @@ def result_overview(request):
     return render(request, "exams/mark/result_report.html", context)
 
 
+"""
+=========================================================================
+ REPLACEMENT for download_result_report_pdf (exam/views.py)
+=========================================================================
+ KENO PURONO TA BHUL CHILO:
+  1. Subject-wise Failed: purono PDF e Count('id', mark__lt=33) - eta
+     protita mark ROW (CQ/MCQ/Practical alada) gunto, tai Bangla=5,
+     ICT=10 erom bhul. EKHON UI er moto subject TOTAL diye fail gona hoy.
+  2. GPA Distribution: purono PDF e bucket gulo (4.5_and_above...) UI er
+     theke ALADA chilo, tai count milto na. EKHON UI er moto EKOI bucket.
+  3. Color: navy #2A3F54 -> teal.
+  4. Institute name/address PDF e add kora holo.
+
+ EKHON UI ar PDF EKOI logic use kore (download er data UI er sathe mile).
+=========================================================================
+"""
+
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
+from django.db.models import Sum, F, Q
 from weasyprint import HTML, CSS
-from django.db.models import Count, Q
+
 
 def download_result_report_pdf(request):
-    """
-    Generates a PDF file of the result report with the same UI as the web page.
-    """
     selected_class_id = request.GET.get("class_id")
     selected_exam_id = request.GET.get("exam_id")
 
-    # ✅ Validate Input (Ensure IDs are provided)
     if not selected_class_id or not selected_exam_id:
         return HttpResponseBadRequest("Error: Missing class_id or exam_id parameters.")
 
@@ -2040,105 +2135,78 @@ def download_result_report_pdf(request):
     except ValueError:
         return HttpResponseBadRequest("Error: Invalid class_id or exam_id format.")
 
-    # ✅ Fetch Exam Object (Ensure it exists)
     exam = get_object_or_404(Examname, id=selected_exam_id)
-
-    # ✅ Fetch Students
-    students = StudentProfile.objects.filter(
-        class_id=selected_class_id
-    )
+    students = StudentProfile.objects.filter(class_id=selected_class_id)
 
     if not students.exists():
         return HttpResponseBadRequest("Error: No students found for the selected criteria.")
 
-    # ✅ Fetch Results
-    student_results = StudentResult.objects.filter(
-        student__in=students,
-        exam=exam
-    )
-
+    # ---- Subject-wise marks aggregate (UI er moto) ----
     subject_marks = Subject_mark.objects.filter(
-        student_id__in=students,
-        examname_id=exam
-    )
-
-    # ✅ Generate GPA Distribution
-    gpa_data = {
-        "4.5_and_above": student_results.filter(gpa__gte=4.5).count(),
-        "4_and_above": student_results.filter(gpa__gte=4, gpa__lt=4.5).count(),
-        "3.5_and_above": student_results.filter(gpa__gte=3.5, gpa__lt=4).count(),
-        "3_and_above": student_results.filter(gpa__gte=3, gpa__lt=3.5).count(),
-        "2.5_and_above": student_results.filter(gpa__gte=2.5, gpa__lt=3).count(),
-        "2_and_above": student_results.filter(gpa__gte=2, gpa__lt=2.5).count(),
-        "below_2": student_results.filter(gpa__lt=2).count(),
-    }
-
-    # ✅ Calculate Highest and Lowest Marks
-    obtained_marks_list = student_results.values_list('obtained_marks', flat=True)
-    obtained_marks_list = [marks for marks in obtained_marks_list if marks is not None]
-
-    highest_marks = max(obtained_marks_list, default=0)
-    lowest_marks = min(obtained_marks_list, default=0)
-
-    # ✅ Subject-Wise Failed and Absent Data
-    subject_wise_data = subject_marks.values(
+        student_id__in=students, examname_id=exam
+    ).values(
+        'student_id',
         'mark_id__subject_conf_id__subject_id__name'
     ).annotate(
-        total_failed=Count('id', filter=Q(mark__lt=33, check_mark=True)),
-        total_absent=Count('id', filter=Q(check_mark=False)),
+        total_marks=Sum('mark'),
+        max_marks=Sum(F('mark_id__mark')),
+        min_pass=Sum(F('mark_id__pass_mark')),
     )
+
+    # Subject-wise FAILED — subject TOTAL diye (NOT per-row)
+    subject_fail_counts = {}
+    for mark in subject_marks:
+        subject_name = mark['mark_id__subject_conf_id__subject_id__name']
+        total = mark['total_marks'] or 0
+        max_m = mark['max_marks'] or 0
+        min_pass = mark['min_pass'] or 0
+        percentage = (total / max_m) * 100 if max_m else 0
+        failed = percentage < 33 or total < min_pass
+        subject_fail_counts.setdefault(subject_name, 0)
+        if failed:
+            subject_fail_counts[subject_name] += 1
+
+    # ---- StudentResult based stats (UI er moto) ----
+    student_results = StudentResult.objects.filter(student__in=students, exam=exam)
+
+    gpa_data = {
+        "gpa_5": student_results.filter(gpa=5.00).count(),
+        "gpa_4_to_4_99": student_results.filter(gpa__gte=4.00, gpa__lt=5.00).count(),
+        "gpa_3_5_to_3_99": student_results.filter(gpa__gte=3.50, gpa__lt=4.00).count(),
+        "gpa_3_to_3_49": student_results.filter(gpa__gte=3.00, gpa__lt=3.50).count(),
+        "gpa_2_to_2_99": student_results.filter(gpa__gte=2.00, gpa__lt=3.00).count(),
+        "gpa_1_to_1_99": student_results.filter(gpa__gte=1.00, gpa__lt=2.00).count(),
+        "gpa_below_1": student_results.filter(gpa__lt=1.00).count(),
+    }
+
+    obtained = [m for m in student_results.values_list('obtained_marks', flat=True) if m is not None]
+    highest_marks = max(obtained) if obtained else 0
+    lowest_marks = min(obtained) if obtained else 0
 
     total_students = students.count()
     passed_students = student_results.filter(is_pass=True).count()
-    failed_students_count = student_results.filter(is_pass=False).count()
-    absent_students_count = subject_marks.filter(check_mark=False).values('student_id').distinct().count()
+    failed_students = student_results.filter(is_pass=False).count()
+    absent_students = Subject_mark.objects.filter(
+        student_id__in=students, examname_id=exam, check_mark=False
+    ).values('student_id').distinct().count()
 
     context = {
+        "institute": Institute.objects.first(),
+        "exam_name": exam.name,
         "total_students": total_students,
         "passed_students": passed_students,
-        "failed_students": failed_students_count,
-        "absent_students": absent_students_count,
+        "failed_students": failed_students,
+        "absent_students": absent_students,
         "gpa_data": gpa_data,
         "highest_marks": highest_marks,
         "lowest_marks": lowest_marks,
-        "subject_wise_data": subject_wise_data,
+        "subject_wise_data": subject_fail_counts,   # dict: subject -> fail count
     }
 
-    # ✅ Render HTML Template for PDF
     html_string = render_to_string("exams/mark/result_report_pdf.html", context)
-
-    # ✅ Generate PDF Using WeasyPrint
-    pdf_file = HTML(string=html_string).write_pdf(
-        stylesheets=[CSS(string="""
-            @page {
-                size: A4 portrait;
-                margin: 10px;
-            }
-            body {
-                font-family: Arial, sans-serif;
-                font-size: 10px;
-            }
-            table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-            th, td {
-                border: 1px solid #ccc;
-                padding: 6px;
-                text-align: center;
-                font-size: 9px;
-            }
-            th {
-                background-color: #2A3F54;
-                color: white;
-                font-size: 10px;
-            }
-            .highlight {
-                font-weight: bold;
-                color: #1D1E4E;
-            }
-        """)]
-    )
+    pdf_file = HTML(
+        string=html_string, base_url=request.build_absolute_uri('/')
+    ).write_pdf(stylesheets=[CSS(string="@page { size: A4 portrait; margin: 12mm; }")])
 
     response = HttpResponse(pdf_file, content_type="application/pdf")
     response["Content-Disposition"] = "inline; filename=result_report.pdf"
@@ -2364,7 +2432,15 @@ def paginated_report(request):
     }
 
     return render(request, "exams/mark/paginated_report.html", context)
-
+grading_rules = [
+    {"min_mark": 80, "max_mark": 100, "letter": "A+"},
+    {"min_mark": 70, "max_mark": 79, "letter": "A"},
+    {"min_mark": 60, "max_mark": 69, "letter": "A-"},
+    {"min_mark": 50, "max_mark": 59, "letter": "B"},
+    {"min_mark": 40, "max_mark": 49, "letter": "C"},
+    {"min_mark": 33, "max_mark": 39, "letter": "D"},
+    {"min_mark": 0, "max_mark": 32, "letter": "F"},
+]
 @login_required(login_url='login')
 @user_passes_test(lambda user: is_staff_or_has_role(user, "teacher", roles=['Manager', 'HR', 'DataEntry']))
 def subject_wise_analysis(request):
@@ -2449,6 +2525,8 @@ def subject_wise_analysis(request):
         "exams": exams,
         "results": results,
         "grading_rules": grading_rules,
+        "selected_class_id": request.POST.get("class_id"),
+        "selected_exam_id": request.POST.get("exam_id"),
         'heading': 'Result ',
         'subheading': 'Subject Wise Analysis',
     }
@@ -2466,25 +2544,20 @@ from django.db.models import Sum
 @user_passes_test(lambda user: is_staff_or_has_role(user, "teacher", roles=['Manager', 'HR', 'DataEntry']))
 def download_subject_analysis_pdf(request):
     """Generates and downloads the subject-wise analysis as a PDF."""
-    
-    # Get selected class, section, and exam
+
     selected_class_id = request.GET.get("class_id")
     selected_exam_id = request.GET.get("exam_id")
 
-    # ✅ Check if all selections are valid
-    if not selected_class_id or  not selected_exam_id:
+    if not selected_class_id or not selected_exam_id:
         return HttpResponse("Missing class, or exam selection.", content_type="text/plain")
 
     try:
         selected_class = StudentClass.objects.get(id=selected_class_id)
         selected_exam = Examname.objects.get(id=selected_exam_id)
     except (StudentClass.DoesNotExist, Examname.DoesNotExist):
-        return HttpResponse("Invalid selection. Please select a valid class, section, and exam.", content_type="text/plain")
+        return HttpResponse("Invalid selection. Please select a valid class and exam.", content_type="text/plain")
 
-    # ✅ Proceed with data processing only if selections are valid
-    students = StudentProfile.objects.filter(
-        class_id=selected_class_id,
-    )
+    students = StudentProfile.objects.filter(class_id=selected_class_id)
 
     subject_marks = Subject_mark.objects.filter(
         student_id__in=students,
@@ -2493,10 +2566,9 @@ def download_subject_analysis_pdf(request):
         "student_id",
         "mark_id__subject_conf_id__subject_id__name"
     ).annotate(
-        total_marks=Sum("mark")  # Summing all divided marks (MCQ, CQ, Practical)
+        total_marks=Sum("mark")
     )
 
-    # Define grading rules
     grading_rules = [
         {"min_mark": 80, "max_mark": 100, "letter": "A+"},
         {"min_mark": 70, "max_mark": 79, "letter": "A"},
@@ -2508,7 +2580,6 @@ def download_subject_analysis_pdf(request):
     ]
 
     def get_grade(total_marks):
-        """Determine grade based on total marks"""
         for rule in grading_rules:
             if rule["min_mark"] <= total_marks <= rule["max_mark"]:
                 return rule["letter"]
@@ -2538,9 +2609,9 @@ def download_subject_analysis_pdf(request):
     for subject, grades in grade_counts.items():
         result_entry = {
             "subject_name": subject,
-            "total_students": len(student_subject_totals[subject]),  # Unique student count per subject
+            "total_students": len(student_subject_totals[subject]),
         }
-        result_entry.update(grades)  # Add grade counts dynamically
+        result_entry.update(grades)
         results.append(result_entry)
 
     context = {
@@ -2548,89 +2619,105 @@ def download_subject_analysis_pdf(request):
         "grading_rules": grading_rules,
         "selected_class": selected_class.name,
         "selected_exam": selected_exam.name,
+        "institute": Institute.objects.first(),
     }
 
     html_string = render_to_string("exams/mark/subject_analysis_pdf.html", context)
 
-    # ✅ Fix CSS Styles in WeasyPrint
-    pdf_file = io.BytesIO()
-    pdf = HTML(string=html_string).write_pdf(stylesheets=[CSS(string="""
-        @page {
-            size: A4;
-            margin: 20mm;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            color: #333;
-        }
-        h2 {
-            text-align: center;
-            background-color: #001f3f;
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: center;
-        }
-        th {
-            background-color: #001f3f;
-            color: white;
-            font-size: 14px;
-        }
-        tr:nth-child(even) { background-color: #f2f2f2; }
-        tr:nth-child(odd) { background-color: #ffffff; }
-    """)])
-    pdf_file.write(pdf)
-    pdf_file.seek(0)
+    pdf = HTML(string=html_string).write_pdf(
+        stylesheets=[CSS(string="@page { size: A4; margin: 14mm; }")]
+    )
 
-    response = HttpResponse(pdf_file, content_type="application/pdf")
+    response = HttpResponse(pdf, content_type="application/pdf")
     response["Content-Disposition"] = "inline; filename=subject_analysis.pdf"
-
     return response
 
+"""
+=========================================================================
+ REPLACEMENT for top_last_students_report (exam/views.py)
+ + NEW: download_top_last_pdf
+=========================================================================
+ KI THIK HOLO:
+  - Total student joto, tar besi "Top 10" dekhabe na (4 jon thakle 4-i).
+  - Last 10 ekhon NICHER dik theke (boro->choto kore dekhano, ulta
+    crom na). Top ar Last e jodi student kom thake tahole overlap
+    ekhono thakte pare (eta normal — kom student thakle), kintu ekhon
+    Last list ta nicher 10 jon (sorted boro->choto).
+  - rank, total marks (2 decimal), GPA (2 decimal) — sob clean.
+  - PDF download jukto.
+
+ NOTE: rank list er moddhei thake (top: 1..N; last: nicher der rank).
+=========================================================================
+"""
+
+from django.http import HttpResponse, HttpResponseBadRequest
+from django.shortcuts import get_object_or_404
+from django.template.loader import render_to_string
+from weasyprint import HTML, CSS
+
+
+def _round2(v):
+    try:
+        return round(float(v), 2)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _top_last_data(selected_class_id, selected_exam_id, limit=10):
+    """UI ar PDF duitoই use kore. Returns (top_list, last_list, total)."""
+    qs = StudentResult.objects.filter(
+        student__class_id__class_group_id__class_id=selected_class_id,
+        exam=selected_exam_id
+    ).select_related('student__student_field').order_by('-obtained_marks')
+
+    total = qs.count()
+
+    def pack(results, start_rank):
+        out = []
+        for i, r in enumerate(results, start=start_rank):
+            sf = r.student.student_field if r.student else None
+            out.append({
+                "rank": i,
+                "name": sf.name if sf else "-",
+                "college_id": getattr(sf, "college_id", "") or "-",
+                "total_marks": _round2(r.obtained_marks),
+                "gpa": _round2(r.gpa),
+            })
+        return out
+
+    # Top: highest first, rank 1..
+    top_list = pack(list(qs[:limit]), 1)
+
+    # Last: nicher limit jon, kintu boro->choto kore dekhabo.
+    # Tader actual rank = (total - count_in_last + 1) ... total
+    last_qs = list(qs.order_by('obtained_marks')[:limit])  # choto->boro
+    last_qs = list(reversed(last_qs))                       # boro->choto
+    last_start_rank = total - len(last_qs) + 1
+    last_list = pack(last_qs, last_start_rank)
+
+    return top_list, last_list, total
+
+
 def top_last_students_report(request):
-    """
-    Generate a report of the top 10 and last 10 students for a selected class and exam (without section).
-    """
-    # Fetch classes and exams for the dropdowns
     classes = StudentClass.objects.all()
     exams = Examname.objects.all()
-    selected_class_id = None
-    selected_exam_id = None
+    selected_class_id = request.GET.get("class_id")
+    selected_exam_id = request.GET.get("exam_id")
     top_10_students = []
     last_10_students = []
+    total_students = 0
 
-    if request.method == "GET":
-        # Get selected class and exam from query parameters
-        selected_class_id = request.GET.get("class_id")
-        selected_exam_id = request.GET.get("exam_id")
-
-        # Fetch student results for the selected filters
-        if selected_class_id and selected_exam_id:
-            students_results = StudentResult.objects.filter(
-                student__class_id__class_group_id__class_id=selected_class_id,
-                exam=selected_exam_id
-            ).order_by('-obtained_marks')  # Order by total marks descending
-
-            # Get the top 10 students
-            top_10_students = list(students_results[:10])
-
-            # Get the last 10 students (safely)
-            last_10_students = list(students_results.order_by('obtained_marks')[:10])
+    if selected_class_id and selected_exam_id:
+        top_10_students, last_10_students, total_students = _top_last_data(
+            selected_class_id, selected_exam_id
+        )
 
     context = {
         "classes": classes,
         "exams": exams,
         "top_10_students": top_10_students,
         "last_10_students": last_10_students,
+        "total_students": total_students,
         "selected_class_id": selected_class_id,
         "selected_exam_id": selected_exam_id,
         'heading': 'Result ',
@@ -2638,54 +2725,125 @@ def top_last_students_report(request):
     }
     return render(request, "exams/mark/top_last_students.html", context)
 
-from django.db.models import F
+
+def download_top_last_pdf(request):
+    selected_class_id = request.GET.get("class_id")
+    selected_exam_id = request.GET.get("exam_id")
+
+    if not selected_class_id or not selected_exam_id:
+        return HttpResponseBadRequest("Error: Missing class_id or exam_id.")
+
+    exam = get_object_or_404(Examname, id=selected_exam_id)
+    try:
+        selected_class = StudentClass.objects.get(id=selected_class_id)
+        class_name = selected_class.name
+    except StudentClass.DoesNotExist:
+        class_name = ""
+
+    top_list, last_list, total = _top_last_data(selected_class_id, selected_exam_id)
+
+    context = {
+        "institute": Institute.objects.first(),
+        "exam_name": exam.name,
+        "class_name": class_name,
+        "total_students": total,
+        "top_10_students": top_list,
+        "last_10_students": last_list,
+    }
+
+    html_string = render_to_string("exams/mark/top_last_pdf.html", context)
+    pdf_file = HTML(
+        string=html_string, base_url=request.build_absolute_uri('/')
+    ).write_pdf(stylesheets=[CSS(string="@page { size: A4 portrait; margin: 12mm; }")])
+
+    response = HttpResponse(pdf_file, content_type="application/pdf")
+    response["Content-Disposition"] = "inline; filename=top_last_students.pdf"
+    return response
+"""
+=========================================================================
+ REPLACEMENT for subject_wise_fail_report (exam/views.py)
+ + NEW: download_subject_fail_pdf
+=========================================================================
+ KI THIK HOLO:
+  - roll_no e age VUL kore class_id (pura object) boshano chilo ->
+    ekhon ASOL roll_no (student.roll_no).
+  - Fail hisab ekhon SUBJECT TOTAL diye (CQ+MCQ+Practical jog kore
+    pass_mark er sathe tulona). Age protita row alada dekhto, tai
+    ekই subject e ekadhikbar / vul ashto.
+  - Failed subjects + koyti subject e fail — dekhano hoy.
+  - PDF download (teal, institute header).
+=========================================================================
+"""
+
+from django.db.models import F, Sum
+from django.http import HttpResponse, HttpResponseBadRequest
+from django.shortcuts import get_object_or_404
+from django.template.loader import render_to_string
+from weasyprint import HTML, CSS
+
+
+def _build_fail_report(selected_class_id, selected_exam_id):
+    """UI + PDF — ek builder. Returns results list."""
+    # Subject TOTAL (per student per subject) ber kori, sathe pass_mark
+    rows = Subject_mark.objects.filter(
+        student_id__class_id__id=selected_class_id,
+        examname_id=selected_exam_id
+    ).values(
+        'student_id',
+        'student_id__roll_no',
+        'student_id__student_field__name',
+        'mark_id__subject_conf_id__subject_id__name',
+    ).annotate(
+        subj_total=Sum('mark'),
+        subj_full=Sum(F('mark_id__mark')),
+        subj_pass=Sum(F('mark_id__pass_mark')),
+    )
+
+    student_fail = {}
+    for r in rows:
+        total = r['subj_total'] or 0
+        full = r['subj_full'] or 0
+        passm = r['subj_pass'] or 0
+        percentage = (total / full) * 100 if full > 0 else 0
+        # Fail jodi: percentage 33% er kom, OR pass_mark set thakle tar kom
+        failed = percentage < 33 or (passm > 0 and total < passm)
+        if failed:
+            sid = r['student_id']
+            if sid not in student_fail:
+                student_fail[sid] = {
+                    'name': r['student_id__student_field__name'],
+                    'roll_no': r['student_id__roll_no'] if r['student_id__roll_no'] is not None else '-',
+                    'subjects': [],
+                }
+            student_fail[sid]['subjects'].append(
+                r['mark_id__subject_conf_id__subject_id__name']
+            )
+
+    results = []
+    for idx, data in enumerate(student_fail.values(), start=1):
+        results.append({
+            'sn': idx,
+            'student_name': data['name'],
+            'roll_no': data['roll_no'],
+            'fail_count': len(data['subjects']),
+            'subjects': ', '.join(data['subjects']),
+        })
+    # roll onujayi sort
+    results.sort(key=lambda x: (x['roll_no'] if isinstance(x['roll_no'], int) else 999999))
+    for i, r in enumerate(results, start=1):
+        r['sn'] = i
+    return results
+
+
 def subject_wise_fail_report(request):
-    """
-    Generate a report of students who failed in subjects for a selected class and exam.
-    """
-    # Fetch classes, sections, and exams for dropdowns
     classes = ClassConfig.objects.all()
     exams = Examname.objects.all()
     results = []
-    
     selected_class_id = request.GET.get('class_id')
     selected_exam_id = request.GET.get('exam_id')
 
     if selected_class_id and selected_exam_id:
-        # Fetch students who failed in any subject for the selected class, section, and exam
-        failed_subjects = Subject_mark.objects.filter(
-            student_id__class_id__id=selected_class_id,
-            examname_id=selected_exam_id,
-            mark__lt=F('mark_id__pass_mark')  # ✅ Corrected Pass Mark Filtering
-        ).select_related('student_id', 'mark_id__subject_conf_id__subject_id')
-
-        # Debugging: Print SQL Query
-        print(failed_subjects.query)
-
-        # Group data by student and subjects failed
-        student_fail_data = {}
-        for entry in failed_subjects:
-            student = entry.student_id
-            subject_name = entry.mark_id.subject_conf_id.subject_id.name
-
-            if student.id not in student_fail_data:
-                student_fail_data[student.id] = {
-                    'student_name': student.student_field.name,
-                    'roll_no': student.class_id,  # ✅ Using College ID
-                    'subjects': []
-                }
-            student_fail_data[student.id]['subjects'].append(subject_name)
-
-        # Format results for the template
-        results = [
-            {
-                'sn': idx + 1,
-                'student_name': data['student_name'],
-                'roll_no': data['roll_no'],
-                'subjects': ', '.join(data['subjects'])
-            }
-            for idx, data in enumerate(student_fail_data.values())
-        ]
+        results = _build_fail_report(selected_class_id, selected_exam_id)
 
     context = {
         'class_list': classes,
@@ -2698,96 +2856,36 @@ def subject_wise_fail_report(request):
     }
     return render(request, "exams/mark/subject_wise_fail_report.html", context)
 
-# def tabulation_sheet_two(request):
-#     # Fetch classes and exams for dropdowns
-#     classes = StudentClass.objects.all()
-#     sections = StudentSection.objects.all()
-#     exams = Examname.objects.all()
 
-#     # Get filters from the form
-#     selected_class_id = request.POST.get("class_id")
-#     selected_section_id = request.POST.get("section_id")
-#     selected_exam_id = request.POST.get("exam_id")
+def download_subject_fail_pdf(request):
+    selected_class_id = request.GET.get('class_id')
+    selected_exam_id = request.GET.get('exam_id')
 
-#     tabulation_data = []
+    if not selected_class_id or not selected_exam_id:
+        return HttpResponseBadRequest("Error: Missing class_id or exam_id.")
 
-#     if selected_class_id and selected_section_id and selected_exam_id:
-#         # Fetch students for the selected class and section
-#         students = StudentProfile.objects.filter(
-#             class_id__class_group_id__class_id=selected_class_id,
-#             class_id__section_id=selected_section_id,
-#         )
+    exam = get_object_or_404(Examname, id=selected_exam_id)
+    try:
+        class_name = ClassConfig.objects.get(id=selected_class_id).__str__()
+    except ClassConfig.DoesNotExist:
+        class_name = ""
 
-#         for student in students:
-#             student_data = {
-#                 "roll": student.id,
-#                 "name": student.student_field.name,
-#                 "stream": student.class_id.class_group_id.group_id.name,
-#                 "section": student.class_id.section_id.name,
-#                 "subjects": {},
-#                 "total_marks": 0,
-#                 "gpa": 0,
-#             }
+    results = _build_fail_report(selected_class_id, selected_exam_id)
 
-#             # Fetch marks for the selected student and exam
-#             marks = Subject_mark.objects.filter(
-#                 student_id=student.id,
-#                 examname_id=selected_exam_id,
-#             ).select_related("mark_id__subject_conf_id__subject_id", "mark_id__mark_type_id")
+    context = {
+        'institute': Institute.objects.first(),
+        'exam_name': exam.name,
+        'class_name': class_name,
+        'results': results,
+    }
+    html_string = render_to_string("exams/mark/subject_wise_fail_pdf.html", context)
+    pdf_file = HTML(
+        string=html_string, base_url=request.build_absolute_uri('/')
+    ).write_pdf(stylesheets=[CSS(string="@page { size: A4 portrait; margin: 12mm; }")])
 
-#             total_gpa = 0
-#             fail_flag = False
-
-#             # Organize marks by subject
-#             for mark in marks:
-#                 subject_name = mark.mark_id.subject_conf_id.subject_id.name
-#                 mark_type_name = mark.mark_id.mark_type_id.name
-#                 obtained_marks = mark.mark
-
-#                 if subject_name not in student_data["subjects"]:
-#                     student_data["subjects"][subject_name] = {
-#                         "marks": {},
-#                         "total": 0,
-#                         "grade": None,
-#                         "gpa": 0,
-#                     }
-
-#                 student_data["subjects"][subject_name]["marks"][mark_type_name] = obtained_marks
-#                 student_data["subjects"][subject_name]["total"] += obtained_marks
-
-#                 # Calculate grade and GPA
-#                 grading = Graderule.objects.filter(
-#                     min_mark__lte=obtained_marks,
-#                     max_mark__gte=obtained_marks,
-#                 ).first()
-
-#                 if grading:
-#                     student_data["subjects"][subject_name]["grade"] = grading.grade_name
-#                     student_data["subjects"][subject_name]["gpa"] = grading.gpa
-#                     total_gpa += grading.gpa
-#                 else:
-#                     fail_flag = True
-
-#             # Add total marks and GPA
-#             student_data["total_marks"] = sum(
-#                 [subject["total"] for subject in student_data["subjects"].values()]
-#             )
-#             student_data["gpa"] = round(total_gpa / len(student_data["subjects"]), 2) if student_data["subjects"] else 0
-#             student_data["status"] = "Fail" if fail_flag else "Pass"
-
-#             tabulation_data.append(student_data)
-
-#     context = {
-#         "classes": classes,
-#         "sections": sections,
-#         "exams": exams,
-#         "tabulation_data": tabulation_data,
-#         "selected_class_id": selected_class_id,
-#         "selected_section_id": selected_section_id,
-#         "selected_exam_id": selected_exam_id,
-#     }
-
-#     return render(request, "exams/mark/tabulation_sheet_two.html", context)
+    response = HttpResponse(pdf_file, content_type="application/pdf")
+    response["Content-Disposition"] = "inline; filename=subject_wise_fail.pdf"
+    return response
 
 def get_grade(percentage):
     """Returns GPA and Grade based on percentage"""
@@ -2800,146 +2898,94 @@ def get_grade(percentage):
         return grading.gpa, grading.grade_name
     return 0.00, "F"
 
-def tabulation_sheet_two(request):
-    # Fetch classes, sections, and exams for dropdowns
-    classes = ClassConfig.objects.all()
-    exams = Examname.objects.all()
+"""
+==========================================================================
+ REPLACEMENT for tabulation_sheet_two + tabulation_pdf  (exam/views.py)
+==========================================================================
+ Purono duita function (tabulation_sheet_two ar tabulation_pdf) ke ei
+ niche deya version diye REPLACE korun. get_grade(percentage) function
+ ta jodi age thekei thake (line ~2792), oita rakhun — eta sei tai use kore.
 
-    selected_class_id = request.POST.get("class_id")
-    selected_exam_id = request.POST.get("exam_id")
-
-    tabulation_data = []
-
-    if selected_class_id  and selected_exam_id:
-        # Fetch students in the selected class and section
-        students = StudentProfile.objects.filter(
-            class_id=selected_class_id
-        )
-
-        for student in students:
-            student_data = {
-                "roll": student.id,
-                "name": student.student_field.name,
-                "stream": student.class_id.class_group_id.group_id.name if student.class_id.class_group_id.group_id else None,
-                "section": student.class_id.section_id.name if student.class_id.section_id else None,
-                "subjects": {},
-                "total_marks": 0,
-                "total_gpa": 0,
-                "final_grade": None,
-                "status": "Pass",
-            }
-
-            # Fetch all subjects assigned to the class
-            subjects = SubjectConfig.objects.filter(class_id=student.class_id.class_group_id)
-
-            total_gpa_sum = 0
-            total_gpa_count = 0
-            total_marks_obtained = 0
-            total_marks_possible = 0
-
-            for subject in subjects:
-                subject_name = subject.subject_id.name
-                student_data["subjects"][subject_name] = {"marks": {}, "total": 0, "gpa": 0, "grade": None}
-
-                # Fetch the max possible marks from `Mark_config`
-                mark_configs = Mark_config.objects.filter(
-                    class_id=student.class_id.class_group_id,
-                    subject_conf_id=subject
-                )
-
-                max_marks = sum(mark_config.mark for mark_config in mark_configs)
-                total_marks_possible += max_marks
-
-                # Fetch the student's marks for the subject
-                marks = Subject_mark.objects.filter(
-                    student_id=student.id,
-                    examname_id=selected_exam_id,
-                    mark_id__subject_conf_id=subject
-                ).select_related("mark_id__mark_type_id")
-
-                total_marks = 0
-
-                for mark in marks:
-                    mark_type_name = mark.mark_id.mark_type_id.name
-                    obtained_marks = mark.mark
-
-                    student_data["subjects"][subject_name]["marks"][mark_type_name] = obtained_marks
-                    total_marks += obtained_marks
-
-                # Calculate percentage and determine grade & GPA
-                percentage = (total_marks / max_marks) * 100 if max_marks > 0 else 0
-                gpa, grade = get_grade(percentage)
-
-                student_data["subjects"][subject_name]["total"] = total_marks
-                student_data["subjects"][subject_name]["gpa"] = gpa
-                student_data["subjects"][subject_name]["grade"] = grade
-
-                # Update totals for final GPA and grade calculation
-                total_marks_obtained += total_marks
-                total_gpa_sum += gpa
-                total_gpa_count += 1 if max_marks > 0 else 0
-
-            # Calculate final GPA and Grade
-            student_data["total_marks"] = total_marks_obtained
-            student_data["total_gpa"] = round(total_gpa_sum / total_gpa_count, 2) if total_gpa_count > 0 else 0
-
-            final_percentage = (total_marks_obtained / total_marks_possible) * 100 if total_marks_possible > 0 else 0
-            student_data["final_grade"] = get_grade(final_percentage)[1]
-
-            tabulation_data.append(student_data)
-
-    context = {
-        "classes": classes,
-        "exams": exams,
-        "tabulation_data": tabulation_data,
-        "selected_class_id": selected_class_id,
-        "selected_exam_id": selected_exam_id,
-        'heading': 'Result ',
-        'subheading': 'Tabulation Sheet',
-    }
-
-    return render(request, "exams/mark/tabulation_sheet_two.html", context)
+ KI THIK HOLO:
+  1. Blank PDF: PDF view e student filter bhul chilo
+     (class_id__class_group_id__class_id + section_id). Ekhon duito
+     view-i EKOI filter use kore: StudentProfile.filter(class_id=<ClassConfig.id>)
+     — tai preview-te ja dekhe PDF-eo thik tai ashe.
+  2. Auto-download: template er JS auto-click serano hoyeche (niche template e).
+  3. roll: ekhon student.id na, asol roll_no dekhabe.
+  4. status: F grade pele "Fail", na hole "Pass" (hardcoded chilo).
+  5. GPA + grade duito view-i hisheb kore (PDF-eo GPA thik ashe).
+  6. Marks dynamic: MCQ/CQ hardcode na kore je mark_type ache shob dekhabe.
+  7. Data validation: max_marks 0 hole divide-by-zero guard ache.
+==========================================================================
+"""
 
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from weasyprint import HTML, CSS
 
-def tabulation_pdf(request):
-    """Generates a compressed PDF for the tabulation sheet in landscape format"""
 
-    selected_class_id = request.GET.get("class_id")
-    selected_section_id = request.GET.get("section_id")
-    selected_exam_id = request.GET.get("exam_id")
-
-    # Fetch student data
-    students = StudentProfile.objects.filter(
-        class_id__class_group_id__class_id=selected_class_id,
-        class_id__section_id=selected_section_id
-    )
-
+def _build_tabulation(selected_class_id, selected_exam_id):
+    """
+    Preview ar PDF — duito-i ei EK helper use kore, tai data shob shomoy
+    consistent. Returns (tabulation_data, subject_list, mark_type_list).
+    """
     tabulation_data = []
-    subject_list = set()  # Store all unique subjects
+    subject_list = []          # order rakhar jonno list (set noy)
+    mark_type_list = []        # je mark type gula ache (MCQ/CQ/Practical...)
+
+    if not (selected_class_id and selected_exam_id):
+        return tabulation_data, subject_list, mark_type_list
+
+    students = StudentProfile.objects.filter(
+        class_id=selected_class_id
+    ).select_related(
+        'student_field', 'class_id', 'class_id__class_group_id',
+        'class_id__class_group_id__group_id', 'class_id__section_id'
+    ).order_by('roll_no')
 
     for student in students:
+        group = student.class_id.class_group_id.group_id
+        section = student.class_id.section_id
+
         student_data = {
-            "roll": student.id,
+            "roll": student.roll_no if student.roll_no is not None else "-",
             "name": student.student_field.name,
-            "stream": student.class_id.class_group_id.group_id.name if student.class_id.class_group_id.group_id else None,
-            "section": student.class_id.section_id.name if student.class_id.section_id else None,
+            "stream": group.name if group else "",
+            "section": section.name if section else "",
             "subjects": {},
             "total_marks": 0,
             "total_gpa": 0,
+            "final_grade": None,
             "status": "Pass",
         }
 
-        subjects = SubjectConfig.objects.filter(class_id=student.class_id.class_group_id)
+        subjects = SubjectConfig.objects.filter(
+            class_id=student.class_id.class_group_id
+        ).select_related('subject_id').order_by('subject_Serial')
 
+        total_gpa_sum = 0
+        total_gpa_count = 0
         total_marks_obtained = 0
+        total_marks_possible = 0
+        any_fail = False
 
         for subject in subjects:
-            subject_name = subject.subject_id.name
-            subject_list.add(subject_name)  # Add to unique subject set
-            student_data["subjects"][subject_name] = {"marks": {}, "total": 0}
+            subject_name = subject.subject_id.name if subject.subject_id else "Unknown"
+            if subject_name not in subject_list:
+                subject_list.append(subject_name)
+
+            student_data["subjects"][subject_name] = {
+                "marks": {}, "total": 0, "gpa": 0, "grade": None
+            }
+
+            mark_configs = Mark_config.objects.filter(
+                class_id=student.class_id.class_group_id,
+                subject_conf_id=subject
+            ).select_related('mark_type_id')
+
+            max_marks = sum((mc.mark or 0) for mc in mark_configs)
+            total_marks_possible += max_marks
 
             marks = Subject_mark.objects.filter(
                 student_id=student.id,
@@ -2948,45 +2994,125 @@ def tabulation_pdf(request):
             ).select_related("mark_id__mark_type_id")
 
             total_marks = 0
-
             for mark in marks:
+                if not mark.mark_id:
+                    continue
                 mark_type_name = mark.mark_id.mark_type_id.name.upper()
-                obtained_marks = mark.mark
-                student_data["subjects"][subject_name]["marks"][mark_type_name] = obtained_marks
-                total_marks += obtained_marks
+                if mark_type_name not in mark_type_list:
+                    mark_type_list.append(mark_type_name)
+                obtained = round(mark.mark or 0, 2)
+                student_data["subjects"][subject_name]["marks"][mark_type_name] = obtained
+                total_marks += obtained
 
-            student_data["subjects"][subject_name]["total"] = total_marks
+            percentage = (total_marks / max_marks) * 100 if max_marks > 0 else 0
+            gpa, grade = get_grade(percentage)
+
+            student_data["subjects"][subject_name]["total"] = round(total_marks, 2)
+            student_data["subjects"][subject_name]["gpa"] = gpa
+            student_data["subjects"][subject_name]["grade"] = grade
+
+            if str(grade).upper() == "F":
+                any_fail = True
+
             total_marks_obtained += total_marks
+            total_gpa_sum += gpa
+            total_gpa_count += 1 if max_marks > 0 else 0
 
-        student_data["total_marks"] = total_marks_obtained
+        student_data["total_marks"] = round(total_marks_obtained, 2)
+        student_data["total_gpa"] = (
+            round(total_gpa_sum / total_gpa_count, 2) if total_gpa_count > 0 else 0
+        )
+        final_percentage = (
+            (total_marks_obtained / total_marks_possible) * 100
+            if total_marks_possible > 0 else 0
+        )
+        student_data["final_grade"] = get_grade(final_percentage)[1]
+
+        if any_fail:
+            student_data["status"] = "Fail"
+            student_data["total_gpa"] = 0.00
+            student_data["final_grade"] = "F"
+
         tabulation_data.append(student_data)
 
-    # **DYNAMIC FONT SIZE & COLUMN WIDTH**
-    subject_count = len(subject_list)
-    base_font_size = max(5, 10 - (subject_count // 4))  # Reduce font dynamically
-    base_padding = max(2, 6 - (subject_count // 4))  # Reduce padding
-    column_width = 100 / (4 + (subject_count * 3) + 3)  # Adjust width
+    return tabulation_data, subject_list, mark_type_list
+
+
+def tabulation_sheet_two(request):
+    classes = ClassConfig.objects.all()
+    exams = Examname.objects.all()
+
+    selected_class_id = request.POST.get("class_id")
+    selected_exam_id = request.POST.get("exam_id")
+
+    tabulation_data, subject_list, mark_type_list = _build_tabulation(
+        selected_class_id, selected_exam_id
+    )
+
+    context = {
+        "classes": classes,
+        "exams": exams,
+        "tabulation_data": tabulation_data,
+        "subject_list": subject_list,
+        "mark_type_list": mark_type_list,
+        "selected_class_id": selected_class_id,
+        "selected_exam_id": selected_exam_id,
+        "heading": "Result",
+        "subheading": "Tabulation Sheet",
+    }
+    return render(request, "exams/mark/tabulation_sheet_two.html", context)
+
+
+def tabulation_pdf(request):
+    """Landscape PDF — preview er SHOMAN data. Institute name dynamic."""
+    selected_class_id = request.GET.get("class_id")
+    selected_exam_id = request.GET.get("exam_id")
+
+    tabulation_data, subject_list, mark_type_list = _build_tabulation(
+        selected_class_id, selected_exam_id
+    )
+
+    # ---- Header meta (dynamic institute + class/exam info) ----
+    institute = Institute.objects.first()
+    class_config = ClassConfig.objects.filter(id=selected_class_id).select_related(
+        'class_group_id', 'class_group_id__class_id', 'class_group_id__group_id',
+        'section_id', 'shift_id'
+    ).first()
+    exam_obj = Examname.objects.filter(id=selected_exam_id).first()
+
+    class_meta = {}
+    if class_config:
+        cg = class_config.class_group_id
+        class_meta = {
+            "class_name": cg.class_id.name if cg and cg.class_id else "",
+            "group": cg.group_id.name if cg and cg.group_id else "",
+            "section": class_config.section_id.name if class_config.section_id else "",
+            "shift": class_config.shift_id.name if class_config.shift_id else "",
+        }
+
+    # ---- Dynamic sizing (subject beshi hole choto font) ----
+    subject_count = len(subject_list) or 1
+    base_font_size = max(6, 11 - (subject_count // 3))
+    base_padding = max(2, 5 - (subject_count // 4))
 
     context = {
         "tabulation_data": tabulation_data,
-        "subject_list": sorted(subject_list),
-        "column_width": column_width,
+        "subject_list": subject_list,
+        "mark_type_list": mark_type_list,
         "font_size": base_font_size,
         "padding": base_padding,
+        "institute": institute,
+        "class_meta": class_meta,
+        "exam_name": exam_obj.name if exam_obj else "",
     }
 
-    # Convert HTML to PDF
     html_string = render_to_string("exams/mark/tabulation_pdf_template.html", context)
-    pdf_file = HTML(string=html_string).write_pdf(
+    pdf_file = HTML(
+        string=html_string, base_url=request.build_absolute_uri('/')
+    ).write_pdf(
         stylesheets=[CSS(string=f"""
-            @page {{
-                size: A4 landscape;
-                margin: 5px;
-            }}
-            table {{
-                table-layout: fixed;
-                width: 100%;
-            }}
+            @page {{ size: legal landscape; margin: 8mm; }}
+            table {{ table-layout: fixed; width: 100%; }}
             th, td {{
                 font-size: {base_font_size}px;
                 padding: {base_padding}px;
@@ -2999,8 +3125,6 @@ def tabulation_pdf(request):
     response = HttpResponse(pdf_file, content_type="application/pdf")
     response["Content-Disposition"] = "inline; filename=tabulation_sheet.pdf"
     return response
-
-
 
 
 

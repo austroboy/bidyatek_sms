@@ -1,463 +1,90 @@
-{% extends 'partials/base.html' %} 
-{% load static %} 
-{% load mark_tags %} 
+{% extends 'partials/base.html' %}
 {% load static %}
-
-<!-- Preconnect for Google Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="{% static 'assets/progress/style.css' %}">
-<img src="{% static 'assets/img/school.png' %}" alt="School Logo">
-<img src="{% static 'assets/img/Frame.svg' %}" alt="Background Frame">
-
-
-{% block extra_css %} 
-
-<link
-      rel="stylesheet"
-      href="{% static 'assets/progress/style.css' %}"
-    />
-    <style>
-
-        /* ===== GENERAL STYLING FOR TRANSCRIPT ===== */
-        .transcript_wrapper {
-            width: 100%;
-            max-width: 900px;
-            margin: auto;
-            padding: 40px;
-            border: 8px double black;
-            font-family: 'Times New Roman', serif;
-            background: white;
-            position: relative;
-            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
-        }
-        
-        /* Outer Border Effect */
-        .transcript_wrapper::before {
-            content: "";
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            right: 12px;
-            bottom: 12px;
-            border: 5px solid black;
-            pointer-events: none;
-        }
-        
-        /* HEADER */
-        .transcript_heading {
-            text-align: center;
-            font-size: 26px;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-            text-decoration: underline;
-            letter-spacing: 1px;
-        }
-        
-        .transcript_heading h1 {
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 6px;
-        }
-        
-        .transcript_heading p {
-            font-size: 16px;
-            margin-bottom: 8px;
-        }
-        
-        /* TITLE */
-        .title {
-            text-align: center;
-            font-size: 22px;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 15px;
-            border-bottom: 2px solid black;
-            padding-bottom: 5px;
-        }
-        
-        /* SERIAL AND LOGO SECTION */
-        .transcript_letter_grade {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .serial p {
-            font-size: 16px;
-            font-weight: bold;
-            margin-left: 10px;
-            text-decoration: underline;
-        }
-        
-        .logo {
-            text-align: center;
-            flex-grow: 1;
-        }
-        
-        .logo img {
-            height: 100px;
-        }
-        
-        .logo h3 {
-            font-size: 24px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        
-        /* STUDENT DETAILS */
-        .student_details table,
-        .center_details table {
-            width: 100%;
-            margin-bottom: 20px;
-            border-collapse: collapse;
-        }
-        
-        .student_details th,
-        .center_details th {
-            width: 30%;
-            text-align: left;
-            font-weight: bold;
-            background: #dcdcdc;
-            padding: 6px;
-            border: 1px solid black;
-        }
-        
-        .student_details td,
-        .center_details td {
-            text-align: left;
-            padding: 6px;
-            font-style: italic;
-            border: 1px solid black;
-        }
-        
-        /* SUBJECT WISE RESULTS */
-        .subject_wise_result table {
-            margin-top: 12px;
-            border-collapse: collapse;
-            width: 100%;
-            font-size: 16px;
-        }
-        
-        .subject_wise_result th,
-        .subject_wise_result td {
-            border: 1px solid black;
-            padding: 12px;
-            text-align: center;
-        }
-        
-        .subject_wise_result th {
-            background: #c5c5c5;
-            font-weight: bold;
-            border-top: 2px solid black;
-        }
-        
-        .subject_wise_result tr:nth-child(even) {
-            background: #f7f7f7;
-        }
-        
-        /* ADDITIONAL SUBJECT */
-        .additional_subject {
-            font-weight: bold;
-            text-align: center;
-            background: #e0e0e0;
-            padding: 8px;
-            border-top: 2px solid black;
-        }
-        
-        /* GPA SECTIONS */
-        .gpa_section {
-            font-weight: bold;
-            text-align: center;
-            font-size: 16px;
-        }
-        
-        /* CONTROLLER SIGNATURE */
-        .controller_sign {
-            margin-top: 25px;
-            text-align: right;
-        }
-        
-        .result_date {
-            font-size: 16px;
-            font-weight: bold;
-        }
-        
-        .sign {
-            text-align: center;
-            margin-top: 10px;
-            font-weight: bold;
-            border-top: 1px solid black;
-            width: 200px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        /* BORDER AND DESIGN */
-        .transcript_wrapper {
-            border: 8px double black;
-            padding: 25px;
-            position: relative;
-        }
-        
-        .transcript_wrapper::before {
-            content: "";
-            position: absolute;
-            top: 18px;
-            left: 18px;
-            right: 18px;
-            bottom: 18px;
-            border: 4px solid black;
-            pointer-events: none;
-        }
-        
-        /* ITALIC STYLING */
-        .italic {
-            font-style: italic;
-        }
-        
-        /* PRINT CONSISTENCY */
-        @media print {
-            body {
-                background: white;
-            }
-        
-            .transcript_wrapper {
-                box-shadow: none;
-                border: 4px solid black;
-                page-break-after: always;
-            }
-        
-            .controller_sign {
-                page-break-before: always;
-            }
-        }
-        
-        </style>
-        
-{% endblock extra_css %} 
-
+{% load mark_tags %}
 {% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
 
-<div class="container-fluid flex-grow-1 container-p-y"> 
-    {% include 'pageinfo.html' %}
-
-    <div id="fixed-button">
-        <div>
-            <button class="fixed-icon" id="print-tabulation">
-                <i class="bx bxs-printer fs-1"></i>
-            </button>
+  <div class="card">
+    <div class="card-body">
+      <form action="{% url 'progress_report' %}" method="post">
+        {% csrf_token %}
+        <div class="row">
+          <div class="col-md-3">
+            <select class="form-select" name="exam_name_id" id="exam_name" required>
+              <option disabled {% if not selected_exam_id %}selected{% endif %} value="">Select Exam</option>
+              {% for examname in exam_list %}
+              <option value="{{examname.id}}" {% if examname.id|stringformat:'s' == selected_exam_id %}selected{% endif %}>{{examname.name}}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-3">
+            <select class="form-select" name="class_name_id" id="class_name" required>
+              <option disabled {% if not selected_class_id %}selected{% endif %} value="">Select Class</option>
+              {% for class in class_list %}
+              <option value="{{class.id}}" {% if class.id|stringformat:'s' == selected_class_id %}selected{% endif %}>{{class}}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6 d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Load</button>
+            {% if results %}
+            <a class="btn btn-success" target="_blank"
+               href="{% url 'progress_report_pdf' %}?exam_id={{ selected_exam_id }}&class_id={{ selected_class_id }}">
+              <i class="bx bx-download"></i> Download PDF
+            </a>
+            {% endif %}
+          </div>
         </div>
-        <div>
-            <button class="fixed-icon" id="previous">
-                <i class="bx bx-skip-previous fs-1"></i>
-            </button>
-        </div>
+      </form>
     </div>
+  </div>
 
-    <div class="card">
-        <div class="card-body">
-            <form action="{% url 'progress_report' %}" method="post">
-                {% csrf_token %}
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <select class="form-select" name="exam_name_id" id="exam_name" required>
-                                <option disabled selected value="">Select Exam</option>
-                                {% for examname in exam_list %}
-                                <option value="{{examname.id}}">{{examname.name}}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <select class="form-select" name="class_name_id" id="class_name" required>
-                                <option disabled selected value="">Select Class</option>
-                                {% for class in class_list %}
-                                <option value="{{class.id}}">{{class}}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-6 d-flex justify-content-between gap-2 align-content-center">
-                        <div>
-                            <button class="btn btn-primary" type="submit">Load</button>
-                        </div>
-                        <div class="d-flex flex-row gap-2 align-self-center pb-3">
-                            <input class="form-control" type="text" id="examname" value="{{exam_instance}}" disabled>
-                            <input class="form-control" type="text" id="classname" value="{{class_instance}}" disabled>
-                        </div>
-                    </div>
-                </div>
-            </form>
-
-            <hr>
-
-            <div id="tm_download_mark">
-                {% for student in results %}
-                <div class="transcript_wrapper">
-                    <div class="transcript_heading text-center">
-                        <h1>{{ institute.institute_name }}</h1>
-                        <p>{{ institute.location }}</p>
-                    </div>
-                    <h2 class="title">{{ exam_instance }} Examination {{ class_instance }}</h2>
-            
-                    <div style="padding: 0 55px;">
-                        <div class="transcript_letter_grade d-flex justify-content-between">
-                            <div class="serial">
-                                <p>Serial No. {{ student.roll_no }}</p>
-                            </div>
-                            <div class="logo text-center">
-                                <img style="height: 130px;" src="{{ institute.institute_logo.url }}" alt="logo">
-                                <h3>ACADEMIC TRANSCRIPT</h3>
-                            </div>
-                        </div>
-            
-                        <div class="student_details">
-                            <table>
-                                <tr>
-                                    <th>Student Name</th>
-                                    <td>{{ student.student_name }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Father's Name</th>
-                                    <td>{{ student.parent_id.father_name }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Mother's Name</th>
-                                    <td>{{ student.parent_id.mother_name }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Name of Institution</th>
-                                    <td>{{ institute.institute_name }}</td>
-                                </tr>
-                            </table>
-                        </div>
-            
-                        <div class="center_details">
-                            <table>
-                                <tr>
-                                    <th>Name of Center</th>
-                                    <td>({{ student.class_id.class_group_id.class_id }}) {{ student.class_id.section_id.name }}</td>
-                                    <th>Type</th>
-                                    <td>Regular</td>
-                                </tr>
-                                <tr>
-                                    <th>Roll No.</th>
-                                    <td>{{ student.roll_no }}</td>
-                                    <th>Registration No.</th>
-                                    <td>{{ student.registration_no }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Group</th>
-                                    <td>{{ student.class_id.class_group_id.group_id.name }}</td>
-                                    <th>Date of Birth</th>
-                                    <td>{{ student.date_of_birth|date:"d/m/y" }}</td>
-                                </tr>
-                            </table>
-                        </div>
-            
-                        <div class="subject_wise_result">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Sl. No.</th>
-                                        <th>Name of Subjects</th>
-                                        <th>Letter Grade</th>
-                                        <th>Grade Point</th>
-                                        <th>GPA <br> <small>(Without additional subject)</small></th>
-                                        <th>GPA</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% with student_subjects=subject_mark_dict|get_item:student.roll_no %}
-                                        {% for subject_name, mark_dict in student_subjects.items %}
-                                  
-                                            {% if subject_name not in student.choosable_subjects %}
-                                            <tr>
-                                                <td>{{ forloop.counter }}</td>
-                                                <td>{{ subject_name }}</td>
-                                                <td>{{ mark_dict.Letter }}</td>
-                                                <td>{{ mark_dict.GPA }}</td>
-                                                {% if forloop.first %}
-                                                    <td rowspan="{{ student_subjects|length }}">{{ student.gpa_without_optional }}</td>
-                                                    <td rowspan="{{ student_subjects|length }}">{{ student.gpa_with_optional }}</td>
-                                                {% endif %}
-                                            </tr>
-                                            {% endif %}
-                                        {% endfor %}
-                                    {% endwith %}
-            
-                                    <!-- Additional Subject Section -->
-                                    {% if student.choosable_subjects %}
-                                    <tr>
-                                        <td colspan="5"><strong>Additional Subject</strong></td>
-                                    </tr>
-            
-                                    {% for subject_name, mark_dict in student.choosable_subjects.items %}
-                                    <tr>
-                                        <td rowspan="2">{{ forloop.counter }}</td>
-                                        <td rowspan="2">{{ subject_name }}</td>
-                                        <td rowspan="2">{{ mark_dict.Letter }}</td>
-                                        <td rowspan="2">{{ mark_dict.GPA }}</td>
-                                        <td>GP above 2</td>
-                                    </tr>
-                                    <tr>
-                                        <td>{{ mark_dict.GPA_if_counted }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                    {% endif %}
-                                </tbody>
-                            </table>
-                        </div>
-            
-                        <div class="controller_sign">
-                            <div class="result_date">
-                                <p>Date of Publication of Result: {{ result_date }}</p>
-                            </div>
-                            <div class="sign">
-                                <p>----------------------------</p>
-                                <p>Controller</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+  {% if results %}
+    {% for s in results %}
+    <div class="card mt-3" style="border-top:3px solid #0d6b5f;">
+      <div class="card-body">
+        <div class="d-flex justify-content-between flex-wrap border-bottom pb-2 mb-2">
+          <div><strong style="color:#0a4f46;">{{ s.name }}</strong> &nbsp; Roll: {{ s.roll_no }}</div>
+          <div>Section: {{ s.section }} | Shift: {{ s.shift }} | {{ s.version }}</div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-bordered table-sm mb-2">
+            <thead style="background:#0d6b5f;color:#fff;">
+              <tr>
+                <th>SL</th><th class="text-start">Subject</th>
+                {% for mt in mark_type_list %}<th>{{ mt }}</th>{% endfor %}
+                <th>Total</th><th>Full</th><th>GP</th><th>LG</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for sub in s.subjects %}
+              <tr>
+                <td>{{ forloop.counter }}</td>
+                <td class="text-start">{{ sub.name }}{% if sub.is_optional %} <small>(4th)</small>{% endif %}</td>
+                {% for mt in mark_type_list %}
+                <td>{% with v=sub.marks|get_item:mt %}{% if v != None %}{{ v|floatformat:2 }}{% else %}-{% endif %}{% endwith %}</td>
                 {% endfor %}
-            </div>
-            
+                <td><strong>{{ sub.total|floatformat:2 }}</strong></td>
+                <td>{{ sub.full_marks }}</td>
+                <td>{{ sub.gp }}</td>
+                <td {% if sub.lg == 'F' %}class="text-danger fw-bold"{% endif %}>{{ sub.lg }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
+        <div class="d-flex gap-3 flex-wrap">
+          <span class="badge bg-light text-dark border">Total: <strong>{{ s.total_marks|floatformat:2 }}</strong></span>
+          <span class="badge bg-light text-dark border">GPA: <strong>{{ s.gpa|floatformat:2 }}</strong></span>
+          <span class="badge bg-light text-dark border">Grade: <strong>{{ s.grade }}</strong></span>
+          <span class="badge bg-light text-dark border">Position: <strong>{{ s.position }}</strong></span>
+        </div>
+      </div>
     </div>
+    {% endfor %}
+  {% elif selected_class_id %}
+    <p class="text-center mt-4">No data found for this class & exam.</p>
+  {% endif %}
 </div>
-
-{% endblock content %}
-{% block extra_javascript %} 
-<script src="{% static 'assets/vendor/libs/print/jQuery.print.js' %}"></script>
-
-<script type="text/javascript">
-    $(document).ready(function () {
-
-      $("#print-tabulation").on("click", function () {
-        $("#tm_download_mark").print({
-          globalStyles: true,
-          mediaPrint: false,
-          stylesheet: null,
-          noPrintSelector: ".no-print",
-          iframe: true,
-          append: null,
-          prepend: null,
-          manuallyCopyFormValues: true,
-          deferred: $.Deferred(),
-          timeout: 750,
-          title: "Tabulation Sheet",
-          doctype: "<!doctype html>",
-        });
-      });
-
-      $("#previous").on("click", function () {
-        window.history.back(); 
-      });
-    });
-</script>
-{% endblock extra_javascript %}
+{% endblock %}
