@@ -128,7 +128,7 @@ def add_syllabus(request):
     current_year = str(datetime.now().year)
     admission_year, _ = Admission_Year.objects.get_or_create(name=current_year)
     form = SyllabusForm(initial={'academic_year': admission_year})
-    form.fields['exam_name'].queryset = Examname.objects.filter(academic_year=admission_year)
+    form.fields['exam_name'].queryset = Examname.objects.all()
     form.fields['classname'].queryset = ClassGroupConfig.objects.all()
     form.fields['subject_id'].queryset = Subject.objects.all()
 
@@ -168,7 +168,7 @@ def edit_syllabus(request, pk):
     else:
         form = SyllabusForm(instance=syllabus, initial={'academic_year': admission_year})
         # Filter the exam_name field queryset based on the latest Admission_Year
-        form.fields['exam_name'].queryset = Examname.objects.filter(academic_year=admission_year)
+        form.fields['exam_name'].queryset = Examname.objects.all()
 
     context = {
         'form': form
@@ -360,7 +360,8 @@ def exam_schedule(request):
             exam_items = Examname.objects.filter(id__in=exam_names)
 
         exams = Schedule.objects.select_related('subject_id', 'class_name', 'exam_name').filter(**filters).order_by('exam_date')
-    
+        print("DEBUG class_names:", class_names, "exam_names:", exam_names, "match count:", exams.count())
+        
     for exam in exams:
         class_name = exam.class_name
         exam_date = exam.exam_date.strftime("%d-%m-%y")

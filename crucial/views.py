@@ -11882,13 +11882,15 @@ def generate_admit_card_pdf(student, exam=None):
     # Use the student's academic_session_year from database
     academic_session = student.academic_session_year
     institute = Institute.objects.order_by('-id').first()
-    institute_logo = institute.institute_logo.url if institute and institute.institute_logo else None
+    institute_logo = institute.institute_logo.path if institute and institute.institute_logo else None
     
     context = {
         'student': student,
         'academic_session': academic_session,
         'exam': exam,  # Pass the exam to template
-        'institute_logo': institute_logo 
+        'institute_logo': institute_logo,
+        'institute_name': institute.institute_name if institute else '',
+        'institute_address': institute.institute_address if institute else '',
     }
     html_string = render_to_string('admit_card/admit_card_template.html', context)
     html = HTML(string=html_string)
@@ -11979,6 +11981,7 @@ def bulk_admit_card_download(request):
     shifts = StudentShift.objects.all()
     exams = Examname.objects.all()
     academic_sessions = AcademicSession.objects.all()
+    institute = Institute.objects.order_by('-id').first()
     
     context = {
         'class_groups': class_groups,
@@ -11987,6 +11990,8 @@ def bulk_admit_card_download(request):
         'shifts': shifts,
         'exams': exams,
         'academic_sessions': academic_sessions,
+        'institute_name': institute.institute_name,
+        'institute_address': institute.institute_address,
     }
     return render(request, 'admit_card/bulk_admit_card_form.html', context)
 

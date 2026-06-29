@@ -266,14 +266,14 @@
             <div class="text-truncate" data-i18n="Login">Admit Card Downlaod</div>
           </a>
           <ul class="menu-sub">
-            <li class="menu-item {% if '/admit_card_without_routine/' in request.path %}active {% endif %}">
-              <a href="{% url 'admit_card_without_routine' %}" class="menu-link">
-                <div class="text-truncate" data-i18n="admit_card_without_routine">Simple Admit Card</div>
+            <li class="menu-item {% if '/admit-card/single/' in request.path %}active{% endif %}">
+              <a href="{% url 'single_admit_card_download' %}" class="menu-link">
+                <div class="text-truncate" data-i18n="single_admit_card_download">Single Admit Card Download</div>
               </a>
             </li>
-            <li class="menu-item {% if '/admit_card_with_routine/' in request.path %}active{% endif %}">
-              <a href="{% url 'admit_card_with_routine' %}" class="menu-link">
-                <div class="text-truncate" data-i18n="admit_card_with_routine">Admit Card With Routine</div>
+            <li class="menu-item {% if '/admit-card/bulk/' in request.path %}active{% endif %}">
+              <a href="{% url 'bulk_admit_card_download' %}" class="menu-link">
+                <div class="text-truncate" data-i18n="bulk_admit_card_download">Bulk Admit Card Download</div>
               </a>
             </li>
            
@@ -435,7 +435,7 @@
 
 
     {% if user|in_group:"teacher" %}
-   
+  
         <li
           class="menu-item {% if '/mark_list' in request.path %}active{% endif %}" data-is-module="true"
         >

@@ -38,7 +38,7 @@
   padding: 10px;
   border-radius: 5px;
   color: #232321;
-  background-color: #d9e4ff;
+  background-color: #e7f3f1;
 }
 
 .grid-item.left_item {
@@ -55,7 +55,7 @@
   text-align: center;
   padding: 8px 0;  
   color: #232321;
-  background-color: #d9e4ff;
+  background-color: #e7f3f1;
   font-size: 16px;
   border-radius: 5px;
   margin-bottom: 10px !important;
@@ -99,6 +99,6 @@
 }
 
 .grid-container::-webkit-scrollbar-thumb {
-  background-color: #6d96ff;
+  background-color: #0d6b5f;
   border-radius: 12px;
 }
