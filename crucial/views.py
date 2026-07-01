@@ -1805,7 +1805,7 @@ def add_fee(request):
         invoice = request.POST.get('invoice_type')
         version = request.POST.get('version') 
         fee_month_id = request.POST.get('fee_month_id')
-        fee_name_id = request.POST.get('fee_name')  
+        fee_name_id = request.POST.get('fess_name')  
         academic_year = request.POST.get('academic_year')
         individual_student = request.POST.get('student_id')
 
@@ -2139,71 +2139,7 @@ def feestatus(request):
     return JsonResponse(student_data, safe=False)
 
 
-@login_required(login_url='login')
-@user_passes_test(lambda user: is_staff_or_has_role(user, roles=['Manager', 'Accountant']))
-# @csrf_exempt
-# def student_search(request):
 
-#     if request.method == 'POST':
-#         student_id = request.POST.get('studentId')
-#         student = StudentProfile.objects.get(id=student_id)
-#         name = student.student_field.name
-#         class_name = student.class_id
-#         roll = student.roll_no
-#         parent=student.parent_id.name
-
-#         if class_name:
-#             class_config_data = {
-#             'class_id': getattr(class_name.class_group_id.class_id, 'name', 'Unknown Class'),
-#             'group_id': getattr(class_name.class_group_id.group_id, 'name', ''),
-#             'section_id': getattr(class_name.section_id, 'name', '')
-#         }
-
-#         fees = Fees.objects.filter(student_id=student_id)
-
-#         total_net_total = sum(fee.total_netTotal() for fee in fees)
-
-#         feesList = []
-
-#         for fee in fees:
-#             latefee = fee.calculate_late_fee() or fee.late_amount
-#             total_fee_after_discount = fee.total_fee_after_discount()
-#             waiver_amount = Waiver.objects.filter(student_id=student_id).aggregate(
-#                 total_waiver=Sum('waiver_amount'))['total_waiver'] or 0
-#             total_paid_amount = fee.total_paid_amount()
-#             total_fee_after_partial_payments = fee.total_fee_after_partial_payments()
-
-#             fee_data = {
-#                 'id': fee.id,
-#                 'feetype': fee.feetype_id.fees_title,
-#                 'amount': fee.amount,
-#                 'startdate': fee.feetype_id.startdate if fee.feetype_id else None,
-#                 'enddate': fee.feetype_id.enddate if fee.feetype_id else None,
-#                 'discount_amount': fee.discount_amount,
-#                 'status': fee.status,
-#                 'total_fee_after_discount': total_fee_after_discount,
-#                 'late_fee': latefee,
-#                 'waiver_amount': waiver_amount,
-#                 'total_paid_amount': total_paid_amount,
-#                 'total_netTotal':total_net_total,
-#                 'total_fee_after_partial_payments': total_fee_after_partial_payments,
-#                 'total_fee':fee.total_fee()
-                
-#             }
-#             feesList.append(fee_data)
-
-#         student_data = [
-#             {'name': name, 'parent' : parent, 'class': class_config_data['class_id'] + " " + class_config_data['group_id'] + " " +
-#                 class_config_data['section_id'], 'roll': roll, 'feesList': feesList}
-#         ]
-
-        
-#         return JsonResponse(student_data, safe=False)
-
-#     return JsonResponse({'error': 'Invalid request'})
-
-
-@csrf_exempt
 def student_search(request):
     if request.method == 'POST':
         try:
@@ -2255,19 +2191,21 @@ def student_search(request):
                     'total_fee_after_discount': total_fee_after_discount,
                     'total_fee_after_partial_payments': total_fee_after_partial_payments,
                     'total_fee': total_fee,
+                    'total_netTotal': fee.total_netTotal(),
                 }
                 feesList.append(fee_data)
 
-            # Final student data
+            # Final student data (JS expects an array with student info + feesList in first element)
             student_data = {
                 'name': name,
                 'parent': parent,
                 'class': f"{class_config_data['class_id']} {class_config_data['group_id']} {class_config_data['section_id']}",
                 'roll': roll,
                 'total_netTotal': total_net_total,
+                'feesList': feesList,
             }
 
-            return JsonResponse({'student': student_data, 'fees': feesList}, status=200)
+            return JsonResponse([student_data], safe=False, status=200)
 
         except StudentProfile.DoesNotExist:
             return JsonResponse({'error': 'Student not found'}, status=404)
@@ -2275,8 +2213,6 @@ def student_search(request):
             return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Invalid request method'}, status=400)
-
-
 
 import logging
 
@@ -2702,32 +2638,6 @@ def generate_multiple_invoice(request):
             due_total =(total_fees_amount+total_late_fees)-(total_discount_amount+check_due)
 
             full_and_final = total_fee_paid
-
-            # template = SMSTemplateNotification.objects.filter(
-            #         notification_type='Pay Slip Info',
-            #         notification_status='Active'
-            #         ).first()
-            # if fees_status == 'collectfees' and template:
-                
-            #     sms_body = template.body.format(
-            #                 name=name,
-            #                 fee_month=fee_month,
-            #                 total_amount=total_paid_fees_amount
-            #                 )
-            #     sms_count = count_sms(sms_body)
-            #     sms_limit_obj = SMSUsage.objects.filter(
-            #         Msg_type='NONMASKING').first()
-            #     if sms_limit_obj.total_sms < 1:
-            #         print('SMS LIMIT OVER')
-            #     else:
-            #         receiver = f'{formatted_number}'
-            #         send_sms(receiver, sms_body)
-            #         sms_limit_obj.total_sms -= sms_count
-            #         sms_limit_obj.save()
-            #         SMS.objects.create(
-            #             mobile=phone_number, title='Paid Msg', msg=sms_body, created_by=current_user)
-
-
             student_info = {
                 'id': student_profile.id,
                 'name': name,
@@ -2759,55 +2669,6 @@ def generate_multiple_invoice(request):
 
     return JsonResponse({'msg': 'Invalid request'}, status=400)
 
-
-@login_required(login_url='login')
-@user_passes_test(lambda user: is_staff_or_has_role(user, roles=['Manager', 'Accountant']))
-@csrf_exempt
-# def fee_put_back(request):
-#     current_user = request.user
-#     fee_id = request.POST.get('id')
-#     btn_status = request.POST.get('status')
-    
-#     if btn_status == "partial_payment":
-#         partial_instance = get_object_or_404(PartialPayment, pk=fee_id)
-#         pid = partial_instance.id
-#         fee_instance = partial_instance.fee
-#         p_count = PartialPayment.objects.filter(fee=fee_instance).count()
-#         transaction_number = str(fee_instance.transaction_no) + '-' + str(pid)
-        
-#         if p_count > 1:
-#             partial_instance.delete()
-#             IncomeitemList.objects.filter(invoice_number=transaction_number).delete()
-#         else:
-#             late_amount = 0
-#             discount_amount = 0
-#             partial_instance.delete()
-#             transaction_no = fee_instance.transaction_no
-#             fee_instance.status = 'unpaid'
-#             fee_instance.late_amount = late_amount
-#             fee_instance.discount_amount = discount_amount
-#             fee_instance.updated_by = current_user
-#             fee_instance.save()
-#             deleted_count, _ = IncomeitemList.objects.filter(invoice_number__startswith=transaction_no).delete()
-        
-#         return JsonResponse({'msg': 'Partial payment deleted'}, safe=False)
-    
-#     elif btn_status == "fee":
-#         fees_instance = get_object_or_404(Fees, pk=fee_id)
-#         PartialPayment.objects.filter(fee=fees_instance).delete()
-#         transaction_no = fees_instance.transaction_no
-#         late_amount = 0
-#         discount_amount = 0
-#         fees_instance.status = 'unpaid'
-#         fees_instance.late_amount = late_amount
-#         fees_instance.discount_amount = discount_amount
-#         fees_instance.updated_by = current_user
-#         fees_instance.save()
-#         deleted_count, _ = IncomeitemList.objects.filter(invoice_number__startswith=transaction_no).delete()
-        
-#         return JsonResponse({'msg': 'Fee and related partial payments deleted'}, safe=False)
-    
-#     return JsonResponse({'msg': 'Successfully' }, safe=False)
 
 @login_required(login_url='login')
 @user_passes_test(lambda user: user.is_staff or user.groups.filter(name__in=['Manager', 'Accountant']).exists())
@@ -2942,11 +2803,9 @@ def del_fee(request):
 @login_required(login_url='login')
 @user_passes_test(lambda user: is_staff_or_has_role(user, roles=['Manager', 'Accountant']))
 def student_fee(request):
-    current_year = str(datetime.now().year)
-    admission_year = Admission_Year.objects.get(name=current_year)
-
     studentlist = StudentProfile.objects.filter(
-        Q(admission_year_id=admission_year) & Q(student_field__status="Active"))
+        student_field__status="Active"
+    ).select_related('student_field', 'class_id__class_group_id__class_id')
 
     context = {
         'heading': 'Fees',
@@ -2955,6 +2814,59 @@ def student_fee(request):
     }
     return render(request, 'crucial/finance/student_fee.html', context)
 
+@login_required(login_url='login')
+@user_passes_test(lambda user: is_staff_or_has_role(user, roles=['Manager', 'Accountant']))
+def student_fee_statement_pdf(request, student_id):
+    from django.template.loader import render_to_string
+    from weasyprint import HTML
+
+    student = get_object_or_404(
+        StudentProfile.objects.select_related(
+            'student_field', 'class_id__class_group_id__class_id',
+            'class_id__class_group_id__group_id', 'class_id__section_id', 'parent_id'
+        ), id=student_id
+    )
+    institute = Institute.objects.order_by('-id').first()
+    fees = Fees.objects.filter(student_id=student).select_related('feetype_id')
+
+    rows = []
+    total_amount = Decimal(0)
+    total_discount = Decimal(0)
+    total_paid = Decimal(0)
+    for fee in fees:
+        amount = fee.amount or Decimal(0)
+        latefee = fee.calculate_late_fee() or fee.late_amount or Decimal(0)
+        discount = fee.discount_amount or Decimal(0)
+        paid = fee.total_netTotal() or Decimal(0)
+        final_amount = amount + latefee - discount
+        rows.append({
+            'feetype': fee.feetype_id.fees_title if fee.feetype_id else "N/A",
+            'late_fee': latefee,
+            'amount': amount,
+            'discount': discount,
+            'final_amount': final_amount,
+            'status': fee.status,
+        })
+        total_amount += (amount + latefee)
+        total_discount += discount
+        total_paid += paid
+
+    due = total_amount - total_paid
+
+    context = {
+        'student': student,
+        'institute': institute,
+        'rows': rows,
+        'total_amount': total_amount,
+        'total_discount': total_discount,
+        'total_paid': total_paid,
+        'due': due,
+    }
+    html_string = render_to_string('crucial/finance/student_fee_pdf.html', context)
+    pdf = HTML(string=html_string, base_url=request.build_absolute_uri('/')).write_pdf()
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="fee_statement_{student.student_field.name}.pdf"'
+    return response
 
 @login_required(login_url='login')
 @user_passes_test(lambda user: is_staff_or_in_group(user, "student", "parent"))
@@ -5311,6 +5223,8 @@ def salary_process(request):
 
                 for salary_id, payment_amount in selected_salaries.items():
                     salary = get_object_or_404(SalaryProcess, id=salary_id)
+                    if salary.salary_status == 'paid':
+                        continue
                     payment_amount = Decimal(payment_amount)  
                     payment_method = data.get(f'payment_method_{salary_id}', "cash")
                     payment_status = data.get(f'payment_status_{salary_id}', "partial")
@@ -5386,42 +5300,62 @@ def process_individual_payment(salary, payment_amount, payment_method, payment_s
 def trigger_payment_and_journal(salary, payment_amount):
     """
     Handles the accounting entries for salary payments by recording them in the Payment table only.
+    Auto-creates required ledgers (Salaries & Wages, Cash in Hand, Bank Account (Main)) if missing,
+    so the entry always lands correctly in the accounting app.
     """
     try:
+        from accounting.models import LedgerCategory
+
         payment_amount = Decimal(payment_amount)
 
         if payment_amount <= 0:
             raise ValueError("Payment amount must be greater than zero.")
 
-        debit_ledger = Ledger.objects.get(name="Salaries & Wages")  
+        def get_or_create_ledger(name, code, category_name, balance_type):
+            category, _ = LedgerCategory.objects.get_or_create(
+                name=category_name,
+                defaults={'code': category_name[:3].upper()}
+            )
+            ledger, _ = Ledger.objects.get_or_create(
+                name=name,
+                defaults={
+                    'code': code,
+                    'category': category,
+                    'balance_type': balance_type,
+                }
+            )
+            return ledger
+
+        # Expense side (debit) — salary expense
+        debit_ledger = get_or_create_ledger("Salaries & Wages", "EXP-SAL", "Expense", "Debit")
+
+        # Cash/Bank side (credit)
         if salary.payment_method == 'cash':
-            credit_ledger = Ledger.objects.get(name="Cash in Hand")  
+            credit_ledger = get_or_create_ledger("Cash in Hand", "AST-CASH", "Asset", "Debit")
         else:
-            credit_ledger = Ledger.objects.get(name="Bank Account (Main)")  
+            credit_ledger = get_or_create_ledger("Bank Account (Main)", "AST-BANK", "Asset", "Debit")
 
+        import uuid
         current_time = timezone.now().strftime("%Y%m%d%H%M%S")
-        voucher_number = f"PAY{current_time}"
+        voucher_number = f"PAY{current_time}{uuid.uuid4().hex[:6]}"
 
-        with transaction.atomic(): 
+        with transaction.atomic():
 
-            staff_member = salary.employee_salary.employee  
+            staff_member = salary.employee_salary.employee
 
             Payment.objects.create(
                 voucher_no=voucher_number,
                 date=timezone.now().date(),
                 amount=payment_amount,
-                staff=staff_member, 
+                staff=staff_member,
                 expense_ledger=debit_ledger,
                 cash_ledger=credit_ledger,
                 description=f"Salary payment for {salary.salary_month} - {voucher_number}",
-                created_by=salary.created_by 
+                created_by=salary.created_by
             )
 
-    except Ledger.DoesNotExist as e:
-        raise ValueError(f"Ledger not found: {str(e)}")
     except Exception as e:
         raise ValueError(f"Error processing payment: {str(e)}")  
-    
 
 def update_tax_profile_on_payment(salary_process):
     try:

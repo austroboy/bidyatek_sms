@@ -30,9 +30,9 @@
         <div class="card-body">
             <div class="col-md-12 pb-2">
                 <select class="form-select" id="student_id" name="id_no">
+                    <option></option>
                     {% for student in studentlist %}
-                        <option></option>
-                        <option value="{{ student.id }}">{{ student.student_field.name }} {{ student.class_id }}</option>
+                        <option value="{{ student.id }}">{{ student.student_field.name }} - Roll {{ student.roll_no|default:"-" }} ({{ student.class_id }})</option>
                     {% endfor %}
                 </select>
             </div>
@@ -61,6 +61,9 @@
                         <button  type="button" class="btn btn-icon btn-warning mb-md-0 mb-2 ms-3" id="generateInvoiceBtn"> 
                             <i class='bx bx-receipt fs-3'></i>
                         </button>
+                        <a href="#" class="btn btn-icon btn-success mb-md-0 mb-2 ms-3" id="downloadStatementBtn" style="display:none;" target="_blank">
+                            <i class='bx bx-download fs-3'></i>
+                        </a>
                         
 
                     </div>
@@ -74,7 +77,7 @@
                             <th><input type="checkbox" id="select_all"></th>
                             <th data-fee="feetype" >FEE TYPE</th>
                             <th data-fee="waiver" >Waiver (%)</th>
-                            <th data-fee="late_fee" >Lfee</th>
+                            <th data-fee="late_fee" >L. Fee</th>
                             <th data-fee="amount" >AMOUNT</th>
                             <th data-fee="discount" style="width: 60px;">Discount </th>
                             <th data-fee="total_fee" >FINAL AMOUNT</th>
@@ -109,7 +112,7 @@
                   </div>
                   <div  style=" border-right: 1px dotted white; background-color: #ccc;"
                     class="col-md-6 col-lg-3 flex-grow-1 d-flex flex-column text-center text-danger fs-5 pt-1">
-                    <label class="control-label">Net Total</label>
+                    <label class="control-label">Total Paid</label>
                     <input disabled style="width: 50%;" type="number" id="net_Total" name="net_Total"
                       class=" mb-2 align-self-center fw-bold form-control center-placeholder text-center"
                       placeholder="Net Total" />
@@ -332,51 +335,18 @@
             tAmount += amount;
             totalLfee += lateFee;
             totalAmount = tAmount + totalLfee;
-            totalNetTotal = netTotal;
+            totalNetTotal += (parseFloat(fee.total_netTotal) || 0);
             totalDiscount += discountAmount
         });
     
         return { totalAmount, totalDiscount, totalNetTotal };
     }
     
-
-    // $(document).on("click", 'input[type="radio"]', function () {
-    //     var btnid = (this.id);
-    //     var value = $(this).val();
-    //     currentDataId = $(this).attr("data-id");
-    //     currentDiscountAmount = $(".discount-input[data-fee-id='" + currentDataId + "']").val();
-        
-    //     if (value === "partial") {
-    //         $('#intext' + currentDataId).removeAttr('hidden');
-
-    //         $('#intext' + currentDataId).keypress(function (e) {
-    //             var key = e.which;
-    //             if (key == 13) {
-    //                 let pvalue = $(this).val();
-    //                 let partial_data = $(this).attr("data-id");
-    //                 currentDiscountAmount = $(".discount-input[data-fee-id='" + partial_data + "']").val();
-    //                 sendToServer(currentDataId, value, currentDiscountAmount, pvalue);
-    //                 $('#intext' + currentDataId).attr("disabled", true);
-    //             }
-    //         });
-    //     } else {
-    //         console.log('else');
-    //     }
-    // });
-
-    // $('#confirmMarkAsPaidBtn').on('click', function() {
-        
-    //     sendToServer(currentDataId, 'full', currentDiscountAmount, 0);
-    //     $('#confirmMarkAsPaidModal').modal('hide');
-    // });
-
-
-    
     function sendToServer(dataId, value, discountAmount, pvalue) {
         $.ajax({
             url: "/feestatus/",
             type: "POST",
-            data: { id: dataId, paymentMethod: value, discount: discountAmount, paymentAmount: pvalue },
+            data: { id: dataId, paymentMethod: value, discount: discountAmount, paymentAmount: pvalue, csrfmiddlewaretoken: '{{ csrf_token }}' },
         })
         .done(function (data) {
             var studentData = data[0];
@@ -388,6 +358,7 @@
                 $("[data-id='class']").text("Class: " + studentData.class);
                 $("[data-id='roll']").text("Roll: " + studentData.roll);
                 $("[data-id='parent']").text("Parent: " + studentData.parent);
+                $("#downloadStatementBtn").attr("href", "/fees/student_fee/statement/" + selectedStudentId + "/").show();
                 $("#stuFee tbody").empty();
     
                 var {
@@ -412,7 +383,7 @@
                 $("#discount").val(totalDiscount.toFixed(2));
                 $("#net_Total").val(totalNetTotal.toFixed(2));
     
-                var due = (totalNetTotal + totalDiscount) - totalFee
+                var due = totalFee - totalNetTotal;
                 $("#due").val(due.toFixed(2));
     
             } else {
@@ -422,21 +393,7 @@
         .fail(function () {
             console.log("Error Occurred");
         });
-    }
-
-    // function markAsPaid(feeId) {
-        
-    //     $('#confirmMarkAsPaidModal').modal('show');
-    //     $('#confirmMarkAsPaidBtn').data('fee-id', feeId);
-    //     }
-    //     $('#confirmMarkAsPaidBtn').on('click', function () {
-    //         var feeId = $(this).data('fee-id');
-    //         $('#confirmMarkAsPaidModal').modal('hide');
-
-    //         var discountValue = $(".discount-input[data-fee-id='" + feeId + "']").val();
-    //         sendToServer(feeId, discountValue);
-    //     });
-    
+    } 
     $(document).ready(function () {
         $("#student_id").select2({
             theme: "bootstrap-5",
@@ -458,7 +415,7 @@
             $.ajax({
                 url: '{% url 'student_search' %}',
                 method: 'POST',
-                data: { studentId: studentId },
+                data: { studentId: studentId, csrfmiddlewaretoken: '{{ csrf_token }}' },
                 dataType: 'json',
                 success: function (data) {
                     var studentData = data[0];
@@ -469,6 +426,7 @@
                         $("[data-id='class']").text("Class: " + studentData.class);
                         $("[data-id='roll']").text("Roll: " + studentData.roll);
                         $("[data-id='parent']").text("Parent: " + studentData.parent);
+                        $("#downloadStatementBtn").attr("href", "/fees/student_fee/statement/" + selectedStudentId + "/").show();
                         $("#stuFee tbody").empty();
     
                         var {
@@ -638,6 +596,7 @@
                                 $("[data-id='class']").text("Class: " + studentData.class);
                                 $("[data-id='roll']").text("Roll: " + studentData.roll);
                                 $("[data-id='parent']").text("Parent: " + studentData.parent);
+                                $("#downloadStatementBtn").attr("href", "/fees/student_fee/statement/" + selectedStudentId + "/").show();
                                 $("#stuFee tbody").empty();
             
                                 var {

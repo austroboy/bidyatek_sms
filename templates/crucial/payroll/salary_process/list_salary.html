@@ -1,281 +1,7 @@
-{% extends 'partials/base.html' %} {% load static %} {% block extra_css %}
+{% extends 'partials/base.html' %} {% load static %} 
 
  <link rel="stylesheet" href="{% static 'assets/css/gtable.css' %}" /> 
-{% comment %} <style>
-  .form-control{
-    font-size: 0.7rem;
-    padding: 0.4375rem 0.575rem;
-  }
-  .form-select{
-    font-size: 0.7rem;
-    background-image: none;
-    padding: 0.4375rem .5rem 0.4375rem 0.875rem;
-  }
 
-  
-  .section {
-      margin-bottom: 20px!important;
-  }
-  .section-title {
-      display: inline-block!important;
-      font-size: 18px!important;
-      font-weight: bold!important;
-      margin-bottom: 10px!important;
-      background-color: #14a89a!important ;
-      color: white!important;
-      padding: 4px!important;
-      text-transform: capitalize;
-  }
-  .info-table {
-      width: 100%!important;
-      border-collapse: collapse!important;
-  }
-  .info-table th,
-  .info-table td {
-      border: 1px solid #ddd!important;
-      padding:4px 8px !important;;
-      width: 25%!important;
-  }
-  .info-table th {
-      background-color: #f2f2f2!important;
-      text-align: left!important;
-  }
-
-  .info{
-    display: none!important;
-  }
-
-</style> {% endcomment %}
-
-
-
-{% endblock extra_css %} 
-
-
-
-{% comment %} {% block content %}
-
-<!-- start: Content -->
-<div class="container-fluid flex-grow-1 container-p-y">
-  {% include 'pageinfo.html' %}
-  <!-- Hoverable Table rows -->
-  <div class="card p-4">
-    <div>
-      <button id="bulkPayBtn" class="btn btn-success">Bulk Pay</button>
-      <button id="selectedPayBtn" class="btn btn-warning">Selected Pay</button>
-  </div>
-  
-    
-      <div class="table-responsive">
-        <table id="softdatatable" class="table table-striped table-bordered table-centered table-nowrap mb-0">
-          <thead>
-            <tr>
-              <th class="align-middle text-center " scope="col">
-                <input type="checkbox" id="select_all">
-              </th>
-
-              <th class="align-middle" scope="col">
-                <input type="text" class="form-control" id="idFilter" name="search_id" placeholder="Filter by ID">
-              </th>
-
-              <th class="align-middle" scope="col">
-                <input type="text" class="form-control" id="nameFilter" placeholder="Filter by Name">
-              </th>
-              
-              <th>
-                <select class="form-select" name="monthFilter" id="monthFilter">
-                <option selected hidden value="">Select Month</option>
-                <option value="January">January</option>
-                <option value="February">February</option>
-                <option value="March">March</option>
-                <option value="April">April</option>
-                <option value="May">May</option>
-                <option value="June">June</option>
-                <option value="July">July</option>
-                <option value="August">August</option>
-                <option value="September">September</option>
-                <option value="October">October</option>
-                <option value="November">November</option>
-                <option value="December">December</option>
-              </select>
-              </th>
-              <th>Role</th>
-              <th>Salary</th>
-              <th>Paid Amount</th>
-              <th>Pending Amount</th>
-              <th>Payment Amount</th>
-              <th>Payment Method</th>
-              <th>Payment Type</th>
-              <th>Actions</th>
-              
-              <th class="align-middle" scope="col">
-                <div class="export__file">
-                  <label for="export-file" class="export__file-btn" title="Export File"></i></label>
-                  <input type="checkbox" id="export-file">
-                  <div class="export__file-options">
-                    <label>Export As &nbsp; ➜</label>
-                    <label for="export-file" id="toPDF">PDF <img src="images/pdf.png" alt=""></label>
-                    <label for="export-file" id="toJSON">JSON <img src="images/json.png" alt=""></label>
-                    <label for="export-file" id="toCSV">CSV <img src="images/csv.png" alt=""></label>
-                    <label for="export-file" id="toEXCEL">EXCEL <img src="images/excel.png" alt=""></label>
-                  </div>
-                </div>
-              </th>
-            </tr>
-          </thead>
-          <tbody id="">
-            {% for salary_process in salary_process_list %}
-            <tr>
-              
-              <th class="text-end" scope="col">
-                <input type="checkbox" id="select_all">
-              </th>
-              <td>{{ salary_process.employee_salary.employee.staff_field.user_id }}</td>
-              <td>{{ salary_process.employee_salary.employee }}</td>
-              <td>{{ salary_process.salary_month }}</td>
-              <td>{{ salary_process.employee_salary.employee.role }}</td>
-              <td>{{ salary_process.total_salary }}</td>
-              <td>{{ salary_process.paid_amount }}</td>
-              <td id="pending_amount_{{ salary_process.id }}">{{ salary_process.pending_amount }}</td>
-              <td id="unpaid_amount_{{ salary_process.id }}">{{ salary_process.unpaid_amount|floatformat:2 }}</td>
-              <td>
-                <input
-                    type="number"
-                    name="payment_amount_{{ salary_process.id }}"
-                    id="payment_amount_{{ salary_process.id }}"
-                    placeholder="Enter Amount"
-                    class="form-control"
-                    min="0"
-                    max="{{ salary_process.pending_amount }}"
-                    value="0"
-                />
-                <input
-                    type="hidden"
-                    name="pending_amount_{{ salary_process.id }}"
-                    value="{{ salary_process.pending_amount }}"
-                />
-
-              </td>              
-              <td>
-                <select name="payment_method_{{ salary_process.id }}" class="form-select" required>
-                  <option value="cash">Cash</option>
-                  <option value="bank">Bank</option>
-                  <option value="mfs">MFS</option>
-                </select>
-              </td>
-              <td>
-                <select name="payment_status_{{ salary_process.id }}" class="form-select payment-status" data-salary-id="{{ salary_process.id }}" required>
-                  <option value="partial">Partial</option>
-                  <option value="full">Full</option>
-                </select>
-              </td>
-              <td>
-                <button
-                  type="button"
-                  class="btn btn-primary btn-sm pay-individual"
-                  data-salary-id="{{ salary_process.id }}"
-                >
-                  Pay
-                </button>
-              
-                  PaySlip
-                </a>
-              </td>              
-            </tr>
-
-            {% endfor %}
-          </tbody>
-        </table>
-        
-      </div>
-      <!-- Pagination Controls -->
-      <div id="pagination">
-        {% if salary_process_list.has_other_pages %}
-        <ul class="pagination">
-            {% if salary_process_list.has_previous %}
-                <li class="page-item">
-                    <a class="page-link pagination-link" href="?page={{ salary_process_list.previous_page_number }}" data-page="{{ salary_process_list.previous_page_number }}">Previous</a>
-                </li>
-            {% endif %}
-
-            {% for num in salary_process_list.paginator.page_range %}
-                {% if salary_process_list.number == num %}
-                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                {% else %}
-                    <li class="page-item">
-                        <a class="page-link pagination-link" href="?page={{ num }}" data-page="{{ num }}">{{ num }}</a>
-                    </li>
-                {% endif %}
-            {% endfor %}
-
-            {% if salary_process_list.has_next %}
-                <li class="page-item">
-                    <a class="page-link pagination-link" href="?page={{ salary_process_list.next_page_number }}" data-page="{{ salary_process_list.next_page_number }}">Next</a>
-                </li>
-            {% endif %}
-        </ul>
-      {% endif %}
-      </div>
-    
-    
-  </div>
-  <!--/ Hoverable Table rows -->
-
-  
-</div>
-<!-- end: Content -->
-
-{% endblock content %} {% block extra_javascript %}
-
-<script src="{% static 'assets/vendor/libs/print/jQuery.print.js' %}"></script>
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-      const idFilter = document.getElementById("idFilter");
-      const nameFilter = document.getElementById("nameFilter");
-      const monthFilter = document.getElementById("monthFilter");
-  
-      function fetchFilteredData() {
-          let searchID = idFilter.value.trim();
-          let searchName = nameFilter.value.trim();
-          let searchMonth = monthFilter.value.trim();
-  
-          fetch(`/payroll/salary_process/?search_id=${searchID}&search_name=${searchName}&search_month=${searchMonth}`, {
-              headers: { "X-Requested-With": "XMLHttpRequest" }
-          })
-          .then(response => response.json())
-          .then(data => {
-              document.querySelector("tbody").innerHTML = data.html;
-          })
-          .catch(error => console.error("Error:", error));
-      }
-  
-      // Event Listeners for automatic search
-      idFilter.addEventListener("input", fetchFilteredData);
-      nameFilter.addEventListener("input", fetchFilteredData);
-      monthFilter.addEventListener("change", fetchFilteredData);
-  });
-  </script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        document.querySelectorAll(".payment-status").forEach(function(select) {
-            select.addEventListener("change", function() {
-                const salaryId = this.getAttribute("data-salary-id");
-                const amountField = document.getElementById(`payment_amount_${salaryId}`);
-    
-                if (this.value === "full") {
-                    amountField.value = 0;
-                    amountField.disabled = true;
-                } else {
-                    amountField.disabled = false;
-                }
-            });
-        });
-    });
-    </script>
-    
-  
-
-{% endblock extra_javascript%} {% endcomment %}
 
 {% block content %}
 <div class="container-fluid flex-grow-1 container-p-y">
@@ -293,7 +19,7 @@
     <select class="form-select d-inline-block w-auto ms-2" name="bulkMonthFilter" id="bulkMonthFilter">
       <option selected hidden value="">Select Month</option>
       {% for month in months %}
-      <option value="{{ month }}">{{ month }}</option>
+      <option value="{{ month }}" {% if request.GET.search_month == month %}selected{% endif %}>{{ month }}</option>
       {% endfor %}
     </select>
   </div>
@@ -329,7 +55,7 @@
               <td>{{ salary_process.employee_salary.employee.role }}</td>
               <td>{{ salary_process.total_salary }}</td>
               <td id="paid_amount_{{ salary_process.id }}">{{ salary_process.paid_amount|default:"0" }}</td>
-              <td id="pending_amount_{{ salary_process.id }}">{{ salary_process.pending_amount|default:salary_process.total_salary }}</td>
+              <td id="pending_amount_{{ salary_process.id }}">{{ salary_process.pending_amount }}</td>
              
               <td>
                   <input type="number" id="payment_amount_{{ salary_process.id }}" 
@@ -337,15 +63,15 @@
               </td>
               <td>
                   <select class="form-select payment-method" id="payment_method_{{ salary_process.id }}">
+                      <option value="bank">Bank</option>                      
                       <option value="cash">Cash</option>
-                      <option value="bank">Bank</option>
                       <option value="mfs">MFS</option>
                   </select>
               </td>
               <td>
                   <select class="form-select payment-status" data-salary-id="{{ salary_process.id }}" id="payment_status_{{ salary_process.id }}">
-                      <option value="partial">Partial</option>
-                      <option value="full">Full</option>
+                    <option value="full">Full</option>  
+                    <option value="partial">Partial</option>   
                   </select>
               </td>
               <td>
@@ -444,9 +170,12 @@ document.addEventListener("DOMContentLoaded", function() {
 
     document.getElementById("selectedPayBtn").addEventListener("click", function() {
         const selectedSalaries = {};
+        const extraData = {};
         document.querySelectorAll(".select-individual:checked").forEach(el => {
             const salaryId = el.getAttribute("data-salary-id");
             selectedSalaries[salaryId] = document.getElementById(`payment_amount_${salaryId}`).value;
+            extraData[`payment_method_${salaryId}`] = document.getElementById(`payment_method_${salaryId}`).value;
+            extraData[`payment_status_${salaryId}`] = document.getElementById(`payment_status_${salaryId}`).value;
         });
 
         if (Object.keys(selectedSalaries).length === 0) {
@@ -454,17 +183,24 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
-        processPayment("selected", {
+        processPayment("selected", Object.assign({
             invoice_type: "selected",
             selected_salaries: selectedSalaries
-        }, "Selected payments processed successfully.");
+        }, extraData), "Selected payments processed successfully.");
     });
 
-    document.getElementById("bulkMonthFilter").addEventListener("change", function() {
-        const selectedMonth = this.value;
-        document.querySelectorAll("tbody tr").forEach(row => {
-            row.style.display = row.getAttribute("data-month") === selectedMonth ? "" : "none";
+    document.getElementById("select_all").addEventListener("change", function() {
+        const isChecked = this.checked;
+        document.querySelectorAll(".select-individual").forEach(cb => {
+            cb.checked = isChecked;
         });
+    });
+
+    $('#bulkMonthFilter').on('change', function() {
+        const selectedMonth = $(this).val();
+        if (selectedMonth) {
+            window.location.href = "?search_month=" + encodeURIComponent(selectedMonth);
+        }
     });
 });
 </script>

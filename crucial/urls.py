@@ -68,6 +68,7 @@ urlpatterns = [
     path('fees/fees_master/',fees_master,name='fees_master' ),
 
     path('fees/student_fee/',student_fee,name='student_fee' ),
+    path('fees/student_fee/statement/<int:student_id>/', student_fee_statement_pdf, name='student_fee_statement_pdf'),
     path('generate_multiple_invoice/',generate_multiple_invoice,name='generate_multiple_invoice' ),
     path('collect-fees/', collect_fees, name='collect_fees'),
     
