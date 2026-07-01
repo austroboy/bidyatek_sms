@@ -1,95 +1,162 @@
 {% extends 'partials/base.html' %} {% load static %} {% block extra_css %}
 <style>
-    .fbox{
-        width: 2.15in;
-        height: 3.4in;
-        background: url('{% static "idcard/idfontE.svg" %}' ) no-repeat;
-        background-size: cover;
-        }
-  
-    .bbox{
-        width: 2.15in;
-        height: 3.4in;
-        background: url('{% static "idcard/idback.svg" %}' ) no-repeat;
-        background-size: cover;
-        }
-  
-        
-  
-    @media print {
-    
-    @page {
-        size: A5;
-        margin: 0;
-    }
+  :root {
+    --sc-navy: #1a2744;
+    --sc-navy-dark: #111b30;
+    --sc-navy-light: #2c3e63;
+    --sc-gold: #c9a227;
+    --sc-gold-light: #e6c14d;
+    --sc-accent: #FCCF14;
+  }
 
-    .student-card {
-        page-break-before: always; /* Add page break before each card */
-        width: 2.15in;
-        height: 3.4in;
-        margin: 0;
-      }
-  
-      .student-card:last-child {
-        page-break-after: auto; /* Remove page break after the last card */
-      } 
-      
-    .fbox{
-        width: 2.15in;
-        height: 3.4in;
-        background: url('{% static "idcard/idfontE.svg" %}' ) no-repeat;
-        background-size: cover;
-        
-        }
-
-    .bbox{
+  .id-card {
     width: 2.15in;
     height: 3.4in;
-    background: url('{% static "idcard/idback.svg" %}' ) no-repeat;
-    background-size: cover;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #ffffff;
+    box-shadow: 0 8px 22px rgba(17, 27, 48, 0.28);
+    position: relative;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    display: inline-block;
+    vertical-align: top;
+  }
 
-    }
+  /* Header with angled cut + gold strip */
+  .sc-header {
+    background: linear-gradient(135deg, var(--sc-navy), var(--sc-navy-light));
+    color: #fff;
+    text-align: center;
+    padding: 20px 8px 46px;
+    position: relative;
+    clip-path: polygon(0 0, 100% 0, 100% 82%, 0 100%);
+  }
+  .sc-header .logo {
+    width: 34px; height: 34px;
+    object-fit: contain;
+    background: #fff;
+    border-radius: 50%;
+    padding: 3px;
+    margin-bottom: 5px;
+  }
+  .sc-header .inst-name {
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.15;
+    margin: 0;
+    letter-spacing: 0.3px;
+  }
+  .sc-goldbar {
+    height: 4px;
+    background: linear-gradient(90deg, var(--sc-gold), var(--sc-gold-light), var(--sc-gold));
+    margin-top: -6px;
+    position: relative;
+    z-index: 2;
+  }
 
-    
-    body {
-        -webkit-print-color-adjust: exact;
-    }
-    }
-  
-  
-    #fixed-button {
-      position: fixed;
-      right: 0px;
-      z-index: 1000!important;
-      top: 50%; /* Set top to 50% */
-      transform: translateY(-50%);
-    }
-  
-    #fixed-button button {
-      color: #FCCF14;
-      display: block;
-      height: 50px;
-      position: relative;
-      text-align: center; 
-      line-height: 40px;
-      width: 50px;
-      margin-bottom: 1px;
-      z-index: 1000;
-      border: none;
-    }
-  
-    #fixed-button button:hover {
-      right: 5px;
-      opacity: 1;
-    }
-  
-    .fixed-icon {
-      background-color: #1D1E4E;
-    }
-</style> 
+  /* Photo with gold ring */
+  .sc-photo {
+    width: 84px; height: 84px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--sc-gold);
+    background: #eef1f6;
+    position: absolute;
+    top: 76px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+    z-index: 3;
+  }
+
+  .sc-name {
+    text-align: center;
+    margin-top: 52px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--sc-navy);
+    line-height: 1.1;
+    padding: 0 6px;
+  }
+  .sc-role {
+    text-align: center;
+    display: inline-block;
+    font-size: 8.5px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--sc-navy);
+    background: linear-gradient(90deg, var(--sc-gold-light), var(--sc-gold));
+    padding: 2px 12px;
+    border-radius: 10px;
+    margin-top: 4px;
+  }
+  .sc-role-wrap { text-align: center; }
+
+  .sc-info { padding: 8px 16px 22px; margin-top: 8px; }
+  .sc-info table { width: 100%; font-size: 9px; color: #2a2a2a; border-collapse: collapse; }
+  .sc-info td { padding: 1.5px 0; vertical-align: top; }
+  .sc-info tr { border-bottom: 1px solid #eef0f3; }
+  .sc-info tr:last-child { border-bottom: none; }
+  .sc-info td.lbl { font-weight: 700; color: var(--sc-navy-light); width: 58px; white-space: nowrap; }
+  .sc-info td.sep { width: 6px; color: var(--sc-gold); }
+
+  .sc-footer {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 16px;
+    background: linear-gradient(90deg, var(--sc-navy), var(--sc-navy-light));
+    border-top: 2px solid var(--sc-gold);
+  }
+
+  /* Back */
+  .sc-back {
+    text-align: center;
+    padding: 18px 12px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: linear-gradient(160deg, #ffffff 70%, #f4f6fa);
+  }
+  .sc-back .logo { width: 58px; height: 58px; object-fit: contain; margin-bottom: 8px; }
+  .sc-back .return-title {
+    font-size: 10px; font-weight: 700; color: var(--sc-navy);
+    border-bottom: 2px solid var(--sc-gold); padding-bottom: 5px; margin-bottom: 7px; width: 80%;
+  }
+  .sc-back p { font-size: 9px; margin: 2px 0; color: #333; }
+  .sc-back .qr { width: 60px; height: 60px; margin-top: 10px; border: 2px solid var(--sc-navy); border-radius: 6px; padding: 2px; }
+  .sc-back-footer {
+    margin-top: auto; height: 16px; width: 100%;
+    background: linear-gradient(90deg, var(--sc-navy), var(--sc-navy-light));
+    border-top: 2px solid var(--sc-gold);
+    border-radius: 0 0 6px 6px;
+  }
+
+  .card-pair { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
+
+  #fixed-button {
+    position: fixed; right: 0px; z-index: 1000 !important;
+    top: 50%; transform: translateY(-50%);
+  }
+  #fixed-button button {
+    color: var(--sc-accent); display: block; height: 50px;
+    position: relative; text-align: center; line-height: 40px;
+    width: 50px; margin-bottom: 1px; z-index: 1000; border: none;
+  }
+  #fixed-button button:hover { right: 5px; opacity: 1; }
+  .fixed-icon { background-color: var(--sc-navy); }
+
+  @media print {
+    @page { size: A4; margin: 0.3in; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .card-pair { gap: 0.25in; padding-top: 0; }
+    .id-card { page-break-inside: avoid; box-shadow: none; border: 1px solid #ccc; }
+    #fixed-button, hr { display: none !important; }
+  }
+</style>
 {% endblock extra_css %} {% block content %}
 
-<!-- start: Content -->
 <div class="container-fluid flex-grow-1 container-p-y">
   {% include 'pageinfo.html' %}
 
@@ -99,7 +166,6 @@
         <i class="bx bxs-printer fs-1"></i>
       </button>
     </div>
-
     <div>
       <button class="fixed-icon" id="previous">
         <i class="bx bx-skip-previous fs-1"></i>
@@ -107,61 +173,80 @@
     </div>
   </div>
 
-  <div class="card">
-   
-
-    <div
-      class="container d-flex align-items-center justify-content-center flex-row flex-wrap pb-4"
-    >
-      <div>
-        <div class="" id="invoice">
-          {% for staff in stafflist %}
-          <div class="student-card mx-auto mt-5 fbox position-relative" style="text-align: center;">
-            <p class="text-center fw-bold pt-4"> {{institute.institute_name}} </p>
-            <img style="border-radius: 8px; position: absolute; top: 60px; left: 5px;" height="40px" width="50px" src="{{institute.institute_logo.url}}" alt="">
-            
-            {% if staff.staff_field.avatar %}
-                <img style="border-radius: 8px; position: absolute; top: 77px; left: 68.5px;" height="72px" width="70px" src="{{staff.staff_field.avatar.url}}" alt="">
+  <div class="card p-4">
+    <div class="container pb-4" id="invoice">
+      <div class="card-pair">
+        {% for staff in stafflist %}
+        <div class="id-card">
+          <div class="sc-header">
+            {% if institute.institute_logo %}
+            <img class="logo" src="{{institute.institute_logo.url}}" alt="logo">
             {% endif %}
-             
-            <p style="position: absolute; top: 165px; width: 100%; margin: 0 auto;font-weight: 600;">{{ staff.staff_field.name }}</p>
-            
-            <div style="position: absolute; bottom: 56px; left: 100px;" class="m-0 p-0 text-start">
-                <p class="" style="font-size: 12px; font-weight: 600; padding:0px; margin:-4px -1px; ">{{ staff.staff_id_no }}</p>
-                <p class="" style="font-size: 12px; font-weight: 600; padding:0px; margin:-4px -1px; ">{{ staff.staff_field.dob }}</p>
-                <p class="" style="font-size: 12px; font-weight: 600; padding:0px; margin:-4px -1px; ">{{ staff.staff_field.blood_group }}</p>
-                <p class="" style="font-size: 12px; font-weight: 600; padding:0px; margin:-4px -1px; ">{{ staff.designation }}</p>
-                <p class="" style="font-size: 12px; font-weight: 600; padding:0px; margin:-4px -1px; "> {{ staff.staff_field.phone_number }} </p>
-            </div>
-            {% comment %} {% if student.student_field.barcode %}
-                <img style="position: absolute; bottom: 3px; left: 3.5px;" height="50px" width="200px" src="{{ student.student_field.barcode.url }}" alt="">
-            {% else %}
-                  <p class="text-danger">Need Generate ID Card</p>
-            {% endif %} {% endcomment %}
-            
+            <p class="inst-name">{{ institute.institute_name }}</p>
+          </div>
+          <div class="sc-goldbar"></div>
+
+          {% if staff.staff_field.avatar %}
+          <img class="sc-photo" src="{{ staff.staff_field.avatar.url }}" alt="photo">
+          {% else %}
+          <div class="sc-photo"></div>
+          {% endif %}
+
+          <div class="sc-name">{{ staff.staff_field.name }}</div>
+          <div class="sc-role-wrap"><span class="sc-role">{{ staff.designation|default:"Staff" }}</span></div>
+
+          <div class="sc-info">
+            <table>
+              <tr>
+                <td class="lbl">ID No</td><td class="sep">:</td>
+                <td>{{ staff.staff_id_no|default:"-" }}</td>
+              </tr>
+              <tr>
+                <td class="lbl">DOB</td><td class="sep">:</td>
+                <td>{{ staff.staff_field.dob|default:"-" }}</td>
+              </tr>
+              <tr>
+                <td class="lbl">B.Group</td><td class="sep">:</td>
+                <td>{{ staff.staff_field.blood_group|default:"-" }}</td>
+              </tr>
+              <tr>
+                <td class="lbl">Dept</td><td class="sep">:</td>
+                <td>{{ staff.department.name|default:"-" }}</td>
+              </tr>
+              <tr>
+                <td class="lbl">Phone</td><td class="sep">:</td>
+                <td>{{ staff.staff_field.phone_number|default:"-" }}</td>
+              </tr>
+            </table>
           </div>
 
-          {% endfor %}
-
-          <div class="mx-auto mt-5 bbox position-relative" style="text-align: center; left: 0; right: 0;">
-            <img style="border-radius: 8px; position: absolute; top: 20px; left: 59px;" height="70px" width="90px" src="{{institute.institute_logo.url}}" alt=""> 
-            <p class="border-bottom" style="position: absolute; top: 90px; width: 100%; margin: 0 auto; font-size: 11px;">If found please return to</p>
-            <p  style="position: absolute; top: 112px; width: 100%; margin: 0 auto; font-size: 11px;">{{institute.headmaster_mobile}}</p>
-            <p  style="position: absolute; top: 135px; width: 100%; margin: 0 auto; font-size: 11px;">{{institute.education_thana_id}}, {{institute.education_district_id}}</p>
-            <p  style="position: absolute; bottom: 125px; width: 100%; margin: 0 auto; font-size: 9px;">07/02/2024</p>
-            <p  style="position: absolute; bottom: 115px; width: 100%; margin: 0 auto; font-size: 9px;">07/02/2024</p>
-            <img style="border-radius: 8px; position: absolute; bottom: 18.5px; left: 25.5px;" height="60px" width="60px" src="{% static 'idcard/QR-code.svg'%}" alt="">
-            {% comment %} <img style="border-radius: 8px; position: absolute; bottom: 30px; left: 125px;" height="40px" width="70px" src="signature.png" alt=""> {% endcomment %}
-          </div>
-
+          <div class="sc-footer"></div>
         </div>
+        {% endfor %}
 
-        
+        {% if stafflist %}
+        <div class="id-card">
+          <div class="sc-back">
+            {% if institute.institute_logo %}
+            <img class="logo" src="{{institute.institute_logo.url}}" alt="logo">
+            {% endif %}
+            <div class="return-title">If found, please return to</div>
+            <p><strong>{{ institute.institute_name }}</strong></p>
+            {% if institute.education_thana_id or institute.education_district_id %}
+            <p>{{ institute.education_thana_id|default:"" }}{% if institute.education_thana_id and institute.education_district_id %}, {% endif %}{{ institute.education_district_id|default:"" }}</p>
+            {% endif %}
+            {% if institute.headmaster_mobile %}
+            <p>Contact: {{ institute.headmaster_mobile }}</p>
+            {% endif %}
+            <img class="qr" src="{% static 'idcard/QR-code.svg' %}" alt="qr">
+            <div class="sc-back-footer"></div>
+          </div>
+        </div>
+        {% endif %}
       </div>
     </div>
   </div>
 </div>
-<!-- end: Content -->
 
 {% endblock content %} {% block extra_javascript %}
 
@@ -182,7 +267,7 @@
         manuallyCopyFormValues: true,
         deferred: $.Deferred(),
         timeout: 750,
-        title: "Invoice",
+        title: "Staff ID Card",
         doctype: "<!doctype html>",
       });
     });
@@ -194,3 +279,4 @@
 </script>
 
 {% endblock extra_javascript%}
+</document_content></document>

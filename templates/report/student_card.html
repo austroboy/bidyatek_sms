@@ -1,94 +1,167 @@
 {% extends 'partials/base.html' %} {% load static %} {% block extra_css %}
 <style>
-    .fbox{
-        width: 2.15in;
-        height: 3.4in;
-        background: url('{% static "idcard/idfont.svg" %}' ) no-repeat;
-        background-size: cover;
-        }
-  
-    .bbox{
-        width: 2.15in;
-        height: 3.4in;
-        background: url('{% static "idcard/idback.svg" %}' ) no-repeat;
-        background-size: cover;
-        }
-  
-        
-  
-    @media print {
-    
-    @page {
-        size: A5;
-        margin: 0;
-    }
+  :root {
+    --idc-teal: #0d6b5f;
+    --idc-teal-dark: #0a4f46;
+    --idc-teal-light: #14a89a;
+    --idc-gold: #c9a227;
+    --idc-gold-light: #e6c14d;
+    --idc-accent: #FCCF14;
+  }
 
-    .student-card {
-        page-break-before: always; /* Add page break before each card */
-        width: 2.15in;
-        height: 3.4in;
-        margin: 0;
-      }
-  
-      .student-card:last-child {
-        page-break-after: auto; /* Remove page break after the last card */
-      } 
-      
-    .fbox{
-        width: 2.15in;
-        height: 3.4in;
-        background: url('{% static "idcard/idfont.svg" %}' ) no-repeat;
-        background-size: cover;
-        
-        }
-
-    .bbox{
+  .id-card {
     width: 2.15in;
     height: 3.4in;
-    background: url('{% static "idcard/idback.svg" %}' ) no-repeat;
-    background-size: cover;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #ffffff;
+    box-shadow: 0 8px 22px rgba(10, 79, 70, 0.28);
+    position: relative;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    display: inline-block;
+    vertical-align: top;
+  }
 
-    }
+  .idc-header {
+    background: linear-gradient(135deg, var(--idc-teal), var(--idc-teal-light));
+    color: #fff;
+    text-align: center;
+    padding: 20px 8px 46px;
+    position: relative;
+    clip-path: polygon(0 0, 100% 0, 100% 82%, 0 100%);
+  }
+  .idc-header .logo {
+    width: 34px; height: 34px;
+    object-fit: contain;
+    background: #fff;
+    border-radius: 50%;
+    padding: 3px;
+    margin-bottom: 5px;
+  }
+  .idc-header .inst-name {
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.15;
+    margin: 0;
+    letter-spacing: 0.3px;
+  }
+  .idc-goldbar {
+    height: 4px;
+    background: linear-gradient(90deg, var(--idc-gold), var(--idc-gold-light), var(--idc-gold));
+    margin-top: -6px;
+    position: relative;
+    z-index: 2;
+  }
 
-    
-    body {
-        -webkit-print-color-adjust: exact;
-    }
-    }
-  
-    #fixed-button {
-      position: fixed;
-      right: 0px;
-      z-index: 1000!important;
-      top: 50%; /* Set top to 50% */
-      transform: translateY(-50%);
-    }
-  
-    #fixed-button button {
-      color: #FCCF14;
-      display: block;
-      height: 50px;
-      position: relative;
-      text-align: center; 
-      line-height: 40px;
-      width: 50px;
-      margin-bottom: 1px;
-      z-index: 1000;
-      border: none;
-    }
-  
-    #fixed-button button:hover {
-      right: 5px;
-      opacity: 1;
-    }
-  
-    .fixed-icon {
-      background-color: #1D1E4E;
-    }
+  .idc-photo {
+    width: 84px; height: 84px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--idc-gold);
+    background: #e7f3f1;
+    position: absolute;
+    top: 76px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+    z-index: 3;
+  }
+
+  .idc-name {
+    text-align: center;
+    margin-top: 52px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--idc-teal-dark);
+    line-height: 1.1;
+    padding: 0 6px;
+  }
+  .idc-class-wrap { text-align: center; }
+  .idc-class {
+    display: inline-block;
+    font-size: 8.5px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--idc-teal-dark);
+    background: linear-gradient(90deg, var(--idc-gold-light), var(--idc-gold));
+    padding: 2px 12px;
+    border-radius: 10px;
+    margin-top: 4px;
+  }
+
+  .idc-info { padding: 8px 16px 26px; margin-top: 8px; }
+  .idc-info table { width: 100%; font-size: 9px; color: #222; border-collapse: collapse; }
+  .idc-info td { padding: 1.5px 0; vertical-align: top; }
+  .idc-info tr { border-bottom: 1px solid #eef2f1; }
+  .idc-info tr:last-child { border-bottom: none; }
+  .idc-info td.lbl { font-weight: 700; color: var(--idc-teal-dark); width: 52px; white-space: nowrap; }
+  .idc-info td.sep { width: 6px; color: var(--idc-gold); }
+
+  .idc-barcode {
+    position: absolute;
+    bottom: 20px;
+    left: 0; right: 0;
+    text-align: center;
+  }
+  .idc-barcode img { height: 30px; max-width: 82%; }
+
+  .idc-footer {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 16px;
+    background: linear-gradient(90deg, var(--idc-teal), var(--idc-teal-light));
+    border-top: 2px solid var(--idc-gold);
+  }
+
+  /* Back */
+  .idc-back {
+    text-align: center;
+    padding: 18px 12px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: linear-gradient(160deg, #ffffff 70%, #f2f8f6);
+  }
+  .idc-back .logo { width: 58px; height: 58px; object-fit: contain; margin-bottom: 8px; }
+  .idc-back .return-title {
+    font-size: 10px; font-weight: 700; color: var(--idc-teal-dark);
+    border-bottom: 2px solid var(--idc-gold); padding-bottom: 5px; margin-bottom: 7px; width: 80%;
+  }
+  .idc-back p { font-size: 9px; margin: 2px 0; color: #333; }
+  .idc-back .qr { width: 60px; height: 60px; margin-top: 10px; border: 2px solid var(--idc-teal-dark); border-radius: 6px; padding: 2px; }
+  .idc-back-footer {
+    margin-top: auto; height: 16px; width: 100%;
+    background: linear-gradient(90deg, var(--idc-teal), var(--idc-teal-light));
+    border-top: 2px solid var(--idc-gold);
+    border-radius: 0 0 6px 6px;
+  }
+
+  .card-pair { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
+
+  #fixed-button {
+    position: fixed; right: 0px; z-index: 1000 !important;
+    top: 50%; transform: translateY(-50%);
+  }
+  #fixed-button button {
+    color: var(--idc-accent); display: block; height: 50px;
+    position: relative; text-align: center; line-height: 40px;
+    width: 50px; margin-bottom: 1px; z-index: 1000; border: none;
+  }
+  #fixed-button button:hover { right: 5px; opacity: 1; }
+  .fixed-icon { background-color: var(--idc-teal); }
+
+  @media print {
+    @page { size: A4; margin: 0.3in; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .card-pair { gap: 0.25in; padding-top: 0; }
+    .id-card { page-break-inside: avoid; box-shadow: none; border: 1px solid #ccc; }
+    #fixed-button, form, hr { display: none !important; }
+  }
 </style>
 {% endblock extra_css %} {% block content %}
 
-<!-- start: Content -->
 <div class="container-fluid flex-grow-1 container-p-y">
   {% include 'pageinfo.html' %}
 
@@ -98,7 +171,6 @@
         <i class="bx bxs-printer fs-1"></i>
       </button>
     </div>
-
     <div>
       <button class="fixed-icon" id="previous">
         <i class="bx bx-skip-previous fs-1"></i>
@@ -107,122 +179,113 @@
   </div>
 
   <div class="card p-4">
-      <form action="{% url 'student_id_data' %}" method="post">
-        {% csrf_token %}
-        <div class="row" >
-          <div class="col-md-6">
-            <select class="form-select w-75" name="class_name_id" required>
-              <option disabled hidden selected>Select Class</option>
-              {% for class in classList %}
-  
-              <option value="{{class.id}}">{{class.name}}</option>
-  
-              {% endfor %}
-            </select>
-          </div>
-          <div class="col-md-3" >
-            <button
-              type="submit"
-              class="btn btn-primary"
-              name="action"
-              value="view_id_card"
-              id="searchButton"
-            >
-              View ID Card
-            </button>
-          </div>
-
-          <div class="col-md-3" >
-            <button
-              type="submit"
-              class="btn btn-primary"
-              name="action"
-              value="generate_barcode"
-              id="downloadButton"
-            >
-              Generate Barcode
-            </button>
-          </div>
-            
-            
-          
-        </div>
-        
-      </form>
-
-      <hr>
-    
-
-      <div
-        class="container d-flex align-items-center justify-content-center flex-row flex-wrap pb-4"
-      >
-        <div>
-          <div class="" id="invoice">
-            {% for student in studentlist %}
-            <div class="student-card mx-auto mt-5 fbox position-relative" style="text-align: center;">
-              <p class="text-center fw-bold pt-4"> {{institute.institute_name}} </p>
-              <img style="border-radius: 8px; position: absolute; top: 60px; left: 5px;" height="40px" width="50px" src="{{institute.institute_logo.url}}" alt="">
-              
-              {% if student.student_field.avatar %}
-                  <img style="border-radius: 8px; position: absolute; top: 77px; left: 68.5px;" height="72px" width="70px" src="{{student.student_field.avatar.url}}" alt="">
-              {% endif %}
-              
-              <p style="position: absolute; top: 155px; width: 100%; margin: 0 auto;font-weight: 600;">{{ student.student_field.name }}</p>
-              <p  style="position: absolute; top: 175px; width: 100%; margin: 0 auto; font-size: 12px;font-weight: 600;">Class: {{ student.class_id.class_shift_id.class_id }} {{ student.class_id.section_id }}</p>
-              <div style="position: absolute; bottom: 58px; left: 100px;" class="m-0 p-0 text-start">
-                  <p class="" style="font-size: 10px; font-weight: 600; padding:0px; margin:-1.5px -1px; ">
-                    {% if student.roll_no|stringformat:"s"|length == 1 %}
-                        0{{ student.roll_no }}
-                    {% else %}
-                        {{ student.roll_no }}
-                    {% endif %}
-                  </p>
-                  <p class="" style="font-size: 10px; font-weight: 600; padding:0px; margin:-1.5px -1px; ">{{ student.student_field.dob }}</p>
-                  <p class="" style="font-size: 10px; font-weight: 600; padding:0px; margin:-1.5px -1px; ">{{ student.student_field.blood_group }}</p>
-                  <p class="" style="font-size: 10px; font-weight: 600; padding:0px; margin:-1.5px -1px; ">
-                    
-                    {% with parent_name_parts=student.parent_id.name.split %}
-                        {% if parent_name_parts|length >= 3 %}
-                            {{ parent_name_parts|slice:":3"|join:" " }}
-                        {% else %}
-                            {{ student.parent_id.name }}
-                        {% endif %}
-                    {% endwith %}
-
-                  </p>
-                  <p class="" style="font-size: 10px; font-weight: 600; padding:0px; margin:-1.5px -1px; "> 0{{ student.parent_id.phone_number }} </p>
-              </div>
-              {% if student.student_field.barcode %}
-                  <img style="position: absolute; bottom: 3px; left: 3.5px;" height="50px" width="200px" src="{{ student.student_field.barcode.url }}" alt="">
-              {% else %}
-                    <p class="text-danger">Need Generate ID Card</p>
-              {% endif %}
-              
-            </div>
-
+    <form action="{% url 'student_id_data' %}" method="post">
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-6">
+          <select class="form-select w-75" name="class_name_id" required>
+            <option disabled hidden selected>Select Class</option>
+            {% for class in classList %}
+            <option value="{{class.id}}">{{class.name}}</option>
             {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3">
+          <button type="submit" class="btn btn-primary" name="action" value="view_id_card" id="searchButton">
+            View ID Card
+          </button>
+        </div>
+        <div class="col-md-3">
+          <button type="submit" class="btn btn-primary" name="action" value="generate_barcode" id="downloadButton">
+            Generate Barcode
+          </button>
+        </div>
+      </div>
+    </form>
 
-            <div class="mx-auto mt-5 bbox position-relative" style="text-align: center; left: 0; right: 0;">
-              <img style="border-radius: 8px; position: absolute; top: 20px; left: 59px;" height="70px" width="90px" src="{{institute.institute_logo.url}}" alt=""> 
-              <p class="border-bottom" style="position: absolute; top: 90px; width: 100%; margin: 0 auto; font-size: 11px;">If found please return to</p>
-              <p  style="position: absolute; top: 112px; width: 100%; margin: 0 auto; font-size: 11px;">{{institute.headmaster_mobile}}</p>
-              <p  style="position: absolute; top: 135px; width: 100%; margin: 0 auto; font-size: 11px;">{{institute.education_thana_id}}, {{institute.education_district_id}}</p>
-              <p  style="position: absolute; bottom: 125px; width: 100%; margin: 0 auto; font-size: 9px;">07/02/2024</p>
-              <p  style="position: absolute; bottom: 115px; width: 100%; margin: 0 auto; font-size: 9px;">07/02/2024</p>
-              <img style="border-radius: 8px; position: absolute; bottom: 18.5px; left: 25.5px;" height="60px" width="60px" src="{% static 'idcard/QR-code.svg'%}" alt="">
-              {% comment %} <img style="border-radius: 8px; position: absolute; bottom: 30px; left: 125px;" height="40px" width="70px" src="signature.png" alt=""> {% endcomment %}
-            </div>
+    <hr>
 
+    <div class="container pb-4" id="invoice">
+      <div class="card-pair">
+        {% for student in studentlist %}
+        <div class="id-card">
+          <div class="idc-header">
+            {% if institute.institute_logo %}
+            <img class="logo" src="{{institute.institute_logo.url}}" alt="logo">
+            {% endif %}
+            <p class="inst-name">{{ institute.institute_name }}</p>
+          </div>
+          <div class="idc-goldbar"></div>
+
+          {% if student.student_field.avatar %}
+          <img class="idc-photo" src="{{ student.student_field.avatar.url }}" alt="photo">
+          {% else %}
+          <div class="idc-photo"></div>
+          {% endif %}
+
+          <div class="idc-name">{{ student.student_field.name }}</div>
+          <div class="idc-class-wrap">
+            <span class="idc-class">Class {{ student.class_id.class_group_id.class_id.name }} {{ student.class_id.section_id.name|default:"" }}</span>
           </div>
 
-          
+          <div class="idc-info">
+            <table>
+              <tr>
+                <td class="lbl">Roll</td><td class="sep">:</td>
+                <td>{% if student.roll_no %}{{ student.roll_no|stringformat:"02d" }}{% else %}-{% endif %}</td>
+              </tr>
+              <tr>
+                <td class="lbl">DOB</td><td class="sep">:</td>
+                <td>{{ student.student_field.dob|default:"-" }}</td>
+              </tr>
+              <tr>
+                <td class="lbl">B.Group</td><td class="sep">:</td>
+                <td>{{ student.student_field.blood_group|default:"-" }}</td>
+              </tr>
+              <tr>
+                <td class="lbl">Guardian</td><td class="sep">:</td>
+                <td>{{ student.parent_id.name|default:"-" }}</td>
+              </tr>
+              <tr>
+                <td class="lbl">Phone</td><td class="sep">:</td>
+                <td>{{ student.parent_id.phone_number|default:"-" }}</td>
+              </tr>
+            </table>
+          </div>
+
+          {% if student.student_field.barcode %}
+          <div class="idc-barcode">
+            <img src="{{ student.student_field.barcode.url }}" alt="barcode">
+          </div>
+          {% endif %}
+
+          <div class="idc-footer"></div>
         </div>
+        {% endfor %}
 
+        {% if studentlist %}
+        <div class="id-card">
+          <div class="idc-back">
+            {% if institute.institute_logo %}
+            <img class="logo" src="{{institute.institute_logo.url}}" alt="logo">
+            {% endif %}
+            <div class="return-title">If found, please return to</div>
+            <p><strong>{{ institute.institute_name }}</strong></p>
+            {% if institute.education_thana_id or institute.education_district_id %}
+            <p>{{ institute.education_thana_id|default:"" }}{% if institute.education_thana_id and institute.education_district_id %}, {% endif %}{{ institute.education_district_id|default:"" }}</p>
+            {% endif %}
+            {% if institute.headmaster_mobile %}
+            <p>Contact: {{ institute.headmaster_mobile }}</p>
+            {% endif %}
+            <img class="qr" src="{% static 'idcard/QR-code.svg' %}" alt="qr">
+            <div class="idc-back-footer"></div>
+          </div>
+        </div>
+        {% endif %}
       </div>
-   </div>
-
+    </div>
+  </div>
 </div>
-<!-- end: Content -->
 
 {% endblock content %} {% block extra_javascript %}
 
@@ -243,7 +306,7 @@
         manuallyCopyFormValues: true,
         deferred: $.Deferred(),
         timeout: 750,
-        title: "Invoice",
+        title: "ID Card",
         doctype: "<!doctype html>",
       });
     });

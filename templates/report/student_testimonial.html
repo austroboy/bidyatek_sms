@@ -203,7 +203,7 @@
           <div class="testimonial-content">
             <div class="t-header">
               <h4>{{institute.institute_name}}</h4>
-              <h6>{{institute.education_thana_id}}, {{institute.education_district_id}}</h6>
+              <h6>{{institute.education_thana_id|default:""}}{% if institute.education_thana_id and institute.education_district_id %}, {% endif %}{{institute.education_district_id|default:""}}</h6>
               <img
                 src="{{institute.institute_logo.url}}"
                 alt=""

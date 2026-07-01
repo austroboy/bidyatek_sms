@@ -1080,50 +1080,103 @@ def update_rfid(request):
 @login_required(login_url='login')
 @user_passes_test(lambda user: is_staff_or_has_role(user, roles=['Manager','HR']))
 def list_migrations(request):
-    admission_year = Admission_Year.objects.latest('updated_at')
-    classList = ClassConfig.objects.all()
-    admission_year_list= Admission_Year.objects.all()
-    studentlist=None
+    classList = ClassConfig.objects.select_related(
+        'class_group_id__class_id', 'class_group_id__group_id', 'section_id', 'shift_id'
+    ).all()
+    admission_year_list = Admission_Year.objects.all()
+    studentlist = None
+    selected_source = {}
+
     if request.method == 'POST':
-        class_id =request.POST.get("class_id")
-        if class_id:
-            admission_year_id=request.POST.get("admission_year_mi")
-            admission_year_instance= get_object_or_404(Admission_Year, pk=admission_year_id)
-            class_instance= get_object_or_404(StudentClass, pk=class_id)
-            studentlist = StudentProfile.objects.filter(Q(class_id__class_group_id__class_id=class_instance) & Q(admission_year_id=admission_year_instance) & Q(student_field__status="Active"))
-        class_id_mi =request.POST.get("class_id_my")
-        if class_id_mi:
-            class_instance_mi= get_object_or_404(ClassConfig, pk=class_id_mi)
-            admission_id =request.POST.get("my_admission_year")
-            admission_year_instance=get_object_or_404(Admission_Year, pk=admission_id )
-            selected_student_ids = request.POST.getlist('selected_students[]')
-            for student_id in selected_student_ids:
-                student_profile = get_object_or_404(StudentProfile, pk=student_id)
-                
-                new_student_profile = StudentProfile.objects.create(
-                    student_field=student_profile.student_field,
-                    admission_year_id=admission_year_instance,
-                    class_id=class_instance_mi,
-                    birth_certificate=student_profile.birth_certificate,
-                    birth_certificate_no=student_profile.birth_certificate_no,
-                    nationality=student_profile.nationality,
-                    tc_no=student_profile.tc_no,
-                    admission_date=student_profile.admission_date,
-                    tc_certificate=student_profile.tc_certificate,
-                    parent_id=student_profile.parent_id
+        action = request.POST.get('action')
+
+        # ---- Step 1: search students to migrate ----
+        if action == 'search':
+            class_id = request.POST.get("class_id")
+            admission_year_id = request.POST.get("admission_year_mi")
+            selected_source = {'class_id': class_id, 'admission_year_id': admission_year_id}
+
+            if class_id and admission_year_id:
+                studentlist = StudentProfile.objects.select_related(
+                    'student_field', 'class_id__class_group_id__class_id',
+                    'class_id__section_id', 'class_id__shift_id'
+                ).filter(
+                    Q(class_id=class_id) &
+                    Q(admission_year_id=admission_year_id) &
+                    Q(student_field__status="Active")&
+                    Q(is_migrated=False)
                 )
-                
-                print("New Student Profile ID:", new_student_profile.id)
-            messages.success(request, 'Migation Completed!')
-    context={
-        'classList':classList,
-        'studentlist':studentlist,
-        'admission_year_list':admission_year_list,
-        'heading':'Student',
-        'subheading':'Migration',
-        }
-    return render(request, 'report/student_migration.html', context)
-    
+                if not studentlist.exists():
+                    messages.warning(request, 'No active students found for the selected class and year.')
+            else:
+                messages.error(request, 'Please select both class and admission year.')
+
+        # ---- Step 2: perform migration ----
+        elif action == 'migrate':
+            target_class_id = request.POST.get("class_id_my")
+            target_year_id = request.POST.get("my_admission_year")
+            selected_student_ids = request.POST.getlist('selected_students[]')
+
+            if not target_class_id or not target_year_id:
+                messages.error(request, 'Please select target class and admission year.')
+            elif not selected_student_ids:
+                messages.error(request, 'Please select at least one student to migrate.')
+            else:
+                target_class = get_object_or_404(ClassConfig, pk=target_class_id)
+                target_year = get_object_or_404(Admission_Year, pk=target_year_id)
+
+                migrated, skipped = 0, 0
+                for student_id in selected_student_ids:
+                    old = get_object_or_404(StudentProfile, pk=student_id)
+
+                    # skip if already migrated to this class + year
+                    exists = StudentProfile.objects.filter(
+                        student_field=old.student_field,
+                        class_id=target_class,
+                        admission_year_id=target_year
+                    ).exists()
+                    if exists:
+                        skipped += 1
+                        continue
+
+                    StudentProfile.objects.create(
+                        student_field=old.student_field,
+                        admission_year_id=target_year,
+                        class_id=target_class,
+                        version=old.version,
+                        roll_no=old.roll_no,
+                        birth_certificate=old.birth_certificate,
+                        birth_certificate_no=old.birth_certificate_no,
+                        nationality=old.nationality,
+                        tc_no=old.tc_no,
+                        admission_date=old.admission_date,
+                        tc_certificate=old.tc_certificate,
+                        parent_id=old.parent_id,
+                        village=old.village,
+                        post_office=old.post_office,
+                        ps_or_upazilla=old.ps_or_upazilla,
+                        district=old.district,
+                    )
+                    old.is_migrated = True
+                    old.save(update_fields=['is_migrated'])
+                    migrated += 1
+
+                if migrated:
+                    messages.success(request, f'{migrated} student(s) migrated successfully!')
+                if skipped:
+                    messages.info(request, f'{skipped} student(s) skipped (already migrated).')
+
+    studentClassList = StudentClass.objects.all()
+    context = {
+        'classList': classList,
+        'studentlist': studentlist,
+        'admission_year_list': admission_year_list,
+        'selected_source': selected_source,
+        'heading': 'Student',
+        'subheading': 'Migration',
+        'studentClassList': studentClassList,
+    }
+    return render(request, 'report/student_migration.html', context) 
 
 
 @login_required(login_url='login')

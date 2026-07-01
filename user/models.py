@@ -160,6 +160,7 @@ class StudentProfile(models.Model):
     post_office= models.CharField(max_length=50,null=True,blank=True)
     ps_or_upazilla= models.CharField(max_length=50,null=True,blank=True)
     district=models.CharField(max_length=50,null=True,blank=True)
+    is_migrated=models.BooleanField(default=False)
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now=True) 
 
