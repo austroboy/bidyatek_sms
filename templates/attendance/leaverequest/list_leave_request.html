@@ -1,159 +1,118 @@
-{% load template_tags %} 
+{% load template_tags %}
 
-<div class="d-flex justify-content-between pb-0">
-  <div class="p-2 align-items-center">
-    <a class="btn btn-primary" href="{% url 'add_leave_request' %}"> 
-      <i class='bx bx-plus-circle me-2'></i>
-      Add
-    </a>
-  </div>
-  <div class="d-flex"> 
-    <div class="form-group d-none d-md-block">
-      <input class="form-control" type="text" id="searchName" ng-model="searchName" placeholder="Type name to search" />
-    </div>
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <a class="btn" style="background:#0d6b5f;color:#fff;" href="{% url 'add_leave_request' %}">
+    <i class='bx bx-plus-circle me-1'></i> Add Leave Request
+  </a>
+  <div class="form-group mb-0">
+    <input class="form-control" type="text" id="searchName" placeholder="Type name to search" />
   </div>
 </div>
 
-<div class="table-responsive card-body">
-<table class="table table-nowrap mb-0">
-  <thead style="background-color:rgba(20, 168, 154, 0.12) !important ;">
-    <tr class="shadow-sm">
-      <th>#</th>
-      <th>User </th>
-      <th>Leave Type </th>
-      <th>Start Date </th>
-      <th>End Date </th>
-      <th>Start Time </th>
-      <th>End Time </th>
-      <th>Status </th>
-      <th>Duration </th>
-      {% if user|is_staff_or_in_group:""  or user|has_role:"HR" or user|has_role:"Manager" %}
-      <th>Requested Leave </th>
-      
-      <th>Actions</th>
-      {%endif%}
-    </tr>
-  </thead>
-  <tbody>
-    {% for leaverequest in leaverequestlist %}
-
-    <tr>
-      <td>
-        {{forloop.counter}}
-      </td>
-      <td>
-        <span class="text-capitalize" >{{leaverequest.employee}}</span>
-      </td>
-      <td>
-        {% if leaverequest.leave_type.is_special %}
-        <p class="text-warning">{{leaverequest.leave_type}} </p>
-        {% else %}
-        <p>{{leaverequest.leave_type}} </p>
+<div class="table-responsive">
+  <table class="table table-hover table-nowrap mb-0" id="leaveTable">
+    <thead>
+      <tr style="background:#0d6b5f;">
+        <th style="color:#fff;">#</th>
+        <th style="color:#fff;">User</th>
+        <th style="color:#fff;">Leave Type</th>
+        <th style="color:#fff;">Start Date</th>
+        <th style="color:#fff;">End Date</th>
+        <th style="color:#fff;">Start Time</th>
+        <th style="color:#fff;">End Time</th>
+        <th style="color:#fff;">Status</th>
+        <th style="color:#fff;">Duration</th>
+        {% if user|is_staff_or_in_group:"" or user|has_role:"HR" or user|has_role:"Manager" %}
+        <th style="color:#fff;">Requested Leave</th>
+        <th style="color:#fff;">Actions</th>
         {% endif %}
-        
-      </td>
-      <td>
-        {{leaverequest.start_date}}
-      </td>
-      <td>
-        {{leaverequest.end_date}}
-      </td>
-      <td>
-        {{leaverequest.start_hour}}
-      </td>
-      <td>
-        {{leaverequest.end_hour}}
-      </td>
-      <td>
-        <span class="text-capitalize">{{leaverequest.status}}</span>  
-      </td>
-
-      <td>
-        {{leaverequest.calculate_leave_duration}}
-      </td>
-      {% if user|is_staff_or_in_group:""  or user|has_role:"HR" or user|has_role:"Manager" %}
-      <td style="width:20%">
-
-        {% if leaverequest.status == "Pending" %}
-          <button type="button" value="status" data-id="{{leaverequest.id}}"
-              id="btnstatus{{leaverequest.id}}"
-              class="btn btn-outline-danger btn-sm approved_button">Approved</button>
-
-          <button type="button" value="status" data-id="{{leaverequest.id}}"
-              id="btnstatus{{leaverequest.id}}"
-              class="btn btn-outline-danger btn-sm rejected_button">Rejected</button>
-
-        {% elif leaverequest.status == "Approved" %}
-
-        <p class="text-success" >Approved</p>
-
-        {% elif leaverequest.status == "Rejected" %}
-        
-        <p class="text-danger" >Rejected</p>
-
-        {% else %}  
-         -
-         {% endif %}
-
-      </td>
-      
-      <td>
-        <div class="dropdown">
-          <button
-            type="button"
-            class="btn p-0 dropdown-toggle hide-arrow"
-            data-bs-toggle="dropdown"
-          >
-            <i class="bx bx-dots-vertical-rounded"></i>
-          </button>
-          <div class="dropdown-menu">
-            <a
-              class="dropdown-item"
-              href="javascript:void(0);"
-              hx-get="{% url 'edit_leave_request' pk=leaverequest.pk %}"
-              hx-target="#leaverequestdialog"
-              ><i class="bx bx-edit-alt me-1"></i> Edit</a
-            >
-            <a
-              class="dropdown-item"
-              hx-delete="{% url 'del_leave_request' pk=leaverequest.pk %}"
-              href="javascript:void(0);"
-              hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
-              hx-target="#leaverequestadd"
-              hx-confirm="are you want to delete?"
-              ><i class="bx bx-trash me-1"></i> Delete</a
-            >
+      </tr>
+    </thead>
+    <tbody>
+      {% for leaverequest in leaverequestlist %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td><span class="text-capitalize fw-medium">{{ leaverequest.employee }}</span></td>
+        <td>
+          {% if leaverequest.leave_type.is_special %}
+          <span class="badge" style="background:#fdf0d3;color:#b47e00;">{{ leaverequest.leave_type }}</span>
+          {% else %}
+          <span class="badge" style="background:#e7f3f1;color:#0a4f46;">{{ leaverequest.leave_type }}</span>
+          {% endif %}
+        </td>
+        <td>{{ leaverequest.start_date }}</td>
+        <td>{{ leaverequest.end_date }}</td>
+        <td>{{ leaverequest.start_hour|default:"-" }}</td>
+        <td>{{ leaverequest.end_hour|default:"-" }}</td>
+        <td>
+          {% if leaverequest.status == "Approved" %}
+          <span class="badge rounded-pill" style="background:#d6efe9;color:#0a6b4f;">Approved</span>
+          {% elif leaverequest.status == "Rejected" %}
+          <span class="badge rounded-pill" style="background:#fbe0dd;color:#c0392b;">Rejected</span>
+          {% else %}
+          <span class="badge rounded-pill" style="background:#fdf0d3;color:#b47e00;">Pending</span>
+          {% endif %}
+        </td>
+        <td>{{ leaverequest.calculate_leave_duration }}</td>
+        {% if user|is_staff_or_in_group:"" or user|has_role:"HR" or user|has_role:"Manager" %}
+        <td style="width:18%">
+          {% if leaverequest.status == "Pending" %}
+            <button type="button" data-id="{{ leaverequest.id }}"
+                class="btn btn-sm approved_button" style="background:#0d6b5f;color:#fff;">Approve</button>
+            <button type="button" data-id="{{ leaverequest.id }}"
+                class="btn btn-outline-danger btn-sm rejected_button">Reject</button>
+          {% elif leaverequest.status == "Approved" %}
+            <span class="text-success"><i class='bx bx-check-circle'></i> Approved</span>
+          {% elif leaverequest.status == "Rejected" %}
+            <span class="text-danger"><i class='bx bx-x-circle'></i> Rejected</span>
+          {% else %} - {% endif %}
+        </td>
+        <td>
+          <div class="dropdown">
+            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+              <i class="bx bx-dots-vertical-rounded"></i>
+            </button>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" href="javascript:void(0);"
+                hx-get="{% url 'edit_leave_request' pk=leaverequest.pk %}"
+                hx-target="#leaverequestdialog"><i class="bx bx-edit-alt me-1"></i> Edit</a>
+              <a class="dropdown-item" href="javascript:void(0);"
+                hx-delete="{% url 'del_leave_request' pk=leaverequest.pk %}"
+                hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+                hx-target="#leaverequestadd"
+                hx-confirm="Are you sure you want to delete?"><i class="bx bx-trash me-1"></i> Delete</a>
+            </div>
           </div>
-        </div>
-      </td>
-      {% endif %}
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+        </td>
+        {% endif %}
+      </tr>
+      {% empty %}
+      <tr><td colspan="12" class="text-center text-muted py-4">No leave requests found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 
 <div class="modal" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
   <div class="modal-dialog">
-      <div class="modal-content">
-          <div class="modal-header">
-              <h5 class="modal-title" id="confirmationModalLabel">Confirm Action</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-              Are you sure you want to <span id="actionType"></span> this leave request?
-          </div>
-          <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-              <button type="button" class="btn btn-primary" id="confirmButton">Confirm</button>
-          </div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmationModalLabel">Confirm Action</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
+      <div class="modal-body">
+        Are you sure you want to <span id="actionType"></span> this leave request?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn" style="background:#0d6b5f;color:#fff;" id="confirmButton">Confirm</button>
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
   $(document).ready(function() {
-
     var leaveRequestId;
     var actionType;
 
@@ -162,36 +121,36 @@
       actionType = 'Approved';
       $('#actionType').text('approve');
       $('#confirmationModal').modal('show');
-  });
+    });
 
-  $('.rejected_button').click(function() {
+    $('.rejected_button').click(function() {
       leaveRequestId = $(this).data('id');
       actionType = 'Rejected';
       $('#actionType').text('reject');
       $('#confirmationModal').modal('show');
-  });
+    });
 
-  $('#confirmButton').click(function() {
+    $('#confirmButton').click(function() {
       changeLeaveStatus(leaveRequestId, actionType);
       $('#confirmationModal').modal('hide');
-  });
+    });
 
-      function changeLeaveStatus(id, status) {
-          $.ajax({
-              url: "{% url 'change_leave_status' %}", 
-              type: "POST",
-              data: {
-                  'id': id,
-                  'status': status
-              },
-              success: function(response) {
-                  
-                  location.reload();
-              },
-              error: function(xhr, status, error) {
-                  console.log(error);
-              }
-          });
-      }
+    function changeLeaveStatus(id, status) {
+      $.ajax({
+        url: "{% url 'change_leave_status' %}",
+        type: "POST",
+        data: { 'id': id, 'status': status, 'csrfmiddlewaretoken': '{{ csrf_token }}' },
+        success: function(response) { location.reload(); },
+        error: function(xhr, status, error) { console.log(error); }
+      });
+    }
+
+    $('#searchName').on('keyup', function() {
+      var val = $(this).val().toLowerCase();
+      $('#leaveTable tbody tr').each(function() {
+        var name = $(this).find('td:nth-child(2)').text().toLowerCase();
+        $(this).toggle(name.indexOf(val) > -1);
+      });
+    });
   });
 </script>

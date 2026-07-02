@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Salary Report</title>
+  <style>
+    @page {
+      size: A4 landscape; margin: 0.6cm;
+      @bottom-center { content: "Generated {% now 'd M Y, h:i A' %} • {{ institute.institute_name }} • Page " counter(page) " of " counter(pages); font-size: 7px; color: #9aa5a2; }
+    }
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; color: #1f2d2a; margin: 0; font-size: 7.5px; }
+    .header { display: flex; align-items: center; padding: 10px 14px; background: linear-gradient(135deg,#0a4f46,#0d6b5f 55%,#14a89a); border-radius: 10px; color:#fff; margin-bottom:3px; }
+    .header .logo { width: 46px; height: 46px; background:#fff; border-radius:9px; padding:5px; margin-right:12px; display:flex; align-items:center; justify-content:center; }
+    .header .logo img { max-width:100%; max-height:100%; }
+    .header .inst { flex:1; }
+    .header .inst h1 { font-size:16px; margin:0; font-weight:800; }
+    .header .inst p { margin:3px 0 0; font-size:9px; opacity:.9; }
+    .header .doc-tag { text-align:right; font-size:8px; letter-spacing:2px; text-transform:uppercase; opacity:.85; }
+    .header .doc-tag .big { display:block; font-size:12px; font-weight:700; letter-spacing:2px; margin-top:2px; }
+    .gold-rule { height:3px; background:linear-gradient(90deg,#c9a227,#e6c14d,#c9a227); border-radius:2px; margin:0 0 8px; }
+    .filters { font-size:9px; color:#555; margin-bottom:6px; }
+    .filters b { color:#0a4f46; }
+    table { width:100%; border-collapse:collapse; }
+    thead th { background:#0a4f46; color:#fff; padding:4px 4px; font-size:6.5px; text-transform:uppercase; letter-spacing:.1px; text-align:left; white-space:nowrap; }
+    thead th.add-col { background:#14867a; }
+    thead th.ded-col { background:#7a2e26; }
+    thead th.amt { text-align:right; }
+    tbody td { padding:3px 4px; border-bottom:1px solid #eef2f1; white-space:nowrap; }
+    tbody tr:nth-child(even) { background:#f6faf9; }
+    td.amt { text-align:right; font-variant-numeric:tabular-nums; }
+    tfoot td { background:#eef7f5; font-weight:700; color:#0a4f46; border-top:2px solid #0d6b5f; padding:4px 4px; }
+    .pill { display:inline-block; padding:1px 6px; border-radius:8px; font-size:7px; font-weight:700; text-transform:uppercase; }
+    .pill.paid { background:#d6efe9; color:#0a6b4f; }
+    .pill.unpaid { background:#fbe0dd; color:#c0392b; }
+    .pill.partial { background:#fdf0d3; color:#b47e00; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">{% if institute.institute_logo %}<img src="{{ institute.institute_logo.url }}" alt="logo">{% endif %}</div>
+    <div class="inst">
+      <h1>{{ institute.institute_name }}</h1>
+      {% if institute.education_thana_id or institute.education_district_id %}
+      <p>{{ institute.education_thana_id|default:"" }}{% if institute.education_thana_id and institute.education_district_id %}, {% endif %}{{ institute.education_district_id|default:"" }}</p>
+      {% endif %}
+    </div>
+    <div class="doc-tag">Report<span class="big">SALARY</span></div>
+  </div>
+  <div class="gold-rule"></div>
+
+  <div class="filters"><b>Month:</b> {{ sel_month|default:"All" }} &nbsp; <b>Status:</b> {{ sel_status|default:"All"|capfirst }} &nbsp; <b>Records:</b> {{ rows|length }}</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Emp ID</th>
+        <th>Name</th>
+        <th>Dept</th>
+        <th>Month</th>
+        <th class="amt">Basic</th>
+        {% for at in addition_types %}<th class="amt add-col">{{ at.addition_type }}</th>{% endfor %}
+        <th class="amt add-col">Increment</th>
+        {% for dt in deduction_types %}<th class="amt ded-col">{{ dt.deduction_type }}</th>{% endfor %}
+        <th class="amt">Total</th>
+        <th class="amt">Paid</th>
+        <th class="amt">Due</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ r.emp_id }}</td>
+        <td>{{ r.name }}</td>
+        <td>{{ r.department }}</td>
+        <td>{{ r.month }}</td>
+        <td class="amt">{{ r.basic|floatformat:2 }}</td>
+        {% for v in r.add_values %}<td class="amt">{{ v|floatformat:2 }}</td>{% endfor %}
+        <td class="amt">{{ r.increment|floatformat:2 }}</td>
+        {% for v in r.ded_values %}<td class="amt">{{ v|floatformat:2 }}</td>{% endfor %}
+        <td class="amt">{{ r.total|floatformat:2 }}</td>
+        <td class="amt">{{ r.paid|floatformat:2 }}</td>
+        <td class="amt">{{ r.due|floatformat:2 }}</td>
+        <td><span class="pill {{ r.status }}">{{ r.status }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    {% if rows %}
+    <tfoot>
+      <tr>
+        <td colspan="5" style="text-align:right;">Grand Total</td>
+        <td class="amt">{{ grand.basic|floatformat:2 }}</td>
+        {% for v in grand_add %}<td class="amt">{{ v|floatformat:2 }}</td>{% endfor %}
+        <td class="amt">{{ grand.increment|floatformat:2 }}</td>
+        {% for v in grand_ded %}<td class="amt">{{ v|floatformat:2 }}</td>{% endfor %}
+        <td class="amt">{{ grand.total|floatformat:2 }}</td>
+        <td class="amt">{{ grand.paid|floatformat:2 }}</td>
+        <td class="amt">{{ grand.due|floatformat:2 }}</td>
+        <td></td>
+      </tr>
+    </tfoot>
+    {% endif %}
+  </table>
+</body>
+</html>

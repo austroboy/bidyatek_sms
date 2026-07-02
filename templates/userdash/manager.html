@@ -11,7 +11,6 @@
 {% endblock extra_css %} 
 
 {% block content %}
-
 <!-- start: Content -->
 <div class="container-fluid flex-grow-1 container-p-y">
   
@@ -48,8 +47,8 @@
         </div>
         <div class="dropdown-menu edit_details_overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton2">
           <ul class="list-unstyled">
-            <li><a href="{% url 'add_teacher' %}">Add Teacher</a></li>
-            <li><a href="{% url 'list_teacher' %}">View Teacher</a></li>
+            <li><a href="{% url 'add_staff' %}">Add Teacher</a></li>
+            <li><a href="{% url 'fteacher_list' %}">View Teacher</a></li>
           </ul>
         </div>
         <div class="d-flex align-items-center gap-2">
@@ -139,7 +138,9 @@
               <tr>
                 <th>User Type</th>
                 <td>
-                
+                {% if user.is_superuser %}
+                    <p class="text-primary">Admin</p>
+                {% endif %}
                 {% for group_for in request.user.groups.all %}
                   {% if group_for.name == 'parent' %}
                       <p class="text-primary">Parent</p>
@@ -153,10 +154,6 @@
                 {% endfor %}
               </td>
               </tr>
-              {% comment %} <tr>
-                <th>Designation</th>
-                <td>Principal</td>
-              </tr> {% endcomment %}
               <tr>
                 <th>Phone No</th>
                 <td>{{user.phone_number}}</td>
@@ -198,7 +195,7 @@
           <div class="dropdown-menu edit_details_overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton5">
             <ul class="list-unstyled">
               <li><a href="{% url 'report_student_attendance' %}">View Attendance</a></li>
-              <li><a href="#">Take Attendance</a></li>
+              <li><a href="{% url 'student_attendance' %}">Take Attendance</a></li>
             </ul>
           </div>
           <div
@@ -229,44 +226,6 @@
             </div>
           </div>
         </div>
-        <!-- teacher attendance graph -->
-        <div class="dropdown attendance w-100 w-sm-50 py-3 rounded teacher_attendance position-relative">
-          <div class="dropdown-toggle dots position-absolute" id="dropdownMenuButton6" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class='bx bx-dots-vertical' ></i>
-          </div>
-          <div class="dropdown-menu edit_details_overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton6">
-            <ul class="list-unstyled">
-              <li><a href="{% url 'report_teacher_attendance' %}">View Attendance</a></li>
-              <li><a href="#">Take Attendance</a></li>
-            </ul>
-          </div>
-          <div
-            class="d-flex align-items-center justify-content-center position-relative pieChart_wrapper__holder">
-            <div class="pieChart_wrapper">
-              <canvas id="myChart2"></canvas>
-            </div>
-            <div class="total position-absolute top-50 start-50 text-center">
-              <p class="fw-medium">Total</p>
-              <p class="teaamount"></p>
-            </div>
-          </div>
-          <div class="chart_info">
-            <h6 class="text-center mt-1 mb-3 mb-md-0 mb-lg-3">
-              Teachers
-            </h6>
-          </div>
-          <div class="present_absent mt-2 px-3 d-flex align-items-center justify-content-between">
-            <div class="present item">
-              <p class="present_title">Present</p>
-              <p class="present_number">{{t_teacher_attend}}</p>
-            </div>
-            <div class="present border-start border-warning" style="width: 1px; height: 40px"></div>
-            <div class="absent item">
-              <p class="absent_title">Absent</p>
-              <p class="absent_number">{{t_teacher_absent}}</p>
-            </div>
-          </div>
-        </div>
         <!-- staff attendance graph -->
         <div class="dropdown attendance w-100 w-sm-50 py-3 rounded staff_attendance position-relative">
           <div class="dropdown-toggle dots position-absolute" id="dropdownMenuButton7" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -275,7 +234,7 @@
           <div class="dropdown-menu edit_details_overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton7">
             <ul class="list-unstyled">
               <li><a href="{% url 'report_staff_attendance' %}">View Attendance</a></li>
-              <li><a href="#">Take Attendance</a></li>
+              <li><a href="{% url 'staff_attendance' %}">Take Attendance</a></li>
             </ul>
           </div>
           <div
@@ -309,1234 +268,303 @@
     </div>
   </div>
 
-  <!-- notices and events -->
+ <!-- Today's Routine (rotating) -->
   <div class="col-lg-3 col-md-6 col-12">
-    <div class="shadow mb-3 rounded bg-white">
-      <div class="heading rounded-top pb-3 px-3 text-white">
-        <h5 class="m-0">Events</h5>
+    <div class="shadow mb-3 rounded bg-white h-100" style="overflow:hidden;">
+      <div class="d-flex justify-content-between align-items-center px-3 py-2" style="background:linear-gradient(135deg,#0a4f46,#0d6b5f);">
+        <h5 class="m-0 text-white">Today's Routine</h5>
+        <a href="{% url 'list_routine' %}" class="btn btn-sm" style="background:#c9a227;color:#fff;" title="Go to Routine">
+          <i class='bx bx-right-arrow-alt'></i>
+        </a>
       </div>
+      <div class="p-3">
+        <div class="text-center mb-2">
+          <span class="badge" style="background:#e7f3f1;color:#0a4f46;">{{ cards_data.today_name }}</span>
+          <span class="text-muted" style="font-size:11px;">· {{ cards_data.routine_list|length }} classes</span>
+        </div>
 
-      <div class="notices">
-        <ul class="list-unstyled">
-          {% for event in upcoming_events %}
-          <li>
-            <span class="badge text-bg-success">{{event.start}} </span> - <span class="badge text-bg-success" > {{event.start}} </span> 
-            <p class="">
-              {{event.title}}
-            </p>
-          </li>
+        {% if cards_data.routine_list %}
+        <div id="routineRotator" style="min-height:120px;">
+          {% for r in cards_data.routine_list %}
+          <div class="routine-slide" style="display:none;">
+            <div class="rounded p-3 text-center" style="background:#e7f3f1;border:1px solid #b5ddd6;">
+              <div class="fw-bold fs-5" style="color:#0a4f46;">{{ r.class }}</div>
+              <div class="mt-1" style="color:#0d6b5f;font-weight:600;">{{ r.subject }}</div>
+              <hr class="my-2">
+              <div style="font-size:13px;"><i class='bx bx-user'></i> {{ r.teacher }}</div>
+              <div class="mt-1"><span class="badge" style="background:#fdf0d3;color:#b47e00;">{{ r.start }} - {{ r.end }}</span></div>
+            </div>
+          </div>
           {% endfor %}
-        </ul>
-      </div>
-      <div class="text-end pe-2">
-        <a href="{% url 'event_detail' %}" class="btn btn-primary">View All</a>
+        </div>
+        <div class="text-center mt-2">
+          <small class="text-muted"><span id="routineIndex">1</span> / {{ cards_data.routine_list|length }}</small>
+        </div>
+        {% else %}
+        <div class="text-center text-muted py-4" style="font-size:13px;">No classes scheduled today</div>
+        {% endif %}
       </div>
     </div>
   </div>
+
+<!-- New Dashboard Cards: Attendance % / Exam / Notice+Events / Leave -->
+<div class="row gx-4">
+
+  <!-- Today's Attendance % -->
+  <div class="col-md-6 col-lg-3 mb-3">
+    <div class="shadow rounded bg-white h-100 p-3" style="border-top:4px solid #0d6b5f;">
+      <h5 class="m-0 mb-3" style="color:#0a4f46;">Today's Attendance</h5>
+      <div class="d-flex justify-content-around text-center">
+        <div>
+          <div class="position-relative d-inline-block" style="width:80px;height:80px;">
+            <svg viewBox="0 0 36 36" style="width:80px;height:80px;">
+              <path style="fill:none;stroke:#e7f3f1;stroke-width:3.5;" d="M18 2.1a15.9 15.9 0 1 1 0 31.8 15.9 15.9 0 0 1 0-31.8"/>
+              <path style="fill:none;stroke:#0d6b5f;stroke-width:3.5;stroke-linecap:round;" stroke-dasharray="{{ cards_data.student_attend_pct }}, 100" d="M18 2.1a15.9 15.9 0 1 1 0 31.8 15.9 15.9 0 0 1 0-31.8"/>
+            </svg>
+            <div class="position-absolute top-50 start-50 translate-middle fw-bold" style="color:#0a4f46;">{{ cards_data.student_attend_pct }}%</div>
+          </div>
+          <div class="mt-1"><small class="text-muted">Students</small></div>
+        </div>
+        <div>
+          <div class="position-relative d-inline-block" style="width:80px;height:80px;">
+            <svg viewBox="0 0 36 36" style="width:80px;height:80px;">
+              <path style="fill:none;stroke:#fdf0d3;stroke-width:3.5;" d="M18 2.1a15.9 15.9 0 1 1 0 31.8 15.9 15.9 0 0 1 0-31.8"/>
+              <path style="fill:none;stroke:#c9a227;stroke-width:3.5;stroke-linecap:round;" stroke-dasharray="{{ cards_data.staff_attend_pct }}, 100" d="M18 2.1a15.9 15.9 0 1 1 0 31.8 15.9 15.9 0 0 1 0-31.8"/>
+            </svg>
+            <div class="position-absolute top-50 start-50 translate-middle fw-bold" style="color:#a5811c;">{{ cards_data.staff_attend_pct }}%</div>
+          </div>
+          <div class="mt-1"><small class="text-muted">Staff</small></div>
+        </div>
+      </div>
+      <hr class="my-2">
+      <div class="d-flex justify-content-between" style="font-size:12px;">
+        <span class="text-muted">Present: <b style="color:#0a6b4f;">{{ t_student_attend }}</b> / {{ totalStudents }}</span>
+        <a href="{% url 'report_student_attendance' %}" style="color:#0d6b5f;">View</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upcoming Exam -->
+  <div class="col-md-6 col-lg-3 mb-3">
+    <div class="shadow rounded bg-white h-100 p-3" style="border-top:4px solid #c9a227;">
+      <h5 class="m-0 mb-2" style="color:#0a4f46;">Upcoming Exams</h5>
+      <hr class="my-2">
+      <ul class="list-unstyled mb-0">
+        {% for exam in cards_data.upcoming_exams %}
+        <li class="d-flex justify-content-between align-items-center mb-2">
+          <span style="font-size:13px;">{{ exam.name }}</span>
+          <span class="badge" style="background:#fdf0d3;color:#b47e00;">{{ exam.start_date|date:"d M" }}</span>
+        </li>
+        {% empty %}
+        <li class="text-muted text-center py-3" style="font-size:13px;">No upcoming exams</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <!-- Recent Notices & Events -->
+  <div class="col-md-6 col-lg-3 mb-3">
+    <div class="shadow rounded bg-white h-100 p-3" style="border-top:4px solid #14a89a;">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="m-0" style="color:#0a4f46;">Notices & Events</h5>
+        <a href="{% url 'notice' %}" style="color:#0d6b5f;font-size:12px;">All</a>
+      </div>
+      <hr class="my-2">
+      <ul class="list-unstyled mb-0" style="max-height:170px;overflow-y:auto;">
+        {% for notice in upcoming_notices %}
+        <li class="mb-2">
+          <span class="badge" style="background:#e7f3f1;color:#0a4f46;">Notice</span>
+          <span style="font-size:12.5px;">{{ notice.notice_title|truncatechars:26 }}</span>
+        </li>
+        {% endfor %}
+        {% for event in upcoming_events %}
+        <li class="mb-2">
+          <span class="badge" style="background:#fdf0d3;color:#b47e00;">Event</span>
+          <span style="font-size:12.5px;">{{ event.title|truncatechars:26 }}</span>
+        </li>
+        {% endfor %}
+        {% if not upcoming_notices and not upcoming_events %}
+        <li class="text-muted text-center py-3" style="font-size:13px;">Nothing upcoming</li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+
+  <!-- Pending Leave Requests -->
+  <div class="col-md-6 col-lg-3 mb-3">
+    <div class="shadow rounded bg-white h-100 p-3" style="border-top:4px solid #c0392b;">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="m-0" style="color:#0a4f46;">Pending Leaves</h5>
+        <span class="badge rounded-pill" style="background:#fbe0dd;color:#c0392b;">{{ cards_data.pending_leave_count }}</span>
+      </div>
+      <hr class="my-2">
+      <ul class="list-unstyled mb-2" style="max-height:150px;overflow-y:auto;">
+        {% for leave in cards_data.pending_leaves %}
+        <li class="d-flex justify-content-between mb-2" style="font-size:12.5px;">
+          <span>{{ leave.employee.name|truncatechars:16 }}</span>
+          <span class="text-muted">{{ leave.start_date|date:"d M" }}</span>
+        </li>
+        {% empty %}
+        <li class="text-muted text-center py-3" style="font-size:13px;">No pending leaves</li>
+        {% endfor %}
+      </ul>
+      <a href="{% url 'leave_request' %}" class="btn btn-sm btn-outline-secondary w-100">Manage Leaves</a>
+    </div>
+  </div>
+
 </div>
 
 
-  <!-- leave teacher student and sms -->
-
-  <div class="row leave_sms">
-    <div class="col-12 col-md-6">
-      <div class="shadow mb-3 rounded bg-white">
-        <div
-          class="heading d-flex justify-content-between align-items-center rounded-top pb-3 px-3 text-white position-relative" style="overflow:visible;">
-          <h5 class="dropdown m-0">Leave Information</h5>
-          <div class="dropdown-toggle dots bg-white rounded-circle d-flex justify-content-center align-items-center" id="dropdownMenuButton8" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class='bx bx-dots-vertical text-primary' ></i>
-          </div>
-          <div class="dropdown-menu edit_details_overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton8">
-            <ul class="list-unstyled">
-              <li><a href="#">Edit</a></li>
-              <li><a href="#">View Details</a></li>
-            </ul>
-          </div>
-        </div>
-        <div class="p-3 d-flex flex-wrap flex-sm-nowrap flex-md-wrap flex-lg-nowrap gap-2">
-          <div class="shadow w-100 w-sm-50 p-3 rounded bg-white leave_student">
-            <div class="d-flex align-items-center gap-2">
-              <div class="img_wrapper rounded-circle">
-                <img src="{% static 'assets/img/essential/leave-tea.png' %}" alt="" />
-              </div>
-              <div class="text_wrapper pl-2 border-left border-danger">
-                <p class="mb-0">Leave Employee</p>
-                <span>0</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="shadow w-100 w-sm-50 p-3 rounded bg-white leave_teacher">
-            <div class="d-flex align-items-center gap-2">
-              <div class="img_wrapper rounded-circle">
-                <img src="{% static 'assets/img/essential/leave-stu.png' %}" alt="" />
-              </div>
-              <div class="text_wrapper pl-2 border-left border-danger">
-                <p class="mb-0">Leave Student</p>
-                <span>0</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-12 col-md-6">
-      <div class="shadow mb-3 rounded bg-white">
-        <div
-          class="heading d-flex justify-content-between align-items-center rounded-top pb-3 px-3 text-white position-relative" style="overflow:visible;">
-          <h5 class="dropdown m-0">SMS Information</h5>
-          <div class="dropdown-toggle dots bg-white rounded-circle d-flex justify-content-center align-items-center" id="dropdownMenuButton9" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class='bx bx-dots-vertical text-primary' ></i>
-          </div>
-          <div class="dropdown-menu edit_details_overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton9">
-            <ul class="list-unstyled">
-              <li><a href="#">Edit</a></li>
-              <li><a href="#">View Details</a></li>
-            </ul>
-          </div>
-        </div>
-        <div class="p-3 d-flex flex-wrap flex-sm-nowrap flex-md-wrap flex-lg-nowrap gap-2">
-          <div class="shadow w-100 w-sm-50 p-3 rounded bg-white general_sms">
-            <div class="d-flex align-items-center gap-2">
-              <div class="img_wrapper rounded-circle">
-                <img src="{% static 'assets/img/essential/sms.png' %}" alt="" />
-              </div>
-              <div class="text_wrapper pl-2 border-left border-danger">
-                <p class="mb-0">General SMS</p>
-                <span>{% if nonmasking_limit %} {{nonmasking_limit.total_sms}} {% else %} 0 {% endif %}</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="shadow w-100 w-sm-50 p-3 rounded bg-white general_sms">
-            <div class="d-flex align-items-center gap-2">
-              <div class="img_wrapper rounded-circle">
-                <img src="{% static 'assets/img/essential/msms.png' %}" alt="" />
-              </div>
-              <div class="text_wrapper pl-2 border-left border-danger">
-                <p class="mb-0">Masking SMS</p>
-                <span>{% if masking_limit %} {{masking_limit.total_sms}} {% else %} 0 {% endif %}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-
-<!-- event and gender -->
-
-<div class="row">
-  <!-- events -->
-  <div class="col-12 col-lg-6 pb-3">
-    <div class="shadow mb-3 rounded bg-white h-100">
-      <div
-        class="heading d-flex justify-content-between align-items-center rounded-top pb-3 px-3 text-white position-relative" style="overflow:visible;">
-        <h5 class="dropdown m-0">Notice</h5>
-        <div class="dropdown-toggle dots bg-white rounded-circle d-flex justify-content-center align-items-center" id="dropdownMenuButton10" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <i class='bx bx-dots-vertical text-primary' ></i>
-        </div>
-        <div class="dropdown-menu edit_details_overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton10">
-          <ul class="list-unstyled">
-            <li><a href="#">Edit</a></li>
-            <li><a href="#">View Details</a></li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="vanillar_calendar_wrapper d-flex">
-        <!-- eveent items -->
-        <div class="events notices">
-          <ul class="list-unstyled">
-            {% for notice in upcoming_notices %}  
-            <li>
-              <span class="badge text-bg-warning">{{notice.date}} </span> - <span class="badge text-bg-success" > {{notice.notice_title}} </span> 
-              <p class="">
-                {{notice.notice_description}}
-              </p>
-            </li>
-            {% endfor %}
-          </ul>
-          <div class="text-start ps-2">
-            <a href="{% url 'notice' %}" class="btn btn-primary">View All</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="col-12 col-lg-6 leave_sms male_female">
-    <!-- Gender Wise Student information -->
-    <div class="shadow mb-3 rounded bg-white">
-      <div
-        class="heading d-flex justify-content-between align-items-center rounded-top pb-3 px-3 text-white position-relative" style="overflow:visible;">
-        <h5 class="dropdown m-0">Gender Wise Student</h5>
-        <div class="dropdown-toggle dots bg-white rounded-circle d-flex justify-content-center align-items-center" id="dropdownMenuButton11" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <i class='bx bx-dots-vertical text-primary' ></i>
-        </div>
-        <div class="dropdown-menu edit_details_overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton11">
-          <ul class="list-unstyled">
-            <li><a href="#">Edit</a></li>
-            <li><a href="#">View Details</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="p-3 d-flex flex-wrap flex-sm-nowrap gap-2">
-        <div class="shadow w-100 w-sm-50 p-3 mb-1 rounded bg-white male">
-          <div class="d-flex align-items-center gap-2">
-            <div class="img_wrapper rounded-circle">
-              <img src="{% static 'assets/img/essential/male.png' %}" alt="" />
-            </div>
-            <div class="text_wrapper pl-2 border-left border-danger">
-              <p class="mb-0">Male Student</p>
-              <span>{{male_students}}</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="shadow w-100 w-sm-50 p-3 mb-1 rounded bg-white female">
-          <div class="d-flex align-items-center gap-2">
-            <div class="img_wrapper rounded-circle">
-              <img src="{% static 'assets/img/essential/female.png' %}" alt="" />
-            </div>
-            <div class="text_wrapper pl-2 border-left border-danger">
-              <p class="mb-0">Female Student</p>
-              <span>{{female_students}}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Gender Wise Teacher & Staff information -->
-    <div class="shadow mb-3 rounded bg-white">
-      <div
-        class="heading d-flex justify-content-between align-items-center rounded-top pb-3 px-3 text-white position-relative" style="overflow:visible;">
-        <h5 class="dropdown m-0">Gender Wise Teacher & Staff</h5>
-        <div class="dropdown-toggle dots bg-white rounded-circle d-flex justify-content-center align-items-center" id="dropdownMenuButton12" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <i class='bx bx-dots-vertical text-primary' ></i>
-        </div>
-        <div class="dropdown-menu edit_details_overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton12">
-          <ul class="list-unstyled">
-            <li><a href="#">Edit</a></li>
-            <li><a href="#">View Details</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="p-3 d-flex flex-wrap flex-sm-nowrap gap-2">
-        <div class="shadow w-100 w-sm-50 p-3 mb-1 rounded bg-white male">
-          <div class="d-flex align-items-center gap-2">
-            <div class="img_wrapper rounded-circle">
-              <img src="{% static 'assets/img/essential/male.png' %}" alt="" />
-            </div>
-            <div class="text_wrapper pl-2 border-left border-danger">
-              <p class="mb-0">Male Employee</p>
-              <span>{{male_employees}}</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="shadow w-100 w-sm-50 p-3 mb-1 rounded bg-white female">
-          <div class="d-flex align-items-center gap-2">
-            <div class="img_wrapper rounded-circle">
-              <img src="{% static 'assets/img/essential/female.png' %}" alt="" />
-            </div>
-            <div class="text_wrapper pl-2 border-left border-danger">
-              <p class="mb-0">Female Employee</p>
-              <span>{{female_employees}}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-  {% comment %} <div class="row gx-4">
-
-    <!-- Fees info section -->
-    <div class="col-md-6 col-12">
-      <div class="shadow mb-3 rounded bg-white">
-        <div
-          class="heading d-flex justify-content-between align-items-center rounded-top pb-3 px-3 text-white position-relative" style="overflow:visible;">
-          <h5 class="dropdown m-0">Fees Information</h5>
-          <div class="dropdown-toggle dots bg-white rounded-circle d-flex justify-content-center align-items-center" id="dropdownMenuButton13" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class='bx bx-dots-vertical text-primary' ></i>
-          </div>
-          <div class="dropdown-menu edit_details_overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton13">
-            <ul class="list-unstyled">
-              <li><a href="#">Edit</a></li>
-              <li><a href="#">View Details</a></li>
-            </ul>
-          </div>
-        </div>
-        <section class="fees-info">
-          <form>
-            <!-- 3 select boxes -->
-            <div class="input-fields row">
-              <div class="col-4">
-                <h5>Year</h5>
-                <select id="year" name="year">
-                  <option value="" disabled selected>select year</option>
-                  <option value="2022">2022</option>
-                  <option value="2023">2023</option>
-                  <option value="2024">2024</option>
-                </select>
-              </div>
-              <div class="col-4">
-                <h5>Month</h5>
-                <select id="year" name="year">
-                  <option value="" disabled selected>select month</option>
-                  <option value="Nursary">January</option>
-                  <option value="February">February</option>
-                  <option value="March">March</option>
-                  <option value="April">April</option>
-                  <option value="May">May</option>
-                  <option value="June">June</option>
-                  <option value="July">July</option>
-                  <option value="August">August</option>
-                  <option value="September">September</option>
-                  <option value="October">October</option>
-                  <option value="November">November</option>
-                  <option value="December">December</option>
-                </select>
-              </div>
-              <div class="col-4">
-                <button type="submit" class="submit-button-orange">Search</button>
-              </div>
-            </div>
-          </form>
-
-          <h6 class="overview">Total Student Found: <span>43</span></h6>
-          <!-- show student data -->
-          <div class="table">
-            <table class="table-head">
-              <tr>
-                <th style="width:50%">Name</th>
-                <th style="width:20%">Class</th>
-                <th style="width:20%">Amount</th>
-                <th class="status" style="width:20%">Status</th>
-              </tr>
-            </table>
-            <div class="table-content scrollbar">
-              <table class="content">
-                <tr>
-                  <td style="width:45%">Samsul Islam Khan</td>
-                  <td style="width:25%">Nursery - A</td>
-                  <td style="width:18%">1234</td>
-                  <td style="width:20%"><span class="payment-status">paid</span></td>
-                </tr>
-                <tr>
-                  <td style="width:45%">Samsul Islam Khan</td>
-                  <td style="width:25%">Nursery - A</td>
-                  <td style="width:18%">1234</td>
-                  <td style="width:20%"><span class="payment-status">unpaid</span></td>
-                </tr>
-                <tr>
-                  <td style="width:45%">Samsul Islam Khan</td>
-                  <td style="width:25%">Nursery - A</td>
-                  <td style="width:18%">1234</td>
-                  <td style="width:20%"><span class="payment-status">paid</span></td>
-                </tr>
-                <tr>
-                  <td style="width:45%">Samsul Islam Khan</td>
-                  <td style="width:25%">Nursery - A</td>
-                  <td style="width:18%">1234</td>
-                  <td style="width:20%"><span class="payment-status">paid</span></td>
-                </tr>
-                <tr>
-                  <td style="width:45%">Samsul Islam Khan</td>
-                  <td style="width:25%">Nursery - A</td>
-                  <td style="width:18%">1234</td>
-                  <td style="width:20%"><span class="payment-status">paid</span></td>
-                </tr>
-                <tr>
-                  <td style="width:45%">Samsul Islam Khan</td>
-                  <td style="width:25%">Nursery - A</td>
-                  <td style="width:18%">1234</td>
-                  <td style="width:20%"><span class="payment-status">unpaid</span></td>
-                </tr>
-                <tr>
-                  <td style="width:45%">Samsul Islam Khan</td>
-                  <td style="width:25%">Nursery - A</td>
-                  <td style="width:18%">1234</td>
-                  <td style="width:20%"><span class="payment-status">paid</span></td>
-                </tr>
-                <tr>
-                  <td style="width:45%">Samsul Islam Khan</td>
-                  <td style="width:25%">Nursery - A</td>
-                  <td style="width:18%">1234</td>
-                  <td style="width:20%"><span class="payment-status">paid</span></td>
-                </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-      </div>
-    </div>
-
-    <!-- Payment stat section -->
-
-    <div class="col-md-6 col-12">
-      <div class="shadow mb-3 rounded bg-white">
-        <div
-          class="heading d-flex justify-content-between align-items-center rounded-top pb-3 px-3 text-white position-relative" style="overflow:visible;">
-          <h5 class="dropdown m-0">Payment Statistics</h5>
-          <div class="dropdown-toggle dots bg-white rounded-circle d-flex justify-content-center align-items-center" id="dropdownMenuButton14" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class='bx bx-dots-vertical text-primary' ></i>
-          </div>
-          <div class="dropdown-menu edit_details_overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton14">
-            <ul class="list-unstyled">
-              <li><a href="#">Edit</a></li>
-              <li><a href="#">View Details</a></li>
-            </ul>
-          </div>
-        </div>
-        <section class="payment-statistics">
-
-          <form>
-            <!-- 3 select boxes -->
-            <div class="input-fields row">
-              <div class="col-4">
-                <h5>Year</h5>
-                <select id="year" name="year">
-                  <option value="" disabled selected>select year</option>
-                  <option value="2022">2022</option>
-                  <option value="2023">2023</option>
-                  <option value="2024">2024</option>
-                </select>
-              </div>
-              <div class="col-4">
-                <h5>Month</h5>
-                <select id="year" name="year">
-                  <option value="" disabled selected>select month</option>
-                  <option value="Nursary">January</option>
-                  <option value="February">February</option>
-                  <option value="March">March</option>
-                  <option value="April">April</option>
-                  <option value="May">May</option>
-                  <option value="June">June</option>
-                  <option value="July">July</option>
-                  <option value="August">August</option>
-                  <option value="September">September</option>
-                  <option value="October">October</option>
-                  <option value="November">November</option>
-                  <option value="December">December</option>
-                </select>
-              </div>
-              <div class="col-4">
-                <button type="submit" class="submit-button-orange">Search</button>
-              </div>
-            </div>
-          </form>
-
-          <h6 class="overview">Total Rows Found: <span>43</span></h6>
-          <!-- show student data -->
-          <div class="payment-overview">
-            <h4>Payment Due Summary</h4>
-            <div class="graph-and-table">
-              <!-- graph -->
-              <div class="graph">
-                <div
-                  class="d-flex align-items-center justify-content-center position-relative pieChart_wrapper__holder">
-                  <div class="pieChart_wrapper">
-                    <canvas id="myChart3"></canvas>
-                  </div>
-                  <div class="total position-absolute top-50 start-50 text-center">
-                    <p class="fw-medium"></p>
-                    <p class="amount">60%</p>
-                  </div>
-                </div>
-                <h3>Total Students</h3>
-              </div>
-              <!-- payment summary table -->
-              <div class="payment-table">
-                <table class="table-head">
-                  <tr>
-                    <th style="width:18%">Class</th>
-                    <th style="width:20%">Section</th>
-                    <th style="width:20%">T.Student</th>
-                    <th style="width:20%">Paid</th>
-                    <th style="width:22%">Unpaid</th>
-                  </tr>
-                </table>
-
-                <div class="overflow-2 scrollbar">
-                  <table class="table-content scrollbar">
-                    <tr>
-                      <td style="width:25%">Nursery</td>
-                      <td style="width:20%">A</td>
-                      <td style="width:19%">43</td>
-                      <td class="paid" style="width:21%">33</td>
-                      <td class="unpaid" style="width:20%">10</td>
-                    </tr>
-                    <tr>
-                      <td style="width:25%">Nursery</td>
-                      <td style="width:20%">A</td>
-                      <td style="width:19%">43</td>
-                      <td class="paid" style="width:21%">33</td>
-                      <td class="unpaid" style="width:20%">10</td>
-                    </tr>
-                    <tr>
-                      <td style="width:25%">Nursery</td>
-                      <td style="width:20%">A</td>
-                      <td style="width:19%">43</td>
-                      <td class="paid" style="width:21%">33</td>
-                      <td class="unpaid" style="width:20%">10</td>
-                    </tr>
-                    <tr>
-                      <td style="width:25%">Nursery</td>
-                      <td style="width:20%">A</td>
-                      <td style="width:19%">43</td>
-                      <td class="paid" style="width:21%">33</td>
-                      <td class="unpaid" style="width:20%">10</td>
-                    </tr>
-                    <tr>
-                      <td style="width:25%">Nursery</td>
-                      <td style="width:20%">A</td>
-                      <td style="width:19%">43</td>
-                      <td class="paid" style="width:21%">33</td>
-                      <td class="unpaid" style="width:20%">10</td>
-                    </tr>
-                    <tr>
-                      <td style="width:25%">Nursery</td>
-                      <td style="width:20%">A</td>
-                      <td style="width:19%">43</td>
-                      <td class="paid" style="width:21%">33</td>
-                      <td class="unpaid" style="width:20%">10</td>
-                    </tr>
-
-
-                  </table>
-                </div>
-
-
-              </div>
-            </div>
-
-          </div>
-        </section>
-      </div>
-
-    </div>
-
-  </div>
-
-  <!-- Expense and fund info-->
-
+<!-- Live Summary: Fees / Salary / Expense -->
   <div class="row gx-4">
 
-    <!-- Expense info  -->
-    <div class="col-md-6 col-12">
-      <div class="shadow mb-3 rounded bg-white">
-        <div
-          class="heading d-flex justify-content-between align-items-center rounded-top pb-3 px-3 text-white position-relative" style="overflow:visible;">
-          <h5 class="dropdown m-0">Expense Information</h5>
-          <div class="dropdown-toggle dots bg-white rounded-circle d-flex justify-content-center align-items-center" id="dropdownMenuButton15" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class='bx bx-dots-vertical text-primary' ></i>
+    <!-- Fees Summary -->
+    <div class="col-md-4 col-12 mb-3">
+      <div class="shadow rounded bg-white h-100 p-3" style="border-top:4px solid #0d6b5f;">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="m-0" style="color:#0a4f46;">Fees Information</h5>
+          <a href="{% url 'student_fees_report' %}" class="btn btn-sm" style="background:#0d6b5f;color:#fff;">View Details</a>
+        </div>
+        <hr class="my-2">
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">Total Collected</span>
+          <span class="fw-bold" style="color:#0a4f46;">৳ {{ dashboard_summary.fees_collected|floatformat:2 }}</span>
+        </div>
+        <div class="row text-center g-2 mt-2">
+          <div class="col-4">
+            <div class="rounded p-2" style="background:#e7f3f1;">
+              <div class="fw-bold fs-5" style="color:#0a6b4f;">{{ dashboard_summary.fees_paid }}</div>
+              <small class="text-muted">Paid</small>
+            </div>
           </div>
-          <div class="dropdown-menu edit_details_overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton15">
-            <ul class="list-unstyled">
-              <li><a href="#">Edit</a></li>
-              <li><a href="#">View Details</a></li>
-            </ul>
+          <div class="col-4">
+            <div class="rounded p-2" style="background:#fdf0d3;">
+              <div class="fw-bold fs-5" style="color:#b47e00;">{{ dashboard_summary.fees_partial }}</div>
+              <small class="text-muted">Partial</small>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="rounded p-2" style="background:#fbe0dd;">
+              <div class="fw-bold fs-5" style="color:#c0392b;">{{ dashboard_summary.fees_unpaid }}</div>
+              <small class="text-muted">Unpaid</small>
+            </div>
           </div>
         </div>
-        <section class="expense-info">
-          <form>
-            <!-- 3 select boxes -->
-            <div class="input-fields row">
-              <div class="col-4">
-                <h5>Year</h5>
-                <select id="year" name="year">
-                  <option value="" disabled selected>select year</option>
-                  <option value="2022">2022</option>
-                  <option value="2023">2023</option>
-                  <option value="2024">2024</option>
-                </select>
-              </div>
-              <div class="col-4">
-                <h5>Month</h5>
-                <select id="year" name="year">
-                  <option value="" disabled selected>select month</option>
-                  <option value="Nursary">January</option>
-                  <option value="February">February</option>
-                  <option value="March">March</option>
-                  <option value="April">April</option>
-                  <option value="May">May</option>
-                  <option value="June">June</option>
-                  <option value="July">July</option>
-                  <option value="August">August</option>
-                  <option value="September">September</option>
-                  <option value="October">October</option>
-                  <option value="November">November</option>
-                  <option value="December">December</option>
-                </select>
-              </div>
-              <div class="col-4">
-                <button type="submit" class="submit-button-orange">Search</button>
-              </div>
-            </div>
-          </form>
-          <h6 class="overview-large">Total Expanse: <span>127,543</span></h6>
-          <!-- show expense data -->
-          <div class="table ">
-            <table class="table-head">
-              <tr>
-                <th style="width:25%">Type</th>
-                <th style="width:20%">Amount</th>
-                <th style="width:55%">Description</th>
-              </tr>
-            </table>
-            <div class="overflow-1 scrollbar">
-              <table class="table-content">
-                <tr>
-                  <td style="width:26%">Salary</td>
-                  <td style="width:20%">12345</td>
-                  <td style="width:54%">Mr. Hafizur march month salary</td>
-                </tr>
-                <tr>
-                  <td style="width:26%">Salary</td>
-                  <td style="width:20%">12345</td>
-                  <td style="width:54%">Mr. Hafizur march month salary</td>
-                </tr>
-                <tr>
-                  <td style="width:26%">Salary</td>
-                  <td style="width:20%">12345</td>
-                  <td style="width:54%">Mr. Hafizur march month salary</td>
-                </tr>
-                <tr>
-                  <td style="width:26%">Salary</td>
-                  <td style="width:20%">12345</td>
-                  <td style="width:54%">Mr. Hafizur march month salary</td>
-                </tr>
-                <tr>
-                  <td style="width:26%">Salary</td>
-                  <td style="width:20%">12345</td>
-                  <td style="width:54%">Mr. Hafizur march month salary</td>
-                </tr>
-                <tr>
-                  <td style="width:26%">Salary</td>
-                  <td style="width:20%">12345</td>
-                  <td style="width:54%">Mr. Hafizur march month salary</td>
-                </tr>
-                <tr>
-                  <td style="width:26%">Salary</td>
-                  <td style="width:20%">12345</td>
-                  <td style="width:54%">Mr. Hafizur march month salary</td>
-                </tr>
-                <tr>
-                  <td style="width:26%">Salary</td>
-                  <td style="width:20%">12345</td>
-                  <td style="width:54%">Mr. Hafizur march month salary</td>
-                </tr>
-                <tr>
-                  <td style="width:26%">Salary</td>
-                  <td style="width:20%">12345</td>
-                  <td style="width:54%">Mr. Hafizur march month salary</td>
-                </tr>
-                <tr>
-                  <td style="width:26%">Salary</td>
-                  <td style="width:20%">12345</td>
-                  <td style="width:54%">Mr. Hafizur march month salary</td>
-                </tr>
-                <tr>
-                  <td style="width:26%">Salary</td>
-                  <td style="width:20%">12345</td>
-                  <td style="width:54%">Mr. Hafizur march month salary</td>
-                </tr>
-
-              </table>
-            </div>
-          </div>
-        </section>
+        <div class="mt-3 d-flex gap-2">
+          <a href="{% url 'addfee' %}" class="btn btn-sm btn-outline-secondary flex-fill">Allocate Fee</a>
+          <a href="{% url 'student_fee' %}" class="btn btn-sm btn-outline-secondary flex-fill">Collect Fee</a>
+        </div>
       </div>
     </div>
 
-    <!-- Fund info section -->
-    <div class="col-md-6 col-12">
-
-      <div class="shadow mb-3 rounded bg-white">
-        <div class="shadow mb-3 rounded bg-white">
-          <div
-            class="heading d-flex justify-content-between align-items-center rounded-top pb-3 px-3 text-white position-relative" style="overflow:visible;">
-            <h5 class="dropdown m-0">Fund Information</h5>
-            <div class="dropdown-toggle dots bg-white rounded-circle d-flex justify-content-center align-items-center" id="dropdownMenuButton16" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              <i class='bx bx-dots-vertical text-primary' ></i>
-            </div>
-            <div class="dropdown-menu edit_details_overlay bg-white rounded shadow position-absolute" aria-labelledby="dropdownMenuButton16">
-              <ul class="list-unstyled">
-                <li><a href="#">Edit</a></li>
-                <li><a href="#">View Details</a></li>
-              </ul>
+    <!-- Salary / Payment Summary -->
+    <div class="col-md-4 col-12 mb-3">
+      <div class="shadow rounded bg-white h-100 p-3" style="border-top:4px solid #c9a227;">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="m-0" style="color:#0a4f46;">Payment Statistics</h5>
+          <a href="{% url 'salary_report' %}" class="btn btn-sm" style="background:#0d6b5f;color:#fff;">View Details</a>
+        </div>
+        <hr class="my-2">
+        <div class="d-flex justify-content-between mb-1">
+          <span class="text-muted">Paid Amount</span>
+          <span class="fw-bold" style="color:#0a6b4f;">৳ {{ dashboard_summary.salary_paid_amount|floatformat:2 }}</span>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">Pending Amount</span>
+          <span class="fw-bold" style="color:#c0392b;">৳ {{ dashboard_summary.salary_pending_amount|floatformat:2 }}</span>
+        </div>
+        <div class="row text-center g-2 mt-2">
+          <div class="col-4">
+            <div class="rounded p-2" style="background:#e7f3f1;">
+              <div class="fw-bold fs-5" style="color:#0a6b4f;">{{ dashboard_summary.salary_paid }}</div>
+              <small class="text-muted">Paid</small>
             </div>
           </div>
-          <section class="fund-info">
-            <form>
-              <!-- 3 select boxes -->
-              <div class="input-fields row gx-3">
-                <div class="col-3">
-                  <h5>Year</h5>
-                  <select id="year" name="year">
-                    <option value="" disabled selected>select year</option>
-                    <option value="2022">2022</option>
-                    <option value="2023">2023</option>
-                    <option value="2024">2024</option>
-                  </select>
-                </div>
-                <div class="col-3">
-                  <h5>Month</h5>
-                  <select id="year" name="year">
-                    <option value="" disabled selected>select month</option>
-                    <option value="January">January</option>
-                    <option value="February">February</option>
-                    <option value="March">March</option>
-                    <option value="April">April</option>
-                    <option value="May">May</option>
-                    <option value="June">June</option>
-                    <option value="July">July</option>
-                    <option value="August">August</option>
-                    <option value="September">September</option>
-                    <option value="October">October</option>
-                    <option value="November">November</option>
-                    <option value="December">December</option>
-                  </select>
-                </div>
-                <div class="col-3">
-                  <h5>Fund</h5>
-                  <select id="fund" name="fund">
-                    <option value="" disabled selected>select fund</option>
-                    <option value="organizing-fund">Organizing Fund</option>
-                    <option value="maintenance-fund">Maintenance Fund</option>
-                    <option value="allumni-fund">Allumni Fund</option>
-                  </select>
-                </div>
-                <div class="col-3">
-                  <button type="submit" class="submit-button-orange">Search</button>
-                </div>
-              </div>
-            </form>
-            <h6 class="overview-large">Total Fund Available: <span>127,543</span></h6>
-            <!-- show expense data -->
-            <div class="table">
-              <table class="table-head">
-                <tr>
-                  <th style="width:20%">Date</th>
-                  <th style="width:20%">Fund</th>
-                  <th style="width:20%">Debit</th>
-                  <th style="width:20%">Credit</th>
-                  <th style="width:20%">Remaining</th>
-                </tr>
-              </table>
-              <div class="overflow-1 scrollbar">
-                <table class="table-content">
-                  <tr>
-                    <td style="width:20%">12/01/2024</td>
-                    <td style="width:21%">General</td>
-                    <td style="width:21%">0</td>
-                    <td style="width:21%">1234</td>
-                    <td style="width:16%">7654</td>
-                  </tr>
-                  <tr>
-                    <td style="width:20%">12/01/2024</td>
-                    <td style="width:21%">General</td>
-                    <td style="width:21%">0</td>
-                    <td style="width:21%">1234</td>
-                    <td style="width:16%">7654</td>
-                  </tr>
-                  <tr>
-                    <td style="width:20%">12/01/2024</td>
-                    <td style="width:21%">General</td>
-                    <td style="width:21%">0</td>
-                    <td style="width:21%">1234</td>
-                    <td style="width:16%">7654</td>
-                  </tr>
-                  <tr>
-                    <td style="width:20%">12/01/2024</td>
-                    <td style="width:21%">General</td>
-                    <td style="width:21%">0</td>
-                    <td style="width:21%">1234</td>
-                    <td style="width:16%">7654</td>
-                  </tr>
-                  <tr>
-                    <td style="width:20%">12/01/2024</td>
-                    <td style="width:21%">General</td>
-                    <td style="width:21%">0</td>
-                    <td style="width:21%">1234</td>
-                    <td style="width:16%">7654</td>
-                  </tr>
-                  <tr>
-                    <td style="width:20%">12/01/2024</td>
-                    <td style="width:21%">General</td>
-                    <td style="width:21%">0</td>
-                    <td style="width:21%">1234</td>
-                    <td style="width:16%">7654</td>
-                  </tr>
-                  <tr>
-                    <td style="width:20%">12/01/2024</td>
-                    <td style="width:21%">General</td>
-                    <td style="width:21%">0</td>
-                    <td style="width:21%">1234</td>
-                    <td style="width:16%">7654</td>
-                  </tr>
-                  <tr>
-                    <td style="width:20%">12/01/2024</td>
-                    <td style="width:21%">General</td>
-                    <td style="width:21%">0</td>
-                    <td style="width:21%">1234</td>
-                    <td style="width:16%">7654</td>
-                  </tr>
-
-                </table>
-              </div>
+          <div class="col-4">
+            <div class="rounded p-2" style="background:#fdf0d3;">
+              <div class="fw-bold fs-5" style="color:#b47e00;">{{ dashboard_summary.salary_partial }}</div>
+              <small class="text-muted">Partial</small>
             </div>
-          </section>
+          </div>
+          <div class="col-4">
+            <div class="rounded p-2" style="background:#fbe0dd;">
+              <div class="fw-bold fs-5" style="color:#c0392b;">{{ dashboard_summary.salary_unpaid }}</div>
+              <small class="text-muted">Unpaid</small>
+            </div>
+          </div>
+        </div>
+        <div class="mt-3">
+          <a href="{% url 'salary_process' %}" class="btn btn-sm btn-outline-secondary w-100">Process Salary</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expense Summary -->
+    <div class="col-md-4 col-12 mb-3">
+      <div class="shadow rounded bg-white h-100 p-3" style="border-top:4px solid #c0392b;">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="m-0" style="color:#0a4f46;">Expense Information</h5>
+        </div>
+        <hr class="my-2">
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">Total Expense</span>
+          <span class="fw-bold" style="color:#c0392b;">৳ {{ dashboard_summary.total_expense|floatformat:2 }}</span>
+        </div>
+        <div class="table-responsive" style="max-height:180px;overflow-y:auto;">
+          <table class="table table-sm mb-0" style="font-size:12px;">
+            <thead>
+              <tr style="color:#0a4f46;">
+                <th>Staff</th>
+                <th>Type</th>
+                <th class="text-end">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in dashboard_summary.recent_payments %}
+              <tr>
+                <td>{{ p.staff.staff_field.name|default:"-"|truncatechars:16 }}</td>
+                <td>{{ p.expense_ledger.name|default:"-"|truncatechars:14 }}</td>
+                <td class="text-end">৳ {{ p.amount|floatformat:0 }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="3" class="text-center text-muted py-2">No expense records</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
 
   </div>
 
+  <!-- Quick Access -->
   <div class="row gx-4">
-    <!-- Payslip section  -->
-    <div class="col-md-6 col-12">
-      <div class="shadow mb-3 rounded bg-white">
-        <div
-          class="heading d-flex justify-content-between align-items-center rounded-top pb-3 px-3 text-white position-relative" style="overflow:visible;">
-          <h5 class="dropdown m-0">Marks</h5>
-          <div class="dropdown-toggle  bg-white rounded-circle d-flex justify-content-center align-items-center" id="dropdownMenuButton17" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class='bx bx-dots-vertical text-primary' ></i>
+    <div class="col-12 mb-3">
+      <div class="shadow rounded bg-white p-3">
+        <h5 class="mb-3" style="color:#0a4f46;">Quick Access</h5>
+        <div class="row g-2 text-center">
+          <div class="col-6 col-md-3 col-lg-2">
+            <a href="{% url 'student_fee' %}" class="btn btn-outline-secondary w-100 py-2"><i class='bx bx-wallet fs-4 d-block'></i>Fee Collection</a>
           </div>
-          <div class="edit_details_overlay bg-white rounded shadow position-absolute dropdown-menu" aria-labelledby="dropdownMenuButton17">
-            <ul class="list-unstyled">
-              <li><a href="#">Edit</a></li>
-              <li><a href="#">View Details</a></li>
-            </ul>
+          <div class="col-6 col-md-3 col-lg-2">
+            <a href="{% url 'salary_process' %}" class="btn btn-outline-secondary w-100 py-2"><i class='bx bx-money fs-4 d-block'></i>Salary</a>
           </div>
-        </div>
-        <!-- marks -->
-        <section class="marks class-routine">
-          <form>
-            <!-- 3 select boxes -->
-            <div class="input-fields row gx-3">
-
-              <div class="col-3">
-                <h5>Class</h5>
-                <select id="class" name="class">
-                  <option value="" disabled selected>
-                    select class
-                  </option>
-                  <option value="Nursary">Nursary</option>
-                  <option value="class-one">Class One</option>
-                  <option value="class-two">Class Two</option>
-                </select>
-              </div>
-
-              <div class="col-3">
-                <h5>Section</h5>
-                <select id="section" name="section">
-                  <option value="" disabled selected>
-                    select section
-                  </option>
-                  <option value="A">A</option>
-                  <option value="B">B</option>
-                  <option value="C">C</option>
-                  <option value="D">D</option>
-                </select>
-              </div>
-              <div class="col-3">
-                <h5>Subject</h5>
-                <select id="section" name="section">
-                  <option value="" disabled selected>
-                    select subject
-                  </option>
-                  <option value="A">Bangla</option>
-                  <option value="B">English</option>
-                </select>
-              </div>
-              <div class="col-3">
-                <button type="submit" class="submit-button-orange">
-                  Search
-                </button>
-              </div>
-            </div>
-          </form>
-          <h6 class="overview">
-            Total Students Found: <span>06</span>
-          </h6>
-          <!-- show marks -->
-          <div class="routine">
-            <h3 class="heading">
-              Class: Nine | Section: A | Subject: English
-            </h3>
-            <div class="routines scrollbar">
-              <div class="single-mark">
-                <div class="top">
-                  <h3>Md. Hakim Ali</h3>
-                  <h3>Roll: 17</h3>
-                  <h4>Written: 60</h4>
-                  <h4>Oral: 20</h4>
-                  <h4>Total: 80</h4>
-                </div>
-              </div>
-              <div class="single-mark">
-                <div class="top">
-                  <h3 title="Md. Hekmat Ali Shah Ahmed Babul">Md. Hekmat Ali</h3>
-                  <h3>Roll: 17</h3>
-                  <h4>Written: 60</h4>
-                  <h4>Oral: 20</h4>
-                  <h4>Total: 80</h4>
-                </div>
-              </div>
-              <div class="single-mark">
-                <div class="top">
-                  <h3>Md. Hakim Ali</h3>
-                  <h3>Roll: 17</h3>
-                  <h4>Written: 60</h4>
-                  <h4>Oral: 20</h4>
-                  <h4>Total: 80</h4>
-                </div>
-              </div>
-              <div class="single-mark">
-                <div class="top">
-                  <h3 title="Md. Hekmat Ali Shah Ahmed Babul">Md. Hekmat Ali</h3>
-                  <h3>Roll: 17</h3>
-                  <h4>Written: 60</h4>
-                  <h4>Oral: 20</h4>
-                  <h4>Total: 80</h4>
-                </div>
-              </div>
-              <div class="single-mark">
-                <div class="top">
-                  <h3>Md. Hakim Ali</h3>
-                  <h3>Roll: 17</h3>
-                  <h4>Written: 60</h4>
-                  <h4>Oral: 20</h4>
-                  <h4>Total: 80</h4>
-                </div>
-              </div>
-              <div class="single-mark">
-                <div class="top">
-                  <h3 title="Md. Hekmat Ali Shah Ahmed Babul">Md. Hekmat Ali</h3>
-                  <h3>Roll: 17</h3>
-                  <h4>Written: 60</h4>
-                  <h4>Oral: 20</h4>
-                  <h4>Total: 80</h4>
-                </div>
-              </div>
-              <div class="single-mark">
-                <div class="top">
-                  <h3>Md. Hakim Ali</h3>
-                  <h3>Roll: 17</h3>
-                  <h4>Written: 60</h4>
-                  <h4>Oral: 20</h4>
-                  <h4>Total: 80</h4>
-                </div>
-              </div>
-              <div class="single-mark">
-                <div class="top">
-                  <h3 title="Md. Hekmat Ali Shah Ahmed Babul">Md. Hekmat Ali</h3>
-                  <h3>Roll: 17</h3>
-                  <h4>Written: 60</h4>
-                  <h4>Oral: 20</h4>
-                  <h4>Total: 80</h4>
-                </div>
-              </div>
-              <div class="single-mark">
-                <div class="top">
-                  <h3>Md. Hakim Ali</h3>
-                  <h3>Roll: 17</h3>
-                  <h4>Written: 60</h4>
-                  <h4>Oral: 20</h4>
-                  <h4>Total: 80</h4>
-                </div>
-              </div>
-              <div class="single-mark">
-                <div class="top">
-                  <h3 title="Md. Hekmat Ali Shah Ahmed Babul">Md. Hekmat Ali</h3>
-                  <h3>Roll: 17</h3>
-                  <h4>Written: 60</h4>
-                  <h4>Oral: 20</h4>
-                  <h4>Total: 80</h4>
-                </div>
-              </div>
-              <div class="single-mark">
-                <div class="top">
-                  <h3>Md. Hakim Ali</h3>
-                  <h3>Roll: 17</h3>
-                  <h4>Written: 60</h4>
-                  <h4>Oral: 20</h4>
-                  <h4>Total: 80</h4>
-                </div>
-              </div>
-              <div class="single-mark">
-                <div class="top">
-                  <h3 title="Md. Hekmat Ali Shah Ahmed Babul">Md. Hekmat Ali</h3>
-                  <h3>Roll: 17</h3>
-                  <h4>Written: 60</h4>
-                  <h4>Oral: 20</h4>
-                  <h4>Total: 80</h4>
-                </div>
-              </div>
-              <div class="single-mark">
-                <div class="top">
-                  <h3>Md. Hakim Ali</h3>
-                  <h3>Roll: 17</h3>
-                  <h4>Written: 60</h4>
-                  <h4>Oral: 20</h4>
-                  <h4>Total: 80</h4>
-                </div>
-              </div>
-              <div class="single-mark">
-                <div class="top">
-                  <h3 title="Md. Hekmat Ali Shah Ahmed Babul">Md. Hekmat Ali</h3>
-                  <h3>Roll: 17</h3>
-                  <h4>Written: 60</h4>
-                  <h4>Oral: 20</h4>
-                  <h4>Total: 80</h4>
-                </div>
-              </div>
-              <div class="single-mark">
-                <div class="top">
-                  <h3>Md. Hakim Ali</h3>
-                  <h3>Roll: 17</h3>
-                  <h4>Written: 60</h4>
-                  <h4>Oral: 20</h4>
-                  <h4>Total: 80</h4>
-                </div>
-              </div>
-              <div class="single-mark">
-                <div class="top">
-                  <h3 title="Md. Hekmat Ali Shah Ahmed Babul">Md. Hekmat Ali</h3>
-                  <h3>Roll: 17</h3>
-                  <h4>Written: 60</h4>
-                  <h4>Oral: 20</h4>
-                  <h4>Total: 80</h4>
-                </div>
-              </div>
-              <div class="single-mark">
-                <div class="top">
-                  <h3>Md. Hakim Ali</h3>
-                  <h3>Roll: 17</h3>
-                  <h4>Written: 60</h4>
-                  <h4>Oral: 20</h4>
-                  <h4>Total: 80</h4>
-                </div>
-              </div>
-              <div class="single-mark">
-                <div class="top">
-                  <h3 title="Md. Hekmat Ali Shah Ahmed Babul">Md. Hekmat Ali</h3>
-                  <h3>Roll: 17</h3>
-                  <h4>Written: 60</h4>
-                  <h4>Oral: 20</h4>
-                  <h4>Total: 80</h4>
-                </div>
-              </div>
-              <div class="single-mark">
-                <div class="top">
-                  <h3>Md. Hakim Ali</h3>
-                  <h3>Roll: 17</h3>
-                  <h4>Written: 60</h4>
-                  <h4>Oral: 20</h4>
-                  <h4>Total: 80</h4>
-                </div>
-              </div>
-              <div class="single-mark">
-                <div class="top">
-                  <h3 title="Md. Hekmat Ali Shah Ahmed Babul">Md. Hekmat Ali</h3>
-                  <h3>Roll: 17</h3>
-                  <h4>Written: 60</h4>
-                  <h4>Oral: 20</h4>
-                  <h4>Total: 80</h4>
-                </div>
-              </div>
-            </div>
+          <div class="col-6 col-md-3 col-lg-2">
+            <a href="{% url 'salary_report' %}" class="btn btn-outline-secondary w-100 py-2"><i class='bx bx-line-chart fs-4 d-block'></i>Salary Report</a>
           </div>
-        </section>
-      </div>
-    </div>
-
-    <!-- Class routine section -->
-    <div class="col-md-6 col-12">
-      <div class="shadow mb-3 rounded bg-white">
-        <div
-          class="heading d-flex justify-content-between align-items-center rounded-top pb-3 px-3 text-white position-relative" style="overflow:visible;">
-          <h5 class="dropdown m-0">Class Routine</h5>
-          <div class="dropdown-toggle  bg-white rounded-circle d-flex justify-content-center align-items-center" id="dropdownMenuButton18" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class='bx bx-dots-vertical text-primary' ></i>
+          <div class="col-6 col-md-3 col-lg-2">
+            <a href="{% url 'bulk_admit_card_download' %}" class="btn btn-outline-secondary w-100 py-2"><i class='bx bx-id-card fs-4 d-block'></i>Admit Card</a>
           </div>
-          <div class="edit_details_overlay bg-white rounded shadow position-absolute dropdown-menu" aria-labelledby="dropdownMenuButton18">
-            <ul class="list-unstyled">
-              <li><a href="#">Edit</a></li>
-              <li><a href="#">View Details</a></li>
-            </ul>
+          <div class="col-6 col-md-3 col-lg-2">
+            <a href="{% url 'list_student' %}" class="btn btn-outline-secondary w-100 py-2"><i class='bx bx-group fs-4 d-block'></i>Students</a>
+          </div>
+          <div class="col-6 col-md-3 col-lg-2">
+            <a href="{% url 'notice' %}" class="btn btn-outline-secondary w-100 py-2"><i class='bx bx-bell fs-4 d-block'></i>Notices</a>
           </div>
         </div>
-        <section class="class-routine">
-          <form>
-            <!-- 3 select boxes -->
-            <div class="input-fields row gx-3">
-              <div class="col-3">
-                <h5>Date</h5>
-                <input type="date" id="date" name="date" />
-              </div>
-              <div class="col-3">
-                <h5>Class</h5>
-                <select id="class" name="class">
-                  <option value="" disabled selected>
-                    select class
-                  </option>
-                  <option value="Nursary">Nursary</option>
-                  <option value="class-one">Class One</option>
-                  <option value="class-two">Class Two</option>
-                </select>
-              </div>
-              <div class="col-3">
-                <h5>Section</h5>
-                <select id="section" name="section">
-                  <option value="" disabled selected>
-                    select section
-                  </option>
-                  <option value="A">A</option>
-                  <option value="B">B</option>
-                  <option value="C">C</option>
-                  <option value="D">D</option>
-                </select>
-              </div>
-              <div class="col-3">
-                <button type="submit" class="submit-button-orange">
-                  Search
-                </button>
-              </div>
-            </div>
-          </form>
-          <h6 class="overview">
-            Total Class Found: <span>06</span>
-          </h6>
-          <!-- show class routine -->
-          <div class="routine">
-            <h3 class="heading">
-              12 July 2024 | Class: Nine | Section: A
-            </h3>
-            <div class="routines scrollbar">
-              <div class="single-routine">
-                <div class="first">
-                  <div class="book-img">
-                    <img src="../assets/img/book.png" alt="" />
-                  </div>
-                  <div class="details">
-                    <h3>English 1st Paper</h3>
-                    <h4>Time: 10:00 am - 11:00 am</h4>
-                  </div>
-                </div>
-                <div class="second">
-                  <h5 class="room">Room: 301</h5>
-                  <div class="additional">
-                    <h4>Period: 1st Period</h4>
-                    <h5>Teacher: AKM</h5>
-                  </div>
-                </div>
-              </div>
-              <div class="single-routine">
-                <div class="first">
-                  <div class="book-img">
-                    <img src="../assets/img/book.png" alt="" />
-                  </div>
-                  <div class="details">
-                    <h3>English 1st Paper</h3>
-                    <h4>Time: 10:00 am - 11:00 am</h4>
-                  </div>
-                </div>
-                <div class="second">
-                  <h5 class="room">Room: 301</h5>
-                  <div class="additional">
-                    <h4>Period: 1st Period</h4>
-                    <h5>Teacher: AKM</h5>
-                  </div>
-                </div>
-              </div>
-              <div class="single-routine">
-                <div class="first">
-                  <div class="book-img">
-                    <img src="../assets/img/book.png" alt="" />
-                  </div>
-                  <div class="details">
-                    <h3>English 1st Paper</h3>
-                    <h4>Time: 10:00 am - 11:00 am</h4>
-                  </div>
-                </div>
-                <div class="second">
-                  <h5 class="room">Room: 301</h5>
-                  <div class="additional">
-                    <h4>Period: 1st Period</h4>
-                    <h5>Teacher: AKM</h5>
-                  </div>
-                </div>
-              </div>
-              <div class="single-routine">
-                <div class="first">
-                  <div class="book-img">
-                    <img src="../assets/img/book.png" alt="" />
-                  </div>
-                  <div class="details">
-                    <h3>English 1st Paper</h3>
-                    <h4>Time: 10:00 am - 11:00 am</h4>
-                  </div>
-                </div>
-                <div class="second">
-                  <h5 class="room">Room: 301</h5>
-                  <div class="additional">
-                    <h4>Period: 1st Period</h4>
-                    <h5>Teacher: AKM</h5>
-                  </div>
-                </div>
-              </div>
-              <div class="single-routine">
-                <div class="first">
-                  <div class="book-img">
-                    <img src="../assets/img/book.png" alt="" />
-                  </div>
-                  <div class="details">
-                    <h3>English 1st Paper</h3>
-                    <h4>Time: 10:00 am - 11:00 am</h4>
-                  </div>
-                </div>
-                <div class="second">
-                  <h5 class="room">Room: 301</h5>
-                  <div class="additional">
-                    <h4>Period: 1st Period</h4>
-                    <h5>Teacher: AKM</h5>
-                  </div>
-                </div>
-              </div>
-              <div class="single-routine">
-                <div class="first">
-                  <div class="book-img">
-                    <img src="../assets/img/book.png" alt="" />
-                  </div>
-                  <div class="details">
-                    <h3>English 1st Paper</h3>
-                    <h4>Time: 10:00 am - 11:00 am</h4>
-                  </div>
-                </div>
-                <div class="second">
-                  <h5 class="room">Room: 301</h5>
-                  <div class="additional">
-                    <h4>Period: 1st Period</h4>
-                    <h5>Teacher: AKM</h5>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
       </div>
     </div>
-  </div> {% endcomment %}
-
-
+  </div>
 
 
 </div>  
@@ -1564,7 +592,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{% static 'assets/js/extended-ui-perfect-scrollbar.js' %}"></script>
-<!-- Place this tag in your head or just before your close body tag. -->
 <script async defer src="https://buttons.github.io/buttons.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js" integrity="sha512-bPs7Ae6pVvhOSiIcyUClR7/q2OAsRiovw4vAkX+zJbw3ShAeeqezq50RIIcIURq7Oa20rW2n2q+fyXBNcU9lrw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -1575,42 +602,35 @@
           var formData = $("#sessionForm").serialize();
 
           $.ajax({
-              url: "/set_session_year/",  // Update the URL based on your Django project
+              url: "/set_session_year/",
               type: "POST",
               data: formData,
               dataType: "json",
               success: function (data) {
                   if (data.success) {
                     $('#myModal').modal('show');
-
-                        // Automatically close the modal after 2000 milliseconds (2 seconds)
                         setTimeout(function () {
                             $('#myModal').modal('hide');
                         }, 1000);
                   } else {
-                      // Handle failure, e.g., display an error message
                       alert(data.message);
                   }
               },
               error: function () {
-                  // Handle AJAX error
                   alert("Session Year Not Valid !!!");
               }
           });
       });
   });
-
-
 </script>
 
 
   <!-- js for pie chart -->
   <script>
     const ctx = document.getElementById("myChart");
-    const ctx2 = document.getElementById("myChart2");
     const ctx3 = document.getElementById("myChart3");
-    const ctx4 = document.getElementById("myChart4");
 
+    // student attendance chart
     const studentData = {
       labels: ["Present", "Absent"],
       datasets: [
@@ -1624,8 +644,6 @@
       ],
     };
 
-    // student attendance chart
-
     const studentAttendancePieChart = new Chart(ctx, {
       type: "doughnut",
       data: studentData,
@@ -1635,14 +653,8 @@
         cutout: "75%",
         radius: 48,
         plugins: {
-          legend: {
-            display: false,
-            position: "bottom",
-          },
-          title: {
-            display: false,
-            text: "Students",
-          },
+          legend: { display: false, position: "bottom" },
+          title: { display: false, text: "Students" },
         },
       },
     });
@@ -1654,50 +666,7 @@
     document.querySelector(".student_attendance .total .stuamount").textContent =
       studentData.datasets[0].data[0] + studentData.datasets[0].data[1];
 
-    // teacher attendance chart
-
-    const teacherData = {
-      labels: ["Present", "Absent"],
-      datasets: [
-        {
-          label: "",
-          borderWidth: 0,
-          data: [{{t_teacher_attend}}, {{t_teacher_absent}}],
-          backgroundColor: ["#77DF40", "#FF3E1D"],
-          hoverOffset: 2,
-        },
-      ],
-    };
-
-    const teacherAttendancePieChart = new Chart(ctx2, {
-      type: "doughnut",
-      data: teacherData,
-      options: {
-        responsive: true,
-        backgroundColor: "#fff",
-        cutout: "75%",
-        radius: 48,
-        plugins: {
-          legend: {
-            display: false,
-            position: "bottom",
-          },
-          title: {
-            display: false,
-            text: "Students",
-          },
-        },
-      },
-    });
-    document.querySelector(".teacher_attendance .present_title").style.color =
-    teacherData.datasets[0].backgroundColor[0];
-    document.querySelector(".teacher_attendance .absent_title").style.color =
-    teacherData.datasets[0].backgroundColor[1];
-    document.querySelector(".teacher_attendance .total .teaamount").textContent =
-    teacherData.datasets[0].data[0] + teacherData.datasets[0].data[1];
-
-       // staff attendance chart
-
+    // staff attendance chart
     const staffData = {
       labels: ["Present", "Absent"],
       datasets: [
@@ -1720,14 +689,8 @@
         cutout: "75%",
         radius: 48,
         plugins: {
-          legend: {
-            display: false,
-            position: "bottom",
-          },
-          title: {
-            display: false,
-            text: "Students",
-          },
+          legend: { display: false, position: "bottom" },
+          title: { display: false, text: "Staffs" },
         },
       },
     });
@@ -1737,77 +700,6 @@
     staffData.datasets[0].backgroundColor[1];
     document.querySelector(".staff_attendance .total .staffamount").textContent =
     staffData.datasets[0].data[0] + staffData.datasets[0].data[1];
-
-    // student payment chart
-
-    const student_payment_data = {
-      labels: ["Paid", "Unpaid"],
-      datasets: [
-        {
-          label: "",
-          borderWidth: 0,
-          data: [300, 45],
-          backgroundColor: ["#77DF40", "#FF3E1D"],
-          hoverOffset: 2,
-        },
-      ],
-    };
-
-    const studentPaymentPieChart = new Chart(ctx3, {
-      type: "doughnut",
-      data: student_payment_data,
-      options: {
-        responsive: true,
-        backgroundColor: "#fff",
-        cutout: "75%",
-        radius: 50,
-        plugins: {
-          legend: {
-            display: false,
-            position: "bottom",
-          },
-          title: {
-            display: false,
-            text: "Payment",
-          },
-        },
-      },
-    });
-
-    document.querySelector("#myChart3 .total .amount").textContent = studentData.datasets[0].data[0] + studentData.datasets[0].data[1];
-  </script>
-
-  <!-- edit details toggle by three dots -->
-  <script>
-    $(document).ready(function () {
-        $("#submitBtn").click(function () {
-            var formData = $("#sessionForm").serialize();
-  
-            $.ajax({
-                url: "/set_session_year/",  // Update the URL based on your Django project
-                type: "POST",
-                data: formData,
-                dataType: "json",
-                success: function (data) {
-                    if (data.success) {
-                      $('#myModal').modal('show');
-  
-                          // Automatically close the modal after 2000 milliseconds (2 seconds)
-                          setTimeout(function () {
-                              $('#myModal').modal('hide');
-                          }, 1000);
-                    } else {
-                        // Handle failure, e.g., display an error message
-                        alert(data.message);
-                    }
-                },
-                error: function () {
-                    // Handle AJAX error
-                    alert("Session Year Not Valid !!!");
-                }
-            });
-        });
-    });
   </script>
 
 {% endblock extra_javascript%}

@@ -200,6 +200,8 @@ urlpatterns = [
 
     path('payroll/salary_allocation/',salary_allocation,name='salary_allocation'), 
     path('payroll/salary_process/',salary_process,name='salary_process'), 
+    path('payroll/salary_process/payslip/<int:salary_id>/', salary_payslip, name='salary_payslip'),
+    path('payroll/salary_report/', salary_report, name='salary_report'),
     path('employee_salary/',employee_salary,name='employee_salary'), 
     path('generate_pay_report/<int:salary_id>/', generate_pay_report, name='generate_pay_report'),
 

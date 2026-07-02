@@ -1,0 +1,127 @@
+{% extends 'partials/base.html' %} {% load static %}
+{% block extra_css %}
+<style>
+  .sr-toolbar { display: flex; gap: 12px; align-items: end; flex-wrap: wrap; margin-bottom: 16px; }
+  .sr-table { font-size: 11.5px; }
+  .sr-table thead th {
+    background: #0d6b5f !important; color: #ffffff !important; font-weight: 600;
+    font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.3px;
+    vertical-align: middle; white-space: nowrap; border-color: #0a4f46 !important;
+  }
+  .sr-table thead th.add-col { background: #14867a !important; }
+  .sr-table thead th.ded-col { background: #7a2e26 !important; border-color:#5e2019 !important; }
+  .sr-table thead th.amt, .sr-table td.amt { text-align: right; font-variant-numeric: tabular-nums; }
+  .sr-table tbody td { vertical-align: middle; white-space: nowrap; }
+  .sr-table tfoot td { background: #eef7f5; font-weight: 700; color: #0a4f46; border-top: 2px solid #0d6b5f; }
+  .pill { display:inline-block; padding:2px 9px; border-radius:10px; font-size:9px; font-weight:700; text-transform:uppercase; }
+  .pill.paid { background:#d6efe9; color:#0a6b4f; }
+  .pill.unpaid { background:#fbe0dd; color:#c0392b; }
+  .pill.partial { background:#fdf0d3; color:#b47e00; }
+</style>
+{% endblock extra_css %}
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+  {% include 'pageinfo.html' %}
+
+  <div class="card p-4">
+    <form method="get" class="sr-toolbar">
+      <div>
+        <label class="form-label">Month</label>
+        <select name="month" class="form-select">
+          <option value="">All Months</option>
+          {% for m in months %}
+          <option value="{{ m }}" {% if sel_month == m %}selected{% endif %}>{{ m }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Status</label>
+        <select name="status" class="form-select">
+          <option value="">All Status</option>
+          <option value="paid" {% if sel_status == 'paid' %}selected{% endif %}>Paid</option>
+          <option value="partial" {% if sel_status == 'partial' %}selected{% endif %}>Partial</option>
+          <option value="unpaid" {% if sel_status == 'unpaid' %}selected{% endif %}>Unpaid</option>
+        </select>
+      </div>
+      <div><button type="submit" class="btn btn-primary">Filter</button></div>
+      <div class="ms-auto">
+        <a href="?month={{ sel_month }}&status={{ sel_status }}&download=pdf" class="btn btn-success" target="_blank">
+          <i class='bx bx-download'></i> Download PDF
+        </a>
+      </div>
+    </form>
+
+    <div class="table-responsive">
+      <table class="table table-bordered sr-table mb-0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Emp ID</th>
+            <th>Name</th>
+            <th>Dept</th>
+            <th>Month</th>
+            <th class="amt">Basic</th>
+            {% for at in addition_types %}
+            <th class="amt add-col">{{ at.addition_type }}</th>
+            {% endfor %}
+            <th class="amt add-col">Increment</th>
+            {% for dt in deduction_types %}
+            <th class="amt ded-col">{{ dt.deduction_type }}</th>
+            {% endfor %}
+            <th class="amt">Total</th>
+            <th class="amt">Paid</th>
+            <th class="amt">Due</th>
+            <th>Status</th>
+            <th>Slip</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ r.emp_id }}</td>
+            <td>{{ r.name }}</td>
+            <td>{{ r.department }}</td>
+            <td>{{ r.month }}</td>
+            <td class="amt">{{ r.basic|floatformat:2 }}</td>
+            {% for v in r.add_values %}
+            <td class="amt">{{ v|floatformat:2 }}</td>
+            {% endfor %}
+            <td class="amt">{{ r.increment|floatformat:2 }}</td>
+            {% for v in r.ded_values %}
+            <td class="amt">{{ v|floatformat:2 }}</td>
+            {% endfor %}
+            <td class="amt">{{ r.total|floatformat:2 }}</td>
+            <td class="amt">{{ r.paid|floatformat:2 }}</td>
+            <td class="amt">{{ r.due|floatformat:2 }}</td>
+            <td><span class="pill {{ r.status }}">{{ r.status }}</span></td>
+            <td><a href="{% url 'salary_payslip' r.sp.id %}?download=pdf" class="btn btn-outline-secondary btn-sm" target="_blank">Slip</a></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="{{ addition_types|length|add:deduction_types|length|add:11 }}" class="text-center text-muted py-4">No salary records found.</td></tr>
+          {% endfor %}
+        </tbody>
+        {% if rows %}
+        <tfoot>
+          <tr>
+            <td colspan="5" class="text-end">Grand Total</td>
+            <td class="amt">{{ grand.basic|floatformat:2 }}</td>
+            {% for v in grand_add %}
+            <td class="amt">{{ v|floatformat:2 }}</td>
+            {% endfor %}
+            <td class="amt">{{ grand.increment|floatformat:2 }}</td>
+            {% for v in grand_ded %}
+            <td class="amt">{{ v|floatformat:2 }}</td>
+            {% endfor %}
+            <td class="amt">{{ grand.total|floatformat:2 }}</td>
+            <td class="amt">{{ grand.paid|floatformat:2 }}</td>
+            <td class="amt">{{ grand.due|floatformat:2 }}</td>
+            <td colspan="2"></td>
+          </tr>
+        </tfoot>
+        {% endif %}
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock content %}

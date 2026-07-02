@@ -30,7 +30,7 @@ from django.forms import ValidationError
 @login_required(login_url='login')
 @user_passes_test(lambda user: is_staff_or_has_role(user, "teacher", "staff","parent","student", roles=['Manager', 'Accountant']))
 def dashboard(request):
-    if is_staff_or_has_role(request.user, "teacher", "staff","parent","student", roles=["Manager", 'Accountant']):
+    if request.user.is_superuser or is_staff_or_has_role(request.user, "teacher", "staff","parent","student", roles=["Manager", 'Accountant']):
         requested_user = request.user
         current_date = timezone.now().date()
         current_datetime = timezone.now()
@@ -80,9 +80,101 @@ def dashboard(request):
 
         male_staffs= StaffProfile.objects.filter(Q(staff_field__status='Active') & Q(staff_field__gender="Male")).count()
         female_staffs= StaffProfile.objects.filter(Q(staff_field__status='Active') & Q(staff_field__gender="Female")).count()
-            
 
-        if has_role(requested_user, ["Manager"]):
+        # ---- Dashboard live summaries (Fees / Salary / Expense) ----
+        from crucial.models import Fees, SalaryProcess
+        from accounting.models import Payment
+        from decimal import Decimal as _D
+
+        # Fees summary
+        fees_qs = Fees.objects.all()
+        fees_total = fees_qs.count()
+        fees_paid = fees_qs.filter(status='paid').count()
+        fees_partial = fees_qs.filter(status='partial').count()
+        fees_unpaid = fees_qs.filter(status='unpaid').count()
+        try:
+            fees_collected = sum((f.total_netTotal() for f in fees_qs), _D(0))
+        except Exception:
+            fees_collected = _D(0)
+
+        # Salary / Payment summary
+        sp_qs = SalaryProcess.objects.all()
+        salary_total = sp_qs.count()
+        salary_paid = sp_qs.filter(salary_status='paid').count()
+        salary_unpaid = sp_qs.filter(salary_status='unpaid').count()
+        salary_partial = sp_qs.filter(salary_status='partial').count()
+        salary_paid_amount = sum((_D(str(s.payment_amount or 0)) for s in sp_qs), _D(0))
+        salary_pending_amount = sum(
+            (_D(str(s.total_salary or 0)) - _D(str(s.payment_amount or 0))
+             for s in sp_qs if s.salary_status != 'paid'), _D(0)
+        )
+
+        # Expense summary (accounting Payments)
+        recent_payments = Payment.objects.select_related('staff__staff_field', 'expense_ledger').order_by('-date')[:6]
+        total_expense = sum((_D(str(p.amount or 0)) for p in Payment.objects.all()), _D(0))
+
+        dashboard_summary = {
+            'fees_total': fees_total,
+            'fees_paid': fees_paid,
+            'fees_partial': fees_partial,
+            'fees_unpaid': fees_unpaid,
+            'fees_collected': fees_collected,
+            'salary_total': salary_total,
+            'salary_paid': salary_paid,
+            'salary_unpaid': salary_unpaid,
+            'salary_partial': salary_partial,
+            'salary_paid_amount': salary_paid_amount,
+            'salary_pending_amount': salary_pending_amount,
+            'total_expense': total_expense,
+            'recent_payments': recent_payments,
+        }
+
+        # ---- New dashboard cards data (Attendance % / Exam / Leave) ----
+        from attendance.models import LeaveRequest
+        from exam.models import Examname
+
+        pending_leaves = LeaveRequest.objects.filter(status='Pending').select_related('employee', 'leave_type').order_by('-created_at')[:5]
+        pending_leave_count = LeaveRequest.objects.filter(status='Pending').count()
+
+        upcoming_exams = Examname.objects.filter(start_date__gte=current_date).order_by('start_date')[:4]
+
+        student_attend_pct = round((t_student_attend / totalStudents) * 100) if totalStudents else 0
+        staff_attend_pct = round((t_staff_attend / totalStaffs) * 100) if totalStaffs else 0
+
+        # Today's routine (rotating class cards)
+        from crucial.models import Routine
+        today_name = current_date.strftime('%A')
+        today_routines = Routine.objects.filter(day_name=today_name).select_related(
+            'class_id__class_group_id__class_id', 'class_id__section_id',
+            'subject_id', 'teacher_name__staff_field', 'period_id'
+        ).order_by('period_id__start_time')[:12]
+
+        routine_list = []
+        for r in today_routines:
+            try:
+                cls = r.class_id.class_group_id.class_id.name if r.class_id and r.class_id.class_group_id else ''
+                sec = r.class_id.section_id.name if r.class_id and r.class_id.section_id else ''
+            except Exception:
+                cls, sec = '', ''
+            routine_list.append({
+                'class': f"{cls} {sec}".strip(),
+                'subject': r.subject_id.name if r.subject_id else '-',
+                'teacher': r.teacher_name.staff_field.name if r.teacher_name and r.teacher_name.staff_field else '-',
+                'start': r.period_id.start_time.strftime('%I:%M %p') if r.period_id and r.period_id.start_time else '',
+                'end': r.period_id.end_time.strftime('%I:%M %p') if r.period_id and r.period_id.end_time else '',
+            })
+
+        cards_data = {
+            'pending_leaves': pending_leaves,
+            'pending_leave_count': pending_leave_count,
+            'upcoming_exams': upcoming_exams,
+            'student_attend_pct': student_attend_pct,
+            'staff_attend_pct': staff_attend_pct,
+            'today_name': today_name,
+            'routine_list': routine_list,
+        }
+
+        if requested_user.is_superuser or has_role(requested_user, ["Manager"]):
 
             context = {
                 'heading': heading,
@@ -103,9 +195,11 @@ def dashboard(request):
                 'upcoming_events':upcoming_events,
                 'academic_year': academic_year,
                 'academic_year_list': academic_year_list,
+                'dashboard_summary': dashboard_summary,
+                'cards_data': cards_data,
                     }
             return render(request, 'userdash/manager.html', context)
-        
+
         elif has_role(requested_user, ["Accountant"]):
             context = {
                 'heading': heading,
@@ -126,11 +220,13 @@ def dashboard(request):
                 'upcoming_events':upcoming_events,
                 'academic_year': academic_year,
                 'academic_year_list': academic_year_list,
+                'dashboard_summary': dashboard_summary,
+                'cards_data': cards_data,
                 }
             return render(request, 'userdash/accountant.html', context)
-        
+
         elif has_role(requested_user, ["HR"]):
-            
+
             context = {
                 'heading': heading,
                 'totalStaffs':totalStaffs,
@@ -150,9 +246,11 @@ def dashboard(request):
                 'upcoming_events':upcoming_events,
                 'academic_year': academic_year,
                 'academic_year_list': academic_year_list,
+                'dashboard_summary': dashboard_summary,
+                'cards_data': cards_data,
                 }
             return render(request, 'userdash/hr.html', context)
-        
+
         elif requested_user.groups.filter(name='teacher').exists():
 
             context = {
@@ -161,7 +259,7 @@ def dashboard(request):
                 'upcoming_events':upcoming_events
                 }
             return render(request, 'userdash/teacher.html', context)
-        
+
         elif requested_user.groups.filter(name='staff').exists():
 
             context = {
@@ -170,26 +268,25 @@ def dashboard(request):
                 'upcoming_events':upcoming_events
                 }
             return render(request, 'userdash/staff.html', context)
-        
+
         elif requested_user.groups.filter(name='student').exists():
-            
+
             context = {
                 'heading': heading,
                 'upcoming_notices':upcoming_notices,
                 'upcoming_events':upcoming_events
                 }
             return render(request, 'userdash/student.html', context)
-        
+
         elif requested_user.groups.filter(name='parent').exists():
-            
+
             context = {
                 'heading': heading,
                 'upcoming_notices':upcoming_notices,
                 'upcoming_events':upcoming_events
                     }
             return render(request, 'userdash/parent.html', context)
-    
-    
+
     context = {
         'heading': heading,
         'totalStaffs':totalStaffs,
@@ -211,152 +308,6 @@ def dashboard(request):
         'academic_year_list': academic_year_list,
         }
     return render(request, 'index.html', context)
-
-
-# def dashboard(request):
-#     user = request.user
-#     heading = "Dashboard"
-#     current_date = datetime.now().date()
-#     current_datetime = datetime.now()
-
-#     # Fetch academic year details
-#     academic_year = Admission_Year.objects.latest('updated_at') if Admission_Year.objects.exists() else None
-#     academic_year_list = Admission_Year.objects.all()
-
-#     # Calculate Total Counts
-#     totalTeachers = StaffProfile.objects.filter(Q(staff_field__status="Active")).count()
-#     totalStaffs = StaffProfile.objects.filter(Q(staff_field__status="Active")).count()
-#     totalStudents = StudentProfile.objects.filter(
-#         Q(admission_year_id=academic_year) & Q(student_field__status="Active")
-#     ).count()
-#     totalParents = ParentProfile.objects.filter(
-#         Q(parent_field__std_parent__admission_year_id=academic_year.id) & 
-#         Q(parent_field__std_parent__student_field__status="Active")
-#     ).distinct().count()
-
-#     # Attendance Counts
-#     t_student_attend = StudentAttendance.objects.filter(Q(attendance_date=current_date) & Q(status=True)).count()
-#     t_staff_attend = StaffAttendance.objects.filter(Q(attendance_date=current_date) & Q(status=True)).count()
-
-#     # Absentees
-#     t_student_absent = totalStudents - t_student_attend
-#     t_staff_absent = totalStaffs - t_staff_attend
-
-#     # SMS Usage
-#     masking_limit = SMSUsage.objects.filter(Msg_type='MASKING').first()
-#     nonmasking_limit = SMSUsage.objects.filter(Msg_type='NONMASKING').first()
-
-#     # Gender Counts
-#     male_students = StudentProfile.objects.filter(
-#         Q(student_field__status="Active") & Q(student_field__gender="Male") & Q(admission_year_id=academic_year)
-#     ).count()
-#     female_students = StudentProfile.objects.filter(
-#         Q(student_field__status="Active") & Q(student_field__gender="Female") & Q(admission_year_id=academic_year)
-#     ).count()
-
-#     # Notices and Events
-#     upcoming_notices = Notice.objects.filter(Q(date__gte=current_date)).order_by('date')[:3]
-#     upcoming_events = Event.objects.filter(Q(start__gte=current_datetime)).order_by('start')[:3]
-
-#     male_staffs= StaffProfile.objects.filter(Q(staff_field__status='Active') & Q(staff_field__gender="Male")).count()
-#     female_staffs= StaffProfile.objects.filter(Q(staff_field__status='Active') & Q(staff_field__gender="Female")).count()
-#     context = {
-#         'heading': heading,
-#         'totalTeachers': totalTeachers,
-#         'totalStaffs': totalStaffs,
-#         'totalStudents': totalStudents,
-#         'totalParents': totalParents,
-#         't_student_attend': t_student_attend,
-#         't_student_absent': t_student_absent,
-#         't_staff_attend': t_staff_attend,
-#         't_staff_absent': t_staff_absent,
-#         'masking_limit': masking_limit,
-#         'nonmasking_limit': nonmasking_limit,
-#         'male_students': male_students,
-#         'female_students': female_students,
-#         'male_employees':male_staffs,
-#         'female_employees':female_staffs,
-#         'upcoming_notices': upcoming_notices,
-#         'upcoming_events': upcoming_events,
-#         'academic_year': academic_year,
-#         'academic_year_list': academic_year_list,
-#     }
-
-#     if user.is_superuser:
-#         return render(request, 'index.html', context)
-
-#     elif user.groups.filter(name='staff').exists():
-#         staff_profile = StaffProfile.objects.filter(staff_field=user).first()
-#         staff_role = staff_profile.role.name.lower() if staff_profile and staff_profile.role else None
-
-#         staff_templates = {
-#             "manager": "userdash/manager.html",
-#             "accountant": "userdash/accountant.html",
-#         }
-
-#         return render(request, staff_templates.get(staff_role, 'userdash/staff.html'), context)
-
-#     elif user.groups.filter(name='student').exists():
-#         return render(request, 'userdash/student.html', context)
-
-#     elif user.groups.filter(name='parent').exists():
-#         return render(request, 'userdash/parent.html', context)
-
-#     return render(request, 'index.html', context)
-
-# def auth_login(request):
-#     if request.method == 'POST':
-#         identifier = request.POST.get('username')  # Username or Phone Number
-#         password = request.POST.get('password')
-
-#         from django.contrib.auth import get_user_model
-#         User = get_user_model()
-
-#         # Find user by phone number or username
-#         user_obj = User.objects.filter(Q(phone_number=identifier) | Q(username=identifier)).first()
-
-#         if not user_obj:
-#             messages.error(request, 'Invalid Phone Number, Username, or Password!')
-#             return redirect('login')  # Ensure 'login' exists in your urls.py
-
-#         # Authenticate user
-#         user = authenticate(request, username=user_obj.username, password=password)
-
-#         if user is not None:
-#             login(request, user)
-
-#             # Superuser Redirect
-#             if user.is_superuser:
-#                 return redirect('dashboard')  
-
-#             # Staff User Redirect
-#             elif user.groups.filter(name='staff').exists():
-#                 staff_profile = StaffProfile.objects.filter(staff_field=user).first()
-#                 if staff_profile and staff_profile.role:
-#                     role_name = staff_profile.role.name.lower()
-#                     role_dashboard_map = {
-#                         "hr": "hr_dashboard",
-#                         "teacher": "teacher_dashboard",
-#                         "manager": "manager_dashboard",
-#                         "accountant": "accountant_dashboard",
-#                     }
-#                     return redirect(role_dashboard_map.get(role_name, "dashboard")) 
-
-#                 return redirect("dashboard")
-
-#             # Student & Parent Redirects
-#             elif user.groups.filter(name='student').exists():
-#                 return redirect('student_dashboard')
-#             elif user.groups.filter(name='parent').exists():
-#                 return redirect('parent_dashboard')
-
-#             return redirect('dashboard')  
-
-#         else:
-#             messages.error(request, 'Invalid credentials!')
-#             return redirect('login')
-
-#     return render(request, 'login.html', {'heading': 'Login'})
 
 
 def auth_login(request):

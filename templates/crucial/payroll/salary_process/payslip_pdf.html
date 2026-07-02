@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Payslip</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 1.4cm 1.2cm;
+      @bottom-center {
+        content: "Computer-generated payslip • {{ institute.institute_name }} • {% now 'd M Y, h:i A' %}";
+        font-size: 8px;
+        color: #9aa5a2;
+      }
+    }
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; color: #1f2d2a; margin: 0; font-size: 12px; position: relative; }
+
+    .watermark {
+      position: fixed;
+      top: 40%; left: 0; right: 0;
+      text-align: center;
+      font-size: 82px; font-weight: 800;
+      color: #0d6b5f; opacity: 0.04;
+      transform: rotate(-24deg); letter-spacing: 4px;
+    }
+    .sheet { position: relative; z-index: 1; }
+
+    .header {
+      display: flex; align-items: center;
+      padding: 16px 18px;
+      background: linear-gradient(135deg, #0a4f46, #0d6b5f 55%, #14a89a);
+      border-radius: 12px; color: #fff;
+    }
+    .header .logo {
+      width: 62px; height: 62px; background: #fff;
+      border-radius: 12px; padding: 6px; margin-right: 16px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .header .logo img { max-width: 100%; max-height: 100%; }
+    .header .inst { flex: 1; }
+    .header .inst h1 { font-size: 21px; margin: 0; font-weight: 800; letter-spacing: 0.4px; }
+    .header .inst p { margin: 4px 0 0; font-size: 11px; opacity: 0.9; }
+    .header .doc-tag { text-align: right; font-size: 10px; letter-spacing: 2px; opacity: 0.85; text-transform: uppercase; }
+    .header .doc-tag .big { display: block; font-size: 15px; font-weight: 700; letter-spacing: 3px; margin-top: 2px; }
+
+    .gold-rule { height: 3px; background: linear-gradient(90deg, #c9a227, #e6c14d, #c9a227); border-radius: 2px; margin: 0 0 16px; }
+
+    .meta {
+      display: flex; flex-wrap: wrap;
+      background: #e7f3f1; border-left: 4px solid #0d6b5f;
+      border-radius: 8px; padding: 12px 16px; margin-bottom: 18px;
+    }
+    .meta .item { width: 33.33%; font-size: 11.5px; margin-bottom: 6px; }
+    .meta .item .lbl { color: #0a4f46; font-weight: 700; font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; display: block; }
+    .meta .item .val { color: #1f2d2a; }
+    .status-pill { display:inline-block; padding:2px 10px; border-radius:10px; font-size:9px; font-weight:700; text-transform:uppercase; }
+    .status-pill.paid { background:#d6efe9; color:#0a6b4f; }
+    .status-pill.unpaid { background:#fbe0dd; color:#c0392b; }
+    .status-pill.partial { background:#fdf0d3; color:#b47e00; }
+
+    .cols { display: flex; gap: 16px; }
+    .col { flex: 1; }
+    .block-title {
+      background: #0a4f46; color: #fff;
+      padding: 7px 12px; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.6px;
+      border-radius: 6px 6px 0 0;
+    }
+    .block-title.ded { background: #7a2e26; }
+    table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    .lines td { padding: 6px 12px; border-bottom: 1px solid #eef2f1; }
+    .lines tr:nth-child(even) { background: #f6faf9; }
+    .lines td.amt { text-align: right; font-variant-numeric: tabular-nums; }
+    .lines .subtot td { border-top: 2px solid #0d6b5f; font-weight: 700; background: #eef7f5; }
+    .lines .subtot.ded td { border-top-color: #7a2e26; background: #f7eeec; }
+    .box-wrap { border: 1px solid #e2e8e6; border-top: none; border-radius: 0 0 6px 6px; overflow: hidden; }
+
+    .net {
+      margin-top: 20px;
+      background: linear-gradient(135deg, #0d6b5f, #14a89a);
+      color: #fff; border-radius: 10px;
+      padding: 14px 20px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .net .label { font-size: 12px; letter-spacing: 1px; text-transform: uppercase; opacity: 0.9; }
+    .net .value { font-size: 26px; font-weight: 800; }
+
+    .paystat { display: flex; gap: 10px; margin-top: 14px; }
+    .paystat .box { flex: 1; border: 1px solid #e2e8e6; border-top: 3px solid #0d6b5f; border-radius: 8px; padding: 10px; text-align: center; background: #fbfdfc; }
+    .paystat .box .lbl { font-size: 9px; color: #8a9591; text-transform: uppercase; letter-spacing: 0.5px; }
+    .paystat .box .val { font-size: 15px; font-weight: 800; color: #0a4f46; margin-top: 3px; }
+    .paystat .box.due { border-top-color: #c0392b; }
+    .paystat .box.due .val { color: #c0392b; }
+
+    .signs { display: flex; justify-content: space-between; margin-top: 46px; }
+    .signs .sig { width: 40%; text-align: center; font-size: 10px; color: #555; }
+    .signs .sig .line { border-top: 1px solid #999; padding-top: 4px; }
+  </style>
+</head>
+<body>
+  <div class="watermark">{{ institute.institute_name|default:"INSTITUTE" }}</div>
+
+  <div class="sheet">
+    <div class="header">
+      <div class="logo">
+        {% if institute.institute_logo %}<img src="{{ institute.institute_logo.url }}" alt="logo">{% endif %}
+      </div>
+      <div class="inst">
+        <h1>{{ institute.institute_name }}</h1>
+        {% if institute.education_thana_id or institute.education_district_id %}
+        <p>{{ institute.education_thana_id|default:"" }}{% if institute.education_thana_id and institute.education_district_id %}, {% endif %}{{ institute.education_district_id|default:"" }}</p>
+        {% endif %}
+      </div>
+      <div class="doc-tag">Payslip<span class="big">{{ salary.salary_month }}</span></div>
+    </div>
+    <div class="gold-rule"></div>
+
+    <div class="meta">
+      <div class="item"><span class="lbl">Employee</span><span class="val">{{ employee.staff_field.name }}</span></div>
+      <div class="item"><span class="lbl">Employee ID</span><span class="val">{{ employee.staff_id_no|default:employee.staff_field.user_id }}</span></div>
+      <div class="item"><span class="lbl">Designation</span><span class="val">{{ employee.designation|default:"-" }}</span></div>
+      <div class="item"><span class="lbl">Department</span><span class="val">{{ employee.department.name|default:"-" }}</span></div>
+      <div class="item"><span class="lbl">Month</span><span class="val">{{ salary.salary_month }}</span></div>
+      <div class="item"><span class="lbl">Status</span><span class="status-pill {{ salary.salary_status }}">{{ salary.salary_status }}</span></div>
+    </div>
+
+    <div class="cols">
+      <!-- Earnings -->
+      <div class="col">
+        <div class="block-title">Earnings</div>
+        <div class="box-wrap">
+          <table class="lines">
+            <tr><td>Basic Salary</td><td class="amt">{{ basic|floatformat:2 }}</td></tr>
+            {% for e in earnings %}
+            <tr><td>{{ e.name }}</td><td class="amt">{{ e.amount|floatformat:2 }}</td></tr>
+            {% endfor %}
+            {% if total_increment %}
+            <tr><td>Increment</td><td class="amt">{{ total_increment|floatformat:2 }}</td></tr>
+            {% endif %}
+            <tr class="subtot"><td>Total Earnings</td><td class="amt">{{ total_earnings|floatformat:2 }}</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- Deductions -->
+      <div class="col">
+        <div class="block-title ded">Deductions</div>
+        <div class="box-wrap">
+          <table class="lines">
+            {% for d in deductions %}
+            <tr><td>{{ d.name }}</td><td class="amt">{{ d.amount|floatformat:2 }}</td></tr>
+            {% empty %}
+            <tr><td>No deductions</td><td class="amt">0.00</td></tr>
+            {% endfor %}
+            <tr class="subtot ded"><td>Total Deductions</td><td class="amt">{{ total_deductions|floatformat:2 }}</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="net">
+      <div class="label">Net Salary Payable</div>
+      <div class="value">&#2547; {{ net_salary|floatformat:2 }}</div>
+    </div>
+
+    <div class="paystat">
+      <div class="box">
+        <div class="lbl">Total Salary</div>
+        <div class="val">{{ salary.total_salary|floatformat:2 }}</div>
+      </div>
+      <div class="box">
+        <div class="lbl">Paid</div>
+        <div class="val">{{ paid|floatformat:2 }}</div>
+      </div>
+      <div class="box due">
+        <div class="lbl">Due</div>
+        <div class="val">{{ due|floatformat:2 }}</div>
+      </div>
+      <div class="box">
+        <div class="lbl">Method</div>
+        <div class="val" style="font-size:12px;text-transform:capitalize;">{{ salary.payment_method|default:"-" }}</div>
+      </div>
+    </div>
+
+    <div class="signs">
+      <div class="sig"><div class="line">Employee Signature</div></div>
+      <div class="sig"><div class="line">Authorized Signature</div></div>
+    </div>
+  </div>
+</body>
+</html>

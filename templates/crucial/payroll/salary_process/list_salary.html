@@ -78,7 +78,7 @@
                   <button type="button" class="btn btn-primary btn-sm pay-individual" data-salary-id="{{ salary_process.id }}">
                       Pay
                   </button>
-                  <a href="#" class="btn btn-outline-secondary btn-sm">PaySlip</a>
+                  <a href="{% url 'salary_payslip' salary_process.id %}?download=pdf" class="btn btn-outline-secondary btn-sm" target="_blank">PaySlip</a>
               </td>
           </tr>
           {% endfor %}

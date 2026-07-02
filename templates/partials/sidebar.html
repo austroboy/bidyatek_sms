@@ -830,6 +830,13 @@
             <div data-i18n="Salary Process">Salary Process</div>
           </a>
         </li>
+        <li
+          class="menu-item {% if '/salary_report/' in request.path %}active{% endif %}" data-is-sub-menu="true"
+        >
+          <a href="{% url 'salary_report' %}" class="menu-link">
+            <div data-i18n="Salary Report">Salary Report</div>
+          </a>
+        </li>
       </ul>
     </li>
 

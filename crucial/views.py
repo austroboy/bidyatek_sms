@@ -5270,6 +5270,179 @@ def salary_process(request):
     }
     return render(request, 'crucial/payroll/salary_process/list_salary.html', context)
 
+def salary_payslip(request, salary_id):
+    from django.template.loader import render_to_string
+    from weasyprint import HTML
+    from crucial.models import Addition, Deduction, SalaryIncrement
+    from django.utils.timezone import now as tz_now
+
+    salary = get_object_or_404(
+        SalaryProcess.objects.select_related(
+            'employee_salary__employee__staff_field',
+            'employee_salary__employee__department',
+            'employee_salary__employee__role'
+        ), id=salary_id
+    )
+    institute = Institute.objects.order_by('-id').first()
+    config = salary.employee_salary
+    employee = config.employee
+
+    basic = Decimal(str(config.basic_salary or 0))
+
+    # Earnings breakdown (per addition type, monthly)
+    additions = Addition.objects.filter(
+        employee_id=employee, addition_type_id__is_every_month=True
+    ).select_related('addition_type_id')
+    earnings = [{'name': a.addition_type_id.addition_type, 'amount': Decimal(str(a.amount))} for a in additions]
+
+    # Increment breakdown
+    increments = SalaryIncrement.objects.filter(
+        employee=employee, effective_date__lte=tz_now().date()
+    ).order_by('effective_date')
+    total_increment = Decimal(str(config.calculate_salary_increment() or 0))
+
+    # Deductions breakdown (per deduction type, monthly)
+    deductions_qs = Deduction.objects.filter(
+        employee_id=employee, deduction_type_id__is_every_month=True
+    ).select_related('deduction_type_id')
+    deductions = [{'name': d.deduction_type_id.deduction_type, 'amount': Decimal(str(d.amount))} for d in deductions_qs]
+
+    total_earnings = basic + sum((e['amount'] for e in earnings), Decimal(0)) + total_increment
+    total_deductions = sum((d['amount'] for d in deductions), Decimal(0))
+    net_salary = total_earnings - total_deductions
+
+    paid = Decimal(str(salary.payment_amount or 0))
+    due = Decimal(str(salary.total_salary or 0)) - paid
+
+    context = {
+        'salary': salary,
+        'institute': institute,
+        'employee': employee,
+        'basic': basic,
+        'earnings': earnings,
+        'total_increment': total_increment,
+        'deductions': deductions,
+        'total_earnings': total_earnings,
+        'total_deductions': total_deductions,
+        'net_salary': net_salary,
+        'paid': paid,
+        'due': due,
+    }
+
+    if request.GET.get('download') == 'pdf':
+        html_string = render_to_string('crucial/payroll/salary_process/payslip_pdf.html', context)
+        pdf = HTML(string=html_string, base_url=request.build_absolute_uri('/')).write_pdf()
+        response = HttpResponse(pdf, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="payslip_{employee.staff_field.name}_{salary.salary_month}.pdf"'
+        return response
+
+    return render(request, 'crucial/payroll/salary_process/payslip_pdf.html', context)
+
+
+def salary_report(request):
+    from crucial.models import Addition, Deduction, SalaryIncrement, Addition_type, Deduction_type
+    from django.template.loader import render_to_string
+
+    month = request.GET.get('month', '') or ''
+    status = request.GET.get('status', '') or ''
+
+    qs = SalaryProcess.objects.select_related(
+        'employee_salary__employee__staff_field',
+        'employee_salary__employee__department'
+    ).order_by('-id')
+
+    if month:
+        qs = qs.filter(salary_month=month)
+    if status:
+        qs = qs.filter(salary_status=status)
+
+    # Dynamic columns: all monthly addition & deduction types
+    addition_types = list(Addition_type.objects.filter(is_every_month=True).order_by('id'))
+    deduction_types = list(Deduction_type.objects.filter(is_every_month=True).order_by('id'))
+
+    rows = []
+    # grand totals per column
+    grand = {'basic': Decimal(0), 'increment': Decimal(0), 'total': Decimal(0),
+             'paid': Decimal(0), 'due': Decimal(0)}
+    grand_add = {at.id: Decimal(0) for at in addition_types}
+    grand_ded = {dt.id: Decimal(0) for dt in deduction_types}
+
+    for sp in qs:
+        config = sp.employee_salary
+        emp = config.employee
+        basic = Decimal(str(config.basic_salary or 0))
+        incr = Decimal(str(config.calculate_salary_increment() or 0))
+
+        # per-type addition amounts for this employee
+        add_map = {at.id: Decimal(0) for at in addition_types}
+        for a in Addition.objects.filter(employee_id=emp, addition_type_id__is_every_month=True):
+            if a.addition_type_id_id in add_map:
+                add_map[a.addition_type_id_id] += Decimal(str(a.amount or 0))
+
+        ded_map = {dt.id: Decimal(0) for dt in deduction_types}
+        for d in Deduction.objects.filter(employee_id=emp, deduction_type_id__is_every_month=True):
+            if d.deduction_type_id_id in ded_map:
+                ded_map[d.deduction_type_id_id] += Decimal(str(d.amount or 0))
+
+        total = Decimal(str(sp.total_salary or 0))
+        paid = Decimal(str(sp.payment_amount or 0))
+        due = total - paid if sp.salary_status != 'paid' else Decimal(0)
+
+        rows.append({
+            'sp': sp,
+            'name': emp.staff_field.name,
+            'emp_id': emp.staff_id_no or emp.staff_field.user_id,
+            'department': getattr(emp.department, 'name', '') or '-',
+            'month': sp.salary_month,
+            'basic': basic,
+            'increment': incr,
+            'add_values': [add_map[at.id] for at in addition_types],
+            'ded_values': [ded_map[dt.id] for dt in deduction_types],
+            'total': total,
+            'paid': paid,
+            'due': due,
+            'status': sp.salary_status,
+        })
+
+        grand['basic'] += basic
+        grand['increment'] += incr
+        grand['total'] += total
+        grand['paid'] += paid
+        grand['due'] += due
+        for at in addition_types:
+            grand_add[at.id] += add_map[at.id]
+        for dt in deduction_types:
+            grand_ded[dt.id] += ded_map[dt.id]
+
+    institute = Institute.objects.order_by('-id').first()
+    months = ["January", "February", "March", "April", "May", "June",
+              "July", "August", "September", "October", "November", "December"]
+
+    context = {
+        'rows': rows,
+        'grand': grand,
+        'addition_types': addition_types,
+        'deduction_types': deduction_types,
+        'grand_add': [grand_add[at.id] for at in addition_types],
+        'grand_ded': [grand_ded[dt.id] for dt in deduction_types],
+        'months': months,
+        'sel_month': month,
+        'sel_status': status,
+        'institute': institute,
+        'heading': 'Payroll',
+        'subheading': 'Salary Report',
+    }
+
+    if request.GET.get('download') == 'pdf':
+        html_string = render_to_string('crucial/payroll/salary_process/salary_report_pdf.html', context)
+        from weasyprint import HTML
+        pdf = HTML(string=html_string, base_url=request.build_absolute_uri('/')).write_pdf()
+        response = HttpResponse(pdf, content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="salary_report.pdf"'
+        return response
+
+    return render(request, 'crucial/payroll/salary_process/salary_report.html', context)
+
 
 def process_individual_payment(salary, payment_amount, payment_method, payment_status, user):
     """
